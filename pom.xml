@@ -690,5 +690,31 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>APNIC</id>
+            <activation>
+                <property>
+                    <!-- Automatic activation if the APNIC_DEVEL environment variable is present -->
+                    <!-- We don't care about it's value. Only APNIC developers should have this anyways. -->
+                    <!-- TODO: Change this to something like WHOIS_BUILD=apnic or whatever -->
+                    <name>env.APNIC_DEVEL</name>
+                </property>
+            </activation>
+            <distributionManagement>
+                <repository>
+                    <id>nexus</id>
+                    <name>Nexus Release Repository</name>
+                    <url>http://nexus.apnic.net:8081/nexus/content/repositories/releases</url>
+                    <uniqueVersion>true</uniqueVersion>
+                </repository>
+                <snapshotRepository>
+                    <id>nexus</id>
+                    <name>Nexus Snapshot Repository</name>
+                    <url>http://nexus.apnic.net:8081/nexus/content/repositories/snapshots</url>
+                    <uniqueVersion>false</uniqueVersion>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
     </profiles>
 </project>
