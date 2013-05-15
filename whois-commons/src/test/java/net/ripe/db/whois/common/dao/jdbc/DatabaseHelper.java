@@ -117,7 +117,7 @@ public class DatabaseHelper {
 
         System.setProperty("whois.source", "TEST");
         System.setProperty("grs.sources", "TEST-GRS");
-        System.setProperty("mirror.sources", "TEST");
+        System.setProperty("mirror.sources", "TEST-NRTM");
 
         final String masterUrl = String.format("jdbc:log:mysql://localhost/%s_WHOIS;driver=%s;logger=%s", dbName, JDBC_DRIVER, LOGGING_HANDLER);
         System.setProperty("whois.db.master.driver", LoggingDriver.class.getName());

@@ -74,7 +74,7 @@ public class IpTreeUpdater {
     public void init() {
         final int nrThreads = sourceConfigurationsForRebuild.size();
         LOGGER.info("Initializing thread pool with {} threads", nrThreads);
-        if (nrThreads > 0) {
+//        if (nrThreads > 0) {
             executorService = Executors.newFixedThreadPool(nrThreads, new ThreadFactory() {
                 final ThreadGroup threadGroup = new ThreadGroup(Thread.currentThread().getThreadGroup(), "IpTreeUpdater");
                 final AtomicInteger threadNum = new AtomicInteger();
@@ -86,7 +86,7 @@ public class IpTreeUpdater {
             });
 
             rebuild();
-       }
+//       }
     }
 
     @PreDestroy
