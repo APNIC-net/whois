@@ -37,6 +37,7 @@ public class SourceContext {
     private final Map<Source, SourceConfiguration> sourceConfigurations = Maps.newLinkedHashMap();
 
     private final Set<CIString> grsSourceNames;
+    private final Set<CIString> mirrorSourceNames;
     private final Set<CIString> allSourceNames;
     private final Map<CIString, CIString> aliases;
 
@@ -46,10 +47,13 @@ public class SourceContext {
     public SourceContext(
             @Value("${whois.source}") final String mainSourceNameString,
             @Value("${grs.sources}") final String grsSourceNames,
+            @Value("${mirror.sources}") final String mirrorSourceNames,
             @Value("${whois.db.grs.master.baseurl}") final String grsMasterBaseUrl,
+            @Value("${whois.db.mirror.master.baseurl}") final String mirrorMasterBaseUrl,
             @Value("${whois.db.master.username}") final String whoisMasterUsername,
             @Value("${whois.db.master.password}") final String whoisMasterPassword,
             @Value("${whois.db.grs.slave.baseurl}") final String grsSlaveBaseUrl,
+            @Value("${whois.db.mirror.slave.baseurl}") final String mirrorSlaveBaseUrl,
             @Value("${whois.db.slave.username}") final String whoisSlaveUsername,
             @Value("${whois.db.slave.password}") final String whoisSlavePassword,
             @Qualifier("whoisMasterDataSource") final DataSource whoisMasterDataSource,
@@ -61,6 +65,7 @@ public class SourceContext {
         this.slaveSource = Source.slave(mainSourceName);
 
         final Set<CIString> grsSources = Sets.newLinkedHashSet();
+        final Set<CIString> mirrorSources = Sets.newLinkedHashSet();
         final Map<CIString, CIString> aliases = Maps.newLinkedHashMap();
 
         sourceConfigurations.put(masterSource, new SourceConfiguration(masterSource, whoisMasterDataSource));
@@ -101,7 +106,40 @@ public class SourceContext {
             }
         }
 
+        final Iterable<CIString> mirrorSourceNameIterable = Iterables.transform(Splitter.on(',').split(mirrorSourceNames), new Function<String, CIString>() {
+            @Nullable
+            @Override
+            public CIString apply(final String input) {
+               return ciString(input);
+            }
+        });
+
+
+        for (final CIString mirrorSourceName : mirrorSourceNameIterable) {
+
+            mirrorSources.add(mirrorSourceName);
+
+            final Source mirrorMasterSource = Source.master(mirrorSourceName);
+            final Source mirrorSlaveSource = Source.slave(mirrorSourceName);
+
+            if (mirrorSourceName.contains(mainSourceName)) {
+                LOGGER.info("Delegating source {} to {}", mirrorSourceName, mainSourceName);
+                aliases.put(mirrorSourceName, slaveSource.getName());
+                sourceConfigurations.put(mirrorMasterSource, new SourceConfiguration(mirrorMasterSource, whoisMasterDataSource));
+                sourceConfigurations.put(mirrorSlaveSource, new SourceConfiguration(mirrorSlaveSource, whoisSlaveDataSource));
+            } else {
+                final String mirrorSlaveUrl =  createMirrorUrl(mirrorSlaveBaseUrl, mirrorSourceName);
+                final DataSource mirrorSlaveDataSource = dataSourceFactory.createDataSource(mirrorSlaveUrl, whoisSlaveUsername, whoisSlavePassword);
+                sourceConfigurations.put(mirrorSlaveSource, new SourceConfiguration(mirrorSlaveSource, mirrorSlaveDataSource));
+
+                final String mirrorMasterUrl = createMirrorUrl(mirrorMasterBaseUrl, mirrorSourceName);
+                final DataSource mirrorMasterDataSource = dataSourceFactory.createDataSource(mirrorMasterUrl, whoisMasterUsername, whoisMasterPassword);
+                sourceConfigurations.put(mirrorMasterSource, new SourceConfiguration(mirrorMasterSource, mirrorMasterDataSource));
+            }
+        }
+
         this.grsSourceNames = Collections.unmodifiableSet(grsSources);
+        this.mirrorSourceNames = Collections.unmodifiableSet(mirrorSources);
         this.aliases = Collections.unmodifiableMap(aliases);
         this.allSourceNames = Collections.unmodifiableSet(Sets.newLinkedHashSet(Iterables.transform(sourceConfigurations.keySet(), new Function<Source, CIString>() {
             @Nullable
@@ -115,6 +153,10 @@ public class SourceContext {
     }
 
     private String createGrsUrl(final String baseUrl, final CIString sourceName) {
+        return String.format("%s_%s", baseUrl, sourceName.toString().replace('-', '_'));
+    }
+
+    private String createMirrorUrl(final String baseUrl, final CIString sourceName) {
         return String.format("%s_%s", baseUrl, sourceName.toString().replace('-', '_'));
     }
 
@@ -152,6 +194,10 @@ public class SourceContext {
 
     public Set<CIString> getGrsSourceNames() {
         return grsSourceNames;
+    }
+
+    public Set<CIString> getMirrorSourceNames() {
+        return mirrorSourceNames;
     }
 
     @CheckForNull

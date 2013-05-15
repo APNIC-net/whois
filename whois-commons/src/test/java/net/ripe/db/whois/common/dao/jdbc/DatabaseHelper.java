@@ -117,6 +117,7 @@ public class DatabaseHelper {
 
         System.setProperty("whois.source", "TEST");
         System.setProperty("grs.sources", "TEST-GRS");
+        System.setProperty("mirror.sources", "TEST");
 
         final String masterUrl = String.format("jdbc:log:mysql://localhost/%s_WHOIS;driver=%s;logger=%s", dbName, JDBC_DRIVER, LOGGING_HANDLER);
         System.setProperty("whois.db.master.driver", LoggingDriver.class.getName());
@@ -127,6 +128,8 @@ public class DatabaseHelper {
         System.setProperty("whois.db.slave.url", slaveUrl);
         System.setProperty("whois.db.grs.slave.baseurl", slaveUrl);
         System.setProperty("whois.db.grs.master.baseurl", slaveUrl);
+        System.setProperty("whois.db.mirror.slave.baseurl", slaveUrl);
+        System.setProperty("whois.db.mirror.master.baseurl", slaveUrl);
 
         namePrefix = dbName;
     }
