@@ -112,7 +112,7 @@ public class WhoisRestService {
         return lookupObject(request, source, objectType, key, true);
     }
 
-    private Response lookupObject(final HttpServletRequest request, final String source, final String objectTypeString, final String key, final boolean isGrsExpected) {
+    protected Response lookupObject(final HttpServletRequest request, final String source, final String objectTypeString, final String key, final boolean isGrsExpected) {
         final Query query = Query.parse(String.format("%s %s %s %s %s",
                 QueryFlag.SOURCES.getLongFlag(), source,
                 QueryFlag.SELECT_TYPES.getLongFlag(), objectTypeString,
