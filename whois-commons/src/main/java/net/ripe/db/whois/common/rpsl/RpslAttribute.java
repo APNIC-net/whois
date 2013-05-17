@@ -24,7 +24,7 @@ public final class RpslAttribute {
 
     public static final String DBM_EMAIL_POSTFIX_REGEX;
     static {
-        if (System.getProperty("whois.config","").equals("APNIC")) {
+        if (System.getProperty("whois.config","").equals("apnic")) {
             DBM_EMAIL_POSTFIX_REGEX = "\\-dbm@apnic\\.net";
         } else {
             DBM_EMAIL_POSTFIX_REGEX = "\\-dbm@ripe\\.net";

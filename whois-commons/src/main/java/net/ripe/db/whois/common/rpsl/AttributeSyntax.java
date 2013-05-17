@@ -23,7 +23,7 @@ import static net.ripe.db.whois.common.domain.CIString.ciString;
 
 public interface AttributeSyntax extends Documented {
 
-    static Map<AttributeSyntaxType, AttributeSyntax> implementationMap = (System.getProperty("whois.config","").equals("APNIC")) ?
+    static Map<AttributeSyntaxType, AttributeSyntax> implementationMap = (System.getProperty("whois.config","").equals("apnic")) ?
             net.apnic.db.whois.common.rpsl.AttributeSyntaxImpl.getAttributeSyntaxMap() :
             net.ripe.db.whois.common.rpsl.AttributeSyntaxImpl.getAttributeSyntaxMap();
 
