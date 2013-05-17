@@ -21,9 +21,21 @@ import static net.ripe.db.whois.common.domain.CIString.ciString;
 
 @Immutable
 public final class RpslAttribute {
-    private static final Pattern INVALID_EMAIL_PATTERN = Pattern.compile("(?i)((?:auto|test)\\-dbm@ripe\\.net)");
+
+    public static final String DBM_EMAIL_POSTFIX_REGEX;
+    static {
+        if (System.getProperty("whois.config","").equals("APNIC")) {
+            DBM_EMAIL_POSTFIX_REGEX = "\\-dbm@apnic\\.net";
+        } else {
+            DBM_EMAIL_POSTFIX_REGEX = "\\-dbm@ripe\\.net";
+        }
+    }
+
     private static final int LEADING_CHARS = 16;
     private static final int LEADING_CHARS_SHORTHAND = 5;
+
+
+    private static final Pattern INVALID_EMAIL_PATTERN =  Pattern.compile("(?i)((?:auto|test)" + DBM_EMAIL_POSTFIX_REGEX + ")");
 
     private final AttributeType type;
     private final String key;

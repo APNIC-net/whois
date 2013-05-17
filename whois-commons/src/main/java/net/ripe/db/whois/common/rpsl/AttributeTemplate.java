@@ -65,7 +65,7 @@ public class AttributeTemplate {
     private final Cardinality cardinality;
     private final Set<Key> keys;
 
-    AttributeTemplate(final AttributeType attributeType, final Requirement requirement, final Cardinality cardinality, final Key... keys) {
+    public AttributeTemplate(final AttributeType attributeType, final Requirement requirement, final Cardinality cardinality, final Key... keys) {
         this.attributeType = attributeType;
         this.requirement = requirement;
         this.cardinality = cardinality;

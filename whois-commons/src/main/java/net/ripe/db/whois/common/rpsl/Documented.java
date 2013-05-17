@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 
 import java.util.Map;
 
-interface Documented {
+public interface Documented {
     String getDescription(ObjectType objectType);
 
     class Single implements Documented {

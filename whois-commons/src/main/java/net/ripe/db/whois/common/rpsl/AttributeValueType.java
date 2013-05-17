@@ -4,7 +4,7 @@ import com.google.common.base.Splitter;
 
 import java.util.Collections;
 
-interface AttributeValueType {
+public interface AttributeValueType {
     final AttributeValueType SINGLE_VALUE = new SingleValueType();
     final AttributeValueType LIST_VALUE = new ListValueType();
 
