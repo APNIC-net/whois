@@ -14,6 +14,7 @@ import net.ripe.db.whois.common.generated.FilterParser;
 import net.ripe.db.whois.common.generated.InjectParser;
 import net.ripe.db.whois.common.generated.InjectR6Parser;
 import net.ripe.db.whois.common.generated.V6FilterParser;
+import net.ripe.db.whois.common.profiles.WhoisConfig;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -23,7 +24,7 @@ import static net.ripe.db.whois.common.domain.CIString.ciString;
 
 public interface AttributeSyntax extends Documented {
 
-    static Map<AttributeSyntaxType, AttributeSyntax> implementationMap = (System.getProperty("whois.config","").equals("apnic")) ?
+    static Map<AttributeSyntaxType, AttributeSyntax> implementationMap = (System.getProperty(WhoisConfig.WHOIS_CONFIG,"").equals(WhoisConfig.WhoisConfigParam.APNIC.getValue())) ?
             net.apnic.db.whois.common.rpsl.AttributeSyntaxImpl.getAttributeSyntaxMap() :
             net.ripe.db.whois.common.rpsl.AttributeSyntaxImpl.getAttributeSyntaxMap();
 
