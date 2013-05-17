@@ -88,7 +88,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                 "              password, produced  authentication. It is by no means\n" +
                 "              using the FreeBSD   to keep out a determined malicious\n" +
                 "              crypt_md5           attacker. As you are publishing the\n" +
-                "              algorithm           encrypted password in the RIPE\n" +
+                "              algorithm           encrypted password in the APNIC\n" +
                 "                                  database, it is open to attack.\n" +
                 "                                  We strongly advise phrases longer\n" +
                 "                                  than 8 characters to be used,\n" +

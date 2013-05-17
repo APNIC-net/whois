@@ -496,7 +496,7 @@ public class AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.FREE_FORM_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("role", "ro", Enum.ROLE)
-                .doc("Specifies the full name of a role entity, e.g. RIPE DBM.")
+                .doc("Specifies the full name of a role entity, e.g. APNIC DBM.")
                 .syntax(AttributeSyntax.PERSON_ROLE_NAME_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("route", "rt", Enum.ROUTE)
@@ -523,7 +523,7 @@ public class AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .references(ObjectType.KEY_CERT));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("source", "so", Enum.SOURCE)
-                .doc("Specifies the registry where the object is registered. Should be \"RIPE\" for the RIPE Database.")
+                .doc("Specifies the registry where the object is registered. Should be \"APNIC\" for the APNIC Database.")
                 .syntax(AttributeSyntax.SOURCE_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("status", "st", Enum.STATUS)

@@ -1,10 +1,12 @@
 package net.ripe.db.whois.common.rpsl;
 
+import net.ripe.db.whois.common.profiles.WhoisConfig;
+
 import java.util.Map;
 import java.util.Set;
 
 public interface AttributeTypeBuilder extends Documented {
-    static Map<Enum, AttributeTypeBuilder> implementationMap = (System.getProperty("whois.config","").equals("apnic")) ?
+    static Map<Enum, AttributeTypeBuilder> implementationMap = (System.getProperty(WhoisConfig.WHOIS_CONFIG,"").equals(WhoisConfig.WhoisConfigParam.APNIC.getValue())) ?
         new net.apnic.db.whois.common.rpsl.AttributeTypeBuilderImpl(null,null,null).getAttributeTypeBuilderMap() :
         new AttributeTypeBuilderImpl(null,null,null).getAttributeTypeBuilderMap();
 
