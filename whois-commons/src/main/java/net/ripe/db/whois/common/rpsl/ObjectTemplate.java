@@ -25,22 +25,22 @@ public class ObjectTemplate implements Comparable<ObjectTemplate> {
     private static final Map<ObjectType, ObjectTemplate> TEMPLATE_MAP;
 
     static {
-        if (System.getProperty("whois.config","").equals("APNIC")) {
+        if (System.getProperty("whois.config","").equals("apnic")) {
             TEMPLATE_MAP = net.apnic.db.whois.common.rpsl.ObjectTemplateMapConfig.getTemplateMap();
         } else {
             TEMPLATE_MAP = ObjectTemplateMapConfig.getTemplateMap();
         }
     }
 
-    private  ObjectType objectType = null;
-    private  int orderPosition = 0;
-    private  Map<AttributeType, AttributeTemplate> attributeTemplateMap = null;
-    private  List<AttributeTemplate> attributeTemplates = null;
-    private  Set<AttributeType> allAttributeTypes = null;
-    private  Set<AttributeType> keyAttributes = null;
-    private  Set<AttributeType> lookupAttributes = null;
-    private  Set<AttributeType> inverseLookupAttributes = null;
-    private  Set<AttributeType> mandatoryAttributes = null;
+    private final ObjectType objectType;
+    private final int orderPosition;
+    private final Map<AttributeType, AttributeTemplate> attributeTemplateMap;
+    private final List<AttributeTemplate> attributeTemplates;
+    private final Set<AttributeType> allAttributeTypes;
+    private final Set<AttributeType> keyAttributes;
+    private final Set<AttributeType> lookupAttributes;
+    private final Set<AttributeType> inverseLookupAttributes;
+    private final Set<AttributeType> mandatoryAttributes;
 
     public ObjectTemplate(final ObjectType objectType, final int orderPosition, final AttributeTemplate... attributeTemplates) {
         this.objectType = objectType;

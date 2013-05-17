@@ -167,7 +167,7 @@ public enum AttributeType implements AttributeTypeBuilder {
     }
 
     public boolean isValidValue(final ObjectType objectType, final String value) {
-        return getSyntax().matches(objectType, value);
+        return attributeTypeBuilder.getSyntax().matches(objectType, value);
     }
 
     Iterable<String> splitValue(final String value) {
