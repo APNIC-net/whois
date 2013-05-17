@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 public interface AttributeTypeBuilder extends Documented {
-    static Map<Enum, AttributeTypeBuilder> implementationMap = (System.getProperty(WhoisConfig.WHOIS_CONFIG,"").equals(WhoisConfig.WhoisConfigParam.APNIC.getValue())) ?
+    static Map<Enum, AttributeTypeBuilder> implementationMap = WhoisConfig.isAPNIC() ?
         new net.apnic.db.whois.common.rpsl.AttributeTypeBuilderImpl(null,null,null).getAttributeTypeBuilderMap() :
         new AttributeTypeBuilderImpl(null,null,null).getAttributeTypeBuilderMap();
 

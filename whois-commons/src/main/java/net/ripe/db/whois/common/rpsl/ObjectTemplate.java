@@ -26,7 +26,7 @@ public class ObjectTemplate implements Comparable<ObjectTemplate> {
     private static final Map<ObjectType, ObjectTemplate> TEMPLATE_MAP;
 
     static {
-        if (System.getProperty(WhoisConfig.WHOIS_CONFIG,"").equals(WhoisConfig.WhoisConfigParam.APNIC.getValue())) {
+        if (WhoisConfig.isAPNIC()) {
             TEMPLATE_MAP = net.apnic.db.whois.common.rpsl.ObjectTemplateMapConfig.getTemplateMap();
         } else {
             TEMPLATE_MAP = ObjectTemplateMapConfig.getTemplateMap();

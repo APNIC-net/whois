@@ -24,7 +24,7 @@ import static net.ripe.db.whois.common.domain.CIString.ciString;
 
 public interface AttributeSyntax extends Documented {
 
-    static Map<AttributeSyntaxType, AttributeSyntax> implementationMap = (System.getProperty(WhoisConfig.WHOIS_CONFIG,"").equals(WhoisConfig.WhoisConfigParam.APNIC.getValue())) ?
+    static Map<AttributeSyntaxType, AttributeSyntax> implementationMap = WhoisConfig.isAPNIC() ?
             net.apnic.db.whois.common.rpsl.AttributeSyntaxImpl.getAttributeSyntaxMap() :
             net.ripe.db.whois.common.rpsl.AttributeSyntaxImpl.getAttributeSyntaxMap();
 
