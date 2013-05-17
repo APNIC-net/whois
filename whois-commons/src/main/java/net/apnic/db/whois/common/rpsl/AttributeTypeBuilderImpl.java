@@ -604,8 +604,9 @@ public class AttributeTypeBuilderImpl implements AttributeTypeBuilder {
         return description;
     }
 
-    public String getDescription(ObjectType objectType) {
-        return objectType.getName();
+    @Override
+    public String getDescription(final ObjectType objectType) {
+        return description.getDescription(objectType);
     }
 
     public AttributeSyntax getSyntax() {

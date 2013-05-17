@@ -399,7 +399,7 @@ public class SimpleTestIntegration extends AbstractWhoisIntegrationTest {
     @Test
     public void verbose_description() {
         final String response = DummyWhoisClient.query(QueryServer.port, "-v inetnum");
-        if (System.getProperty(WhoisConfig.WHOIS_CONFIG,"").equals(WhoisConfig.WhoisConfigParam.APNIC.getValue())) {
+        if (WhoisConfig.isAPNIC()) {
             assertThat(response, containsString("" +
                     "The content of the attributes of the inetnum class are defined below:\n" +
                     "\n" +

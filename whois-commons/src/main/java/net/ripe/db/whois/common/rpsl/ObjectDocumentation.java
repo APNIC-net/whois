@@ -5,7 +5,7 @@ import net.ripe.db.whois.common.profiles.WhoisConfig;
 import java.util.Map;
 
 class ObjectDocumentation {
-    private static final Map<ObjectType, String> DOCUMENTATION = (System.getProperty(WhoisConfig.WHOIS_CONFIG,"").equals(WhoisConfig.WhoisConfigParam.APNIC.getValue())) ?
+    private static final Map<ObjectType, String> DOCUMENTATION = WhoisConfig.isAPNIC() ?
                     net.apnic.db.whois.common.rpsl.ObjectDocumentationConfig.getDocumentationImpl() :
                     ObjectDocumentationConfig.getDocumentationImpl();
 

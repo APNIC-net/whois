@@ -12,6 +12,10 @@ public class WhoisConfig {
         }
     }
 
+    public static boolean isAPNIC() {
+        return System.getProperty( WHOIS_CONFIG,"").equals(WhoisConfig.WhoisConfigParam.APNIC.getValue());
+    }
+
     public enum WhoisConfigParam {
         APNIC("apnic");
 
