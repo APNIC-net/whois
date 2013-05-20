@@ -1,7 +1,6 @@
 package net.ripe.db.whois.common.rpsl;
 
 import net.ripe.db.whois.common.Message;
-import net.ripe.db.whois.common.profiles.WhoisVariant;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,7 +28,6 @@ public class ObjectTemplateTest {
             "referral-by:     DEV-MNT\n" +
             "changed:         BECHA@example.net 20101010\n" +
             "source:          DEV";
-
     private ObjectTemplate subject;
 
     @Before
@@ -179,7 +177,6 @@ public class ObjectTemplateTest {
                 "\n"));
     }
 
-
     @Test
     public void stringTemplateOrganisation() {
         final String template = ObjectTemplate.getTemplate(ObjectType.ORGANISATION).toString();
@@ -212,8 +209,7 @@ public class ObjectTemplateTest {
     @Test
     public void verboseStringTemplateOrganisation() {
         final String template = ObjectTemplate.getTemplate(ObjectType.ORGANISATION).toVerboseString();
-        if (WhoisVariant.isAPNIC()) {
-            assertThat(template, containsString("" +
+        assertThat(template, containsString("" +
                 "org-type\n" +
                 "\n" +
                 "   Specifies the type of the organisation.\n" +
@@ -222,7 +218,7 @@ public class ObjectTemplateTest {
                 "     \n" +
                 "     o IANA\n" +
                 "     o RIR\n" +
-                "     o NIR (There are no NIRs in the APNIC service region.)\n" +
+                "     o NIR (There are no NIRs in the RIPE NCC service region.)\n" +
                 "     o LIR\n" +
                 "     o WHITEPAGES\n" +
                 "     o DIRECT_ASSIGNMENT\n" +
@@ -233,36 +229,10 @@ public class ObjectTemplateTest {
                 "         'NIR' for National Internet Registries\n" +
                 "         'LIR' for Local Internet Registries\n" +
                 "         'WHITEPAGES' for special links to industry people\n" +
-                "         'DIRECT_ASSIGNMENT' for direct contract with APNIC\n" +
+                "         'DIRECT_ASSIGNMENT' for direct contract with RIPE NCC\n" +
                 "         'OTHER' for all other organisations.\n" +
                 "\n"));
-        } else {
-            assertThat(template, containsString("" +
-                    "org-type\n" +
-                    "\n" +
-                    "   Specifies the type of the organisation.\n" +
-                    "\n" +
-                    "     org-type can have one of these values:\n" +
-                    "     \n" +
-                    "     o IANA\n" +
-                    "     o RIR\n" +
-                    "     o NIR (There are no NIRs in the RIPE NCC service region.)\n" +
-                    "     o LIR\n" +
-                    "     o WHITEPAGES\n" +
-                    "     o DIRECT_ASSIGNMENT\n" +
-                    "     o OTHER\n" +
-                    "     \n" +
-                    "         'IANA' for Internet Assigned Numbers Authority\n" +
-                    "         'RIR' for Regional Internet Registries\n" +
-                    "         'NIR' for National Internet Registries\n" +
-                    "         'LIR' for Local Internet Registries\n" +
-                    "         'WHITEPAGES' for special links to industry people\n" +
-                    "         'DIRECT_ASSIGNMENT' for direct contract with RIPE NCC\n" +
-                    "         'OTHER' for all other organisations.\n" +
-                    "\n"));
-        }
     }
-
 
     @Test
     public void allObjectTypesSupported() {
