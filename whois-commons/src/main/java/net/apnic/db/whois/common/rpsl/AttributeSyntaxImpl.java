@@ -1,5 +1,6 @@
 package net.apnic.db.whois.common.rpsl;
 
+import net.ripe.db.whois.common.domain.attrs.OrgType;
 import net.ripe.db.whois.common.generated.AggrBndryParser;
 import net.ripe.db.whois.common.generated.AggrMtdParser;
 import net.ripe.db.whois.common.generated.DefaultParser;
@@ -467,5 +468,38 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
         attributeSyntaxTypeMap.put(AttributeSyntaxType.STATUS_SYNTAX, new StatusSyntax());
     }
 
-}
 
+
+    public static class OrgTypeSyntax implements AttributeSyntax {
+        @Override
+        public boolean matches(final ObjectType objectType, final String value) {
+            return OrgType.getFor(value) != null;
+        }
+
+        @Override
+        public String getDescription(final ObjectType objectType) { // TODO [AK] Generate possible values from OrgType
+            return "" +
+                    "org-type can have one of these values:\n" +
+                    "\n" +
+                    "o IANA\n" +
+                    "o RIR\n" +
+                    "o NIR (There are no NIRs in the APNIC service region.)\n" +
+                    "o LIR\n" +
+                    "o WHITEPAGES\n" +
+                    "o DIRECT_ASSIGNMENT\n" +
+                    "o OTHER\n" +
+                    "\n" +
+                    "    'IANA' for Internet Assigned Numbers Authority\n" +
+                    "    'RIR' for Regional Internet Registries\n" +
+                    "    'NIR' for National Internet Registries\n" +
+                    "    'LIR' for Local Internet Registries\n" +
+                    "    'WHITEPAGES' for special links to industry people\n" +
+                    "    'DIRECT_ASSIGNMENT' for direct contract with APNIC\n" +
+                    "    'OTHER' for all other organisations.\n";
+        }
+    }
+
+
+
+
+}
