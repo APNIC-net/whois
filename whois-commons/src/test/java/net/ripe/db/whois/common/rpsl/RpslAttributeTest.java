@@ -7,8 +7,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 public class RpslAttributeTest {
-    private static final String DBM_EMAIL_POSTFIX = RpslAttribute.DBM_EMAIL_POSTFIX_REGEX.replace("\\","");
-
     private RpslAttribute subject;
 
     @Test
@@ -122,37 +120,37 @@ public class RpslAttributeTest {
     @Test
     public void validateSyntax_syntax_error_and_invalid_email() {
         final ObjectMessages objectMessages = new ObjectMessages();
-        final RpslAttribute rpslAttribute = new RpslAttribute("inetnum", "auto" + DBM_EMAIL_POSTFIX);
+        final RpslAttribute rpslAttribute = new RpslAttribute("inetnum", "auto-dbm@ripe.net");
         rpslAttribute.validateSyntax(ObjectType.INETNUM, objectMessages);
 
-        assertThat(objectMessages.getMessages(rpslAttribute).getAllMessages(), contains(ValidationMessages.syntaxError("auto" + DBM_EMAIL_POSTFIX)));
+        assertThat(objectMessages.getMessages(rpslAttribute).getAllMessages(), contains(ValidationMessages.syntaxError("auto-dbm@ripe.net")));
     }
 
     @Test
     public void validateSyntax_syntax_valid_and_auto_dbm() {
         final ObjectMessages objectMessages = new ObjectMessages();
-        final RpslAttribute rpslAttribute = new RpslAttribute("remarks", "auto" + DBM_EMAIL_POSTFIX);
+        final RpslAttribute rpslAttribute = new RpslAttribute("remarks", "auto-dbm@ripe.net");
         rpslAttribute.validateSyntax(ObjectType.DOMAIN, objectMessages);
 
-        assertThat(objectMessages.getMessages(rpslAttribute).getAllMessages(), contains(ValidationMessages.emailAddressNotAllowed("auto" + DBM_EMAIL_POSTFIX)));
+        assertThat(objectMessages.getMessages(rpslAttribute).getAllMessages(), contains(ValidationMessages.emailAddressNotAllowed("auto-dbm@ripe.net")));
     }
 
     @Test
     public void validateSyntax_syntax_valid_and_test_dbm() {
         final ObjectMessages objectMessages = new ObjectMessages();
-        final RpslAttribute rpslAttribute = new RpslAttribute("remarks", "TEST" + DBM_EMAIL_POSTFIX);
+        final RpslAttribute rpslAttribute = new RpslAttribute("remarks", "TEST-dbm@ripe.net");
         rpslAttribute.validateSyntax(ObjectType.DOMAIN, objectMessages);
 
-        assertThat(objectMessages.getMessages(rpslAttribute).getAllMessages(), contains(ValidationMessages.emailAddressNotAllowed("TEST" + DBM_EMAIL_POSTFIX)));
+        assertThat(objectMessages.getMessages(rpslAttribute).getAllMessages(), contains(ValidationMessages.emailAddressNotAllowed("TEST-dbm@ripe.net")));
     }
 
     @Test
     public void validateSyntax_syntax_valid_and_invalid_email_contains() {
         final ObjectMessages objectMessages = new ObjectMessages();
-        final RpslAttribute rpslAttribute = new RpslAttribute("remarks", "Some remark about auto" + DBM_EMAIL_POSTFIX.toUpperCase() +" should be detected");
+        final RpslAttribute rpslAttribute = new RpslAttribute("remarks", "Some remark about auto-dbm@RIPE.net should be detected");
         rpslAttribute.validateSyntax(ObjectType.DOMAIN, objectMessages);
 
-        assertThat(objectMessages.getMessages(rpslAttribute).getAllMessages(), contains(ValidationMessages.emailAddressNotAllowed("auto" + DBM_EMAIL_POSTFIX.toUpperCase())));
+        assertThat(objectMessages.getMessages(rpslAttribute).getAllMessages(), contains(ValidationMessages.emailAddressNotAllowed("auto-dbm@RIPE.net")));
     }
 
     @Test
