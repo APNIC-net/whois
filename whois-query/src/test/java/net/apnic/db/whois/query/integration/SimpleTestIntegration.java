@@ -19,18 +19,17 @@ import static org.junit.Assert.assertThat;
 
 @Category(IntegrationTest.class)
 public class SimpleTestIntegration extends AbstractWhoisIntegrationTest {
-    private static final String END_OF_HEADER = "% See http://www.ripe.net/db/support/db-terms-conditions.pdf\n\n";
 
     @Autowired IpTreeUpdater ipTreeUpdater;
     @Autowired DateTimeProvider dateTimeProvider;
 
     @Before
     public void startupWhoisServer() {
-        final RpslObject person = RpslObject.parse("person: ADM-TEST\naddress: address\nphone: +312342343\nmnt-by:RIPE-NCC-HM-MNT\nadmin-c: ADM-TEST\nchanged: dbtest@ripe.net 20120707\nnic-hdl: ADM-TEST");
-        final RpslObject mntner = RpslObject.parse("mntner: RIPE-NCC-HM-MNT\nmnt-by: RIPE-NCC-HM-MNT\ndescr: description\nadmin-c: ADM-TEST");
+        final RpslObject person = RpslObject.parse("person: ADM-TEST\naddress: address\nphone: +61738583100\nmnt-by:APNIC-HM-MNT\nadmin-c: ADM-TEST\nchanged: dbtest@apnic.net 20120707\nnic-hdl: ADM-TEST");
+        final RpslObject mntner = RpslObject.parse("mntner: APNIC-HM-MNT\nmnt-by: APNIC-HM-MNT\ndescr: description\nadmin-c: ADM-TEST");
         databaseHelper.addObjects(Lists.newArrayList(person, mntner));
 
-        databaseHelper.addObject("inetnum: 81.0.0.0 - 82.255.255.255\nnetname: NE\nmnt-by:RIPE-NCC-HM-MNT");
+        databaseHelper.addObject("inetnum: 81.0.0.0 - 82.255.255.255\nnetname: NE\nmnt-by:APNIC-HM-MNT");
         databaseHelper.addObject("domain: 117.80.81.in-addr.arpa");
         databaseHelper.addObject("inetnum: 81.80.117.237 - 81.80.117.237\nnetname: NN\nstatus: OTHER");
         ipTreeUpdater.rebuild();
