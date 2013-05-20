@@ -5,7 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.attrs.MntRoutes;
-import net.ripe.db.whois.common.profiles.WhoisConfig;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
 import org.apache.commons.lang.Validate;
 
 import javax.annotation.CheckForNull;
@@ -25,7 +25,7 @@ public final class RpslAttribute {
 
     public static final String DBM_EMAIL_POSTFIX_REGEX;
     static {
-        if (WhoisConfig.isAPNIC()) {
+        if (WhoisVariant.isAPNIC()) {
             DBM_EMAIL_POSTFIX_REGEX = "\\-dbm@apnic\\.net";
         } else {
             DBM_EMAIL_POSTFIX_REGEX = "\\-dbm@ripe\\.net";

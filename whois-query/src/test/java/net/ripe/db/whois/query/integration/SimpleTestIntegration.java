@@ -7,7 +7,7 @@ import net.ripe.db.whois.common.dao.RpslObjectUpdateInfo;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.RpslObjectVersions;
 import net.ripe.db.whois.common.iptree.IpTreeUpdater;
-import net.ripe.db.whois.common.profiles.WhoisConfig;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.common.support.DummyWhoisClient;
 import net.ripe.db.whois.common.support.NettyWhoisClientFactory;
@@ -399,7 +399,7 @@ public class SimpleTestIntegration extends AbstractWhoisIntegrationTest {
     @Test
     public void verbose_description() {
         final String response = DummyWhoisClient.query(QueryServer.port, "-v inetnum");
-        if (WhoisConfig.isAPNIC()) {
+        if (WhoisVariant.isAPNIC()) {
             assertThat(response, containsString("" +
                     "The content of the attributes of the inetnum class are defined below:\n" +
                     "\n" +
