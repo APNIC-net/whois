@@ -5,7 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.ripe.db.whois.common.profiles.WhoisConfig;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
 import org.apache.commons.lang.WordUtils;
 
 import javax.annotation.Nullable;
@@ -26,7 +26,7 @@ public class ObjectTemplate implements Comparable<ObjectTemplate> {
     private static final Map<ObjectType, ObjectTemplate> TEMPLATE_MAP;
 
     static {
-        if (WhoisConfig.isAPNIC()) {
+        if (WhoisVariant.isAPNIC()) {
             TEMPLATE_MAP = net.apnic.db.whois.common.rpsl.ObjectTemplateMapConfig.getTemplateMap();
         } else {
             TEMPLATE_MAP = ObjectTemplateMapConfig.getTemplateMap();

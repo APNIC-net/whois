@@ -1,7 +1,7 @@
 package net.ripe.db.whois.common.rpsl;
 
 import net.ripe.db.whois.common.Message;
-import net.ripe.db.whois.common.profiles.WhoisConfig;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -212,7 +212,7 @@ public class ObjectTemplateTest {
     @Test
     public void verboseStringTemplateOrganisation() {
         final String template = ObjectTemplate.getTemplate(ObjectType.ORGANISATION).toVerboseString();
-        if (WhoisConfig.isAPNIC()) {
+        if (WhoisVariant.isAPNIC()) {
             assertThat(template, containsString("" +
                 "org-type\n" +
                 "\n" +
