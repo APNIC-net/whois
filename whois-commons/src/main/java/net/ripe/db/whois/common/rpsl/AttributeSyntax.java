@@ -100,7 +100,7 @@ public interface AttributeSyntax extends Documented {
 
     boolean matches(ObjectType objectType, String value);
 
-    public static class AnySyntax implements AttributeSyntax {
+    static class AnySyntax implements AttributeSyntax {
         private final String description;
 
         public AnySyntax() {
@@ -124,7 +124,7 @@ public interface AttributeSyntax extends Documented {
 
     }
 
-    public static class AttributeSyntaxRegexp implements AttributeSyntax {
+    static class AttributeSyntaxRegexp implements AttributeSyntax {
         private final Integer maxLength;
         private final Pattern matchPattern;
         private final String description;
@@ -154,7 +154,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    public static class RoutePrefixSyntax implements AttributeSyntax {
+    static class RoutePrefixSyntax implements AttributeSyntax {
         @Override
         public boolean matches(final ObjectType objectType, final String value) {
             switch (objectType) {
@@ -187,7 +187,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    public static class GeolocSyntax  implements AttributeSyntax {
+    static class GeolocSyntax  implements AttributeSyntax {
         private static final Pattern GEOLOC_PATTERN = Pattern.compile("^[+-]?(\\d*\\.?\\d+)\\s+[+-]?(\\d*\\.?\\d+)$");
 
         private static final double LATITUDE_RANGE = 90.0;
@@ -220,7 +220,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    public static class MemberOfSyntax implements AttributeSyntax {
+    static class MemberOfSyntax implements AttributeSyntax {
         @Override
         public boolean matches(final ObjectType objectType, final String value) {
             switch (objectType) {
@@ -300,7 +300,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    public static class MembersSyntax implements AttributeSyntax {
+    static class MembersSyntax implements AttributeSyntax {
         private final boolean allowIpv6;
 
         public MembersSyntax(final boolean allowIpv6) {
@@ -401,7 +401,7 @@ public interface AttributeSyntax extends Documented {
     }
 
 
-    public static class OrgTypeSyntax implements AttributeSyntax {
+    class OrgTypeSyntax implements AttributeSyntax {
         @Override
         public boolean matches(final ObjectType objectType, final String value) {
             return OrgType.getFor(value) != null;
@@ -430,7 +430,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    public static class PersonRoleSyntax implements AttributeSyntax {
+    static class PersonRoleSyntax implements AttributeSyntax {
         private static final Pattern PATTERN = Pattern.compile("(?i)^[A-Z][A-Z0-9\\\\.`'_-]{0,63}(?: [A-Z0-9\\\\.`'_-]{1,64}){0,9}$");
         private static final Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
 
@@ -469,7 +469,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    public static class StatusSyntax implements AttributeSyntax {
+    static class StatusSyntax implements AttributeSyntax {
         @Override
         public boolean matches(final ObjectType objectType, final String value) {
             switch (objectType) {
@@ -516,7 +516,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    public static class ComponentsSyntax  implements AttributeSyntax {
+    static class ComponentsSyntax implements AttributeSyntax {
         @Override
         public boolean matches(final ObjectType objectType, final String value) {
             switch (objectType) {
@@ -541,7 +541,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    public static class ExportCompsSyntax implements AttributeSyntax {
+    static class ExportCompsSyntax implements AttributeSyntax {
         @Override
         public boolean matches(final ObjectType objectType, final String value) {
             switch (objectType) {
@@ -573,7 +573,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    public static class InjectSyntax implements AttributeSyntax {
+    static class InjectSyntax implements AttributeSyntax {
         @Override
         public boolean matches(final ObjectType objectType, final String value) {
             switch (objectType) {
@@ -597,7 +597,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    public static class AttributeSyntaxParser implements AttributeSyntax {
+    static class AttributeSyntaxParser implements AttributeSyntax {
         private final AttributeParser attributeParser;
         private final Documented description;
 

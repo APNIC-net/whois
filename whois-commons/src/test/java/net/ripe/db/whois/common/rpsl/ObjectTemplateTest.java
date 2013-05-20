@@ -1,13 +1,17 @@
 package net.ripe.db.whois.common.rpsl;
 
 import net.ripe.db.whois.common.Message;
+import net.ripe.db.whois.common.profiles.WhoisConfig;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -174,6 +178,91 @@ public class ObjectTemplateTest {
                 "The content of the attributes of the inetnum class are defined below:\n" +
                 "\n"));
     }
+
+
+    @Test
+    public void stringTemplateOrganisation() {
+        final String template = ObjectTemplate.getTemplate(ObjectType.ORGANISATION).toString();
+        assertThat(template, is("" +
+
+                "organisation:   [mandatory]  [single]     [primary/lookup key]\n" +
+                "org-name:       [mandatory]  [single]     [lookup key]\n" +
+                "org-type:       [mandatory]  [single]     [ ]\n" +
+                "descr:          [optional]   [multiple]   [ ]\n" +
+                "remarks:        [optional]   [multiple]   [ ]\n" +
+                "address:        [mandatory]  [multiple]   [ ]\n" + "" +
+                "phone:          [optional]   [multiple]   [ ]\n" +
+                "fax-no:         [optional]   [multiple]   [ ]\n" +
+                "e-mail:         [mandatory]  [multiple]   [lookup key]\n" +
+                "geoloc:         [optional]   [single]     [ ]\n" +
+                "language:       [optional]   [multiple]   [ ]\n" + "" +
+                "org:            [optional]   [multiple]   [inverse key]\n" +
+                "admin-c:        [optional]   [multiple]   [inverse key]\n" +
+                "tech-c:         [optional]   [multiple]   [inverse key]\n" +
+                "abuse-c:        [optional]   [single]     [inverse key]\n" +
+                "ref-nfy:        [optional]   [multiple]   [inverse key]\n" +
+                "mnt-ref:        [mandatory]  [multiple]   [inverse key]\n" +
+                "notify:         [optional]   [multiple]   [inverse key]\n" +
+                "abuse-mailbox:  [optional]   [multiple]   [inverse key]\n" +
+                "mnt-by:         [mandatory]  [multiple]   [inverse key]\n" +
+                "changed:        [mandatory]  [multiple]   [ ]\n" +
+                "source:         [mandatory]  [single]     [ ]\n"));
+    }
+
+    @Test
+    public void verboseStringTemplateOrganisation() {
+        final String template = ObjectTemplate.getTemplate(ObjectType.ORGANISATION).toVerboseString();
+        if (WhoisConfig.isAPNIC()) {
+            assertThat(template, containsString("" +
+                "org-type\n" +
+                "\n" +
+                "   Specifies the type of the organisation.\n" +
+                "\n" +
+                "     org-type can have one of these values:\n" +
+                "     \n" +
+                "     o IANA\n" +
+                "     o RIR\n" +
+                "     o NIR (There are no NIRs in the APNIC service region.)\n" +
+                "     o LIR\n" +
+                "     o WHITEPAGES\n" +
+                "     o DIRECT_ASSIGNMENT\n" +
+                "     o OTHER\n" +
+                "     \n" +
+                "         'IANA' for Internet Assigned Numbers Authority\n" +
+                "         'RIR' for Regional Internet Registries\n" +
+                "         'NIR' for National Internet Registries\n" +
+                "         'LIR' for Local Internet Registries\n" +
+                "         'WHITEPAGES' for special links to industry people\n" +
+                "         'DIRECT_ASSIGNMENT' for direct contract with APNIC\n" +
+                "         'OTHER' for all other organisations.\n" +
+                "\n"));
+        } else {
+            assertThat(template, containsString("" +
+                    "org-type\n" +
+                    "\n" +
+                    "   Specifies the type of the organisation.\n" +
+                    "\n" +
+                    "     org-type can have one of these values:\n" +
+                    "     \n" +
+                    "     o IANA\n" +
+                    "     o RIR\n" +
+                    "     o NIR (There are no NIRs in the RIPE NCC service region.)\n" +
+                    "     o LIR\n" +
+                    "     o WHITEPAGES\n" +
+                    "     o DIRECT_ASSIGNMENT\n" +
+                    "     o OTHER\n" +
+                    "     \n" +
+                    "         'IANA' for Internet Assigned Numbers Authority\n" +
+                    "         'RIR' for Regional Internet Registries\n" +
+                    "         'NIR' for National Internet Registries\n" +
+                    "         'LIR' for Local Internet Registries\n" +
+                    "         'WHITEPAGES' for special links to industry people\n" +
+                    "         'DIRECT_ASSIGNMENT' for direct contract with RIPE NCC\n" +
+                    "         'OTHER' for all other organisations.\n" +
+                    "\n"));
+        }
+    }
+
 
     @Test
     public void allObjectTypesSupported() {
