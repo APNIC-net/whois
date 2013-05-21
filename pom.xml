@@ -37,10 +37,9 @@
         <sonar.jdbc.username>dbint</sonar.jdbc.username>
         <sonar.jdbc.password />
 
-        <!-- whois.variant is overridden by profile -->
-        <whois.variant></whois.variant>
-        <integration.test.groups>net.ripe.db.whois.common.IntegrationTest</integration.test.groups>
 
+        <!-- whois.variant is overridden by profile -->
+        <whois.variant/>
     </properties>
 
     <scm>
@@ -625,7 +624,7 @@
                     <includes>
                         <include>${test.files.integration}</include>
                     </includes>
-                    <groups>${integration.test.groups}</groups>
+                    <groups>${test.groups}</groups>
                     <forkCount>${test.forkCount.integration}</forkCount>
                     <reuseForks>true</reuseForks>
                     <threadCount>1</threadCount>
@@ -714,7 +713,7 @@
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups>None</test.groups>
                 <test.forkCount.integration>1</test.forkCount.integration>
-                <test.files.unit>/net/ripe/**/**Test.class</test.files.unit>
+                <test.files.unit>net/ripe/**/*Test.class</test.files.unit>
                 <test.files.integration>None</test.files.integration>
             </properties>
         </profile>
@@ -752,8 +751,8 @@
             <id>all</id>
             <properties>
                 <test.redirectOutput>true</test.redirectOutput>
-                <test.groups>${integration.test.groups}</test.groups>
-                <test.files.unit>/net/ripe/**/**Test.class</test.files.unit>
+                <test.groups>net.ripe.db.whois.common.IntegrationTest</test.groups>
+                <test.files.unit>net/ripe/**/*Test.class</test.files.unit>
                 <test.files.integration>**/*Test*.class,**/*Spec*.class</test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
             </properties>
@@ -788,8 +787,8 @@
             </activation>
             <properties>
                 <whois.variant>apnic</whois.variant>
-                <integration.test.groups>net.apnic.db.whois.common.IntegrationTest</integration.test.groups>
-                <test.files.unit>net/apnic/**/**Test.class</test.files.unit>
+                <test.groups>net.apnic.db.whois.common.IntegrationTest</test.groups>
+                <test.files.unit>net/apnic/**/*Test.class</test.files.unit>
             </properties>
             <distributionManagement>
                 <repository>
