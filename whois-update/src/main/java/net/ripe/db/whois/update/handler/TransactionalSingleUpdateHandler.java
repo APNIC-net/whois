@@ -6,26 +6,10 @@ import net.ripe.db.whois.common.dao.RpslObjectUpdateInfo;
 import net.ripe.db.whois.common.dao.UpdateLockDao;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.iptree.IpTreeUpdater;
-import net.ripe.db.whois.common.profiles.WhoisVariant;
-import net.ripe.db.whois.common.rpsl.AttributeSanitizer;
-import net.ripe.db.whois.common.rpsl.AttributeType;
-import net.ripe.db.whois.common.rpsl.ObjectMessages;
-import net.ripe.db.whois.common.rpsl.ObjectTemplate;
-import net.ripe.db.whois.common.rpsl.ObjectType;
-import net.ripe.db.whois.common.rpsl.RpslAttribute;
-import net.ripe.db.whois.common.rpsl.RpslObject;
-import net.ripe.db.whois.common.rpsl.RpslObjectFilter;
+import net.ripe.db.whois.common.rpsl.*;
 import net.ripe.db.whois.update.authentication.Authenticator;
 import net.ripe.db.whois.update.autokey.AutoKeyResolver;
-import net.ripe.db.whois.update.domain.Action;
-import net.ripe.db.whois.update.domain.Keyword;
-import net.ripe.db.whois.update.domain.Operation;
-import net.ripe.db.whois.update.domain.Origin;
-import net.ripe.db.whois.update.domain.OverrideOptions;
-import net.ripe.db.whois.update.domain.PreparedUpdate;
-import net.ripe.db.whois.update.domain.Update;
-import net.ripe.db.whois.update.domain.UpdateContext;
-import net.ripe.db.whois.update.domain.UpdateMessages;
+import net.ripe.db.whois.update.domain.*;
 import net.ripe.db.whois.update.log.LoggerContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +40,11 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
     private final PendingUpdateHandler pendingUpdateHandler;
     private CIString source;
 
+    @Value("${whois.source}")
+    void setSource(final String source) {
+        this.source = ciString(source);
+    }
+
     @Autowired
     public TransactionalSingleUpdateHandler(final AutoKeyResolver autoKeyResolver, final AttributeGenerator attributeGenerator, final AttributeSanitizer attributeSanitizer, final UpdateLockDao updateLockDao, final LoggerContext loggerContext, final Authenticator authenticator, final UpdateObjectHandler updateObjectHandler, final RpslObjectDao rpslObjectDao, final RpslObjectUpdateDao rpslObjectUpdateDao, final IpTreeUpdater ipTreeUpdater, final PendingUpdateHandler pendingUpdateHandler) {
         this.autoKeyResolver = autoKeyResolver;
@@ -69,11 +58,6 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
         this.updateObjectHandler = updateObjectHandler;
         this.ipTreeUpdater = ipTreeUpdater;
         this.pendingUpdateHandler = pendingUpdateHandler;
-    }
-
-    @Value("${whois.source}")
-    void setSource(final String source) {
-        this.source = ciString(source);
     }
 
     @Override
@@ -220,42 +204,6 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
 
             if (latestUpdateInfo.getSequenceId() != update.getSubmittedObjectInfo().getSequenceId()) {
                 throw new IllegalStateException("Object was modified unexpectedly");
-            }
-
-            if (WhoisVariant.isAPNIC()) {
-                List<RpslAttribute> updateDsRdataList = update.getSubmittedObject().findAttributes(AttributeType.DS_RDATA);
-                RpslObject rpslObject = rpslObjectDao.getById(latestUpdateInfo.getObjectId());
-                List<RpslAttribute> daoDsRdataList = rpslObject.findAttributes(AttributeType.DS_RDATA);
-
-                int updateDsRdataSize = updateDsRdataList != null ? updateDsRdataList.size() : 0;
-                int daoDsRdataSize = daoDsRdataList != null ? daoDsRdataList.size() : 0;
-
-                boolean dsRdataAcceptable = false;
-                if (updateDsRdataSize == 0 && daoDsRdataSize == 0) {
-                    dsRdataAcceptable = true;
-                } else {
-                    if (updateDsRdataSize == daoDsRdataSize) {
-                        // Check the attributes entries match
-                        boolean entryMatch = false;
-                        for (RpslAttribute daoRpslAttribute : daoDsRdataList) {
-                            entryMatch = false;
-                            for (RpslAttribute updateRpslAttribute : updateDsRdataList) {
-                                if (updateRpslAttribute.equals(daoRpslAttribute)) {
-                                    entryMatch = true;
-                                    break;
-                                }
-                            }
-                            if (entryMatch == false) {
-                                break;
-                            }
-                        }
-                        dsRdataAcceptable = entryMatch;
-                    }
-                }
-
-                if (!dsRdataAcceptable) {
-                    throw new IllegalStateException("Attribute " + AttributeType.DS_RDATA.getName() + " mismatch");
-                }
             }
         }
     }
