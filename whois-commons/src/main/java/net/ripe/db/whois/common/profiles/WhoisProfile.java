@@ -1,5 +1,7 @@
 package net.ripe.db.whois.common.profiles;
 
+import org.apache.commons.lang.StringUtils;
+
 public class WhoisProfile {
     public static final String ENDTOEND = "ENDTOEND";
     public static final String TEST = "TEST";

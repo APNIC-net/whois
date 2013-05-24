@@ -78,7 +78,7 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
 
         checkForUnexpectedModification(update);
 
-        PreparedUpdate preparedUpdate = new PreparedUpdate(update, originalObject, updatedObject, action, overrideOptions);
+        PreparedUpdate preparedUpdate = new PreparedUpdate(update, originalObject, updatedObject, action, origin.getType(), overrideOptions);
         updateContext.setPreparedUpdate(preparedUpdate);
 
         if (updateContext.hasErrors(preparedUpdate)) {
@@ -91,7 +91,7 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
         }
 
         final RpslObject objectWithResolvedKeys = autoKeyResolver.resolveAutoKeys(updatedObject, update, updateContext, action);
-        preparedUpdate = new PreparedUpdate(update, originalObject, objectWithResolvedKeys, action, overrideOptions);
+        preparedUpdate = new PreparedUpdate(update, originalObject, objectWithResolvedKeys, action,  origin.getType(), overrideOptions);
 
         loggerContext.logPreparedUpdate(preparedUpdate);
         authenticator.authenticate(origin, preparedUpdate, updateContext);

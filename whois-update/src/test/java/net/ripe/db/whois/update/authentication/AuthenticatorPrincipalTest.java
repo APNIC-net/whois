@@ -314,7 +314,12 @@ public class AuthenticatorPrincipalTest {
 
             @Override
             public String getName() {
-                return "";
+                return getType().getName();
+            }
+
+            @Override
+            public Type getType() {
+                return Type.NOT_SPECIFIED;
             }
         };
 

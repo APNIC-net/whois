@@ -17,18 +17,21 @@ public class PreparedUpdate implements UpdateContainer {
     private final RpslObject updatedObject;
     private final Action action;
     private final OverrideOptions overrideOptions;
+    private final Origin.Type originType;
 
     public PreparedUpdate(final Update update, @Nullable final RpslObject originalObject, final RpslObject updatedObject, final Action action) {
-        this(update, originalObject, updatedObject, action, OverrideOptions.NONE);
+        this(update, originalObject, updatedObject, action, Origin.Type.NOT_SPECIFIED, OverrideOptions.NONE);
     }
 
-    public PreparedUpdate(final Update update, @Nullable final RpslObject originalObject, final RpslObject updatedObject, final Action action, final OverrideOptions overrideOptions) {
+    public PreparedUpdate(final Update update, @Nullable final RpslObject originalObject, final RpslObject updatedObject, final Action action, final Origin.Type originType, final OverrideOptions overrideOptions) {
         this.update = update;
         this.originalObject = originalObject;
         this.updatedObject = updatedObject;
         this.action = action;
+        this.originType = originType;
         this.overrideOptions = overrideOptions;
     }
+
 
     @Override
     public Update getUpdate() {
@@ -81,6 +84,10 @@ public class PreparedUpdate implements UpdateContainer {
 
     public String getFormattedKey() {
         return updatedObject.getFormattedKey();
+    }
+
+    public Origin.Type getOriginType() {
+        return originType;
     }
 
     public Set<CIString> getNewValues(final AttributeType attributeType) {

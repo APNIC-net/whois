@@ -352,6 +352,10 @@ public final class UpdateMessages {
         return new Message(Type.ERROR, "Creating enum domain requires administrative authorisation");
     }
 
+    public static Message attributeDsRdataCannotBeModified() {
+        return new Message(Type.ERROR, "Attribute " + AttributeType.DS_RDATA.getName() + " cannot be modified via " + Origin.Type.EMAIL_UPDATE.getName());
+    }
+
     public static Message lessSpecificDomainFound(final CharSequence existing) {
         return new Message(Type.ERROR, "Existing less specific domain object found %s", existing);
     }
