@@ -41,7 +41,12 @@ public class MaintenanceJob implements Origin {
 
     @Override
     public String getName() {
-        return "maintenance job";
+        return getType().getName();
+    }
+
+    @Override
+    public Type getType() {
+        return Type.MAINTENANCE_JOB;
     }
 
     @Override

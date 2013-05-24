@@ -56,7 +56,12 @@ public class WhoisRestApi implements Origin {
 
     @Override
     public String getName() {
-        return "rest api";
+        return getType().getName();
+    }
+
+    @Override
+    public Type getType() {
+        return Type.SYNC_UPDATE;
     }
 
     @Override

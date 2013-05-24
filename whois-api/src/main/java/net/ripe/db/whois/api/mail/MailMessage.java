@@ -104,7 +104,12 @@ public class MailMessage implements Origin {
 
     @Override
     public String getName() {
-        return "email update";
+        return getType().getName();
+    }
+
+    @Override
+    public Type getType() {
+        return Type.EMAIL_UPDATE;
     }
 
     @Override
