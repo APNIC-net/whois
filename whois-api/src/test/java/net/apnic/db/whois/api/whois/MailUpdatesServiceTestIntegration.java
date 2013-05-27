@@ -157,4 +157,11 @@ public class MailUpdatesServiceTestIntegration extends AbstractIntegrationTest {
         final MimeMessage message = mailSenderStub.getMessage(response);
         assertThat(message.getContent().toString(), containsString(UpdateMessages.attributeDsRdataCannotBeModified().toString()));
     }
+
+    @Test
+    public void mail_update_with_update_having_different_ds_rdata() throws Exception {
+        final String response = mailUpdatesTestSupport.insert("", DOM_DS_RDATA_1_ENTRIES + DS_RDATA_B + EMAIL_STATIC_DOMAIN );
+        final MimeMessage message = mailSenderStub.getMessage(response);
+        assertThat(message.getContent().toString(), containsString(UpdateMessages.attributeDsRdataCannotBeModified().toString()));
+    }
 }

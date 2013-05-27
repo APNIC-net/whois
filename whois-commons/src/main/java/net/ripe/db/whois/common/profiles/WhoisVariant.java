@@ -6,14 +6,14 @@ public class WhoisVariant {
     public static final String WHOIS_VARIANT_APNIC = "apnic";
 
     public static boolean isAPNIC() {
-        return System.getProperty(WHOIS_VARIANT, "").equals(WhoisValiantType.APNIC.getValue());
+        return System.getProperty(WHOIS_VARIANT, "").equals(WhoisVariantType.APNIC.getValue());
     }
 
-    public enum WhoisValiantType {
+    public enum WhoisVariantType {
         APNIC(WHOIS_VARIANT_APNIC);
         private final String value;
 
-        WhoisValiantType(final String value) {
+        WhoisVariantType(final String value) {
             this.value = value;
         }
 
