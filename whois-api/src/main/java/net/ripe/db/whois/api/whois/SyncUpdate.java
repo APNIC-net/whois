@@ -61,7 +61,7 @@ public class SyncUpdate implements Origin {
 
     @Override
     public Type getType() {
-        return Type.MAINTENANCE_JOB;
+        return Type.SYNC_UPDATE;
     }
 
     @Override

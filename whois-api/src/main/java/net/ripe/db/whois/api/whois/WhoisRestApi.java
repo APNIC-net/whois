@@ -61,7 +61,7 @@ public class WhoisRestApi implements Origin {
 
     @Override
     public Type getType() {
-        return Type.SYNC_UPDATE;
+        return Type.REST_API;
     }
 
     @Override
