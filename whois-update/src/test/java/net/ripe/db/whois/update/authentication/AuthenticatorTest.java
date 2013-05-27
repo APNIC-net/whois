@@ -306,7 +306,7 @@ public class AuthenticatorTest {
 
             @Override
             public Type getType() {
-                return Type.NOT_SPECIFIED;
+                return Type.MAINTENANCE_JOB;
             }
         };
 
