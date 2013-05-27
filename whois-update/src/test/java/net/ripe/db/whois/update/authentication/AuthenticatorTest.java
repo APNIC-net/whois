@@ -53,7 +53,6 @@ public class AuthenticatorTest {
         when(maintainers.getPowerMaintainers()).thenReturn(ciSet("RIPE-NCC-HM-MNT"));
         when(maintainers.getEnduserMaintainers()).thenReturn(ciSet("RIPE-NCC-END-MNT"));
         when(maintainers.getAllocMaintainers()).thenReturn(ciSet("RIPE-NCC-HM-MNT", "AARDVARK-MNT"));
-        when(maintainers.getRipeMaintainers()).thenReturn(ciSet("RIPE-NCC-HM-MNT", "AARDVARK-MNT", "RIPE-NCC-END-MNT"));
         when(update.getCredentials()).thenReturn(new Credentials());
 
         subject = new Authenticator(ipRanges, userDao, maintainers, loggerContext, new AuthenticationStrategy[]{authenticationStrategy1, authenticationStrategy2});
@@ -102,7 +101,7 @@ public class AuthenticatorTest {
     @Test
     @Ignore
     public void authenticate_by_powerMaintainer_by_email() {
-        when(origin.allowRipeOperations()).thenReturn(false);
+        when(origin.allowAdminOperations()).thenReturn(false);
         when(authenticationStrategy1.supports(update)).thenReturn(true);
         when(authenticationStrategy1.authenticate(update, updateContext)).thenReturn(Lists.newArrayList(RpslObject.parse("mntner: RIPE-NCC-HM-MNT")));
 
@@ -114,7 +113,7 @@ public class AuthenticatorTest {
     @Test
     public void authenticate_by_powerMaintainer_inside_ripe() {
         when(origin.getFrom()).thenReturn("193.0.0.10");
-        when(origin.allowRipeOperations()).thenReturn(true);
+        when(origin.allowAdminOperations()).thenReturn(true);
         when(ipRanges.isInRipeRange(any(Interval.class))).thenReturn(true);
         when(authenticationStrategy1.supports(update)).thenReturn(true);
         when(authenticationStrategy1.authenticate(update, updateContext)).thenReturn(Lists.newArrayList(RpslObject.parse("mntner: RIPE-NCC-HM-MNT")));
@@ -126,7 +125,7 @@ public class AuthenticatorTest {
 
     @Test
     public void authentication_fails() {
-        when(origin.allowRipeOperations()).thenReturn(true);
+        when(origin.allowAdminOperations()).thenReturn(true);
         when(origin.getFrom()).thenReturn("193.0.0.10");
         when(authenticationStrategy1.supports(update)).thenReturn(false);
         when(authenticationStrategy2.supports(update)).thenReturn(true);
@@ -140,7 +139,7 @@ public class AuthenticatorTest {
 
     @Test
     public void authenticate_too_many_passwords() {
-        when(origin.allowRipeOperations()).thenReturn(true);
+        when(origin.allowAdminOperations()).thenReturn(true);
         when(origin.getFrom()).thenReturn("193.0.0.10");
 
         final HashSet<Credential> credentialSet = Sets.newHashSet();
@@ -177,7 +176,7 @@ public class AuthenticatorTest {
         final HashSet<Credential> credentialSet = Sets.newHashSet();
         credentialSet.add(OverrideCredential.parse("user,pwd"));
 
-        when(origin.allowRipeOperations()).thenReturn(true);
+        when(origin.allowAdminOperations()).thenReturn(true);
         when(origin.getFrom()).thenReturn("10.0.0.0");
         when(update.isOverride()).thenReturn(true);
         when(update.getCredentials()).thenReturn(new Credentials(credentialSet));
@@ -207,7 +206,7 @@ public class AuthenticatorTest {
     @Test
     public void authenticate_override_no_users() {
         when(origin.getName()).thenReturn("sync update");
-        when(origin.allowRipeOperations()).thenReturn(true);
+        when(origin.allowAdminOperations()).thenReturn(true);
 
         final HashSet<Credential> credentialSet = Sets.newHashSet();
         credentialSet.add(OverrideCredential.parse("user,password"));
@@ -232,7 +231,7 @@ public class AuthenticatorTest {
         final HashSet<Credential> credentialSet = Sets.newHashSet();
         credentialSet.add(OverrideCredential.parse("user,invalid"));
 
-        when(origin.allowRipeOperations()).thenReturn(true);
+        when(origin.allowAdminOperations()).thenReturn(true);
         when(origin.getFrom()).thenReturn("193.0.0.10");
         when(update.isOverride()).thenReturn(true);
         when(update.getCredentials()).thenReturn(new Credentials(credentialSet));
@@ -275,7 +274,7 @@ public class AuthenticatorTest {
             }
 
             @Override
-            public boolean allowRipeOperations() {
+            public boolean allowAdminOperations() {
                 return true;
             }
 
@@ -322,7 +321,7 @@ public class AuthenticatorTest {
         final HashSet<Credential> credentialSet = Sets.newHashSet();
         credentialSet.add(OverrideCredential.parse("user,password"));
 
-        when(origin.allowRipeOperations()).thenReturn(true);
+        when(origin.allowAdminOperations()).thenReturn(true);
         when(origin.getFrom()).thenReturn("193.0.0.10");
         when(update.getType()).thenReturn(ObjectType.INETNUM);
         when(update.isOverride()).thenReturn(true);

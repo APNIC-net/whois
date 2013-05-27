@@ -6,16 +6,52 @@ public class WhoisProfile {
     public static final String ENDTOEND = "ENDTOEND";
     public static final String TEST = "TEST";
     public static final String DEPLOYED = "DEPLOYED";
+    public static String variant;
+    private static boolean deployed, endtoend;
 
-    public static void setActive(final String... profiles) {
+    static void setActive() {
         StringBuilder result = new StringBuilder();
-        for (String profile : profiles) {
-            if (StringUtils.isNotEmpty(profile)) {
-                result.append(",").append(profile);
-            }
+
+        if (deployed) {
+            result.append(DEPLOYED);
         }
-        if (result.length() > 0) {
-            System.setProperty("spring.profiles.active", result.toString().substring(1));
+        else {
+            result.append(ENDTOEND);
         }
+
+        if (StringUtils.isNotEmpty(variant)) {
+            result.append(",").append(variant);
+        }
+
+        System.setProperty("spring.profiles.active", result.toString());
+    }
+
+    public static boolean isDeployed() {
+        return deployed;
+    }
+
+    public static void setDeployed() {
+        WhoisProfile.deployed = true;
+        WhoisProfile.endtoend = false;
+        setActive();
+    }
+
+    public static boolean isEndtoend() {
+        return endtoend;
+    }
+
+    public static void setEndtoend() {
+        WhoisProfile.deployed = false;
+        WhoisProfile.endtoend = true;
+        setActive();
+    }
+
+    public static final String getWhoisVariant() {
+        return variant;
+    }
+
+    public static void setWhoisVariant(final String whoisVariant) {
+        variant = whoisVariant;
+        setActive();
     }
 }

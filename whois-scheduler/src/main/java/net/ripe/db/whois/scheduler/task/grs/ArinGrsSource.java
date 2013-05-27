@@ -10,6 +10,8 @@ import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.Ipv4Resource;
 import net.ripe.db.whois.common.domain.Ipv6Resource;
+import net.ripe.db.whois.common.grs.ArinResourceData;
+import net.ripe.db.whois.common.io.Downloader;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
 import net.ripe.db.whois.common.rpsl.RpslObjectBase;
@@ -35,36 +37,38 @@ import java.util.zip.ZipFile;
 import static net.ripe.db.whois.common.domain.CIString.ciSet;
 import static net.ripe.db.whois.common.domain.CIString.ciString;
 
+// TODO: [AH] mechanism to not even instantiate these beans if grs is not enabled (e.g. "GRS" profile?)
+
 @Component
 class ArinGrsSource extends GrsSource {
     private static final Pattern IPV6_SPLIT_PATTERN = Pattern.compile("(?i)([0-9a-f:]*)\\s*-\\s*([0-9a-f:]*)\\s*");
 
     private String download;
 
-    @Value("${grs.import.arin.download}")
+    @Value("${grs.import.arin.download:}")
     public void setDownload(final String download) {
         this.download = download;
     }
 
     private String zipEntryName;
 
-    @Value("${grs.import.arin.zipEntryName}")
+    @Value("${grs.import.arin.zipEntryName:}")
     public void setZipEntryName(final String zipEntryName) {
         this.zipEntryName = zipEntryName;
     }
 
     @Autowired
     ArinGrsSource(
-            @Value("${grs.import.arin.source}") final String source,
-            @Value("${grs.import.arin.resourceDataUrl:}") final String resourceDataUrl,
+            @Value("${grs.import.arin.source:}") final String source,
             final SourceContext sourceContext,
-            final DateTimeProvider dateTimeProvider) {
-        super(source, resourceDataUrl, sourceContext, dateTimeProvider);
+            final DateTimeProvider dateTimeProvider,
+            final ArinResourceData arinResourceData) {
+        super(source, sourceContext, dateTimeProvider, arinResourceData);
     }
 
     @Override
     public void acquireDump(final File file) throws IOException {
-        downloadToFile(new URL(download), file);
+        Downloader.downloadToFile(logger, new URL(download), file);
     }
 
     @Override

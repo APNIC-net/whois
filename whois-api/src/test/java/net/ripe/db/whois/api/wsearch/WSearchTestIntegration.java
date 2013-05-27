@@ -13,12 +13,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URLEncoder;
 import java.util.zip.GZIPOutputStream;
 
@@ -28,7 +30,6 @@ import static org.hamcrest.Matchers.containsString;
 @Category(IntegrationTest.class)
 public class WSearchTestIntegration extends AbstractIntegrationTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WSearchTestIntegration.class);
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd");
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormat.forPattern("HHmmss");
     private static final String INPUT_FILE_NAME = "001.msg-in.txt.gz";
@@ -57,11 +58,16 @@ public class WSearchTestIntegration extends AbstractIntegrationTest {
 
     @Test
     public void single_term() throws Exception {
-        LOGGER.info("log directory = {}", logDir);
-
         createLogFile("the quick brown fox");
 
         assertThat(wsearch("quick"), containsString("the quick brown fox"));
+    }
+
+    @Test
+    public void single_term_inetnum_with_prefix_length() throws Exception {
+        createLogFile("inetnum: 10.0.0.0/24");
+
+        assertThat(wsearch("10.0.0.0/24"), containsString("inetnum: 10.0.0.0/24"));
     }
 
     @Test
@@ -80,6 +86,52 @@ public class WSearchTestIntegration extends AbstractIntegrationTest {
         final String response = wsearch("{2001::/48}");
 
         assertThat(response, containsString("ROUTES-MNT {2001::/48}"));
+    }
+
+    @Test
+    public void search_multiple_terms_in_failed_update() throws Exception {
+        createLogFile(
+            "SUMMARY OF UPDATE:\n"+
+            "\n"+
+            "Number of objects found:                   1\n"+
+            "Number of objects processed successfully:  0\n"+
+            " Create:         0\n"+
+            " Modify:         0\n"+
+            " Delete:         0\n"+
+            " No Operation:   0\n"+
+            "Number of objects processed with errors:   1\n"+
+            " Create:         1\n"+
+            " Modify:         0\n"+
+            " Delete:         0\n"+
+            "\n"+
+            "DETAILED EXPLANATION:\n"+
+            "\n"+
+            "\n"+
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+            "The following object(s) were found to have ERRORS:\n"+
+            "\n"+
+            "---\n"+
+            "Create FAILED: [person] FP1-TEST   First Person\n"+
+            "\n"+
+            "person:         First Person\n"+
+            "address:        St James Street\n"+
+            "address:        Burnley\n"+
+            "address:        UK\n"+
+            "phone:          +44 282 420469\n"+
+            "nic-hdl:        FP1-TEST\n"+
+            "mnt-by:         OWNER-MNT\n"+
+            "changed:        user@ripe.net\n"+
+            "source:         TEST\n"+
+            "\n"+
+            "***Error:   Authorisation for [person] FP1-TEST failed\n"+
+            "           using \"mnt-by:\"\n"+
+            "           not authenticated by: OWNER-MNT\n"+
+            "\n\n\n"+
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+        final String response = wsearch("FAILED: mnt-by: OWNER-MNT");
+
+        assertThat(response, containsString("First Person"));
     }
 
     private String wsearch(final String searchTerm) throws IOException {

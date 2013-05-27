@@ -4,6 +4,8 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import net.ripe.db.whois.common.DateTimeProvider;
+import net.ripe.db.whois.common.grs.AfrinicResourceData;
+import net.ripe.db.whois.common.io.Downloader;
 import net.ripe.db.whois.common.source.SourceContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -20,23 +22,23 @@ import java.util.List;
 class AfrinicGrsSource extends GrsSource {
     private String download;
 
-    @Value("${grs.import.afrinic.download}")
+    @Value("${grs.import.afrinic.download:}")
     public void setDownload(final String download) {
         this.download = download;
     }
 
     @Autowired
     AfrinicGrsSource(
-            @Value("${grs.import.afrinic.source}") final String source,
-            @Value("${grs.import.afrinic.resourceDataUrl:}") final String resourceDataUrl,
+            @Value("${grs.import.afrinic.source:}") final String source,
             final SourceContext sourceContext,
-            final DateTimeProvider dateTimeProvider) {
-        super(source, resourceDataUrl, sourceContext, dateTimeProvider);
+            final DateTimeProvider dateTimeProvider,
+            final AfrinicResourceData afrinicResourceData) {
+        super(source, sourceContext, dateTimeProvider, afrinicResourceData);
     }
 
     @Override
     public void acquireDump(final File file) throws IOException {
-        downloadToFile(new URL(download), file);
+        Downloader.downloadToFile(logger, new URL(download), file);
     }
 
     @Override
