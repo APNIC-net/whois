@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThat;
 @Category(IntegrationTest.class)
 @ActiveProfiles( {"TEST", WhoisVariant.WHOIS_VARIANT_APNIC} )
 public class MailUpdatesServiceTestIntegration extends AbstractIntegrationTest {
+
     private static final RpslObject OWNER_MNT = RpslObject.parse("" +
             "mntner:      OWNER-MNT\n" +
             "descr:       Owner Maintainer\n" +
@@ -31,6 +32,7 @@ public class MailUpdatesServiceTestIntegration extends AbstractIntegrationTest {
             "referral-by: OWNER-MNT\n" +
             "changed:     dbtest@apnic.net 20120101\n" +
             "source:      TEST");
+
     private static final RpslObject TEST_PERSON = RpslObject.parse("" +
             "person:  Test Person\n" +
             "address: Brisbane Queen St Mall\n" +
@@ -39,16 +41,13 @@ public class MailUpdatesServiceTestIntegration extends AbstractIntegrationTest {
             "mnt-by:  OWNER-MNT\n" +
             "changed: dbtest@apnic.net 20120101\n" +
             "source:  TEST\n");
+
     private static final String DS_RDATA_A = "ds-rdata: 52151 1 1 13ee60f7499a70e5aadaf05828e7fc59e8e70bc1\n";
     private static final String DS_RDATA_B = "ds-rdata: 52151 1 1 23ee60f7499a70e5aadaf05828e7fc59e8e70bc2\n";
 
     private static final String DOM_DS_RDATA_0_ENTRIES = "domain: 29.12.202.in-addr.arpa\n";
     private static final String DOM_DS_RDATA_1_ENTRIES = "domain: 30.12.202.in-addr.arpa\n";
     private static final String DOM_DS_RDATA_2_ENTRIES = "domain: 31.12.202.in-addr.arpa\n";
-
-//    private static final String INETNUM_DS_RDATA_0_ENTRIES = "inetnum: 202.12.29.0 - 202.12.29.255\n";
-//    private static final String INETNUM_DS_RDATA_1_ENTRIES = "inetnum: 202.12.30.0 - 202.12.30.255\n";
-//    private static final String INETNUM_DS_RDATA_2_ENTRIES = "inetnum: 202.12.31.0 - 202.12.31.255\n";
 
     private static final String EMAIL_STATIC_DOMAIN = "" +
             "descr:           Description\n" +
