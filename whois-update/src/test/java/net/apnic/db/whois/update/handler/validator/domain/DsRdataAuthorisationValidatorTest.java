@@ -34,6 +34,8 @@ public class DsRdataAuthorisationValidatorTest {
     UpdateContext updateContext;
     @Mock
     Subject authSubject;
+    @Mock
+    Origin origin;
     @InjectMocks
     DsRdataAuthorisationValidator subject;
 
@@ -61,14 +63,14 @@ public class DsRdataAuthorisationValidatorTest {
 
     @Test
     public void not_supports_other_origin() {
-        when(update.getOriginType()).thenReturn(Origin.Type.SYNC_UPDATE);
+        when(update.getOrigin().getType()).thenReturn(Origin.Type.SYNC_UPDATE);
         subject.validate(update, updateContext);
         verifyZeroInteractions(updateContext);
     }
 
     @Test
     public void validate_no_ds_data_in_update_and_original() {
-        when(update.getOriginType()).thenReturn(Origin.Type.EMAIL_UPDATE);
+        when(update.getOrigin().getType()).thenReturn(Origin.Type.EMAIL_UPDATE);
 
 
         when(update.getAction()).thenReturn(Action.MODIFY);
@@ -83,7 +85,10 @@ public class DsRdataAuthorisationValidatorTest {
     public void validate_ds_data_in_update_and_not_in_original() {
         final RpslObject rpslObjectOriginal = RpslObject.parse("domain: 29.12.202.in-addr.arpa");
         final RpslObject rpslObjectUpdated = RpslObject.parse("domain: 29.12.202.in-addr.arpa\nds-rdata: 52151 1 1 13ee60f7499a70e5aadaf05828e7fc59e8e70bc1");
-        PreparedUpdate updateInstance = new PreparedUpdate(updateContainer, rpslObjectOriginal, rpslObjectUpdated, Action.MODIFY, Origin.Type.EMAIL_UPDATE, OverrideOptions.NONE);
+
+        when(origin.getType()).thenReturn(Origin.Type.EMAIL_UPDATE);
+
+        PreparedUpdate updateInstance = new PreparedUpdate(updateContainer, rpslObjectOriginal, rpslObjectUpdated, Action.MODIFY, origin, OverrideOptions.NONE);
         subject.validate(updateInstance, updateContext);
         verify(updateContext).addMessage(updateInstance, UpdateMessages.attributeDsRdataCannotBeModified());
     }
@@ -92,7 +97,10 @@ public class DsRdataAuthorisationValidatorTest {
     public void validate_no_ds_data_in_update_but_in_original() {
         final RpslObject rpslObjectOriginal = RpslObject.parse("domain: 29.12.202.in-addr.arpa\nds-rdata: 52151 1 1 13ee60f7499a70e5aadaf05828e7fc59e8e70bc1");
         final RpslObject rpslObjectUpdated = RpslObject.parse("domain: 29.12.202.in-addr.arpa");
-        PreparedUpdate updateInstance = new PreparedUpdate(updateContainer, rpslObjectOriginal, rpslObjectUpdated, Action.MODIFY, Origin.Type.EMAIL_UPDATE, OverrideOptions.NONE);
+
+        when(origin.getType()).thenReturn(Origin.Type.EMAIL_UPDATE);
+
+        PreparedUpdate updateInstance = new PreparedUpdate(updateContainer, rpslObjectOriginal, rpslObjectUpdated, Action.MODIFY, origin, OverrideOptions.NONE);
         subject.validate(updateInstance, updateContext);
         verify(updateContext).addMessage(updateInstance, UpdateMessages.attributeDsRdataCannotBeModified());
     }
@@ -101,7 +109,10 @@ public class DsRdataAuthorisationValidatorTest {
     public void validate_ds_data_in_update_and_in_original() {
         final RpslObject rpslObjectOriginal = RpslObject.parse("domain: 29.12.202.in-addr.arpa\nds-rdata: 52151 1 1 13ee60f7499a70e5aadaf05828e7fc59e8e70bc1");
         final RpslObject rpslObjectUpdated = RpslObject.parse("domain: 29.12.202.in-addr.arpa\nds-rdata: 52151 1 1 13ee60f7499a70e5aadaf05828e7fc59e8e70bc1");
-        PreparedUpdate updateInstance = new PreparedUpdate(updateContainer, rpslObjectOriginal, rpslObjectUpdated, Action.MODIFY, Origin.Type.EMAIL_UPDATE, OverrideOptions.NONE);
+
+        when(origin.getType()).thenReturn(Origin.Type.EMAIL_UPDATE);
+
+        PreparedUpdate updateInstance = new PreparedUpdate(updateContainer, rpslObjectOriginal, rpslObjectUpdated, Action.MODIFY, origin, OverrideOptions.NONE);
         subject.validate(updateInstance, updateContext);
         verify(updateContext, never()).addMessage(updateInstance, UpdateMessages.attributeDsRdataCannotBeModified());
     }
@@ -111,7 +122,11 @@ public class DsRdataAuthorisationValidatorTest {
     public void validate_ds_data_in_update_and_in_original_but_delete() {
         final RpslObject rpslObjectOriginal = RpslObject.parse("domain: 29.12.202.in-addr.arpa\nds-rdata: 52151 1 1 13ee60f7499a70e5aadaf05828e7fc59e8e70bc1");
         final RpslObject rpslObjectUpdated = RpslObject.parse("domain: 29.12.202.in-addr.arpa\nds-rdata: 52151 1 1 13ee60f7499a70e5aadaf05828e7fc59e8e70bc1");
-        PreparedUpdate updateInstance = new PreparedUpdate(updateContainer, rpslObjectOriginal, rpslObjectUpdated, Action.DELETE, Origin.Type.EMAIL_UPDATE, OverrideOptions.NONE);
+
+        when(origin.getType()).thenReturn(Origin.Type.EMAIL_UPDATE);
+
+        PreparedUpdate updateInstance = new PreparedUpdate(updateContainer, rpslObjectOriginal, rpslObjectUpdated, Action.DELETE, origin, OverrideOptions.NONE);
+
         subject.validate(updateInstance, updateContext);
         verify(updateContext).addMessage(updateInstance, UpdateMessages.attributeDsRdataCannotBeModified());
     }
@@ -121,7 +136,10 @@ public class DsRdataAuthorisationValidatorTest {
     public void validate_ds_data_in_update_and_in_original_but_out_of_order() {
         final RpslObject rpslObjectOriginal = RpslObject.parse("domain: 29.12.202.in-addr.arpa\nds-rdata: 52151 1 1 13ee60f7499a70e5aadaf05828e7fc59e8e70bc1\nds-rdata: 52151 1 1 23ee60f7499a70e5aadaf05828e7fc59e8e70bc2");
         final RpslObject rpslObjectUpdated = RpslObject.parse("domain: 29.12.202.in-addr.arpa\nds-rdata: 52151 1 1 23ee60f7499a70e5aadaf05828e7fc59e8e70bc2\nds-rdata: 52151 1 1 13ee60f7499a70e5aadaf05828e7fc59e8e70bc1");
-        PreparedUpdate updateInstance = new PreparedUpdate(updateContainer, rpslObjectOriginal, rpslObjectUpdated, Action.MODIFY, Origin.Type.EMAIL_UPDATE, OverrideOptions.NONE);
+
+        when(origin.getType()).thenReturn(Origin.Type.EMAIL_UPDATE);
+
+        PreparedUpdate updateInstance = new PreparedUpdate(updateContainer, rpslObjectOriginal, rpslObjectUpdated, Action.MODIFY, origin, OverrideOptions.NONE);
         subject.validate(updateInstance, updateContext);
         verify(updateContext, never()).addMessage(updateInstance, UpdateMessages.attributeDsRdataCannotBeModified());
     }

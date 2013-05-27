@@ -17,18 +17,18 @@ public class PreparedUpdate implements UpdateContainer {
     private final RpslObject updatedObject;
     private final Action action;
     private final OverrideOptions overrideOptions;
-    private final Origin.Type originType;
+    private final Origin origin;
 
     public PreparedUpdate(final Update update, @Nullable final RpslObject originalObject, final RpslObject updatedObject, final Action action) {
-        this(update, originalObject, updatedObject, action, Origin.Type.NOT_SPECIFIED, OverrideOptions.NONE);
+        this(update, originalObject, updatedObject, action, null, OverrideOptions.NONE);
     }
 
-    public PreparedUpdate(final Update update, @Nullable final RpslObject originalObject, final RpslObject updatedObject, final Action action, final Origin.Type originType, final OverrideOptions overrideOptions) {
+    public PreparedUpdate(final Update update, @Nullable final RpslObject originalObject, final RpslObject updatedObject, final Action action, final Origin origin, final OverrideOptions overrideOptions) {
         this.update = update;
         this.originalObject = originalObject;
         this.updatedObject = updatedObject;
         this.action = action;
-        this.originType = originType;
+        this.origin = origin;
         this.overrideOptions = overrideOptions;
     }
 
@@ -86,8 +86,8 @@ public class PreparedUpdate implements UpdateContainer {
         return updatedObject.getFormattedKey();
     }
 
-    public Origin.Type getOriginType() {
-        return originType;
+    public Origin getOrigin() {
+        return origin;
     }
 
     public Set<CIString> getNewValues(final AttributeType attributeType) {

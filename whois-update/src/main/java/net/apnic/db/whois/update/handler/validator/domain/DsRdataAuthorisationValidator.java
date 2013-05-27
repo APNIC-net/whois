@@ -35,7 +35,7 @@ public class DsRdataAuthorisationValidator implements BusinessRuleValidator {
         if (update.isOverride()) {
             return;
         }
-        if (update.getOriginType().equals(Origin.Type.EMAIL_UPDATE)) {
+        if (update.getOrigin().getType().equals(Origin.Type.EMAIL_UPDATE)) {
 
             // If there is a difference in the ds-rdata then reject update
             Set<CIString> differences = update.getDifferences(AttributeType.DS_RDATA);
