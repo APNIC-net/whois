@@ -127,7 +127,7 @@ public class SourceContext {
 
             if (mirrorSourceName.contains(mainSourceName)) {
                 LOGGER.info("Delegating source {} to {}", mirrorSourceName, mainSourceName);
-                aliases.put(mirrorSourceName, slaveSource.getName());
+                aliases.put(mirrorSourceName, mirrorSlaveSource.getName());
                 sourceConfigurations.put(mirrorMasterSource, new SourceConfiguration(mirrorMasterSource, whoisMasterDataSource));
                 sourceConfigurations.put(mirrorSlaveSource, new SourceConfiguration(mirrorSlaveSource, whoisSlaveDataSource));
             } else {
