@@ -408,6 +408,12 @@
             <version>${spring.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0.2</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- common test dependencies -->
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
@@ -491,6 +497,21 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}</directory>
+                            <includes>
+                                <include>var*/**</include>
+                            </includes>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -645,7 +666,7 @@
                     <target>${compiler.version}</target>
                     <Xlint>ignore</Xlint>
                     <complianceLevel>${compiler.version}</complianceLevel>
-                    <encoding>UTF-8</encoding>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                     <verbose>false</verbose>
                     <aspectLibraries>
                         <aspectLibrary>
@@ -716,7 +737,8 @@
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups/>
                 <test.files.unit>None</test.files.unit>
-                <test.files.integration>**/whois/spec/query/*Spec*.java,**/whois/spec/update/*Spec*.java</test.files.integration>
+                <test.files.integration>**/whois/spec/query/*Spec*.java,**/whois/spec/update/*Spec*.java
+                </test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
             </properties>
         </profile>
