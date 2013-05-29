@@ -105,7 +105,7 @@ public class SearchQueryExecutor implements QueryExecutor {
         final Set<Source> sources = Sets.newLinkedHashSet();
 
         if (query.isAllSources()) {
-            sources.addAll(Sets.newLinkedHashSet(Iterables.transform(sourceContext.getGrsSourceNames(), new Function<CIString, Source>() {
+            sources.addAll(Sets.newLinkedHashSet(Iterables.transform(sourceContext.getAllSourceNames(), new Function<CIString, Source>() {
                 @Override
                 public Source apply(final CIString input) {
                     return Source.slave(input);
@@ -120,6 +120,16 @@ public class SearchQueryExecutor implements QueryExecutor {
                     return Source.slave(input);
                 }
             })));
+        }
+        else {
+            if (!sourceContext.getDefaultSourceNames().isEmpty()) {
+                sources.addAll(Sets.newLinkedHashSet(Iterables.transform(sourceContext.getDefaultSourceNames(), new Function<CIString, Source>() {
+                    @Override
+                    public Source apply(final CIString input) {
+                        return Source.slave(input);
+                    }
+                })));
+            }
         }
 
         if (sources.isEmpty()) {
