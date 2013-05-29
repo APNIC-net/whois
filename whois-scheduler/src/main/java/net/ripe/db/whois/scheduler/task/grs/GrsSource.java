@@ -2,8 +2,10 @@ package net.ripe.db.whois.scheduler.task.grs;
 
 import com.google.common.collect.Lists;
 import net.ripe.db.whois.common.DateTimeProvider;
+import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.grs.AuthoritativeResource;
 import net.ripe.db.whois.common.grs.AuthoritativeResourceData;
+import net.ripe.db.whois.common.io.Downloader;
 import net.ripe.db.whois.common.source.SourceContext;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -18,25 +20,27 @@ import java.util.List;
 import static net.ripe.db.whois.common.domain.CIString.ciString;
 
 abstract class GrsSource implements InitializingBean {
-    final String source;
+    final CIString name;
     final SourceContext sourceContext;
     final DateTimeProvider dateTimeProvider;
     final Logger logger;
     final AuthoritativeResourceData authoritativeResourceData;
+    final Downloader downloader;
 
     private GrsDao grsDao;
 
-    GrsSource(final String source, final SourceContext sourceContext, final DateTimeProvider dateTimeProvider, final AuthoritativeResourceData authoritativeResourceData) {
-        this.source = source;
+    GrsSource(final String name, final SourceContext sourceContext, final DateTimeProvider dateTimeProvider, final AuthoritativeResourceData authoritativeResourceData, final Downloader downloader) {
+        this.name = ciString(name);
         this.sourceContext = sourceContext;
         this.dateTimeProvider = dateTimeProvider;
-        this.logger = LoggerFactory.getLogger(String.format("%s.%s", GrsSource.class.getName(), source));
+        this.logger = LoggerFactory.getLogger(String.format("%s.%s", GrsSource.class.getName(), name));
         this.authoritativeResourceData = authoritativeResourceData;
+        this.downloader = downloader;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        setDao(new GrsDao(logger, dateTimeProvider, source, sourceContext));
+        setDao(new GrsDao(logger, dateTimeProvider, name, sourceContext));
     }
 
     void setDao(final GrsDao grsDao) {
@@ -57,15 +61,15 @@ abstract class GrsSource implements InitializingBean {
 
     @Override
     public String toString() {
-        return source;
+        return name.toString();
     }
 
-    String getSource() {
-        return source;
+    CIString getName() {
+        return name;
     }
 
     AuthoritativeResource getAuthoritativeResource() {
-        return authoritativeResourceData.getAuthoritativeResource(ciString(source));
+        return authoritativeResourceData.getAuthoritativeResource(name);
     }
 
     void handleLines(final BufferedReader reader, final LineHandler lineHandler) throws IOException {

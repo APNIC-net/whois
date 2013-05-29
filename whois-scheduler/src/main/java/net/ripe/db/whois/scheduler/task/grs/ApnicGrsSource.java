@@ -17,25 +17,25 @@ import java.util.zip.GZIPInputStream;
 
 @Component
 class ApnicGrsSource extends GrsSource {
-    private String download;
+    private final String download;
 
-    @Value("${grs.import.apnic.download:}")
-    public void setDownload(final String download) {
-        this.download = download;
-    }
 
     @Autowired
     ApnicGrsSource(
             @Value("${grs.import.apnic.source:}") final String source,
             final SourceContext sourceContext,
             final DateTimeProvider dateTimeProvider,
-            final AuthoritativeResourceData authoritativeResourceData) {
-        super(source, sourceContext, dateTimeProvider, authoritativeResourceData);
+            final AuthoritativeResourceData authoritativeResourceData,
+            final Downloader downloader,
+            @Value("${grs.import.apnic.download:}") final String download) {
+        super(source, sourceContext, dateTimeProvider, authoritativeResourceData, downloader);
+
+        this.download = download;
     }
 
     @Override
     public void acquireDump(final File file) throws IOException {
-        Downloader.downloadToFile(logger, new URL(download), file);
+        downloader.downloadToFile(logger, new URL(download), file);
     }
 
     @Override

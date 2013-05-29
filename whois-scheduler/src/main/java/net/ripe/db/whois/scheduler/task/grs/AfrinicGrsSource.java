@@ -20,25 +20,24 @@ import java.util.List;
 
 @Component
 class AfrinicGrsSource extends GrsSource {
-    private String download;
-
-    @Value("${grs.import.afrinic.download:}")
-    public void setDownload(final String download) {
-        this.download = download;
-    }
+    private final String download;
 
     @Autowired
     AfrinicGrsSource(
             @Value("${grs.import.afrinic.source:}") final String source,
             final SourceContext sourceContext,
             final DateTimeProvider dateTimeProvider,
-            final AuthoritativeResourceData authoritativeResourceData) {
-        super(source, sourceContext, dateTimeProvider, authoritativeResourceData);
+            final AuthoritativeResourceData authoritativeResourceData,
+            final Downloader downloader,
+            @Value("${grs.import.afrinic.download:}") final String download) {
+        super(source, sourceContext, dateTimeProvider, authoritativeResourceData, downloader);
+
+        this.download = download;
     }
 
     @Override
     public void acquireDump(final File file) throws IOException {
-        Downloader.downloadToFile(logger, new URL(download), file);
+        downloader.downloadToFile(logger, new URL(download), file);
     }
 
     @Override
