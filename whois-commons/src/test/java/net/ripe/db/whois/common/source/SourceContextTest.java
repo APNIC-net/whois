@@ -21,6 +21,7 @@ public class SourceContextTest {
     final String mainSourceNameString = "RIPE";
     final String grsSourceNames = "RIPE-GRS,APNIC-GRS,MISCONFIGURED";
     final String mirrorSourceNames = "";
+    final String nrtmSourceNames = "NRTM-GRS";
     final String grsSourceNamesForDummification = "RIPE-GRS";
     final String grsMasterBaseUrl = "jdbc://localhost/master";
     final String mirrorMasterBaseUrl = "jdbc://localhost/master";
@@ -44,6 +45,7 @@ public class SourceContextTest {
                 mainSourceNameString,
                 grsSourceNames,
                 mirrorSourceNames,
+                nrtmSourceNames,
                 grsSourceNamesForDummification,
                 grsMasterBaseUrl,
                 mirrorMasterBaseUrl,
@@ -86,5 +88,11 @@ public class SourceContextTest {
     public void isDummificationRequired_APNIC_GRS() {
         subject.setCurrent(Source.slave("APNIC-GRS"));
         assertThat(subject.isDummificationRequired(), is(false));
+    }
+
+    @Test
+    public void getNrtmSource() {
+        subject.setCurrent(Source.master("NRTM-GRS"));
+        assertThat(subject.getCurrentSource().isGrs(), is(true));
     }
 }

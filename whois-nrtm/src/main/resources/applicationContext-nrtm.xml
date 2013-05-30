@@ -7,4 +7,5 @@
     <import resource="applicationContext-commons.xml"/>
 
     <task:scheduler id="clientSynchronisationScheduler" pool-size="10"/>
+
 </beans>

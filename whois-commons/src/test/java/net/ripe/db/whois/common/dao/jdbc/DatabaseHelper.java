@@ -11,8 +11,15 @@ import net.ripe.db.whois.common.dao.RpslObjectUpdateInfo;
 import net.ripe.db.whois.common.domain.BlockEvent;
 import net.ripe.db.whois.common.domain.User;
 import net.ripe.db.whois.common.jdbc.driver.LoggingDriver;
-import net.ripe.db.whois.common.rpsl.*;
+import net.ripe.db.whois.common.rpsl.AttributeSanitizer;
+import net.ripe.db.whois.common.rpsl.ObjectMessages;
+import net.ripe.db.whois.common.rpsl.ObjectType;
+import net.ripe.db.whois.common.rpsl.RpslAttribute;
+import net.ripe.db.whois.common.rpsl.RpslObject;
+import net.ripe.db.whois.common.rpsl.RpslObjectFilter;
+import net.ripe.db.whois.common.source.Source;
 import net.ripe.db.whois.common.source.SourceAwareDataSource;
+import net.ripe.db.whois.common.source.SourceContext;
 import org.apache.commons.lang.Validate;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +34,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
 import javax.sql.DataSource;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,6 +69,7 @@ public class DatabaseHelper {
     @Autowired RpslObjectDao rpslObjectDao;
     @Autowired RpslObjectUpdateDao rpslObjectUpdateDao;
     @Autowired SourceAwareDataSource sourceAwareDataSource;
+    @Autowired SourceContext sourceContext;
 
     @Autowired(required = false)
     @Qualifier("aclDataSource")
@@ -231,6 +247,14 @@ public class DatabaseHelper {
         return new JdbcTemplate(sourceAwareDataSource);
     }
 
+    public void setCurrentSource(final Source source) {
+        sourceContext.setCurrent(source);
+    }
+
+    public void setCurrentSourceToMaster() {
+        sourceContext.setCurrentSourceToWhoisMaster();
+    }
+
     public RpslObject addObject(final String rpslString) {
         return addObject(RpslObject.parse(rpslString));
     }
@@ -289,6 +313,10 @@ public class DatabaseHelper {
     public RpslObjectUpdateInfo removeObject(final RpslObject rpslObject) {
         final RpslObjectInfo objectInfo = rpslObjectDao.findByKey(rpslObject.getType(), rpslObject.getKey().toString());
         return rpslObjectUpdateDao.deleteObject(objectInfo.getObjectId(), objectInfo.getKey());
+    }
+
+    public RpslObject lookupObject(final ObjectType type, final String pkey) {
+        return rpslObjectDao.getByKey(type, pkey);
     }
 
     public void unban(final String prefix) throws InterruptedException {
