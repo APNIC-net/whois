@@ -49,7 +49,7 @@ public class SourceContext {
     @Autowired
     public SourceContext(
             @Value("${whois.source}") final String mainSourceNameString,
-            @Value("${whois.default.sources:}") final String defaultSourceNames,
+            @Value("${whois.default.sources}") final String defaultSourceNames,
             @Value("${grs.sources}") final String grsSourceNames,
             @Value("${mirror.sources}") final String mirrorSourceNames,
             @Value("${nrtm.import.sources}") final String nrtmSourceNames,
