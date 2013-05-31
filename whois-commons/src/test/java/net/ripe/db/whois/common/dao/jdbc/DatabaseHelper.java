@@ -1,8 +1,11 @@
 package net.ripe.db.whois.common.dao.jdbc;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import net.ripe.db.whois.common.DateTimeProvider;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
 import net.ripe.db.whois.common.dao.RpslObjectInfo;
@@ -11,19 +14,18 @@ import net.ripe.db.whois.common.dao.RpslObjectUpdateInfo;
 import net.ripe.db.whois.common.domain.BlockEvent;
 import net.ripe.db.whois.common.domain.User;
 import net.ripe.db.whois.common.jdbc.driver.LoggingDriver;
-import net.ripe.db.whois.common.rpsl.AttributeSanitizer;
-import net.ripe.db.whois.common.rpsl.ObjectMessages;
-import net.ripe.db.whois.common.rpsl.ObjectType;
-import net.ripe.db.whois.common.rpsl.RpslAttribute;
-import net.ripe.db.whois.common.rpsl.RpslObject;
-import net.ripe.db.whois.common.rpsl.RpslObjectFilter;
+import net.ripe.db.whois.common.rpsl.*;
+import net.ripe.db.whois.common.source.IllegalSourceException;
 import net.ripe.db.whois.common.source.Source;
 import net.ripe.db.whois.common.source.SourceAwareDataSource;
 import net.ripe.db.whois.common.source.SourceContext;
 import org.apache.commons.lang.Validate;
 import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
@@ -31,20 +33,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.StatementCallback;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.DigestUtils;
+import org.springframework.util.StringValueResolver;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Collection;
+import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,7 +46,9 @@ import static net.ripe.db.whois.common.dao.jdbc.JdbcRpslObjectOperations.loadScr
 import static net.ripe.db.whois.common.dao.jdbc.JdbcRpslObjectOperations.truncateTables;
 
 @Component
-public class DatabaseHelper {
+public class DatabaseHelper implements EmbeddedValueResolverAware {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHelper.class);
+
     private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
     private static final String LOGGING_HANDLER = "net.ripe.db.whois.common.jdbc.driver.DelegatingLoggingHandler";
 
@@ -70,6 +66,7 @@ public class DatabaseHelper {
     @Autowired RpslObjectUpdateDao rpslObjectUpdateDao;
     @Autowired SourceAwareDataSource sourceAwareDataSource;
     @Autowired SourceContext sourceContext;
+    private StringValueResolver valueResolver;
 
     @Autowired(required = false)
     @Qualifier("aclDataSource")
@@ -96,8 +93,14 @@ public class DatabaseHelper {
         this.dnsCheckDataSource = dnsCheckDataSource;
     }
 
+    @Override
+    public void setEmbeddedValueResolver(final StringValueResolver valueResolver) {
+        this.valueResolver = valueResolver;
+    }
+
     private static String namePrefix;
-    private static String dbName;
+    private static String dbBaseName;
+    private static Map<String, String> grsDatabaseNames = Maps.newHashMap();
 
     public static synchronized void setupDatabase() {
         if (namePrefix != null) {
@@ -108,25 +111,21 @@ public class DatabaseHelper {
         ensureLocalhost(jdbcTemplate);
         cleanupOldTables(jdbcTemplate);
 
-        dbName = "test_" + System.currentTimeMillis() + "_" + DigestUtils.md5DigestAsHex(UUID.randomUUID().toString().getBytes());
+        dbBaseName = "test_" + System.currentTimeMillis() + "_" + System.getProperty("surefire.forkNumber");
 
-        setupDatabase(jdbcTemplate, "acl.database", dbName, "ACL", "acl_schema.sql");
-        setupDatabase(jdbcTemplate, "dnscheck.database", dbName, "DNSCHECK", "dnscheck_schema.sql");
-        setupDatabase(jdbcTemplate, "scheduler.database", dbName, "SCHEDULER", "scheduler_schema.sql");
-        setupDatabase(jdbcTemplate, "mailupdates.database", dbName, "MAILUPDATES", "mailupdates_schema.sql");
-        setupDatabase(jdbcTemplate, "whois.db", dbName, "WHOIS", "whois_schema.sql", "whois_data.sql");
-
-        System.setProperty("whois.source", "TEST");
         System.setProperty("mirror.sources", "TEST-NRTM");
 
-        // TEST-GRS is an alias for TEST
-        resetGrsSources();
+        setupDatabase(jdbcTemplate, "acl.database", "ACL", "acl_schema.sql");
+        setupDatabase(jdbcTemplate, "dnscheck.database", "DNSCHECK", "dnscheck_schema.sql");
+        setupDatabase(jdbcTemplate, "scheduler.database", "SCHEDULER", "scheduler_schema.sql");
+        setupDatabase(jdbcTemplate, "mailupdates.database", "MAILUPDATES", "mailupdates_schema.sql");
+        setupDatabase(jdbcTemplate, "whois.db", "WHOIS", "whois_schema.sql", "whois_data.sql");
 
-        final String masterUrl = String.format("jdbc:log:mysql://localhost/%s_WHOIS;driver=%s;logger=%s", dbName, JDBC_DRIVER, LOGGING_HANDLER);
+        final String masterUrl = String.format("jdbc:log:mysql://localhost/%s_WHOIS;driver=%s;logger=%s", dbBaseName, JDBC_DRIVER, LOGGING_HANDLER);
         System.setProperty("whois.db.master.driver", LoggingDriver.class.getName());
         System.setProperty("whois.db.master.url", masterUrl);
 
-        final String slaveUrl = String.format("jdbc:mysql://localhost/%s_WHOIS", dbName);
+        final String slaveUrl = String.format("jdbc:mysql://localhost/%s_WHOIS", dbBaseName);
         System.setProperty("whois.db.driver", JDBC_DRIVER);
         System.setProperty("whois.db.slave.url", slaveUrl);
         System.setProperty("whois.db.grs.slave.baseurl", slaveUrl);
@@ -134,7 +133,7 @@ public class DatabaseHelper {
         System.setProperty("whois.db.mirror.slave.baseurl", slaveUrl);
         System.setProperty("whois.db.mirror.master.baseurl", slaveUrl);
 
-        namePrefix = dbName;
+        namePrefix = dbBaseName;
     }
 
     private static void cleanupOldTables(final JdbcTemplate jdbcTemplate) {
@@ -152,27 +151,29 @@ public class DatabaseHelper {
         }
     }
 
-    public static void resetGrsSources() {
-        System.setProperty("grs.sources", "TEST-GRS");
-    }
+    public static void addGrsDatabases(final String... sourceNames) {
+        for (final String sourceName : sourceNames) {
+            Validate.isTrue(sourceName.endsWith("-GRS"), sourceName + " must end with -GRS");
+            final String propertyName = "whois.db." + sourceName;
+            final String dbName = "WHOIS_" + sourceName.replace('-', '_');
 
-    public static void addGrsDatabases(final String... names) {
-        for (final String name : names) {
-            Validate.isTrue(name.endsWith("-GRS"), name + " must end with -GRS");
-            setupDatabase(createDefaultTemplate(), "whois.db." + name, dbName, "WHOIS_" + name.replace('-', '_'), "whois_schema.sql");
+            if (!grsDatabaseNames.containsKey(sourceName)) {
+                setupDatabase(createDefaultTemplate(), propertyName, dbName, "whois_schema.sql");
+                grsDatabaseNames.put(sourceName, dbName);
+            }
         }
 
         final Joiner joiner = Joiner.on(',');
-        final String grsSources = joiner.join(System.getProperty("grs.sources", ""), joiner.join(names));
+        final String grsSources = joiner.join(System.getProperty("grs.sources", ""), joiner.join(sourceNames));
         System.setProperty("grs.sources", grsSources);
     }
 
-    public static void setupDatabase(final String propertyBase, final String nameBase, final String name, final String... sql) {
-        setupDatabase(createDefaultTemplate(), propertyBase, nameBase, name, sql);
+    public static void setupDatabase(final String propertyBase, final String name, final String... sql) {
+        setupDatabase(createDefaultTemplate(), propertyBase, name, sql);
     }
 
-    static void setupDatabase(final JdbcTemplate jdbcTemplate, final String propertyBase, final String nameBase, final String name, final String... sql) {
-        final String dbName = nameBase + "_" + name;
+    static void setupDatabase(final JdbcTemplate jdbcTemplate, final String propertyBase, final String name, final String... sql) {
+        final String dbName = dbBaseName + "_" + name;
         jdbcTemplate.execute("CREATE DATABASE " + dbName);
 
         loadScripts(new JdbcTemplate(createDataSource(dbName)), sql);
@@ -218,9 +219,22 @@ public class DatabaseHelper {
     }
 
     public void setup() {
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(sourceAwareDataSource);
-        truncateTables(jdbcTemplate);
-        loadScripts(jdbcTemplate, "whois_data.sql");
+        // Setup configured sources
+        final Splitter splitter = Splitter.on(',');
+        final Iterable<String> mainSources = Collections.singletonList(valueResolver.resolveStringValue("${whois.source}"));
+        final Iterable<String> grsSources = splitter.split(valueResolver.resolveStringValue("${grs.sources:}"));
+        final Iterable<String> nrtmSources = splitter.split(valueResolver.resolveStringValue("${nrtm.import.sources:}"));
+        final Set<String> sources = Sets.newLinkedHashSet(Iterables.concat(mainSources, grsSources, nrtmSources));
+
+        for (final String source : sources) {
+            try {
+                final JdbcTemplate jdbcTemplate = sourceContext.getSourceConfiguration(Source.master(source)).getJdbcTemplate();
+                truncateTables(jdbcTemplate);
+                loadScripts(jdbcTemplate, "whois_data.sql");
+            } catch (IllegalSourceException e) {
+                LOGGER.warn("Source not configured, check test: {}", source);
+            }
+        }
 
         if (aclTemplate != null) {
             truncateTables(aclTemplate);
@@ -262,6 +276,19 @@ public class DatabaseHelper {
     public RpslObject addObject(final RpslObject rpslObject) {
         final RpslObjectUpdateInfo objectUpdateInfo = rpslObjectUpdateDao.createObject(rpslObject);
         return RpslObject.parse(objectUpdateInfo.getObjectId(), rpslObject.toByteArray());
+    }
+
+    public RpslObject addObjectToSource(final String source, final String rpslString) {
+        return addObjectToSource(source, RpslObject.parse(rpslString));
+    }
+
+    public RpslObject addObjectToSource(final String source, final RpslObject rpslObject) {
+        try {
+            sourceContext.setCurrent(Source.master(source));
+            return addObject(rpslObject);
+        } finally {
+            sourceContext.removeCurrentSource();
+        }
     }
 
     // TODO: [AH] this is very similar to loader, should merge (also, claiming of IDs is missing from here)

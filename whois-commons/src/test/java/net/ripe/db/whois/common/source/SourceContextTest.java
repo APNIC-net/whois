@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SourceContextTest {
     final String mainSourceNameString = "RIPE";
-    final String grsSourceNames = "RIPE-GRS,APNIC-GRS,MISCONFIGURED";
+    final String grsSourceNames = "RIPE-GRS,APNIC-GRS";
     final String mirrorSourceNames = "";
     final String nrtmSourceNames = "NRTM-GRS";
     final String grsSourceNamesForDummification = "RIPE-GRS";

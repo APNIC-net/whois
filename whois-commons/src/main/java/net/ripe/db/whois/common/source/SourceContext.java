@@ -83,8 +83,6 @@ public class SourceContext {
             }
         });
 
-        // TODO: validate that NRTM source does not match master or GRS source
-
         final Iterable<CIString> nrtmSourceNameIterable = Iterables.transform(Splitter.on(',').omitEmptyStrings().split(nrtmSourceNames), new Function<String, CIString>() {
             @Nullable
             @Override
@@ -95,11 +93,14 @@ public class SourceContext {
 
         for (final CIString grsSourceName : Iterables.concat(grsSourceNameIterable, nrtmSourceNameIterable)) {
             if (!grsSourceName.endsWith(ciString("-GRS"))) {
-                LOGGER.warn("Skipped non-GRS source: {}", grsSourceName);
+                LOGGER.warn("Invalid GRS source name: {}", grsSourceName);
                 continue;
             }
 
-            grsSources.add(grsSourceName);
+            if (!grsSources.add(grsSourceName)) {
+                LOGGER.warn("GRS Source already configured: {}", grsSourceName);
+                continue;
+            }
 
             final Source grsMasterSource = Source.master(grsSourceName);
             final Source grsSlaveSource = Source.slave(grsSourceName);
