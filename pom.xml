@@ -772,14 +772,6 @@
 
         <profile>
             <id>APNIC</id>
-            <activation>
-                <property>
-                    <!-- Automatic activation if the APNIC_DEVEL environment variable is present -->
-                    <!-- We don't care about it's value. Only APNIC developers should have this anyways. -->
-                    <!-- TODO: Change this to something like WHOIS_BUILD=apnic or whatever -->
-                    <name>env.APNIC_DEVEL</name>
-                </property>
-            </activation>
             <properties>
                 <whois.variant>apnic</whois.variant>
                 <test.groups>net.apnic.db.whois.common.IntegrationTest</test.groups>
