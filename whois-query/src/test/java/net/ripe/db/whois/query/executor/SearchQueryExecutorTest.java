@@ -99,7 +99,7 @@ public class SearchQueryExecutorTest {
 
     @Test
     public void query_all_sources() {
-        when(sourceContext.getGrsSourceNames()).thenReturn(ciSet("APNIC-GRS", "ARIN-GRS"));
+        when(sourceContext.getAllSourceNames()).thenReturn(ciSet("APNIC-GRS", "ARIN-GRS"));
 
         final Query query = Query.parse("--all-sources 10.0.0.0");
         final CaptureResponseHandler responseHandler = new CaptureResponseHandler();
@@ -126,7 +126,7 @@ public class SearchQueryExecutorTest {
 
     @Test
     public void query_all_sources_and_additional() {
-        when(sourceContext.getGrsSourceNames()).thenReturn(ciSet("APNIC-GRS", "ARIN-GRS"));
+        when(sourceContext.getAllSourceNames()).thenReturn(ciSet("APNIC-GRS", "ARIN-GRS"));
 
         final Query query = Query.parse("--all-sources --sources RIPE 10.0.0.0");
         final CaptureResponseHandler responseHandler = new CaptureResponseHandler();
@@ -137,6 +137,36 @@ public class SearchQueryExecutorTest {
         verify(sourceContext).setCurrent(Source.slave("RIPE"));
         verify(sourceContext, times(3)).removeCurrentSource();
         verify(rpslObjectSearcher, times(3)).search(query);
+    }
+
+    @Test
+    public void query_default_sources() {
+        when(sourceContext.getDefaultSourceNames()).thenReturn(ciSet("RIPE", "APNIC-GRS", "ARIN-GRS"));
+
+        final Query query = Query.parse("10.0.0.0");
+        final CaptureResponseHandler responseHandler = new CaptureResponseHandler();
+        subject.execute(query, responseHandler);
+
+        verify(sourceContext).setCurrent(Source.slave("RIPE"));
+        verify(sourceContext).setCurrent(Source.slave("APNIC-GRS"));
+        verify(sourceContext).setCurrent(Source.slave("ARIN-GRS"));
+        verify(sourceContext, times(3)).removeCurrentSource();
+        verify(rpslObjectSearcher, times(3)).search(query);
+    }
+
+    @Test
+    public void query_sources_not_defaults() {
+        when(sourceContext.getDefaultSourceNames()).thenReturn(ciSet("RIPE", "APNIC-GRS", "ARIN-GRS"));
+
+        final Query query = Query.parse("--sources APNIC-GRS,ARIN-GRS 10.0.0.0");
+
+        final CaptureResponseHandler responseHandler = new CaptureResponseHandler();
+        subject.execute(query, responseHandler);
+
+        verify(sourceContext).setCurrent(Source.slave("APNIC-GRS"));
+        verify(sourceContext).setCurrent(Source.slave("ARIN-GRS"));
+        verify(sourceContext, times(2)).removeCurrentSource();
+        verify(rpslObjectSearcher, times(2)).search(query);
     }
 
     @Test
