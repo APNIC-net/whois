@@ -177,10 +177,16 @@ public class SourceContext {
         });
 
         for (final CIString defaultSourceName : defaultSourceNameIterable) {
+            if (defaultSourceName.length() == 0) {
+                continue;
+            }
+
             if (this.allSourceNames.contains(defaultSourceName)) {
                 defaultSources.add(defaultSourceName);
             }
             else {
+                LOGGER.warn("Default Source {} not found in configured sources}", defaultSourceName);
+
                 throw new IllegalSourceException(defaultSourceName.toString());
             }
         }
