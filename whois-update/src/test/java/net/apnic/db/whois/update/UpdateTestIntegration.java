@@ -3,8 +3,8 @@ package net.apnic.db.whois.update;
 import net.apnic.db.whois.common.IntegrationTest;
 import net.apnic.db.whois.update.handler.validator.domain.DsRdataAuthorisationValidator;
 import net.ripe.db.whois.common.profiles.WhoisVariant;
+import net.ripe.db.whois.update.authentication.strategy.AutnumAuthentication;
 import net.ripe.db.whois.update.dao.AbstractDaoTest;
-import net.ripe.db.whois.update.handler.validator.poem.PoemHasOnlyPublicMaintainerValidator;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -40,8 +40,8 @@ public class UpdateTestIntegration extends AbstractDaoTest {
     public void see_if_server_starts_and_expected_bean_present_test() throws Exception {
         DsRdataAuthorisationValidator dsRdataAuthorisationValidator = (DsRdataAuthorisationValidator)applicationContext.getBean(StringUtils.uncapitalize(DsRdataAuthorisationValidator.class.getSimpleName()));
         assertNotNull(dsRdataAuthorisationValidator);
-        exception.expect(NoSuchBeanDefinitionException.class);
-        applicationContext.getBean(StringUtils.uncapitalize(PoemHasOnlyPublicMaintainerValidator.class.getSimpleName()));
+        exception.expect(ClassCastException.class);
+        AutnumAuthentication autnumAuthentication = (AutnumAuthentication)applicationContext.getBean(StringUtils.uncapitalize(AutnumAuthentication.class.getSimpleName()));
     }
 
     @AfterClass
