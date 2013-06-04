@@ -7,7 +7,9 @@ import net.ripe.db.whois.common.profiles.WhoisVariant;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.update.domain.UpdateMessages;
 import net.ripe.db.whois.update.mail.MailSenderStub;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
 @Category(IntegrationTest.class)
-@ActiveProfiles( {"TEST", WhoisVariant.WHOIS_VARIANT_APNIC} )
+@ActiveProfiles( {"TEST"} )
 public class MailUpdatesServiceTestIntegration extends AbstractIntegrationTest {
 
     private static final RpslObject OWNER_MNT = RpslObject.parse("" +
@@ -65,6 +67,11 @@ public class MailUpdatesServiceTestIntegration extends AbstractIntegrationTest {
 
     @Autowired MailUpdatesTestSupport mailUpdatesTestSupport;
     @Autowired MailSenderStub mailSenderStub;
+
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        WhoisVariant.setWhoIsVariant(WhoisVariant.Type.APNIC);
+    }
 
     @Before
     public void setup() throws Exception {
@@ -163,5 +170,10 @@ public class MailUpdatesServiceTestIntegration extends AbstractIntegrationTest {
         final String response = mailUpdatesTestSupport.insert("", DOM_DS_RDATA_1_ENTRIES + DS_RDATA_B + EMAIL_STATIC_DOMAIN );
         final MimeMessage message = mailSenderStub.getMessage(response);
         assertThat(message.getContent().toString(), containsString(UpdateMessages.attributeDsRdataCannotBeModified().toString()));
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        WhoisVariant.setWhoIsVariant(WhoisVariant.Type.NONE);
     }
 }

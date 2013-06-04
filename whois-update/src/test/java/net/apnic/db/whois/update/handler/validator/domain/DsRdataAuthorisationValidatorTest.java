@@ -63,15 +63,14 @@ public class DsRdataAuthorisationValidatorTest {
 
     @Test
     public void not_supports_other_origin() {
-        when(update.getOrigin().getType()).thenReturn(Origin.Type.SYNC_UPDATE);
+        when(update.getOrigin()).thenReturn(new MockOrigin(Origin.Type.SYNC_UPDATE));
         subject.validate(update, updateContext);
         verifyZeroInteractions(updateContext);
     }
 
     @Test
     public void validate_no_ds_data_in_update_and_original() {
-        when(update.getOrigin().getType()).thenReturn(Origin.Type.EMAIL_UPDATE);
-
+        when(update.getOrigin()).thenReturn(new MockOrigin(Origin.Type.EMAIL_UPDATE));
 
         when(update.getAction()).thenReturn(Action.MODIFY);
         when(update.getReferenceObject()).thenReturn(RpslObject.parse("domain: 29.12.202.in-addr.arpa"));
@@ -144,5 +143,52 @@ public class DsRdataAuthorisationValidatorTest {
         verify(updateContext, never()).addMessage(updateInstance, UpdateMessages.attributeDsRdataCannotBeModified());
     }
 
+    static class MockOrigin implements Origin {
+        Type type;
+
+        MockOrigin(Type type) {
+            this.type = type;
+        }
+
+        @Override
+        public boolean isDefaultOverride() {
+            return false;
+        }
+
+        @Override
+        public boolean allowAdminOperations() {
+            return false;
+        }
+
+        @Override
+        public String getId() {
+            return null;
+        }
+
+        @Override
+        public String getFrom() {
+            return null;
+        }
+
+        @Override
+        public String getResponseHeader() {
+            return null;
+        }
+
+        @Override
+        public String getNotificationHeader() {
+            return null;
+        }
+
+        @Override
+        public String getName() {
+            return type.getName();
+        }
+
+        @Override
+        public Type getType() {
+            return type;
+        }
+    }
 }
 
