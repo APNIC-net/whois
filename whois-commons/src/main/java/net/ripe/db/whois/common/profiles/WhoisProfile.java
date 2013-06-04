@@ -1,6 +1,6 @@
 package net.ripe.db.whois.common.profiles;
 
-import org.apache.commons.lang.StringUtils;
+import org.springframework.core.env.AbstractEnvironment;
 
 public class WhoisProfile {
     public static final String ENDTOEND = "ENDTOEND";
@@ -15,7 +15,7 @@ public class WhoisProfile {
     public static void setDeployed() {
         WhoisProfile.deployed = true;
         WhoisProfile.endtoend = false;
-        System.setProperty("spring.profiles.active", DEPLOYED);
+        System.setProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, DEPLOYED);
     }
 
     public static boolean isEndtoend() {
@@ -25,6 +25,6 @@ public class WhoisProfile {
     public static void setEndtoend() {
         WhoisProfile.deployed = false;
         WhoisProfile.endtoend = true;
-        System.setProperty("spring.profiles.active", ENDTOEND);
+        System.setProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, ENDTOEND);
     }
 }

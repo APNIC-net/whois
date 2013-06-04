@@ -4,7 +4,6 @@ import com.google.common.base.Stopwatch;
 import net.ripe.db.whois.common.ApplicationService;
 import net.ripe.db.whois.common.Slf4JLogConfiguration;
 import net.ripe.db.whois.common.profiles.WhoisProfile;
-import net.ripe.db.whois.common.profiles.WhoisVariant;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

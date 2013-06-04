@@ -2,6 +2,8 @@ package net.ripe.db.whois.update.handler.validator.poem;
 
 import com.google.common.collect.Lists;
 import net.ripe.db.whois.common.domain.CIString;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
+import net.ripe.db.whois.common.profiles.WhoisVariantContext;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
@@ -16,6 +18,7 @@ import java.util.List;
 
 import static net.ripe.db.whois.common.domain.CIString.ciString;
 
+@WhoisVariantContext(excludeWhen = WhoisVariant.Type.APNIC)
 @Component
 public class PoemHasOnlyPublicMaintainerValidator implements BusinessRuleValidator {
     private static final CIString POEM_MAINTAINER = ciString("LIM-MNT");
