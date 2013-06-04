@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SourceContextTest {
     final String mainSourceNameString = "RIPE";
+    final String defaultSourceNames = "";
     final String grsSourceNames = "RIPE-GRS,APNIC-GRS";
     final String mirrorSourceNames = "";
     final String nrtmSourceNames = "NRTM-GRS";
@@ -43,6 +44,7 @@ public class SourceContextTest {
 
         subject = new SourceContext(
                 mainSourceNameString,
+                defaultSourceNames,
                 grsSourceNames,
                 mirrorSourceNames,
                 nrtmSourceNames,

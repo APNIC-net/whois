@@ -42,12 +42,14 @@ public class SourceContext {
     private final Set<CIString> grsSourceNamesForDummification;
     private final Set<CIString> allSourceNames;
     private final Map<CIString, CIString> aliases;
+    private final Set<CIString> defaultSourceNames;
 
     private ThreadLocal<SourceConfiguration> current = new ThreadLocal<SourceConfiguration>();
 
     @Autowired
     public SourceContext(
             @Value("${whois.source}") final String mainSourceNameString,
+            @Value("${whois.default.sources}") final String defaultSourceNames,
             @Value("${grs.sources}") final String grsSourceNames,
             @Value("${mirror.sources}") final String mirrorSourceNames,
             @Value("${nrtm.import.sources}") final String nrtmSourceNames,
@@ -68,6 +70,7 @@ public class SourceContext {
         this.mainMasterSource = Source.master(mainSourceName);
         this.mainSlaveSource = Source.slave(mainSourceName);
 
+        final Set<CIString> defaultSources = Sets.newLinkedHashSet();
         final Set<CIString> grsSources = Sets.newLinkedHashSet();
         final Set<CIString> mirrorSources = Sets.newLinkedHashSet();
         final Map<CIString, CIString> aliases = Maps.newLinkedHashMap();
@@ -165,6 +168,31 @@ public class SourceContext {
             }
         })));
 
+        final Iterable<CIString> defaultSourceNameIterable = Iterables.transform(Splitter.on(',').split(defaultSourceNames), new Function<String, CIString>() {
+            @Nullable
+            @Override
+            public CIString apply(final String input) {
+                return ciString(input);
+            }
+        });
+
+        for (final CIString defaultSourceName : defaultSourceNameIterable) {
+            if (defaultSourceName.length() == 0) {
+                continue;
+            }
+
+            if (this.allSourceNames.contains(defaultSourceName)) {
+                defaultSources.add(defaultSourceName);
+            }
+            else {
+                LOGGER.warn("Default Source {} not found in configured sources}", defaultSourceName);
+
+                throw new IllegalSourceException(defaultSourceName.toString());
+            }
+        }
+
+        this.defaultSourceNames = Collections.unmodifiableSet(defaultSources);
+
         LOGGER.info("Using sources: {}", sourceConfigurations.keySet());
     }
 
@@ -219,6 +247,10 @@ public class SourceContext {
 
     public Set<CIString> getMirrorSourceNames() {
         return mirrorSourceNames;
+    }
+
+    public Set<CIString> getDefaultSourceNames() {
+        return defaultSourceNames;
     }
 
     @CheckForNull
