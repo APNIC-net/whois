@@ -65,7 +65,7 @@ public class JettyBootstrap implements ApplicationService {
     public void start() {
         servers.add(createAndStartServer(Audience.INTERNAL, internalPort, "/int-doc/"));
         servers.add(createAndStartServer(Audience.PUBLIC, publicPort, "/ext-doc/"));
-        servers.add(createAndStartServer(Audience.RDAP, rdapPort, "/rdap-docs/"));
+        servers.add(createAndStartServer(Audience.RDAP, rdapPort, "/rdap-doc/"));
     }
 
     Server createAndStartServer(final Audience audience, final int port, final String resourceBase) {
