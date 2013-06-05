@@ -2,14 +2,16 @@ package net.ripe.db.whois.common.dao;
 
 import net.ripe.db.whois.common.collect.ProxyLoader;
 import net.ripe.db.whois.common.domain.CIString;
+import net.ripe.db.whois.common.domain.Identifiable;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
-public interface RpslObjectDao extends ProxyLoader<Integer, RpslObject> {
+public interface RpslObjectDao extends ProxyLoader<Identifiable, RpslObject> {
     RpslObject getById(int objectId);
 
     RpslObject getByKey(ObjectType type, String searchKey);
@@ -26,5 +28,5 @@ public interface RpslObjectDao extends ProxyLoader<Integer, RpslObject> {
 
     List<RpslObjectInfo> findMemberOfByObjectTypeWithoutMbrsByRef(ObjectType objectType, String attributeValue);
 
-    List<RpslObjectInfo> relatedTo(RpslObject identifiable);
+    List<RpslObjectInfo> relatedTo(RpslObject identifiable, Set<ObjectType> excludeObjectTypes);
 }

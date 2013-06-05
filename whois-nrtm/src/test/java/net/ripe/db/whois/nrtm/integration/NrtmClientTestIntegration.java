@@ -9,7 +9,11 @@ import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.common.source.Source;
 import net.ripe.db.whois.nrtm.NrtmServer;
 import net.ripe.db.whois.nrtm.client.NrtmImporter;
-import org.junit.*;
+import org.apache.commons.lang.StringUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -68,13 +72,13 @@ public class NrtmClientTestIntegration extends AbstractNrtmIntegrationBase {
     }
 
     @Test
-    @Ignore // TODO [AK] Occasionally freezes test
     public void add_person_from_nrtm_gap_in_serials() throws Exception {
         final RpslObject person = RpslObject.parse("" +
                 "person: One Person\n" +
                 "nic-hdl: OP1-TEST\n" +
                 "source: TEST");
 
+        nrtmImporter.stop();
         nrtmServer.stop();
 
         final RpslObject rpslObject = databaseHelper.addObject("mntner: MNT1");
@@ -82,7 +86,9 @@ public class NrtmClientTestIntegration extends AbstractNrtmIntegrationBase {
 
         databaseHelper.addObject(person);
 
-        nrtmServer.resume();
+        nrtmServer.start();
+        System.setProperty("nrtm.import.1-GRS.port", Integer.toString(NrtmServer.port));
+        nrtmImporter.start();
 
         objectExists(ObjectType.PERSON, "OP1-TEST", true);
     }
@@ -133,7 +139,6 @@ public class NrtmClientTestIntegration extends AbstractNrtmIntegrationBase {
     }
 
     @Test
-    @Ignore // TODO [AK] Occasionally freezes test
     public void network_error() throws Exception {
         final RpslObject person = RpslObject.parse("" +
                 "person: One Person\n" +
@@ -144,6 +149,7 @@ public class NrtmClientTestIntegration extends AbstractNrtmIntegrationBase {
         databaseHelper.addObject(person);
         objectExists(ObjectType.PERSON, "OP1-TEST", true);
 
+        nrtmImporter.stop();
         nrtmServer.stop();
 
         final RpslObject person2 = RpslObject.parse("" +
@@ -153,9 +159,23 @@ public class NrtmClientTestIntegration extends AbstractNrtmIntegrationBase {
                 "source: TEST");
 
         databaseHelper.addObject(person2);
-        nrtmServer.resume();
+        nrtmServer.start();
+        System.setProperty("nrtm.import.1-GRS.port", Integer.toString(NrtmServer.port));
+        nrtmImporter.start();
 
         objectExists(ObjectType.PERSON, "OP2-TEST", true);
+    }
+
+    @Test
+    public void create_large_object_with_long_lines() throws Exception {
+        final RpslObject mntner = RpslObject.parse("" +
+                "mntner: TEST-MNT\n" +
+                StringUtils.repeat("remarks: " + StringUtils.repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 2000), "\n", 10) +
+                "source: TEST");
+
+        databaseHelper.addObject(mntner);
+
+        objectMatches(mntner);
     }
 
     private void objectExists(final ObjectType type, final String key, final boolean exists) {

@@ -14,6 +14,7 @@ import net.ripe.db.whois.common.dao.jdbc.domain.RpslObjectRowMapper;
 import net.ripe.db.whois.common.dao.jdbc.index.IndexStrategies;
 import net.ripe.db.whois.common.dao.jdbc.index.IndexStrategy;
 import net.ripe.db.whois.common.domain.CIString;
+import net.ripe.db.whois.common.domain.Identifiable;
 import net.ripe.db.whois.common.rpsl.*;
 import net.ripe.db.whois.common.source.IllegalSourceException;
 import net.ripe.db.whois.common.source.Source;
@@ -28,13 +29,15 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import javax.sql.DataSource;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -59,31 +62,10 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
     }
 
     @Override
-    // TODO [AK] Make loader smarter, sometimes proxy already has some objects of result (object already loaded)
-    public void load(final List<Integer> proxy, final List<RpslObject> result) {
-        final StringBuilder queryBuilder = new StringBuilder();
-        final Integer[] objectIds = new Integer[proxy.size()];
-        int idx = 0;
+    public void load(final List<Identifiable> proxy, final List<RpslObject> result) {
+        final Map<Integer, RpslObject> loadedObjects = Maps.newHashMapWithExpectedSize(proxy.size());
 
-        // In MySQL, UNION ALL is much faster than IN
-        for (final Integer objectId : proxy) {
-            if (idx > 0) {
-                queryBuilder.append(" UNION ALL ");
-
-            }
-            queryBuilder.append("" +
-                    "SELECT object_id, object " +
-                    "FROM last " +
-                    "WHERE object_id = ? " +
-                    "AND sequence_id != 0");
-            objectIds[idx++] = objectId;
-        }
-
-        final String loadObjectsQuery = queryBuilder.toString();
-        final RpslObjectRowMapper rowMapper = new RpslObjectRowMapper();
-
-        List<RpslObject> objects = jdbcTemplate.query(loadObjectsQuery, objectIds, rowMapper);
-        Set<Integer> differences = getDifferences(proxy, objects);
+        Set<Integer> differences = loadObjects(proxy, loadedObjects);
         if (!differences.isEmpty()) {
             final Source originalSource = sourceContext.getCurrentSource();
             LOGGER.warn("Objects in source {} not found for ids: {}", originalSource, differences);
@@ -92,8 +74,7 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
                 final Source masterSource = Source.master(originalSource.getName());
                 try {
                     sourceContext.setCurrent(masterSource);
-                    objects = jdbcTemplate.query(loadObjectsQuery, objectIds, rowMapper);
-                    differences = getDifferences(proxy, objects);
+                    differences = loadObjects(proxy, loadedObjects);
                     if (!differences.isEmpty()) {
                         LOGGER.warn("Objects in source {} not found for ids: {}", masterSource, differences);
                     }
@@ -105,24 +86,81 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
             }
         }
 
-        result.addAll(objects);
+        final List<RpslObject> rpslObjects = Lists.newArrayList(loadedObjects.values());
+        Collections.sort(rpslObjects, new Comparator<RpslObject>() {
+            final List<Integer> requestedIds = Lists.newArrayList(Iterables.transform(proxy, new Function<Identifiable, Integer>() {
+                @Override
+                public Integer apply(final Identifiable input) {
+                    return input.getObjectId();
+                }
+            }));
+
+            @Override
+            public int compare(final RpslObject o1, final RpslObject o2) {
+                return requestedIds.indexOf(o1.getObjectId()) - requestedIds.indexOf(o2.getObjectId());
+            }
+        });
+
+        // TODO [AK] Return result rather than adding all to the collection
+        result.addAll(rpslObjects);
     }
 
-    private Set<Integer> getDifferences(final Collection<Integer> proxy, final Collection<RpslObject> objects) {
-        if (proxy.size() == objects.size()) {
+    private Set<Integer> loadObjects(final List<Identifiable> proxy, final Map<Integer, RpslObject> loadedObjects) {
+        final StringBuilder queryBuilder = new StringBuilder();
+        final List<Integer> objectIds = Lists.newArrayListWithExpectedSize(proxy.size());
+        for (final Identifiable identifiable : proxy) {
+            final Integer objectId = identifiable.getObjectId();
+            if (loadedObjects.containsKey(objectId)) {
+                continue;
+            }
+
+            if (identifiable instanceof RpslObject) {
+                loadedObjects.put(objectId, (RpslObject) identifiable);
+            } else {
+                if (queryBuilder.length() > 0) {
+                    // In MySQL, UNION ALL is much faster than IN
+                    queryBuilder.append(" UNION ALL ");
+                }
+
+                queryBuilder.append("" +
+                        "SELECT object_id, object " +
+                        "FROM last " +
+                        "WHERE object_id = ? " +
+                        "AND sequence_id != 0");
+
+                objectIds.add(objectId);
+            }
+        }
+
+        final List<RpslObject> rpslObjects = jdbcTemplate.query(
+                queryBuilder.toString(),
+                new PreparedStatementSetter() {
+                    @Override
+                    public void setValues(final PreparedStatement ps) throws SQLException {
+                        for (int i = 0; i < objectIds.size(); i++) {
+                            ps.setInt(i + 1, objectIds.get(i));
+                        }
+                    }
+                },
+                new RpslObjectRowMapper());
+
+        for (final RpslObject rpslObject : rpslObjects) {
+            loadedObjects.put(rpslObject.getObjectId(), rpslObject);
+        }
+
+        if (proxy.size() == loadedObjects.size()) {
             return Collections.emptySet();
         }
 
-        final Set<Integer> requestedIds = Sets.newHashSet(proxy);
-        final Set<Integer> foundObjectIds = Sets.newHashSet(Iterables.transform(objects, new Function<RpslObject, Integer>() {
-            @Nullable
-            @Override
-            public Integer apply(final RpslObject input) {
-                return input.getObjectId();
+        final Set<Integer> differences = Sets.newLinkedHashSet();
+        for (final Identifiable identifiable : proxy) {
+            final Integer objectId = identifiable.getObjectId();
+            if (!loadedObjects.containsKey(objectId)) {
+                differences.add(objectId);
             }
-        }));
+        }
 
-        return Sets.difference(requestedIds, foundObjectIds);
+        return differences;
     }
 
     @Override
@@ -137,9 +175,8 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
 
     @Override
     public RpslObject getByKey(final ObjectType type, final String key) {
-        RpslObject rpslObject;
         try {
-            rpslObject = jdbcTemplate.queryForObject("" +
+            return jdbcTemplate.queryForObject("" +
                     "SELECT object_id, object " +
                     "  FROM last " +
                     "  WHERE object_type = ? and pkey = ? and sequence_id != 0 ",
@@ -147,41 +184,7 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
                     ObjectTypeIds.getId(type),
                     key);
         } catch (EmptyResultDataAccessException e) {
-            rpslObject = null;
-        }
-
-        final RpslObject objectWithIndexFallback = getObjectWithIndexFallback(rpslObject, type, ciString(key));
-        if (objectWithIndexFallback == null) {
-            throw new EmptyResultDataAccessException(1);
-        }
-
-        return objectWithIndexFallback;
-    }
-
-    private RpslObject getObjectWithIndexFallback(final RpslObject object, final ObjectType type, final CIString key) {
-        if (object != null) {
-            return object;
-        }
-
-        final Set<RpslObjectInfo> objectInfos = Sets.newHashSet();
-        final ObjectTemplate objectTemplate = ObjectTemplate.getTemplate(type);
-        for (final AttributeType attributeType : objectTemplate.getKeyAttributes()) {
-            objectInfos.addAll(IndexStrategies.get(attributeType).findInIndex(jdbcTemplate, key));
-        }
-
-        switch (objectInfos.size()) {
-            case 0:
-                return null;
-            case 1:
-                final RpslObjectInfo objectInfo = objectInfos.iterator().next();
-                if (objectInfo.getObjectType().equals(type)) {
-                    LOGGER.warn("Object [{}] {} exists in key index, but not found in last by pkey", type, key);
-                    return getById(objectInfo.getObjectId());
-                } else {
-                    return null;
-                }
-            default:
-                throw new IncorrectResultSizeDataAccessException(String.format("Multiple objects found in key index for object [%s] %s", type, key), 1, objectInfos.size());
+            return getByKeyFromIndex(type, ciString(key));
         }
     }
 
@@ -224,13 +227,22 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
 
         final Set<RpslObject> results = Sets.newLinkedHashSetWithExpectedSize(rpslObjectMap.size());
         for (final CIString searchKey : searchKeys) {
-            final RpslObject objectWithIndexFallback = getObjectWithIndexFallback(rpslObjectMap.get(searchKey), type, searchKey);
-            if (objectWithIndexFallback != null) {
-                results.add(objectWithIndexFallback);
+            final RpslObject rpslObject = rpslObjectMap.get(searchKey);
+            if (rpslObject != null) {
+                results.add(rpslObject);
+            } else {
+                try {
+                    results.add(getById(getByKeyFromIndex(type, searchKey).getObjectId()));
+                } catch (IncorrectResultSizeDataAccessException ignored) {
+                }
             }
         }
 
         return Lists.newArrayList(results);
+    }
+
+    private RpslObject getByKeyFromIndex(final ObjectType type, final CIString key) {
+        return getById(findUniqueByKeyInIndex(type, key).getObjectId());
     }
 
     @Override
@@ -269,11 +281,54 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
         );
     }
 
-    // TODO [AK] This is inefficient, loading the object only to get rid of the RPSL data, should be the other way around, don't forget about index fallback
     @Override
     public RpslObjectInfo findByKey(final ObjectType type, final String searchKey) {
-        final RpslObject rpslObject = getByKey(type, searchKey);
-        return new RpslObjectInfo(rpslObject.getObjectId(), rpslObject.getType(), rpslObject.getKey());
+        try {
+            return jdbcTemplate.queryForObject("" +
+                    "SELECT object_id, pkey " +
+                    "  FROM last " +
+                    "  WHERE object_type = ? and pkey = ? and sequence_id != 0 ",
+                    new RowMapper<RpslObjectInfo>() {
+                        @Override
+                        public RpslObjectInfo mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+                            return new RpslObjectInfo(rs.getInt(1), type, rs.getString(2));
+                        }
+                    },
+                    ObjectTypeIds.getId(type),
+                    searchKey);
+        } catch (EmptyResultDataAccessException e) {
+            return findUniqueByKeyInIndex(type, ciString(searchKey));
+        }
+    }
+
+    private RpslObjectInfo findUniqueByKeyInIndex(final ObjectType type, final CIString key) {
+        final Set<RpslObjectInfo> objectInfos = findByKeyInIndex(type, key);
+
+        switch (objectInfos.size()) {
+            case 0:
+                throw new EmptyResultDataAccessException(1);
+            case 1:
+                return objectInfos.iterator().next();
+            default:
+                throw new IncorrectResultSizeDataAccessException(String.format("Multiple objects found in key index for object [%s] %s", type, key), 1, objectInfos.size());
+        }
+    }
+
+    private Set<RpslObjectInfo> findByKeyInIndex(final ObjectType type, final CIString key) {
+        final Set<RpslObjectInfo> objectInfos = Sets.newHashSetWithExpectedSize(1);
+        final ObjectTemplate objectTemplate = ObjectTemplate.getTemplate(type);
+        for (final AttributeType attributeType : objectTemplate.getKeyAttributes()) {
+            final List<RpslObjectInfo> rpslObjectInfos = IndexStrategies.get(attributeType).findInIndex(jdbcTemplate, key);
+            for (final RpslObjectInfo rpslObjectInfo : rpslObjectInfos) {
+
+                // Make sure the object type actually matches the requested type, can otherwise fail e.g. when looking up person/role
+                if (rpslObjectInfo.getObjectType().equals(type)) {
+                    objectInfos.add(rpslObjectInfo);
+                }
+            }
+        }
+
+        return objectInfos;
     }
 
     @Override
@@ -304,20 +359,20 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
     }
 
     @Override
-    public List<RpslObjectInfo> relatedTo(final RpslObject identifiable) {
+    public List<RpslObjectInfo> relatedTo(final RpslObject identifiable, final Set<ObjectType> excludeObjectTypes) {
         final Set<RpslObjectInfo> result = Sets.newLinkedHashSet();
-        for (final AttributeType attributeType : RELATED_TO_ATTRIBUTES) { // TODO [AK] Pass in related-to attributes to optimise --no-personal
-            final List<RpslAttribute> attributes = identifiable.findAttributes(attributeType);
-            for (final RpslAttribute attribute : attributes) {
-                for (final CIString referenceValue : attribute.getReferenceValues()) {
-                    for (final ObjectType objectType : attributeType.getReferences(referenceValue)) {
-                        for (AttributeType keyAttributeType : ObjectTemplate.getTemplate(objectType).getKeyAttributes()) {
-                            final List<RpslObjectInfo> objectInfos = IndexStrategies.get(keyAttributeType).findInIndex(jdbcTemplate, referenceValue);
-                            for (final RpslObjectInfo objectInfo : objectInfos) {
-                                if (objectInfo.getObjectId() != identifiable.getObjectId()) {
-                                    result.add(objectInfo);
-                                }
-                            }
+
+        final List<RpslAttribute> attributes = identifiable.findAttributes(RELATED_TO_ATTRIBUTES);
+        for (final RpslAttribute attribute : attributes) {
+            for (final CIString referenceValue : attribute.getReferenceValues()) {
+                for (final ObjectType objectType : attribute.getType().getReferences(referenceValue)) {
+                    if (excludeObjectTypes.contains(objectType)) {
+                        continue;
+                    }
+
+                    for (final RpslObjectInfo objectInfo : findByKeyInIndex(objectType, referenceValue)) {
+                        if (objectInfo.getObjectId() != identifiable.getObjectId()) {
+                            result.add(objectInfo);
                         }
                     }
                 }

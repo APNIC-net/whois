@@ -42,6 +42,11 @@
         </dependency>
 
         <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-core-annotations</artifactId>
         </dependency>
@@ -131,7 +136,7 @@
                         </goals>
                         <configuration>
                             <configFile>enunciate-ext.xml</configFile>
-                            <docsDir>${project.build.directory}/generated-sources/enunciate/ext-docs</docsDir>
+                            <docsDir>${project.build.directory}/generated-sources/enunciate/ext-doc/api-doc</docsDir>
                             <buildDir>${project.build.directory}/enunciate/build-ext</buildDir>
                             <compileDir>${project.build.directory}/enunciate/compile-ext</compileDir>
                             <scratchDir>${project.build.directory}/enunciate-scratch-ext</scratchDir>
@@ -151,7 +156,7 @@
                         </goals>
                         <configuration>
                             <configFile>enunciate-int.xml</configFile>
-                            <docsDir>${project.build.directory}/generated-sources/enunciate/int-docs</docsDir>
+                            <docsDir>${project.build.directory}/generated-sources/enunciate/int-doc/api-doc</docsDir>
                             <buildDir>${project.build.directory}/enunciate/build-int</buildDir>
                             <compileDir>${project.build.directory}/enunciate/compile-int</compileDir>
                             <scratchDir>${project.build.directory}/enunciate-scratch-int</scratchDir>
