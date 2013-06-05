@@ -78,7 +78,7 @@ public class SourceContext {
         sourceConfigurations.put(mainMasterSource, new SourceConfiguration(mainMasterSource, whoisMasterDataSource));
         sourceConfigurations.put(mainSlaveSource, new SourceConfiguration(mainSlaveSource, whoisSlaveDataSource));
 
-        final Iterable<CIString> grsSourceNameIterable = Iterables.transform(Splitter.on(',').split(grsSourceNames), new Function<String, CIString>() {
+        final Iterable<CIString> grsSourceNameIterable = Iterables.transform(Splitter.on(',').omitEmptyStrings().split(grsSourceNames), new Function<String, CIString>() {
             @Nullable
             @Override
             public CIString apply(final String input) {
@@ -124,7 +124,7 @@ public class SourceContext {
             }
         }
 
-        final Iterable<CIString> mirrorSourceNameIterable = Iterables.transform(Splitter.on(',').split(mirrorSourceNames), new Function<String, CIString>() {
+        final Iterable<CIString> mirrorSourceNameIterable = Iterables.transform(Splitter.on(',').omitEmptyStrings().split(mirrorSourceNames), new Function<String, CIString>() {
             @Nullable
             @Override
             public CIString apply(final String input) {
