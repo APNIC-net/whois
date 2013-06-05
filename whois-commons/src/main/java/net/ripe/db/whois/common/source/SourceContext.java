@@ -168,7 +168,7 @@ public class SourceContext {
             }
         })));
 
-        final Iterable<CIString> defaultSourceNameIterable = Iterables.transform(Splitter.on(',').split(defaultSourceNames), new Function<String, CIString>() {
+        final Iterable<CIString> defaultSourceNameIterable = Iterables.transform(Splitter.on(',').omitEmptyStrings().split(defaultSourceNames), new Function<String, CIString>() {
             @Nullable
             @Override
             public CIString apply(final String input) {
@@ -177,10 +177,6 @@ public class SourceContext {
         });
 
         for (final CIString defaultSourceName : defaultSourceNameIterable) {
-            if (defaultSourceName.length() == 0) {
-                continue;
-            }
-
             if (this.allSourceNames.contains(defaultSourceName)) {
                 defaultSources.add(defaultSourceName);
             }
