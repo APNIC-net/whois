@@ -190,6 +190,9 @@ public class SourceContext {
         this.defaultSourceNames = Collections.unmodifiableSet(defaultSources);
 
         LOGGER.info("Using sources: {}", sourceConfigurations.keySet());
+        if (!defaultSources.isEmpty()) {
+            LOGGER.info("Default sources: {}", defaultSources);
+        }
     }
 
     private String createGrsUrl(final String baseUrl, final CIString sourceName) {

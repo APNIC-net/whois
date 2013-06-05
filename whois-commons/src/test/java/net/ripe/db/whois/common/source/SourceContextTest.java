@@ -1,5 +1,6 @@
 package net.ripe.db.whois.common.source;
 
+import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.jdbc.DataSourceFactory;
 import org.junit.After;
 import org.junit.Before;
@@ -10,8 +11,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.sql.DataSource;
 
+import java.util.Set;
+
 import static net.ripe.db.whois.common.domain.CIString.ciString;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -19,7 +27,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SourceContextTest {
     final String mainSourceNameString = "RIPE";
-    final String defaultSourceNames = "";
+    final String defaultSourceNames = "RIPE,RIPE-GRS,APNIC-GRS";
     final String grsSourceNames = "RIPE-GRS,APNIC-GRS";
     final String mirrorSourceNames = "";
     final String nrtmSourceNames = "NRTM-GRS";
@@ -96,5 +104,12 @@ public class SourceContextTest {
     public void getNrtmSource() {
         subject.setCurrent(Source.master("NRTM-GRS"));
         assertThat(subject.getCurrentSource().isGrs(), is(true));
+    }
+
+    @Test
+    public void getDefaultSources() {
+        final Set<CIString> sourceNames = subject.getDefaultSourceNames();
+        assertThat(sourceNames, hasSize(3));
+        assertThat(sourceNames, hasItems(ciString("RIPE"), ciString("RIPE-GRS"), ciString("APNIC-GRS")));
     }
 }
