@@ -1,5 +1,6 @@
 package spec.integration
 import net.ripe.db.whois.common.IntegrationTest
+import net.ripe.db.whois.common.Stub
 import net.ripe.db.whois.common.dao.jdbc.DatabaseHelper
 
 @org.junit.experimental.categories.Category(IntegrationTest.class)
