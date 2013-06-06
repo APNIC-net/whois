@@ -120,9 +120,13 @@ public class RpslObjectBase {
         return type;
     }
 
+    public byte[] toByteArray() {
+        return buf;
+    }
+
     public List<RpslAttribute> getAttributes() {
         if (attributes == null) {
-            final List<RpslAttribute> newAttributes = new ArrayList<RpslAttribute>(32);
+            final List<RpslAttribute> newAttributes = new ArrayList<>(32);
             newAttributes.add(typeAttribute);
 
             while (pos < count) {

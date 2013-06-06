@@ -45,7 +45,7 @@ public class SourceContext {
     private final Map<CIString, CIString> aliases;
     private final Set<CIString> defaultSourceNames;
 
-    private ThreadLocal<SourceConfiguration> current = new ThreadLocal<SourceConfiguration>();
+    private ThreadLocal<SourceConfiguration> current = new ThreadLocal<>();
 
     @Autowired
     public SourceContext(
