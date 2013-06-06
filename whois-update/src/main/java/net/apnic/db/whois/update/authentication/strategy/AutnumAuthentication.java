@@ -49,6 +49,7 @@ public class AutnumAuthentication implements AuthenticationStrategy {
         return Collections.emptySet();
     }
 
+    // @TODO: Customise as per SCRUM-1549
     @Override
     public List<RpslObject> authenticate(final PreparedUpdate update, final UpdateContext updateContext) {
         final RpslObject object = update.getUpdatedObject();
