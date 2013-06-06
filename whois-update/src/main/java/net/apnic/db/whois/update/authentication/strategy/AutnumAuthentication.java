@@ -1,6 +1,5 @@
 package net.apnic.db.whois.update.authentication.strategy;
 
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.ripe.db.whois.common.Message;
