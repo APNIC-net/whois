@@ -1,6 +1,5 @@
 package spec.integration
 import net.ripe.db.whois.common.IntegrationTest
-import net.ripe.db.whois.common.Stub
 import net.ripe.db.whois.common.dao.jdbc.DatabaseHelper
 
 @org.junit.experimental.categories.Category(IntegrationTest.class)
@@ -67,11 +66,8 @@ class GrsIntegrationSpec extends BaseSpec {
 
         def response = query("--resource AS1000")
       then:
-        response =~ "%ERROR:102: unknown source"
-        response !=~  "No entries found"
-// Dragan: Not sure if the testcase is wrong or the or the whois code??
-//        response != ~"aut-num:        AS1000"
-//        response =~ "No entries found"
+        response != ~"aut-num:        AS1000"
+        response =~ "No entries found"
     }
 
     def "query --resource 10.0.0.0 matches inetnum and route"() {
