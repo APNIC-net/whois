@@ -13,11 +13,10 @@ import net.ripe.db.whois.update.authentication.credential.AuthenticationModule;
 import net.ripe.db.whois.update.domain.Action;
 import net.ripe.db.whois.update.domain.PreparedUpdate;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-abstract class RouteAuthentication implements AuthenticationStrategy {
+abstract class RouteAuthentication extends AuthenticationStrategyBase {
     final AuthenticationModule authenticationModule;
     final RpslObjectDao objectDao;
 
@@ -32,7 +31,7 @@ abstract class RouteAuthentication implements AuthenticationStrategy {
     }
 
     @Override
-    public Set<ObjectType> getPendingAuthenticationTypes() {
+    public Set<ObjectType> getTypesWithDeferredAuthenticationSupport() {
         return Sets.newHashSet(ObjectType.ROUTE, ObjectType.ROUTE6);
     }
 

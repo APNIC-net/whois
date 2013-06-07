@@ -14,6 +14,7 @@ import net.ripe.db.whois.update.log.LoggerContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
 
 import static net.ripe.db.whois.common.domain.CIString.ciString;
 
@@ -38,6 +37,7 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
     private final Authenticator authenticator;
     private final UpdateObjectHandler updateObjectHandler;
     private final IpTreeUpdater ipTreeUpdater;
+    private final PendingUpdateHandler pendingUpdateHandler;
     private CIString source;
 
     @Value("${whois.source}")
@@ -46,7 +46,7 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
     }
 
     @Autowired
-    public TransactionalSingleUpdateHandler(final AutoKeyResolver autoKeyResolver, final AttributeGenerator attributeGenerator, final AttributeSanitizer attributeSanitizer, final UpdateLockDao updateLockDao, final LoggerContext loggerContext, final Authenticator authenticator, final UpdateObjectHandler updateObjectHandler, final RpslObjectDao rpslObjectDao, final RpslObjectUpdateDao rpslObjectUpdateDao, final IpTreeUpdater ipTreeUpdater) {
+    public TransactionalSingleUpdateHandler(final AutoKeyResolver autoKeyResolver, final AttributeGenerator attributeGenerator, final AttributeSanitizer attributeSanitizer, final UpdateLockDao updateLockDao, final LoggerContext loggerContext, final Authenticator authenticator, final UpdateObjectHandler updateObjectHandler, final RpslObjectDao rpslObjectDao, final RpslObjectUpdateDao rpslObjectUpdateDao, final IpTreeUpdater ipTreeUpdater, final PendingUpdateHandler pendingUpdateHandler) {
         this.autoKeyResolver = autoKeyResolver;
         this.attributeGenerator = attributeGenerator;
         this.attributeSanitizer = attributeSanitizer;
@@ -57,6 +57,7 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
         this.authenticator = authenticator;
         this.updateObjectHandler = updateObjectHandler;
         this.ipTreeUpdater = ipTreeUpdater;
+        this.pendingUpdateHandler = pendingUpdateHandler;
     }
 
     @Override
@@ -90,15 +91,18 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
 
         loggerContext.logPreparedUpdate(preparedUpdate);
         authenticator.authenticate(origin, preparedUpdate, updateContext);
+        final boolean businessRulesOk = updateObjectHandler.validateBusinessRules(preparedUpdate, updateContext);
+        final boolean pendingAuthentication = UpdateStatus.PENDING_AUTHENTICATION.equals(updateContext.getStatus(preparedUpdate));
 
-        if (UpdateStatus.PENDING_AUTHENTICATION.equals(updateContext.getStatus(preparedUpdate))) {
-            // TODO [AK] Make distinction between authentication errors and business rule errors
-        }
+        if (businessRulesOk && pendingAuthentication) {
+            pendingUpdateHandler.handle(preparedUpdate, updateContext);
 
-        updateObjectHandler.execute(preparedUpdate, updateContext);
-
-        if (updateContext.hasErrors(update)) {
+            // TODO [AK] Remove this to complete the story, not halfway, since there is no way yet to verify pending works correctly
             throw new UpdateFailedException();
+        } else if (updateContext.hasErrors(update)) {
+            throw new UpdateFailedException();
+        } else {
+            updateObjectHandler.execute(preparedUpdate, updateContext);
         }
 
         updateContext.setPreparedUpdate(preparedUpdate);
@@ -124,16 +128,15 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
             }
         } else {
             final CIString key = updatedObject.getKey();
-            final List<RpslObject> originalObjects = rpslObjectDao.getByKeys(updatedObject.getType(), Collections.singleton(key));
-            if (originalObjects.isEmpty()) {
+
+            try {
+                final RpslObject originalObject = rpslObjectDao.getByKey(updatedObject.getType(), key);
+                return attributeSanitizer.sanitize(originalObject, new ObjectMessages());
+            } catch (EmptyResultDataAccessException e) {
                 return null;
+            } catch (IncorrectResultSizeDataAccessException e) {
+                throw new IllegalStateException(String.format("Invalid number of results for {}", key, e));
             }
-
-            if (originalObjects.size() == 1) {
-                return attributeSanitizer.sanitize(originalObjects.get(0), new ObjectMessages());
-            }
-
-            throw new IllegalStateException(String.format("%s original objects found for %s", originalObjects.size(), key));
         }
     }
 

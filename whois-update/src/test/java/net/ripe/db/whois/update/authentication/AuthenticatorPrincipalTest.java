@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class AuthenticatorTest {
+public class AuthenticatorPrincipalTest {
     @Mock IpRanges ipRanges;
     @Mock UserDao userDao;
     @Mock Origin origin;
@@ -48,10 +48,13 @@ public class AuthenticatorTest {
     @Mock LoggerContext loggerContext;
 
     Authenticator subject;
-    private ArgumentCaptor<Subject> subjectCapture;
+    ArgumentCaptor<Subject> subjectCapture;
 
     @Before
     public void setup() {
+        when(authenticationStrategy1.getName()).thenReturn("authenticationStrategy1");
+        when(authenticationStrategy2.getName()).thenReturn("authenticationStrategy2");
+
         when(maintainers.getPowerMaintainers()).thenReturn(ciSet("RIPE-NCC-HM-MNT"));
         when(maintainers.getEnduserMaintainers()).thenReturn(ciSet("RIPE-NCC-END-MNT"));
         when(maintainers.getAllocMaintainers()).thenReturn(ciSet("RIPE-NCC-HM-MNT", "AARDVARK-MNT"));
@@ -87,7 +90,7 @@ public class AuthenticatorTest {
         subject.authenticate(origin, update, updateContext);
         verifySubject(updateContext, new Subject(
                 Sets.newHashSet(excpectedPrincipals),
-                Collections.singleton(authenticationStrategy1.getClass().getSimpleName()),
+                Collections.singleton(authenticationStrategy1.getName()),
                 Collections.<String>emptySet()));
     }
 
@@ -142,7 +145,7 @@ public class AuthenticatorTest {
         verifySubject(updateContext, new Subject(
                 Collections.<Principal>emptySet(),
                 Collections.<String>emptySet(),
-                Collections.singleton(authenticationStrategy2.getClass().getSimpleName())));
+                Collections.singleton(authenticationStrategy2.getName())));
     }
 
     @Test
@@ -317,8 +320,8 @@ public class AuthenticatorTest {
 
         subject.authenticate(origin, update, updateContext);
         verifySubject(updateContext, new Subject(Principal.OVERRIDE_MAINTAINER));
-        verify(authenticationStrategy1).getPendingAuthenticationTypes();
-        verify(authenticationStrategy2).getPendingAuthenticationTypes();
+        verify(authenticationStrategy1).getTypesWithDeferredAuthenticationSupport();
+        verify(authenticationStrategy2).getTypesWithDeferredAuthenticationSupport();
         verifyNoMoreInteractions(authenticationStrategy1, authenticationStrategy2, userDao, update, updateContext);
     }
 
