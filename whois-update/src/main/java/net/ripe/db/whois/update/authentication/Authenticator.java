@@ -208,20 +208,25 @@ public class Authenticator {
         }
     }
 
-    boolean isPending(final PreparedUpdate update, final UpdateContext updateContext, final Subject subject) {
-        // TODO: [AH] delete this when deploying pending updates
-        if (WhoisProfile.isDeployed()) {
+    private boolean isPendingAuthentication(final PreparedUpdate preparedUpdate, final UpdateContext updateContext) {
+        if (updateContext.hasErrors(preparedUpdate)) {
             return false;
         }
 
-        if (!Action.CREATE.equals(update.getAction())) {
+        if (!Action.CREATE.equals(preparedUpdate.getAction())) {
             return false;
         }
 
-        return !updateContext.hasErrors(update)
-                && subject.getFailedAuthentications().isEmpty()
-                && typesWithPendingAuthenticationSupport.containsKey(update.getType())
-                && subject.getPendingAuthentications().size() < typesWithPendingAuthenticationSupport.get(update.getType()).size();
+        final Set<AuthenticationStrategy> strategies = pendingAuthenticationTypes.get(preparedUpdate.getType());
+        final Subject subject = updateContext.getSubject(preparedUpdate);
+        if (strategies == null || subject == null || subject.getFailedAuthentications() == null) {
+            return false;
+        }
+
+        final boolean failedSupportedOnly = Sets.difference(subject.getFailedAuthentications(), strategies).isEmpty();
+        final boolean passedAtLeastOneSupported = !Sets.intersection(subject.getPassedAuthentications(), strategies).isEmpty();
+
+        return failedSupportedOnly && passedAtLeastOneSupported;
     }
 
     public boolean isAuthenticationForTypeComplete(final ObjectType objectType, final Set<String> authentications) {
