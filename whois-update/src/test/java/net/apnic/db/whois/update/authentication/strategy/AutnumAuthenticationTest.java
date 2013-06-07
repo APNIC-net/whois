@@ -91,13 +91,6 @@ public class AutnumAuthenticationTest {
         assertThat(supported, is(false));
     }
 
-    // No Parents - fail
-    // 1 parent - success + MNT_BY & MNT_LOWER
-    // 2 parents - success + MNT_BY & MNT_LOWER
-    // 1 parent - fail - no maintainers that authenticate
-    // 2 parent - fail - no maintainers that authenticate
-
-
     @Test
     public void no_parents_fails() {
         when(update.getUpdatedObject()).thenReturn(RpslObject.parse("aut-num: AS3333"));
