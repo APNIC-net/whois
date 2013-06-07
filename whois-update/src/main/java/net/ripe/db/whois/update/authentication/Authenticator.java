@@ -14,6 +14,9 @@ import net.ripe.db.whois.update.authentication.strategy.AuthenticationFailedExce
 import net.ripe.db.whois.update.authentication.strategy.AuthenticationStrategy;
 import net.ripe.db.whois.update.domain.*;
 import net.ripe.db.whois.update.log.LoggerContext;
+import org.apache.commons.lang.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
@@ -22,12 +25,14 @@ import java.util.*;
 
 @Component
 public class Authenticator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Authenticator.class);
+
     private final IpRanges ipRanges;
     private final UserDao userDao;
     private final LoggerContext loggerContext;
     private final List<AuthenticationStrategy> authenticationStrategies;
     private final Map<CIString, Set<Principal>> principalsMap;
-    private final Map<ObjectType, Set<AuthenticationStrategy>> pendingAuthenticationTypes;
+    private final Map<ObjectType, Set<String>> typesWithDeferredAuthentication;
 
     @Autowired
     public Authenticator(final IpRanges ipRanges, final UserDao userDao, final Maintainers maintainers, final LoggerContext loggerContext, final AuthenticationStrategy[] authenticationStrategies) {
@@ -45,17 +50,23 @@ public class Authenticator {
         addMaintainers(tempPrincipalsMap, maintainers.getDbmMaintainers(), Principal.DBM_MAINTAINER);
         this.principalsMap = Collections.unmodifiableMap(tempPrincipalsMap);
 
-        pendingAuthenticationTypes = Maps.newEnumMap(ObjectType.class);
+        typesWithDeferredAuthentication = Maps.newEnumMap(ObjectType.class);
         for (final AuthenticationStrategy authenticationStrategy : authenticationStrategies) {
-            for (final ObjectType objectType : authenticationStrategy.getPendingAuthenticationTypes()) {
-                Set<AuthenticationStrategy> strategies = pendingAuthenticationTypes.get(objectType);
-                if (strategies == null) {
-                    strategies = new HashSet<>();
-                    pendingAuthenticationTypes.put(objectType, strategies);
+            for (final ObjectType objectType : authenticationStrategy.getTypesWithDeferredAuthenticationSupport()) {
+                Set<String> strategiesWithDeferredAuthentication = typesWithDeferredAuthentication.get(objectType);
+                if (strategiesWithDeferredAuthentication == null) {
+                    strategiesWithDeferredAuthentication = new HashSet<>();
+                    typesWithDeferredAuthentication.put(objectType, strategiesWithDeferredAuthentication);
                 }
 
-                strategies.add(authenticationStrategy);
+                strategiesWithDeferredAuthentication.add(authenticationStrategy.getName());
             }
+        }
+
+        for (final Map.Entry<ObjectType, Set<String>> objectTypeSetEntry : typesWithDeferredAuthentication.entrySet()) {
+            final Set<String> authenticationStrategyNames = objectTypeSetEntry.getValue();
+            Validate.isTrue(authenticationStrategyNames.size() > 1, "Deferred authentication makes no sense for 1 authentication strategy:", authenticationStrategyNames);
+            LOGGER.info("Deferred authentication supported for {}: {}", objectTypeSetEntry.getKey(), authenticationStrategyNames);
         }
     }
 
@@ -100,8 +111,8 @@ public class Authenticator {
         }
 
         if (!authenticationMessages.isEmpty()) {
-            authenticationFailed(update, updateContext, authenticationMessages);
-            return new Subject();
+            authenticationFailed(update, updateContext, Subject.EMPTY, authenticationMessages);
+            return Subject.EMPTY;
         }
 
         final OverrideCredential overrideCredential = overrideCredentials.iterator().next();
@@ -119,9 +130,8 @@ public class Authenticator {
         }
 
         authenticationMessages.add(UpdateMessages.overrideAuthenticationFailed());
-        authenticationFailed(update, updateContext, authenticationMessages);
-
-        return new Subject();
+        authenticationFailed(update, updateContext, Subject.EMPTY, authenticationMessages);
+        return Subject.EMPTY;
     }
 
     private Subject performAuthentication(final Origin origin, final PreparedUpdate update, final UpdateContext updateContext) {
@@ -136,14 +146,12 @@ public class Authenticator {
         } else {
             for (final AuthenticationStrategy authenticationStrategy : authenticationStrategies) {
                 if (authenticationStrategy.supports(update)) {
-                    final String authenticationStrategyName = getStrategyName(authenticationStrategy.getClass());
-
                     try {
                         authenticatedObjects.addAll(authenticationStrategy.authenticate(update, updateContext));
-                        passedAuthentications.add(authenticationStrategyName);
+                        passedAuthentications.add(authenticationStrategy.getName());
                     } catch (AuthenticationFailedException e) {
                         authenticationMessages.addAll(e.getAuthenticationMessages());
-                        failedAuthentications.add(authenticationStrategyName);
+                        failedAuthentications.add(authenticationStrategy.getName());
                     }
                 }
             }
@@ -161,11 +169,12 @@ public class Authenticator {
             }
         }
 
+        final Subject subject = new Subject(principals, passedAuthentications, failedAuthentications);
         if (!authenticationMessages.isEmpty()) {
-            authenticationFailed(update, updateContext, authenticationMessages);
+            authenticationFailed(update, updateContext, subject, authenticationMessages);
         }
 
-        return new Subject(principals, passedAuthentications, failedAuthentications);
+        return subject;
     }
 
     private Set<Principal> getPrincipals(final RpslObject authenticatedObject) {
@@ -181,8 +190,8 @@ public class Authenticator {
         return principals;
     }
 
-    private void authenticationFailed(final PreparedUpdate update, final UpdateContext updateContext, final Set<Message> authenticationMessages) {
-        if (isPendingAuthentication(update, updateContext)) {
+    private void authenticationFailed(final PreparedUpdate update, final UpdateContext updateContext, final Subject subject, final Set<Message> authenticationMessages) {
+        if (isDeferredAuthenticationAllowed(update, updateContext, subject)) {
             updateContext.status(update, UpdateStatus.PENDING_AUTHENTICATION);
         } else {
             updateContext.status(update, UpdateStatus.FAILED_AUTHENTICATION);
@@ -193,7 +202,7 @@ public class Authenticator {
         }
     }
 
-    private boolean isPendingAuthentication(final PreparedUpdate preparedUpdate, final UpdateContext updateContext) {
+    boolean isDeferredAuthenticationAllowed(final PreparedUpdate preparedUpdate, final UpdateContext updateContext, final Subject subject) {
         if (updateContext.hasErrors(preparedUpdate)) {
             return false;
         }
@@ -202,19 +211,20 @@ public class Authenticator {
             return false;
         }
 
-        final Set<AuthenticationStrategy> strategies = pendingAuthenticationTypes.get(preparedUpdate.getType());
-        final Subject subject = updateContext.getSubject(preparedUpdate);
-        if (strategies == null || subject == null || subject.getFailedAuthentications() == null) {
+        final Set<String> strategiesWithDeferredAuthentication = typesWithDeferredAuthentication.get(preparedUpdate.getType());
+        if (strategiesWithDeferredAuthentication == null) {
             return false;
         }
 
-        final boolean failedSupportedOnly = Sets.difference(subject.getFailedAuthentications(), strategies).isEmpty();
-        final boolean passedAtLeastOneSupported = !Sets.intersection(subject.getPassedAuthentications(), strategies).isEmpty();
+        final boolean failedSupportedOnly = Sets.difference(subject.getFailedAuthentications(), strategiesWithDeferredAuthentication).isEmpty();
+        final boolean passedAtLeastOneSupported = !Sets.intersection(subject.getPassedAuthentications(), strategiesWithDeferredAuthentication).isEmpty();
 
         return failedSupportedOnly && passedAtLeastOneSupported;
     }
 
-    private static String getStrategyName(final Class<? extends AuthenticationStrategy> clazz) {
-        return clazz.getSimpleName();
+    public boolean isAuthenticationForTypeComplete(final ObjectType objectType, final Set<String> authentications) {
+        final Set<String> authenticationStrategyNames = typesWithDeferredAuthentication.get(objectType);
+
+        return authentications.containsAll(authenticationStrategyNames);
     }
 }
