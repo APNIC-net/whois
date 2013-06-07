@@ -26,8 +26,6 @@ import static org.junit.Assert.assertNotNull;
 public class UpdateTestIntegration extends AbstractDaoTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateTestIntegration.class);
 
-    @Rule public ExpectedException exception = ExpectedException.none();
-
     @Autowired @Qualifier("sourceAwareDataSource") DataSource dataSource;
 
     @BeforeClass
@@ -40,9 +38,10 @@ public class UpdateTestIntegration extends AbstractDaoTest {
     public void see_if_server_starts_and_expected_bean_present_test() throws Exception {
         DsRdataAuthorisationValidator dsRdataAuthorisationValidator = (DsRdataAuthorisationValidator)applicationContext.getBean(StringUtils.uncapitalize(DsRdataAuthorisationValidator.class.getSimpleName()));
         assertNotNull(dsRdataAuthorisationValidator);
-        exception.expect(ClassCastException.class);
         AutnumAuthentication autnumAuthentication = (AutnumAuthentication)applicationContext.getBean(StringUtils.uncapitalize(AutnumAuthentication.class.getSimpleName()));
+        assertNotNull(autnumAuthentication);
     }
+
 
     @AfterClass
     public static void afterClass() {
