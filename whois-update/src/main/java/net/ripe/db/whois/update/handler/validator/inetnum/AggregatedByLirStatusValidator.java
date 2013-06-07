@@ -8,6 +8,8 @@ import net.ripe.db.whois.common.domain.attrs.Inet6numStatus;
 import net.ripe.db.whois.common.domain.attrs.InetStatus;
 import net.ripe.db.whois.common.iptree.Ipv6Entry;
 import net.ripe.db.whois.common.iptree.Ipv6Tree;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
+import net.ripe.db.whois.common.profiles.WhoisVariantContext;
 import net.ripe.db.whois.common.rpsl.*;
 import net.ripe.db.whois.update.domain.Action;
 import net.ripe.db.whois.update.domain.PreparedUpdate;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@WhoisVariantContext(excludeWhen = WhoisVariant.Type.APNIC)
 @Component
 public class AggregatedByLirStatusValidator implements BusinessRuleValidator {
     private static final int MAX_ALLOWED_AGGREGATED_BY_LIR = 2;

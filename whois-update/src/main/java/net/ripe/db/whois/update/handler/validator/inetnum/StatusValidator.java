@@ -13,6 +13,8 @@ import net.ripe.db.whois.common.iptree.IpEntry;
 import net.ripe.db.whois.common.iptree.IpTree;
 import net.ripe.db.whois.common.iptree.Ipv4Tree;
 import net.ripe.db.whois.common.iptree.Ipv6Tree;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
+import net.ripe.db.whois.common.profiles.WhoisVariantContext;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
@@ -32,6 +34,8 @@ import java.util.Set;
 
 import static net.ripe.db.whois.update.handler.validator.inetnum.InetStatusHelper.getStatus;
 
+// TODO: implement APNIC variant
+@WhoisVariantContext(excludeWhen = WhoisVariant.Type.APNIC)
 @Component
 public class StatusValidator implements BusinessRuleValidator { // TODO [AK] Redesign status validator using subtrees: parent or child intervals should not have different validation logic, the tree must be valid as a whole
     private final RpslObjectDao objectDao;

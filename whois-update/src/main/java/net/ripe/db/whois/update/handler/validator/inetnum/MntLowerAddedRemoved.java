@@ -3,6 +3,8 @@ package net.ripe.db.whois.update.handler.validator.inetnum;
 import com.google.common.collect.Lists;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.attrs.InetnumStatus;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
+import net.ripe.db.whois.common.profiles.WhoisVariantContext;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.update.authentication.Principal;
@@ -18,7 +20,8 @@ import java.util.Set;
 
 import static net.ripe.db.whois.update.handler.validator.inetnum.InetStatusHelper.getStatus;
 
-
+// TODO: do we need a variant of this for APNIC?
+@WhoisVariantContext(excludeWhen = WhoisVariant.Type.APNIC)
 @Component
 public class MntLowerAddedRemoved implements BusinessRuleValidator {
     @Override
