@@ -203,11 +203,11 @@ public class Authenticator {
         }
 
         final Set<AuthenticationStrategy> strategies = pendingAuthenticationTypes.get(preparedUpdate.getType());
-        if (strategies == null) {
+        final Subject subject = updateContext.getSubject(preparedUpdate);
+        if (strategies == null || subject == null || subject.getFailedAuthentications() == null) {
             return false;
         }
 
-        final Subject subject = updateContext.getSubject(preparedUpdate);
         final boolean failedSupportedOnly = Sets.difference(subject.getFailedAuthentications(), strategies).isEmpty();
         final boolean passedAtLeastOneSupported = !Sets.intersection(subject.getPassedAuthentications(), strategies).isEmpty();
 
