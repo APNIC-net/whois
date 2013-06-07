@@ -12,7 +12,7 @@ import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.update.authentication.credential.AuthenticationModule;
 import net.ripe.db.whois.update.authentication.strategy.AuthenticationFailedException;
-import net.ripe.db.whois.update.authentication.strategy.AuthenticationStrategy;
+import net.ripe.db.whois.update.authentication.strategy.AuthenticationStrategyBase;
 import net.ripe.db.whois.update.domain.Action;
 import net.ripe.db.whois.update.domain.PreparedUpdate;
 import net.ripe.db.whois.update.domain.UpdateContext;
@@ -28,7 +28,7 @@ import java.util.Set;
 
 @WhoisVariantContext(includeWhen = WhoisVariant.Type.APNIC)
 @Component
-public class AutnumAuthentication implements AuthenticationStrategy {
+public class AutnumAuthentication extends AuthenticationStrategyBase {
     private final RpslObjectDao objectDao;
     private final AuthenticationModule authenticationModule;
 
@@ -41,11 +41,6 @@ public class AutnumAuthentication implements AuthenticationStrategy {
     @Override
     public boolean supports(final PreparedUpdate update) {
         return update.getType().equals(ObjectType.AUT_NUM) && update.getAction().equals(Action.CREATE);
-    }
-
-    @Override
-    public Set<ObjectType> getPendingAuthenticationTypes() {
-        return Collections.emptySet();
     }
 
     @Override
