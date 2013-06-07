@@ -3,6 +3,7 @@ package net.apnic.db.whois.api.whois;
 import net.apnic.db.whois.common.IntegrationTest;
 import net.ripe.db.whois.api.AbstractIntegrationTest;
 import net.ripe.db.whois.api.MailUpdatesTestSupport;
+import net.ripe.db.whois.common.profiles.WhoisProfile;
 import net.ripe.db.whois.common.profiles.WhoisVariant;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.update.domain.UpdateMessages;
@@ -21,7 +22,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
 @Category(IntegrationTest.class)
-@ActiveProfiles( {"TEST"} )
+@ActiveProfiles(WhoisProfile.TEST)
 public class MailUpdatesServiceTestIntegration extends AbstractIntegrationTest {
 
     private static final RpslObject OWNER_MNT = RpslObject.parse("" +
