@@ -208,7 +208,7 @@ public class Authenticator {
         }
     }
 
-    private boolean isPendingAuthentication(final PreparedUpdate preparedUpdate, final UpdateContext updateContext) {
+    boolean isDeferredAuthenticationAllowed(final PreparedUpdate preparedUpdate, final UpdateContext updateContext, final Subject subject) {
         if (updateContext.hasErrors(preparedUpdate)) {
             return false;
         }
@@ -217,14 +217,13 @@ public class Authenticator {
             return false;
         }
 
-        final Set<AuthenticationStrategy> strategies = pendingAuthenticationTypes.get(preparedUpdate.getType());
-        final Subject subject = updateContext.getSubject(preparedUpdate);
-        if (strategies == null || subject == null || subject.getFailedAuthentications() == null) {
+        final Set<String> strategiesWithDeferredAuthentication = typesWithDeferredAuthentication.get(preparedUpdate.getType());
+        if (strategiesWithDeferredAuthentication == null) {
             return false;
         }
 
-        final boolean failedSupportedOnly = Sets.difference(subject.getFailedAuthentications(), strategies).isEmpty();
-        final boolean passedAtLeastOneSupported = !Sets.intersection(subject.getPassedAuthentications(), strategies).isEmpty();
+        final boolean failedSupportedOnly = Sets.difference(subject.getFailedAuthentications(), strategiesWithDeferredAuthentication).isEmpty();
+        final boolean passedAtLeastOneSupported = !Sets.intersection(subject.getPassedAuthentications(), strategiesWithDeferredAuthentication).isEmpty();
 
         return failedSupportedOnly && passedAtLeastOneSupported;
     }
