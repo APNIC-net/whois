@@ -3,6 +3,8 @@ package net.ripe.db.whois.update.handler.validator.inetnum;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import net.ripe.db.whois.common.domain.Maintainers;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
+import net.ripe.db.whois.common.profiles.WhoisVariantContext;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.update.authentication.Principal;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@WhoisVariantContext(excludeWhen = WhoisVariant.Type.APNIC)
 @Component
 public class EndUserMaintainerChecks implements BusinessRuleValidator {
     private final Maintainers maintainers;

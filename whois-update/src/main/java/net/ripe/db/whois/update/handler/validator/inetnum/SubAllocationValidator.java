@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.Ipv4Resource;
 import net.ripe.db.whois.common.domain.attrs.InetnumStatus;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
+import net.ripe.db.whois.common.profiles.WhoisVariantContext;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@WhoisVariantContext(excludeWhen = WhoisVariant.Type.APNIC)
 @Component
 public class SubAllocationValidator implements BusinessRuleValidator {
     private static final int SUB_ALLOCATED_PA_MAX_PREFIX = 24;
