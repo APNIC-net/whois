@@ -5,7 +5,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import net.ripe.db.whois.common.dao.jdbc.domain.ObjectTypeIds;
 import net.ripe.db.whois.common.rpsl.ObjectType;
-import net.ripe.db.whois.common.rpsl.RpslObjectBase;
+import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.update.domain.PendingUpdate;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,6 @@ public class JdbcPendingUpdateDao implements PendingUpdateDao {
     private final Splitter SPLITTER = Splitter.on(",");
     private final Joiner JOINER = Joiner.on(",");
 
-
     @Autowired
     public JdbcPendingUpdateDao(@Qualifier("deferredUpdateDataSource") final DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -33,19 +32,23 @@ public class JdbcPendingUpdateDao implements PendingUpdateDao {
 
     @Override
     public List<PendingUpdate> findByTypeAndKey(final ObjectType type, final String key) {
-        return jdbcTemplate.query("SELECT id, passed_authentications, object, stored_date FROM pending_updates WHERE object_type = ? AND pkey = ? ORDER BY stored_date ASC",
+        return jdbcTemplate.query("" +
+                "SELECT id, passed_authentications, object, stored_date " +
+                "FROM pending_updates " +
+                "WHERE object_type = ? AND pkey = ? " +
+                "ORDER BY stored_date ASC",
                 new RowMapper<PendingUpdate>() {
-            @Override
-            public PendingUpdate mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+                    @Override
+                    public PendingUpdate mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
-                return new PendingUpdate(
-                        rs.getInt("id"),
-                        Sets.newHashSet(SPLITTER.split(rs.getString("passed_authentications"))),
-                        RpslObjectBase.parse(rs.getString("object")),
-                        new LocalDateTime(rs.getDate("stored_date"))
-                );
-            }
-        }, ObjectTypeIds.getId(type), key);
+                        return new PendingUpdate(
+                                rs.getInt("id"),
+                                Sets.newHashSet(SPLITTER.split(rs.getString("passed_authentications"))),
+                                RpslObject.parse(rs.getString("object")),
+                                new LocalDateTime(rs.getDate("stored_date"))
+                        );
+                    }
+                }, ObjectTypeIds.getId(type), key);
     }
 
     @Override
