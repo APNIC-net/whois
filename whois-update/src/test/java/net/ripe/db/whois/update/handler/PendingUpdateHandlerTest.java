@@ -9,16 +9,19 @@ import net.ripe.db.whois.update.authentication.Subject;
 import net.ripe.db.whois.update.authentication.strategy.RouteAutnumAuthentication;
 import net.ripe.db.whois.update.authentication.strategy.RouteIpAddressAuthentication;
 import net.ripe.db.whois.update.dao.PendingUpdateDao;
-import net.ripe.db.whois.update.domain.PendingUpdate;
+import net.ripe.db.whois.common.domain.PendingUpdate;
 import net.ripe.db.whois.update.domain.PreparedUpdate;
 import net.ripe.db.whois.update.domain.UpdateContext;
+import net.ripe.db.whois.update.domain.UpdateMessages;
+import net.ripe.db.whois.update.log.LoggerContext;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -29,10 +32,17 @@ public class PendingUpdateHandlerTest {
     @Mock private PreparedUpdate preparedUpdate;
     @Mock private UpdateContext updateContext;
     @Mock private Authenticator authenticator;
+    @Mock private LoggerContext loggerContext;
     @Mock private Subject subject;
-    @Autowired private DateTimeProvider dateTimeProvider;
+    @Mock private DateTimeProvider dateTimeProvider;
 
     @InjectMocks private PendingUpdateHandler testSubject;
+
+    @Before
+    public void setup() {
+        when(dateTimeProvider.getCurrentDate()).thenReturn(LocalDate.now());
+        when(dateTimeProvider.getCurrentDateTime()).thenReturn(LocalDateTime.now());
+    }
 
     @Test
     public void found_completing_pendingUpdate() {
@@ -47,7 +57,7 @@ public class PendingUpdateHandlerTest {
 
         testSubject.handle(preparedUpdate, updateContext);
 
-        Mockito.verify(pendingUpdateDao, never()).store(pendingUpdate);
+        verify(pendingUpdateDao, never()).store(pendingUpdate);
     }
 
     @Test
@@ -63,7 +73,8 @@ public class PendingUpdateHandlerTest {
 
         testSubject.handle(preparedUpdate, updateContext);
 
-        Mockito.verify(pendingUpdateDao, times(1)).store(any(PendingUpdate.class));
+        verify(pendingUpdateDao, never()).store(any(PendingUpdate.class));
+        verify(updateContext).addMessage(preparedUpdate, UpdateMessages.updateAlreadyPendingAuthentication());
     }
 
     @Test
@@ -77,6 +88,6 @@ public class PendingUpdateHandlerTest {
 
         testSubject.handle(preparedUpdate, updateContext);
 
-        Mockito.verify(pendingUpdateDao, times(1)).store(any(PendingUpdate.class));
+        verify(pendingUpdateDao).store(any(PendingUpdate.class));
     }
 }

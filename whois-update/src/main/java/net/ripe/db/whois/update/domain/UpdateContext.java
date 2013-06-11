@@ -147,6 +147,22 @@ public class UpdateContext {
         return globalMessages;
     }
 
+    public String printGlobalMessages() {
+        final StringBuilder sb = new StringBuilder();
+
+        printMessages(globalMessages.getWarnings(), sb);
+        printMessages(globalMessages.getErrors(), sb);
+
+        return sb.toString();
+    }
+
+    private void printMessages(final Iterable<Message> messages, final StringBuilder sb) {
+        for (final Message message : messages) {
+            sb.append(UpdateMessages.print(message));
+            sb.append(UpdateMessages.print(message));
+        }
+    }
+
     public void addGeneratedKey(final UpdateContainer updateContainer, final CIString keyPlaceholder, final GeneratedKey generatedKey) {
         final Update update = updateContainer.getUpdate();
         if (placeHolderForUpdate.put(update, keyPlaceholder) != null) {
@@ -197,8 +213,8 @@ public class UpdateContext {
         return new UpdateResult(update, updatedObject, context.action, context.getStatus(), context.objectMessages, context.retryCount);
     }
 
-    public void prepareForReattempt(final Update update) {
-        final Context context = contexts.remove(update);
+    public void prepareForReattempt(final UpdateContainer update) {
+        final Context context = contexts.remove(update.getUpdate());
         getOrCreateContext(update).retryCount = context.retryCount + 1;
     }
 

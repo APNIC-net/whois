@@ -8,9 +8,10 @@ import net.ripe.db.whois.common.Messages;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.update.authentication.Authenticator;
 import net.ripe.db.whois.update.dao.PendingUpdateDao;
-import net.ripe.db.whois.update.domain.PendingUpdate;
+import net.ripe.db.whois.common.domain.PendingUpdate;
 import net.ripe.db.whois.update.domain.PreparedUpdate;
 import net.ripe.db.whois.update.domain.UpdateContext;
+import net.ripe.db.whois.update.domain.UpdateMessages;
 import net.ripe.db.whois.update.log.LoggerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,17 +49,17 @@ class PendingUpdateHandler {
             loggerContext.log(new Message(Messages.Type.INFO, "No pending updates found; storing in DB"));
             pendingUpdateDao.store(new PendingUpdate(passedAuthentications, rpslObject, dateTimeProvider.getCurrentDateTime()));
         } else {
-            Set<String> currentSuccessfuls = Sets.newHashSet(pendingUpdate.getPassedAuthentications());
-            currentSuccessfuls.addAll(passedAuthentications);
+            final Set<String> allPassedAuthentications = Sets.newHashSet();
+            allPassedAuthentications.addAll(pendingUpdate.getPassedAuthentications());
+            allPassedAuthentications.addAll(passedAuthentications);
 
-            if (authenticator.isAuthenticationForTypeComplete(rpslObject.getType(), currentSuccessfuls)) {
+            if (authenticator.isAuthenticationForTypeComplete(rpslObject.getType(), allPassedAuthentications)) {
                 loggerContext.log(new Message(Messages.Type.INFO, "Pending update found and completes authentication; dropping from DB"));
                 pendingUpdateDao.remove(pendingUpdate);
+                updateContext.prepareForReattempt(preparedUpdate);
                 updateObjectHandler.execute(preparedUpdate, updateContext);
             } else {
-                // TODO: [AH] add sender email to pending updates table
-                loggerContext.log(new Message(Messages.Type.INFO, "Pending update does not complete authentication; storing in DB"));
-                pendingUpdateDao.store(new PendingUpdate(currentSuccessfuls, rpslObject, dateTimeProvider.getCurrentDateTime()));
+                updateContext.addMessage(preparedUpdate, UpdateMessages.updateAlreadyPendingAuthentication());
             }
         }
     }

@@ -45,6 +45,13 @@ public class UpdateResult {
         return action;
     }
 
+    public String getActionString() {
+        if (action != null) {
+            return action.getDescription();
+        }
+        return "";
+    }
+
     public Collection<Message> getErrors() {
         return objectMessages.getMessages().getMessages(Messages.Type.ERROR);
     }
@@ -105,7 +112,13 @@ public class UpdateResult {
 
     private void writeMessages(final Writer writer, final Messages messages, final String separator) throws IOException {
         for (final Message message : messages.getAllMessages()) {
-            writer.write(message.toString());
+            Messages.Type type = message.getType();
+            if (UpdateStatus.PENDING_AUTHENTICATION.equals(status) && Messages.Type.ERROR.equals(type)) {
+                writer.write(UpdateMessages.print(new Message(Messages.Type.INFO, message.getValue())));
+            } else {
+                writer.write(UpdateMessages.print(message));
+            }
+
             writer.write(separator);
         }
     }

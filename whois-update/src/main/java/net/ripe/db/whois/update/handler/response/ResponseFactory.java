@@ -80,9 +80,12 @@ public class ResponseFactory {
         velocityContext.put("failedAuthentication", notification.getUpdates(Notification.Type.FAILED_AUTHENTICATION));
         velocityContext.put("success", notification.getUpdates(Notification.Type.SUCCESS));
         velocityContext.put("successReference", notification.getUpdates(Notification.Type.SUCCESS_REFERENCE));
+        velocityContext.put("pendingUpdate", notification.getUpdates(Notification.Type.PENDING_UPDATE));
 
         final String subject;
-        if (notification.has(Notification.Type.FAILED_AUTHENTICATION)) {
+        if (notification.has(Notification.Type.PENDING_UPDATE)) {
+            subject = "RIPE Database updates, auth request notification";
+        } else if (notification.has(Notification.Type.FAILED_AUTHENTICATION)) {
             subject = "RIPE Database updates, auth error notification";
         } else {
             subject = "Notification of RIPE Database changes";
@@ -92,7 +95,7 @@ public class ResponseFactory {
     }
 
     private String createResponse(final String templateName, final UpdateContext updateContext, final VelocityContext velocityContext, final Origin origin) {
-        velocityContext.put("globalMessages", updateContext.getGlobalMessages());
+        velocityContext.put("globalMessages", updateContext.printGlobalMessages());
         velocityContext.put("origin", origin);
         velocityContext.put("version", version);
         velocityContext.put("hostName", Hosts.getLocalHost().name());

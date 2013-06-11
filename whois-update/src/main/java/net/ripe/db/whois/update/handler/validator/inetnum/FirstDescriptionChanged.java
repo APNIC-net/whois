@@ -35,7 +35,7 @@ public class FirstDescriptionChanged implements BusinessRuleValidator {
     @Override
     public void validate(final PreparedUpdate update, final UpdateContext updateContext) {
         if (true) {
-            return; // TODO [AK] For now allow all first description changes because current implementation breaks compatibility
+            return; // TODO [AH] This check breaks updates for ERX ranges; Denis is working with RS to sort it out (2013-06-10)
         }
 
         if (update.isOverride()) {

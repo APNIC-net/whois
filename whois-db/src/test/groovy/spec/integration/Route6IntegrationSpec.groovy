@@ -1,6 +1,6 @@
 package spec.integration
 import net.ripe.db.whois.common.IntegrationTest
-import net.ripe.db.whois.common.rpsl.RpslObjectBase
+import net.ripe.db.whois.common.rpsl.RpslObject
 import org.joda.time.LocalDate
 import spec.domain.SyncUpdate
 import spock.lang.Ignore
@@ -658,7 +658,7 @@ class Route6IntegrationSpec extends BaseWhoisSourceSpec {
         def response = syncUpdate create
 
       then:
-        response =~ /FAIL/
+        response =~ /Create PENDING:/
 
         response =~ /Authorisation for \[inet6num\] bbdd::\/24 failed
             using "mnt-routes:"
@@ -1122,18 +1122,18 @@ class Route6IntegrationSpec extends BaseWhoisSourceSpec {
 
     @Ignore("TODO not implemented yet")
     def "create route6, with inetnum authentication, and pending autnum authentication"() {
-      setup:
-        databaseHelper.insertPendingUpdate(
-                LocalDate.now().minusDays(1),
-                "AutnumAuthentication",
-                RpslObjectBase.parse("""\
-                    route6: 5353::0/24
-                    descr: TEST-ROUTE6
-                    origin: AS456
-                    mnt-by: TEST-MNT2
-                    changed: ripe@test.net 20091015
-                    source: TEST
-                """.stripIndent()))
+//      setup:
+//        databaseHelper.insertPendingUpdate(
+//                LocalDate.now().minusDays(1),
+//                "AutnumAuthentication",
+//                RpslObject.parse("""\
+//                    route6: 5353::0/24
+//                    descr: TEST-ROUTE6
+//                    origin: AS456
+//                    mnt-by: TEST-MNT2
+//                    changed: ripe@test.net 20091015
+//                    source: TEST
+//                """.stripIndent()))
       when:
         def response = syncUpdate(new SyncUpdate(data: """\
                             route6: 5353::0/24
@@ -1147,35 +1147,33 @@ class Route6IntegrationSpec extends BaseWhoisSourceSpec {
                             """.stripIndent()))
       then:
         response =~ /SUCCESS/
-      cleanup:
-        databaseHelper.clearPendingUpdates()
     }
 
     @Ignore("TODO not implemented yet")
     def "create route6, with pending inetnum and autnum authentications"() {
-      setup:
-        databaseHelper.insertPendingUpdate(
-                LocalDate.now().minusDays(2),
-                "AutnumAuthentication",
-                RpslObjectBase.parse("""\
-                    route6: 5353::0/24
-                    descr: TEST-ROUTE6
-                    origin: AS456
-                    mnt-by: TEST-MNT2
-                    changed: ripe@test.net 20091015
-                    source: TEST
-                """.stripIndent()))
-        databaseHelper.insertPendingUpdate(
-                LocalDate.now().minusDays(1),
-                "InetnumAuthentication",
-                RpslObjectBase.parse("""\
-                    route6: 5353::0/24
-                    descr: TEST-ROUTE6
-                    origin: AS456
-                    mnt-by: TEST-MNT2
-                    changed: ripe@test.net 20091015
-                    source: TEST
-                """.stripIndent()))
+//      setup:
+//        databaseHelper.insertPendingUpdate(
+//                LocalDate.now().minusDays(2),
+//                "AutnumAuthentication",
+//                RpslObject.parse("""\
+//                    route6: 5353::0/24
+//                    descr: TEST-ROUTE6
+//                    origin: AS456
+//                    mnt-by: TEST-MNT2
+//                    changed: ripe@test.net 20091015
+//                    source: TEST
+//                """.stripIndent()))
+//        databaseHelper.insertPendingUpdate(
+//                LocalDate.now().minusDays(1),
+//                "InetnumAuthentication",
+//                RpslObject.parse("""\
+//                    route6: 5353::0/24
+//                    descr: TEST-ROUTE6
+//                    origin: AS456
+//                    mnt-by: TEST-MNT2
+//                    changed: ripe@test.net 20091015
+//                    source: TEST
+//                """.stripIndent()))
       when:
         def response = syncUpdate(new SyncUpdate(data: """\
                             route6: 5353::0/24
@@ -1188,24 +1186,22 @@ class Route6IntegrationSpec extends BaseWhoisSourceSpec {
                             """.stripIndent()))
       then:
         response =~ /SUCCESS/
-      cleanup:
-        databaseHelper.clearPendingUpdates()
     }
 
     @Ignore("TODO not implemented yet")
     def "create route6, with inetnum authentication, and pending inetnum authentication, but no pending autnum authentication"() {
-      setup:
-        databaseHelper.insertPendingUpdate(
-                LocalDate.now().minusDays(1),
-                "InetnumAuthentication",
-                RpslObjectBase.parse("""\
-                    route6: 5353::0/24
-                    descr: TEST-ROUTE6
-                    origin: AS456
-                    mnt-by: TEST-MNT2
-                    changed: ripe@test.net 20091015
-                    source: TEST
-                """.stripIndent()))
+//      setup:
+//        databaseHelper.insertPendingUpdate(
+//                LocalDate.now().minusDays(1),
+//                "InetnumAuthentication",
+//                RpslObject.parse("""\
+//                    route6: 5353::0/24
+//                    descr: TEST-ROUTE6
+//                    origin: AS456
+//                    mnt-by: TEST-MNT2
+//                    changed: ripe@test.net 20091015
+//                    source: TEST
+//                """.stripIndent()))
       when:
         def response = syncUpdate(new SyncUpdate(data: """\
                             route6: 5353::0/24
@@ -1219,8 +1215,6 @@ class Route6IntegrationSpec extends BaseWhoisSourceSpec {
                             """.stripIndent()))
       then:
         response =~ /FAILED/
-      cleanup:
-        databaseHelper.clearPendingUpdates()
     }
 
     @Ignore("TODO not implemented yet")
@@ -1242,18 +1236,18 @@ class Route6IntegrationSpec extends BaseWhoisSourceSpec {
 
     @Ignore("TODO not implemented yet")
     def "create route6, with autnum authentication, and pending inetnum authentication"() {
-      setup:
-        databaseHelper.insertPendingUpdate(
-                LocalDate.now().minusDays(1),
-                "InetnumAuthentication",
-                RpslObjectBase.parse("""\
-                    route6: 5353::0/24
-                    descr: TEST-ROUTE6
-                    origin: AS789
-                    mnt-by: TEST-MNT2
-                    changed: ripe@test.net 20091015
-                    source: TEST
-                """.stripIndent()))
+//      setup:
+//        databaseHelper.insertPendingUpdate(
+//                LocalDate.now().minusDays(1),
+//                "InetnumAuthentication",
+//                RpslObject.parse("""\
+//                    route6: 5353::0/24
+//                    descr: TEST-ROUTE6
+//                    origin: AS789
+//                    mnt-by: TEST-MNT2
+//                    changed: ripe@test.net 20091015
+//                    source: TEST
+//                """.stripIndent()))
       when:
         def response = syncUpdate(new SyncUpdate(data: """\
                             route6: 5353::0/24
@@ -1267,8 +1261,6 @@ class Route6IntegrationSpec extends BaseWhoisSourceSpec {
                             """.stripIndent()))
       then:
         response =~ /SUCCESS/
-      cleanup:
-        databaseHelper.clearPendingUpdates()
     }
 
     @Ignore("TODO not implemented yet")

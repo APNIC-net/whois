@@ -11,7 +11,6 @@ import net.ripe.db.whois.common.dao.RpslObjectDao;
 import net.ripe.db.whois.common.dao.RpslObjectInfo;
 import net.ripe.db.whois.common.dao.RpslObjectUpdateDao;
 import net.ripe.db.whois.common.dao.RpslObjectUpdateInfo;
-import net.ripe.db.whois.common.dao.jdbc.domain.ObjectTypeIds;
 import net.ripe.db.whois.common.domain.BlockEvent;
 import net.ripe.db.whois.common.domain.User;
 import net.ripe.db.whois.common.jdbc.driver.LoggingDriver;
@@ -22,7 +21,6 @@ import net.ripe.db.whois.common.source.SourceAwareDataSource;
 import net.ripe.db.whois.common.source.SourceContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +32,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.StatementCallback;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
@@ -100,7 +97,7 @@ public class DatabaseHelper implements EmbeddedValueResolverAware {
     }
 
     @Autowired(required = false)
-    @Qualifier("deferredUpdateDataSource")
+    @Qualifier("pendingUpdateDataSource")
     public void setPendingDataSource(DataSource pendingDataSource) {
         pendingUpdatesTemplate = new JdbcTemplate(pendingDataSource);
     }
@@ -182,10 +179,6 @@ public class DatabaseHelper implements EmbeddedValueResolverAware {
         System.setProperty("grs.sources", grsSources);
     }
 
-    public static void setupDatabase(final String propertyBase, final String name, final String... sql) {
-        setupDatabase(createDefaultTemplate(), propertyBase, name, sql);
-    }
-
     static void setupDatabase(final JdbcTemplate jdbcTemplate, final String propertyBase, final String name, final String... sql) {
         final String dbName = dbBaseName + "_" + name;
         jdbcTemplate.execute("CREATE DATABASE " + dbName);
@@ -250,17 +243,7 @@ public class DatabaseHelper implements EmbeddedValueResolverAware {
             }
         }
 
-        if (aclTemplate != null) {
-            truncateTables(aclTemplate);
-        }
-
-        if (schedulerTemplate != null) {
-            truncateTables(schedulerTemplate);
-        }
-
-        if (mailupdatesTemplate != null) {
-            truncateTables(mailupdatesTemplate);
-        }
+        truncateTables(aclTemplate, schedulerTemplate, mailupdatesTemplate, pendingUpdatesTemplate);
     }
 
     public DataSource getMailupdatesDataSource() {
@@ -417,34 +400,7 @@ public class DatabaseHelper implements EmbeddedValueResolverAware {
                 new Date());
     }
 
-    public void clearPendingUpdates() {
-        pendingUpdatesTemplate.update("DELETE FROM pending_updates");
-    }
-
-    public int insertPendingUpdate(final LocalDate date, final Set<String> authenticatedBy, final RpslObject rpslObjectBase) {
-        return new SimpleJdbcInsert(pendingUpdatesTemplate)
-                .withTableName("pending_updates")
-                .usingColumns("object_type", "pkey", "stored_date", "passed_authentications", "object")
-                .usingGeneratedKeyColumns("id")
-                .executeAndReturnKey(new HashMap<String, Object>() {{
-                    put("object_type", ObjectTypeIds.getId(rpslObjectBase.getType()));
-                    put("pkey", rpslObjectBase.getKey().toString());
-                    put("stored_date", date.toDate());
-                    put("passed_authentications", Joiner.on(",").join(authenticatedBy));
-                    put("object", rpslObjectBase.toString());
-                }}).intValue();
-    }
-
-    public List<Map<String, Object>> listPendingUpdates() {
-        return pendingUpdatesTemplate.queryForList("SELECT * FROM pending_updates");
-    }
-
-    public List<Map<String, Object>> listPendingUpdates(final String pkey) {
-        return pendingUpdatesTemplate.queryForList("SELECT * FROM pending_updates WHERE pkey = ?", pkey);
-    }
-
     public static void dumpSchema(final DataSource datasource) throws SQLException {
-
         new JdbcTemplate(datasource).execute(new StatementCallback<Object>() {
             @Override
             public Object doInStatement(Statement statement) throws SQLException, DataAccessException {

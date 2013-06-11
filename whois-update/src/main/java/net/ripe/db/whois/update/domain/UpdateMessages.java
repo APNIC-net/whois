@@ -17,10 +17,15 @@ import net.ripe.db.whois.common.rpsl.RpslObject;
 
 import java.util.Set;
 
+import static net.ripe.db.whois.common.FormatHelper.prettyPrint;
 import static net.ripe.db.whois.common.Messages.Type;
 
 public final class UpdateMessages {
     private static final Joiner LIST_JOINED = Joiner.on(", ");
+
+    public static String print(final Message message) {
+        return prettyPrint(String.format("***%s: ", message.getType()), message.getValue(), 12, 80);
+    }
 
     private UpdateMessages() {
     }
@@ -511,5 +516,9 @@ public final class UpdateMessages {
 
     public static Message commentInSourceNotAllowed() {
         return new Message(Type.ERROR, "End of line comments not allowed on \"source:\" attribute");
+    }
+
+    public static Message updateAlreadyPendingAuthentication() {
+        return new Message(Type.ERROR, "There is already an identical update pending authentication");
     }
 }
