@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @WhoisVariantContext(excludeWhen = WhoisVariant.Type.APNIC)
@@ -44,7 +45,7 @@ class AutnumAuthentication extends AuthenticationStrategyBase {
         final long number = Long.parseLong(pkey.toString().substring("AS".length()));
         final RpslObject asBlock = objectDao.findAsBlock(number, number);
         if (asBlock == null) {
-            throw new AuthenticationFailedException(UpdateMessages.noParentAsBlockFound(pkey));
+            throw new AuthenticationFailedException(UpdateMessages.noParentAsBlockFound(pkey), Collections.<RpslObject>emptyList());
         }
 
         AttributeType attributeType = AttributeType.MNT_LOWER;
@@ -57,7 +58,7 @@ class AutnumAuthentication extends AuthenticationStrategyBase {
         final List<RpslObject> maintainers = objectDao.getByKeys(ObjectType.MNTNER, parentMnts);
         final List<RpslObject> authenticatedBy = authenticationModule.authenticate(update, updateContext, maintainers);
         if (authenticatedBy.isEmpty()) {
-            throw new AuthenticationFailedException(UpdateMessages.authenticationFailed(asBlock, attributeType, maintainers));
+            throw new AuthenticationFailedException(UpdateMessages.authenticationFailed(asBlock, attributeType, maintainers), maintainers);
         }
         return authenticatedBy;
     }

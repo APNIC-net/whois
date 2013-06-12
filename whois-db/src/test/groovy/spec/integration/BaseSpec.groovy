@@ -106,6 +106,10 @@ abstract class BaseSpec extends Specification {
         return whoisFixture.getTagsDao()
     }
 
+    def getPendingUpdateDao() {
+        return whoisFixture.getPendingUpdateDao()
+    }
+
     def unrefCleanup() {
         whoisFixture.unrefCleanup()
     }
@@ -180,5 +184,9 @@ ${result}
 
     def removeObject(String string) {
         whoisFixture.getDatabaseHelper().removeObject(RpslObject.parse(string))
+    }
+
+    def pendingUpdates(ObjectType objectType, String pkey) {
+        getPendingUpdateDao().findByTypeAndKey(objectType, pkey)
     }
 }

@@ -94,21 +94,19 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
         final boolean businessRulesOk = updateObjectHandler.validateBusinessRules(preparedUpdate, updateContext);
         final boolean pendingAuthentication = UpdateStatus.PENDING_AUTHENTICATION.equals(updateContext.getStatus(preparedUpdate));
 
-        if (pendingAuthentication) {
-            if (businessRulesOk) {
-                pendingUpdateHandler.handle(preparedUpdate, updateContext);
-            } else {
-                updateContext.status(preparedUpdate, UpdateStatus.FAILED);
-            }
-        }
-
-        if (updateContext.hasErrors(update)) {
+        if ((pendingAuthentication && !businessRulesOk) || (!pendingAuthentication && updateContext.hasErrors(update))) {
             throw new UpdateFailedException();
-        } else {
-            updateObjectHandler.execute(preparedUpdate, updateContext);
         }
 
         updateContext.setPreparedUpdate(preparedUpdate);
+
+        if (update.isDryRun()) {
+            throw new UpdateAbortedException();
+        } else if (pendingAuthentication) {
+            pendingUpdateHandler.handle(preparedUpdate, updateContext);
+        } else {
+            updateObjectHandler.execute(preparedUpdate, updateContext);
+        }
     }
 
     @CheckForNull
@@ -138,7 +136,7 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
             } catch (EmptyResultDataAccessException e) {
                 return null;
             } catch (IncorrectResultSizeDataAccessException e) {
-                throw new IllegalStateException(String.format("Invalid number of results for {}", key, e));
+                throw new IllegalStateException(String.format("Invalid number of results for %s", key), e);
             }
         }
     }
@@ -193,6 +191,7 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
         return Action.MODIFY;
     }
 
+    // `TODO: [AH] once the modify REST call is processed here, this can be dropped
     private void checkForUnexpectedModification(final Update update) {
         if (update.getSubmittedObjectInfo() != null) {
             final RpslObjectUpdateInfo latestUpdateInfo = rpslObjectUpdateDao.lookupObject(

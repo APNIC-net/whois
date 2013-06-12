@@ -1,6 +1,9 @@
 package net.ripe.db.whois.common.rpsl;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import difflib.DiffUtils;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.Identifiable;
 import net.ripe.db.whois.common.domain.ResponseObject;
@@ -19,6 +22,8 @@ import java.util.Set;
 // TODO [AK] This should be moved to whois queries, something like RpslObjectResponse
 @Immutable
 public class RpslObject implements ResponseObject, Identifiable {
+    private final Splitter LINE_SPLITTER = Splitter.on('\n').trimResults();
+
     private final Integer objectId;
     private final RpslObjectBase base;
 
@@ -183,5 +188,22 @@ public class RpslObject implements ResponseObject, Identifiable {
 
     public interface AttributeCallback {
         void execute(RpslAttribute attribute, CIString value);
+    }
+
+    public String diff(final RpslObject rpslObject) {
+        final StringBuilder builder = new StringBuilder();
+
+        final List<String> originalLines = Lists.newArrayList(LINE_SPLITTER.split(rpslObject.toString()));
+        final List<String> revisedLines = Lists.newArrayList(LINE_SPLITTER.split(this.toString()));
+
+        final List<String> diff = DiffUtils.generateUnifiedDiff(null, null, originalLines, DiffUtils.diff(originalLines, revisedLines), 1);
+
+        for (int index = 2; index < diff.size(); index++) {
+            // skip unified diff header lines
+            builder.append(diff.get(index));
+            builder.append('\n');
+        }
+
+        return builder.toString();
     }
 }

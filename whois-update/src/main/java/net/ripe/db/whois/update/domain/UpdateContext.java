@@ -95,7 +95,7 @@ public class UpdateContext {
     }
 
     public UpdateStatus getStatus(final UpdateContainer updateContainer) {
-        return getOrCreateContext(updateContainer).getStatus();
+        return getOrCreateContext(updateContainer).status;
     }
 
     public void subject(final UpdateContainer updateContainer, final Subject subject) {
@@ -159,7 +159,6 @@ public class UpdateContext {
     private void printMessages(final Iterable<Message> messages, final StringBuilder sb) {
         for (final Message message : messages) {
             sb.append(UpdateMessages.print(message));
-            sb.append(UpdateMessages.print(message));
         }
     }
 
@@ -173,13 +172,18 @@ public class UpdateContext {
     }
 
     public void failedUpdate(final UpdateContainer updateContainer, final Message... messages) {
-        final CIString placeHolder = placeHolderForUpdate.remove(updateContainer.getUpdate());
+        final Update update = updateContainer.getUpdate();
+        final CIString placeHolder = placeHolderForUpdate.remove(update);
         if (placeHolder != null) {
             generatedKeys.remove(placeHolder);
         }
 
         for (Message message : messages) {
             addMessage(updateContainer, message);
+        }
+
+        if (getStatus(update).equals(UpdateStatus.SUCCESS) || getStatus(update).equals(UpdateStatus.PENDING_AUTHENTICATION)) {
+            status(update, UpdateStatus.FAILED);
         }
     }
 
@@ -210,7 +214,7 @@ public class UpdateContext {
             updatedObject = update.getSubmittedObject();
         }
 
-        return new UpdateResult(update, updatedObject, context.action, context.getStatus(), context.objectMessages, context.retryCount);
+        return new UpdateResult(update, updatedObject, context.action, context.status, context.objectMessages, context.retryCount);
     }
 
     public void prepareForReattempt(final UpdateContainer update) {
@@ -235,19 +239,7 @@ public class UpdateContext {
         private Action action;
         private PreparedUpdate preparedUpdate;
         private Subject subject;
-        private UpdateStatus status;
+        private UpdateStatus status = UpdateStatus.SUCCESS;
         private int retryCount;
-
-        public UpdateStatus getStatus() {
-            if (status != null) {
-                return status;
-            }
-
-            if (objectMessages.hasErrors()) {
-                return UpdateStatus.FAILED;
-            }
-
-            return UpdateStatus.SUCCESS;
-        }
     }
 }
