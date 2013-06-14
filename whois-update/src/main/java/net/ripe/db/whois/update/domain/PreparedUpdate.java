@@ -74,10 +74,6 @@ public class PreparedUpdate implements UpdateContainer {
         return overrideOptions;
     }
 
-    public boolean isDryRun() {
-        return update.isDryRun();
-    }
-
     public ObjectType getType() {
         return update.getType();
     }
@@ -106,5 +102,10 @@ public class PreparedUpdate implements UpdateContainer {
         }
 
         return differences;
+    }
+
+    @Override
+    public String toString() {
+        return "PreparedUpdate{" + action + " " + updatedObject.getTypeAttribute() + '}';
     }
 }

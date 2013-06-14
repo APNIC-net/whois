@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.ripe.db.whois.common.Message;
 import net.ripe.db.whois.common.Messages;
+import net.ripe.db.whois.common.dao.RpslObjectUpdateInfo;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.rpsl.ObjectMessages;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
@@ -23,18 +24,30 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class UpdateContext {
     private static final AtomicInteger NEXT_NR_SINCE_RESTART = new AtomicInteger();
 
-    private int nrSinceRestart;
     private final List<Paragraph> ignored = Lists.newArrayList();
     private final Messages globalMessages = new Messages();
+    // TODO: [AH] this seems to be the same as generatedkeys; could be dropped?
     private final Map<Update, CIString> placeHolderForUpdate = Maps.newHashMap();
     private final Map<CIString, GeneratedKey> generatedKeys = Maps.newHashMap();
     private final Map<Update, Context> contexts = Maps.newLinkedHashMap();
     private final Map<DnsCheckRequest, DnsCheckResponse> dnsCheckResponses = Maps.newHashMap();
     private final LoggerContext loggerContext;
 
+    private int nrSinceRestart;
+    private boolean dryRun;
+
     public UpdateContext(final LoggerContext loggerContext) {
         this.loggerContext = loggerContext;
         this.nrSinceRestart = NEXT_NR_SINCE_RESTART.incrementAndGet();
+    }
+
+    public boolean isDryRun() {
+        return dryRun;
+    }
+
+    public void dryRun() {
+        loggerContext.logDryRun();
+        this.dryRun = true;
     }
 
     public int getNrSinceRestart() {
@@ -104,6 +117,22 @@ public class UpdateContext {
 
     public Subject getSubject(final UpdateContainer updateContainer) {
         return getOrCreateContext(updateContainer).subject;
+    }
+
+    public void updateInfo(final UpdateContainer updateContainer, final RpslObjectUpdateInfo updateInfo) {
+        getOrCreateContext(updateContainer).updateInfo = updateInfo;
+    }
+
+    public RpslObjectUpdateInfo getUpdateInfo(final UpdateContainer updateContainer) {
+        return getOrCreateContext(updateContainer).updateInfo;
+    }
+
+    public void versionId(final UpdateContainer updateContainer, final int versionId) {
+        getOrCreateContext(updateContainer).versionId = versionId;
+    }
+
+    public int getVersionId(final UpdateContainer updateContainer) {
+        return getOrCreateContext(updateContainer).versionId;
     }
 
     public void setPreparedUpdate(final PreparedUpdate preparedUpdate) {
@@ -217,7 +246,7 @@ public class UpdateContext {
             updatedObject = update.getSubmittedObject();
         }
 
-        return new UpdateResult(update, originalObject, updatedObject, context.action, context.status, context.objectMessages, context.retryCount);
+        return new UpdateResult(update, originalObject, updatedObject, context.action, context.status, context.objectMessages, context.retryCount, dryRun);
     }
 
     public void prepareForReattempt(final UpdateContainer update) {
@@ -244,5 +273,7 @@ public class UpdateContext {
         private Subject subject;
         private UpdateStatus status = UpdateStatus.SUCCESS;
         private int retryCount;
+        private RpslObjectUpdateInfo updateInfo;
+        private int versionId = -1;
     }
 }

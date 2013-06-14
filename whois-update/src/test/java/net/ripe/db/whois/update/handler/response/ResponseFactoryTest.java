@@ -128,7 +128,7 @@ public class ResponseFactoryTest {
         final RpslObject rpslObject = RpslObject.parse("mntner: DEV-ROOT-MNT");
 
         final Update update = new Update(new Paragraph(rpslObject.toString()), Operation.DELETE, Lists.<String>newArrayList(), rpslObject);
-        updateResults.add(new UpdateResult(update, rpslObject, rpslObject, Action.DELETE, UpdateStatus.SUCCESS, new ObjectMessages(), 0));
+        updateResults.add(new UpdateResult(update, rpslObject, rpslObject, Action.DELETE, UpdateStatus.SUCCESS, new ObjectMessages(), 0, false));
 
         final Ack ack = new Ack(updateResults, ignoredParagraphs);
 
@@ -263,7 +263,7 @@ public class ResponseFactoryTest {
 
         objectMessages.addMessage(rpslObject.findAttribute(AttributeType.SOURCE), UpdateMessages.unrecognizedSource("RIPE"));
 
-        updateResults.add(new UpdateResult(update, rpslObject, rpslObject, Action.DELETE, UpdateStatus.FAILED, objectMessages, 0));
+        updateResults.add(new UpdateResult(update, rpslObject, rpslObject, Action.DELETE, UpdateStatus.FAILED, objectMessages, 0, false));
 
         final Ack ack = new Ack(updateResults, ignoredParagraphs);
 
@@ -372,8 +372,8 @@ public class ResponseFactoryTest {
         final PreparedUpdate create2 = new PreparedUpdate(update2, null, object2, Action.CREATE);
 
         final Notification notification = new Notification("notify@me.com");
-        notification.add(Notification.Type.SUCCESS, create1);
-        notification.add(Notification.Type.SUCCESS, create2);
+        notification.add(Notification.Type.SUCCESS, create1, updateContext);
+        notification.add(Notification.Type.SUCCESS, create2, updateContext);
 
 
         final ResponseMessage responseMessage = subject.createNotification(updateContext, origin, notification);
@@ -411,7 +411,7 @@ public class ResponseFactoryTest {
         final PreparedUpdate create = new PreparedUpdate(update, null, object, Action.CREATE);
 
         final Notification notification = new Notification("notify@me.com");
-        notification.add(Notification.Type.SUCCESS, create);
+        notification.add(Notification.Type.SUCCESS, create, updateContext);
 
 
         final ResponseMessage responseMessage = subject.createNotification(updateContext, origin, notification);
@@ -446,8 +446,8 @@ public class ResponseFactoryTest {
         final PreparedUpdate create2 = new PreparedUpdate(update2, null, object2, Action.CREATE);
 
         final Notification notification = new Notification("notify@me.com");
-        notification.add(Notification.Type.SUCCESS_REFERENCE, create1);
-        notification.add(Notification.Type.SUCCESS_REFERENCE, create2);
+        notification.add(Notification.Type.SUCCESS_REFERENCE, create1, updateContext);
+        notification.add(Notification.Type.SUCCESS_REFERENCE, create2, updateContext);
 
         final ResponseMessage responseMessage = subject.createNotification(updateContext, origin, notification);
         assertNotification(responseMessage);
@@ -481,8 +481,8 @@ public class ResponseFactoryTest {
         final PreparedUpdate create2 = new PreparedUpdate(update2, null, object2, Action.CREATE);
 
         final Notification notification = new Notification("notify@me.com");
-        notification.add(Notification.Type.FAILED_AUTHENTICATION, create1);
-        notification.add(Notification.Type.FAILED_AUTHENTICATION, create2);
+        notification.add(Notification.Type.FAILED_AUTHENTICATION, create1, updateContext);
+        notification.add(Notification.Type.FAILED_AUTHENTICATION, create2, updateContext);
 
         final ResponseMessage responseMessage = subject.createNotification(updateContext, origin, notification);
         assertNotification(responseMessage);
