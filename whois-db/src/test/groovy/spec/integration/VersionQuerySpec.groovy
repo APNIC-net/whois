@@ -1,5 +1,4 @@
 package spec.integration
-
 import net.ripe.db.whois.common.IntegrationTest
 import net.ripe.db.whois.common.source.Source
 import spec.domain.SyncUpdate
@@ -1021,5 +1020,139 @@ class VersionQuerySpec extends BaseWhoisSourceSpec {
         after =~ /1.*ADD\/UPD/
         after =~ /2.*ADD\/UPD/
         after != ~/3.*ADD\/UPD/
+    }
+
+    def "--diff-versions (forward range)"() {
+      when:
+        def response = query "--diff-versions 1:2 " + pkey
+
+      then:
+        response =~ header
+        !(response =~ advert)
+        !(response =~ /ERROR:/)
+
+        response =~ "% Difference between version 1 and 2 of object \"TST-MNT\""
+        response =~ "@@ -1,2 \\+1,10 @@\n" +
+                " mntner:         TST-MNT\n" +
+                "\\+descr:          MNTNER for test\n" +
+                "\\+admin-c:        TP1-TEST\n" +
+                "\\+upd-to:         dbtest@ripe.net\n" +
+                "\\+auth:           MD5-PW \\\$1\\\$d9fKeTr2\\\$Si7YudNf4rUGmR71n/cqk/  #test\n" +
+                "\\+mnt-by:         OWNER-MNT\n" +
+                "\\+referral-by:    TST-MNT\n" +
+                "\\+changed:        dbtest@ripe.net\n" +
+                "\\+source:         TEST"
+
+      where:
+        pkey << ["TST-MNT"]
+    }
+
+    def "--diff-versions (inverse range)"() {
+      when:
+        def response = query "--diff-versions 2:1 " + pkey
+
+      then:
+        response =~ header
+        !(response =~ advert)
+        !(response =~ /ERROR:/)
+
+        response =~ "% Difference between version 2 and 1 of object \"TST-MNT\""
+        response =~ "@@ -1,10 \\+1,2 @@\n" +
+                " mntner:         TST-MNT\n"
+                "-descr:          MNTNER for test\n" +
+                "-admin-c:        TP1-TEST\n" +
+                "-upd-to:         dbtest@ripe.net\n" +
+                "-auth:           MD5-PW \\\$1\\\$d9fKeTr2\\\$Si7YudNf4rUGmR71n/cqk/  #test\n" +
+                "-mnt-by:         OWNER-MNT\n" +
+                "-referral-by:    TST-MNT\n" +
+                "-changed:        dbtest@ripe.net\n" +
+                "-source:         TEST"
+
+      where:
+        pkey << ["TST-MNT"]
+    }
+
+    def "--diff-versions (version zero)"() {
+      when:
+        def response = query "--diff-versions 0:1 " + pkey
+
+      then:
+        response =~ header
+        response =~ "% diff version number must be greater than 0\n%\n" +
+                "%ERROR:111: invalid option supplied"
+
+      where:
+        pkey << ["TST-MNT"]
+    }
+
+    def "--diff-versions (out of range)"() {
+      when:
+        def response = query "--diff-versions 1:3 " + pkey
+
+      then:
+        response =~ header
+        response =~ "%ERROR:117: version cannot exceed 2 for this object"
+
+      where:
+        pkey << ["TST-MNT"]
+    }
+
+    def "--diff-versions (person/role)"() {
+      when:
+        def response = query "--diff-versions 1:2 " + pkey
+
+      then:
+        response =~ header
+        response =~ "% Version history for PERSON object \"TP1-TEST\"\n" +
+                "% History not available for PERSON and ROLE objects."
+
+      where:
+        pkey << ["TP1-TEST"]
+    }
+
+    def "--diff-versions (deleted)"() {
+     given:
+        removeObject(oneBasicFixture("TEST-PN3"))
+
+      when:
+        def response = query "--diff-versions 1:2 " + pkey
+
+      then:
+        response =~ header
+        response =~ "% This object was deleted on \\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}\n"
+
+      where:
+        pkey << ["TP3-TEST"]
+    }
+
+    def "--diff-versions (recreated)"() {
+     given:
+        removeObject(oneBasicFixture("TST"))
+        addObject(oneBasicFixture("TST"))
+
+      when:
+        def response = query "--diff-versions 1:3 " + pkey
+
+      then:
+        response =~ header
+        response =~ "%ERROR:117: version cannot exceed 2 for this object"
+
+      where:
+        pkey << ["TST"]
+    }
+
+    def "-V foo --diff-versions <pkey>"() {
+      when:
+        def response = query "-V foo --diff-versions 2:1 " + pkey
+
+      then:
+        response =~ header
+        !(response =~ advert)
+        !(response =~ /ERROR:/)
+
+        response =~ "% Difference between version 2 and 1 of object \"AS1000\""
+
+      where:
+        pkey << ["AS1000"]
     }
 }
