@@ -51,7 +51,7 @@ public class AutnumAuthentication extends AuthenticationStrategyBase {
 
         List<RpslObject> asBlockList = objectDao.findAsBlockIntersections(number, number);
         if (CollectionUtils.isEmpty(asBlockList)) {
-            throw new AuthenticationFailedException(UpdateMessages.noParentAsBlockFound(pkey));
+            throw new AuthenticationFailedException(UpdateMessages.noParentAsBlockFound(pkey), asBlockList);
         }
 
         List<Message> authenticationErrorMessages = Lists.newArrayList();
@@ -75,7 +75,7 @@ public class AutnumAuthentication extends AuthenticationStrategyBase {
         }
 
         if (authenticatedBy.isEmpty()) {
-            throw new AuthenticationFailedException(authenticationErrorMessages);
+            throw new AuthenticationFailedException(authenticationErrorMessages, asBlockList);
         }
 
         return Lists.newArrayList(authenticatedBy);

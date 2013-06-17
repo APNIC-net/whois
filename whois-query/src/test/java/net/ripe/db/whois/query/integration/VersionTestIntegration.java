@@ -1,15 +1,14 @@
 package net.ripe.db.whois.query.integration;
 
 import net.ripe.db.whois.common.IntegrationTest;
-import net.ripe.db.whois.common.dao.RpslObjectUpdateDao;
 import net.ripe.db.whois.common.dao.RpslObjectUpdateInfo;
+import net.ripe.db.whois.common.domain.VersionDateTime;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.common.rpsl.transform.FilterAuthFunction;
 import net.ripe.db.whois.common.rpsl.transform.FilterEmailFunction;
 import net.ripe.db.whois.common.support.DummyWhoisClient;
 import net.ripe.db.whois.query.QueryServer;
 import net.ripe.db.whois.query.domain.QueryMessages;
-import net.ripe.db.whois.query.domain.VersionDateTime;
 import net.ripe.db.whois.query.support.AbstractWhoisIntegrationTest;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -19,7 +18,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static net.ripe.db.whois.common.dao.jdbc.JdbcRpslObjectOperations.loadScripts;
 import static net.ripe.db.whois.query.integration.VersionTestIntegration.VersionMatcher.containsFilteredVersion;
@@ -27,7 +25,6 @@ import static net.ripe.db.whois.query.integration.VersionTestIntegration.Version
 import static net.ripe.db.whois.query.support.PatternMatcher.matchesPattern;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 @Category(IntegrationTest.class)
