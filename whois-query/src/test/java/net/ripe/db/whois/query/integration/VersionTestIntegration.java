@@ -2,13 +2,13 @@ package net.ripe.db.whois.query.integration;
 
 import net.ripe.db.whois.common.IntegrationTest;
 import net.ripe.db.whois.common.dao.RpslObjectUpdateInfo;
+import net.ripe.db.whois.common.domain.VersionDateTime;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.common.rpsl.transform.FilterAuthFunction;
 import net.ripe.db.whois.common.rpsl.transform.FilterEmailFunction;
 import net.ripe.db.whois.common.support.DummyWhoisClient;
 import net.ripe.db.whois.query.QueryServer;
 import net.ripe.db.whois.query.domain.QueryMessages;
-import net.ripe.db.whois.query.domain.VersionDateTime;
 import net.ripe.db.whois.query.support.AbstractWhoisIntegrationTest;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
