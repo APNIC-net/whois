@@ -21,7 +21,6 @@ import org.junit.experimental.categories.Category;
 
 import static net.ripe.db.whois.common.dao.jdbc.JdbcRpslObjectOperations.loadScripts;
 import static net.ripe.db.whois.query.integration.VersionTestIntegration.VersionMatcher.containsFilteredVersion;
-import static net.ripe.db.whois.query.integration.VersionTestIntegration.VersionMatcher.containsUnfilteredVersion;
 import static net.ripe.db.whois.query.support.PatternMatcher.matchesPattern;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -190,7 +189,7 @@ public class VersionTestIntegration extends AbstractWhoisIntegrationTest {
     }
 
     @Test
-    public void versionFiltering() {
+    public void versionFilteringNotAllowed() {
         RpslObject object = RpslObject.parse("" +
                 "mntner:  MAINT-ME\n" +
                 "descr:   Testing maintainer\n" +
@@ -202,7 +201,8 @@ public class VersionTestIntegration extends AbstractWhoisIntegrationTest {
         assertThat(response, containsFilteredVersion(object));
 
         response = stripHeader(DummyWhoisClient.query(QueryServer.port, "--show-version 1 -B MAINT-ME"));
-        assertThat(response, containsUnfilteredVersion(object));
+        assertThat(response, containsString("%ERROR:109: invalid combination of flags passed"));
+        assertThat(response, containsString("% The flags \"--show-version\" and \"-B, --no-filtering\" cannot be used together."));
     }
 
     @Test

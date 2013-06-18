@@ -961,7 +961,7 @@ class VersionQuerySpec extends BaseWhoisSourceSpec {
         input << ["AS1000", "TST-MNT", "ORG-OTO1-TEST", "10.0.0.0 - 10.255.255.255", "TP1-TEST", "TR1-TEST"]
     }
 
-    def "--show-version 3 -B AS1000"() {
+    def "--show-version 3 AS1000"() {
       when:
         def updateResponse = syncUpdate new SyncUpdate(data: """\
             aut-num:     AS1000
@@ -979,7 +979,7 @@ class VersionQuerySpec extends BaseWhoisSourceSpec {
         updateResponse =~ "SUCCESS"
 
       when:
-        def response = query "--show-version 3 -B AS1000"
+        def response = query "--show-version 3 AS1000"
 
       then:
         response =~ header
@@ -990,6 +990,17 @@ class VersionQuerySpec extends BaseWhoisSourceSpec {
 
         // no related objects
         !(response =~ /person:\s+/)
+    }
+
+    def "--show-version and -B cannot be used together"() {
+      when:
+        def response = query "--show-version 2 -B AS1000"
+
+      then:
+        response =~ header
+        !(response =~ advert)
+
+        response =~ /%ERROR:109: invalid combination of flags passed/
     }
 
     def "do not display versions for deleted object"() {
@@ -1032,16 +1043,14 @@ class VersionQuerySpec extends BaseWhoisSourceSpec {
         !(response =~ /ERROR:/)
 
         response =~ "% Difference between version 1 and 2 of object \"TST-MNT\""
-        response =~ "@@ -1,2 \\+1,10 @@\n" +
+        response =~ "@@ -1,2 \\+1,8 @@\n" +
                 " mntner:         TST-MNT\n" +
                 "\\+descr:          MNTNER for test\n" +
                 "\\+admin-c:        TP1-TEST\n" +
-                "\\+upd-to:         dbtest@ripe.net\n" +
-                "\\+auth:           MD5-PW \\\$1\\\$d9fKeTr2\\\$Si7YudNf4rUGmR71n/cqk/  #test\n" +
+                "\\+auth:           MD5-PW # Filtered\n" +
                 "\\+mnt-by:         OWNER-MNT\n" +
                 "\\+referral-by:    TST-MNT\n" +
-                "\\+changed:        dbtest@ripe.net\n" +
-                "\\+source:         TEST"
+                "\\+source:         TEST # Filtered"
 
       where:
         pkey << ["TST-MNT"]
@@ -1057,16 +1066,14 @@ class VersionQuerySpec extends BaseWhoisSourceSpec {
         !(response =~ /ERROR:/)
 
         response =~ "% Difference between version 2 and 1 of object \"TST-MNT\""
-        response =~ "@@ -1,10 \\+1,2 @@\n" +
-                " mntner:         TST-MNT\n"
+        response =~ "@@ -1,8 \\+1,2 @@\n" +
+                " mntner:         TST-MNT\n" +
                 "-descr:          MNTNER for test\n" +
                 "-admin-c:        TP1-TEST\n" +
-                "-upd-to:         dbtest@ripe.net\n" +
-                "-auth:           MD5-PW \\\$1\\\$d9fKeTr2\\\$Si7YudNf4rUGmR71n/cqk/  #test\n" +
+                "-auth:           MD5-PW # Filtered\n" +
                 "-mnt-by:         OWNER-MNT\n" +
                 "-referral-by:    TST-MNT\n" +
-                "-changed:        dbtest@ripe.net\n" +
-                "-source:         TEST"
+                "-source:         TEST # Filtered"
 
       where:
         pkey << ["TST-MNT"]
