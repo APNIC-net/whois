@@ -1,14 +1,13 @@
 package net.ripe.db.whois.common.rpsl;
 
-import net.ripe.db.whois.common.profiles.WhoisVariant;
+import net.ripe.db.whois.common.profiles.WhoisVariantHelperFactory;
 
 import java.util.Map;
 import java.util.Set;
 
 public interface AttributeTypeBuilder extends Documented {
-    static Map<Enum, AttributeTypeBuilder> implementationMap = WhoisVariant.isAPNIC() ?
-        new net.apnic.db.whois.common.rpsl.AttributeTypeBuilderImpl(null,null,null).getAttributeTypeBuilderMap() :
-        new AttributeTypeBuilderImpl(null,null,null).getAttributeTypeBuilderMap();
+
+    static Map<Enum, AttributeTypeBuilder> implementationMap =  WhoisVariantHelperFactory.getAttributeTypeBuilderMap();
 
     public enum Enum {
         ABUSE_MAILBOX,
