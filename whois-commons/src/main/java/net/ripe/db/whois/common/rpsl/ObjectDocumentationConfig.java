@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 
 import java.util.Map;
 
-class ObjectDocumentationConfig {
+public class ObjectDocumentationConfig {
     private static final Map<ObjectType, String> DOCUMENTATION = Maps.newEnumMap(ObjectType.class);
 
     static {

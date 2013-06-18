@@ -393,7 +393,7 @@ public class ObjectTemplateMapConfig {
         TEMPLATE_MAP = Collections.unmodifiableMap(templateMap);
     }
 
-    static  Map<ObjectType, ObjectTemplate> getTemplateMap() {
+    public static Map<ObjectType, ObjectTemplate> getTemplateMap() {
         return TEMPLATE_MAP;
     }
 
