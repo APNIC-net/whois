@@ -1,7 +1,6 @@
 package net.ripe.db.whois.common.profiles;
 
 import net.ripe.db.whois.common.rpsl.*;
-
 import java.util.Map;
 
 public class WhoisVariantHelperFactory {
