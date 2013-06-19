@@ -90,7 +90,172 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>APNIC</id>
+
+            <properties>
+                <build-helper-maven-plugin.version>1.8</build-helper-maven-plugin.version>
+                <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
+                <maven-rpm-plugin.version>2.1-alpha-2</maven-rpm-plugin.version>
+                <maven-deploy-plugin.version>2.7</maven-deploy-plugin.version>
+
+                <maven.build.timestamp.format>yyyyMMdd.HHmmss</maven.build.timestamp.format>
+
+                <rpm.name>apnic-whois-db</rpm.name>
+                <rpm.install.basedir>/opt/whois</rpm.install.basedir>
+                <rpm.install.bin>${rpm.install.basedir}/bin</rpm.install.bin>
+                <rpm.install.conf>${rpm.install.basedir}/conf</rpm.install.conf>
+                <rpm.install.var>${rpm.install.basedir}/var</rpm.install.var>
+            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>${build-helper-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>parse-version</id>
+                                <goals>
+                                    <goal>parse-version</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven-antrun-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>set-conditionals</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="rpm.version"
+                                                  value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}"/>
+                                        <condition property="rpm.release"
+                                                   value="${maven.build.timestamp}.${parsedVersion.qualifier}"
+                                                   else="${maven.build.timestamp}">
+                                            <equals arg1="${parsedVersion.qualifier}" arg2="SNAPSHOT"/>
+                                        </condition>
+
+                                        <echoproperties/>
+                                    </target>
+                                    <exportAntProperties>true</exportAntProperties>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>rpm-maven-plugin</artifactId>
+                        <version>${maven-rpm-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>make-centos6-64-rpm</id>
+                                <!-- Technically this should run as part of the package phase
+                                     However, maven cannot guarantee that it runs after shade (from the release profile)
+                                     So we set it to run on the verify phase
+                                -->
+                                <!--<phase>verify</phase>-->
+                                <goals>
+                                    <goal>rpm</goal>
+                                </goals>
+                                <configuration>
+                                    <group>APNIC/whois</group>
+                                    <description>Whois</description>
+                                    <!-- Organisation name is used as the License field -->
+                                    <!-- (along with the vendor and packager fields, but at least you can override them -->
+                                    <version>${rpm.version}</version>
+                                    <release>${rpm.release}</release>
+                                    <targetOS>centos6-linux</targetOS>
+                                    <packager>APNIC</packager>
+                                    <name>${rpm.name}</name>
+                                    <requires>
+                                        <require>java-1.7.0-openjdk</require>
+                                        <require>procps</require>       <!-- pgrep -->
+                                        <require>socat</require>        <!-- socat (netcat++) -->
+                                        <require>coreutils</require>    <!-- date/mktemp/sleep/etc -->
+                                        <require>grep</require>         <!-- grep -->
+                                        <require>gawk</require>         <!-- awk -->
+                                        <require>mailx</require>        <!-- mail -->
+                                        <require>sendmail</require>     <!-- sendmail -->
+                                        <require>chkconfig</require>    <!-- chkconfig -->
+                                    </requires>
+                                    <mappings>
+                                        <mapping>
+                                            <!-- This is to ensure an rpm erase will remove the base directory -->
+                                            <directory>${rpm.install.basedir}</directory>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.bin}</directory>
+                                            <sources>
+                                                <source>
+                                                    <location>
+                                                        ${project.build.directory}/${project.artifactId}-${project.version}.${project.packaging}
+                                                    </location>
+                                                    <destination>whois.jar</destination>
+                                                </source>
+                                            </sources>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.conf}</directory>
+                                            <configuration>noreplace</configuration>
+                                            <sources>
+                                                <source>
+                                                    <location>rpm/centos6-64/conf</location>
+                                                </source>
+                                            </sources>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.var}</directory>
+                                            <!-- TODO: Should setup a role_user property for this -->
+                                            <!-- TODO: and setup filter for the initscript -->
+                                            <username>whois</username>
+                                            <groupname>whois</groupname>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>/etc/init.d</directory>
+                                            <directoryIncluded>false</directoryIncluded>
+                                            <sources>
+                                                <source>
+                                                    <location>rpm/centos6-64/init.d/whois</location>
+                                                </source>
+                                            </sources>
+                                        </mapping>
+                                    </mappings>
+                                    <postinstallScriptlet>
+                                        <!-- Refresh the init scripts -->
+                                        <script>
+                                            /sbin/chkconfig --del whois
+                                            /sbin/chkconfig --add whois
+                                        </script>
+                                    </postinstallScriptlet>
+                                    <preremoveScriptlet>
+                                        <!-- Remove the whois init script if this is a true uninstall -->
+                                        <script>
+                                            if [ $1 -eq 0 ]; then
+                                                /sbin/chkconfig --del whois
+                                            fi
+                                        </script>
+                                    </preremoveScriptlet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
+
     <build>
         <plugins>
             <plugin>
