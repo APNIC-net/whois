@@ -10,8 +10,8 @@
             location="
                 classpath:version.properties,
                 classpath:whois.properties,
+                file:${whois.config}
                 "/>
-            <!--file:${whois.config}-->
 
     <import resource="applicationContext-whois-base.xml"/>
 </beans>
