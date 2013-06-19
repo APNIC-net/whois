@@ -55,6 +55,7 @@ public class StatusValidatorTest {
         when(maintainers.getRsMaintainers()).thenReturn(ciSet("APNIC-HM-MNT"));
     }
 
+    @Ignore
     @Test
     public void child_status_missing_results_in_warning_ipv4() {
         final Ipv4Resource ipv4Resource = Ipv4Resource.parse("192.0/16");
@@ -202,6 +203,7 @@ public class StatusValidatorTest {
         verify(updateContext, never()).addMessage(update, UpdateMessages.incorrectParentStatus(ObjectType.INETNUM, "ASSIGNED PORTABLE"));
     }
 
+    @Ignore
     @Test
     public void parent_has_no_status_ipv4() {
         when(update.getType()).thenReturn(ObjectType.INETNUM);
@@ -372,6 +374,7 @@ public class StatusValidatorTest {
 //        verify(updateContext).addMessage(update, UpdateMessages.statusRequiresAuthorization("ASSIGNED ANYCAST"));
 //    }
 
+    @Ignore
     @Test
     public void parent_has_no_status_ipv6() {
         when(update.getType()).thenReturn(ObjectType.INET6NUM);

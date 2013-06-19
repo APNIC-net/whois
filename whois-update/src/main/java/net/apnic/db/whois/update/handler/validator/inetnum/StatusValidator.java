@@ -2,6 +2,7 @@ package net.apnic.db.whois.update.handler.validator.inetnum;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import net.apnic.db.whois.common.domain.attrs.Inet6numStatus;
 import net.apnic.db.whois.common.domain.attrs.InetnumStatus;
 import net.ripe.db.whois.common.Message;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
@@ -19,7 +20,6 @@ import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
 import net.ripe.db.whois.common.rpsl.RpslObject;
-import net.ripe.db.whois.update.authentication.Principal;
 import net.ripe.db.whois.update.domain.Action;
 import net.ripe.db.whois.update.domain.PreparedUpdate;
 import net.ripe.db.whois.update.domain.UpdateContext;
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.CheckForNull;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -37,6 +38,30 @@ import static net.apnic.db.whois.update.handler.validator.inetnum.InetStatusHelp
 @WhoisVariantContext(includeWhen = WhoisVariant.Type.APNIC)
 @Component
 public class StatusValidator implements BusinessRuleValidator {
+
+    private static final Set<InetnumStatus> allowedParentInetStatuses = Collections.unmodifiableSet(
+            Sets.newHashSet(InetnumStatus.ALLOCATED_NON_PORTABLE, InetnumStatus.ALLOCATED_PORTABLE)
+    );
+
+    private static final Set<Inet6numStatus> allowedParentInet6Statuses = Collections.unmodifiableSet(
+            Sets.newHashSet(Inet6numStatus.ALLOCATED_NON_PORTABLE, Inet6numStatus.ALLOCATED_PORTABLE)
+    );
+
+    private static String allowedParentInetStatusMessage = "";
+    private static String allowedParentInet6StatusMessage = "";
+
+    static {
+        for (InetnumStatus InetnumStatus : allowedParentInetStatuses) {
+            allowedParentInetStatusMessage += "," + InetnumStatus.getLiteralStatus();
+        }
+        allowedParentInetStatusMessage = allowedParentInetStatusMessage.substring(1);
+
+        for (Inet6numStatus Inetnum6Status : allowedParentInet6Statuses) {
+            allowedParentInet6StatusMessage += "," + Inetnum6Status.getLiteralStatus();
+        }
+        allowedParentInet6StatusMessage = allowedParentInet6StatusMessage.substring(1);
+    }
+
     private final RpslObjectDao objectDao;
     private final Ipv4Tree ipv4Tree;
     private final Ipv6Tree ipv6Tree;
@@ -52,6 +77,7 @@ public class StatusValidator implements BusinessRuleValidator {
         this.ipv4Tree = ipv4Tree;
         this.ipv6Tree = ipv6Tree;
         this.maintainers = maintainers;
+
     }
 
     @Override
@@ -70,142 +96,55 @@ public class StatusValidator implements BusinessRuleValidator {
             return;
         }
 
-        if (update.getAction().equals(Action.CREATE)) {
-            validateCreate(update, updateContext);
-        } else if (update.getAction().equals(Action.DELETE)) {
-            validateDelete(update, updateContext);
-        } else if (update.getAction().equals(Action.MODIFY)) {
-            validateModify(update, updateContext);
+        if (update.getAction().equals(Action.CREATE) || update.getAction().equals(Action.MODIFY)) {
+            validateStatus(update, updateContext);
         }
     }
 
-    private void validateCreate(PreparedUpdate update, UpdateContext updateContext) {
+    private void validateStatus(final PreparedUpdate update, final UpdateContext updateContext) {
         final IpInterval ipInterval = IpInterval.parse(update.getUpdatedObject().getKey());
-        if (update.getType().equals(ObjectType.INETNUM)) {
-            validateCreate(update, updateContext, ipv4Tree, ipInterval);
-        } else {
-            validateCreate(update, updateContext, ipv6Tree, ipInterval);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void validateCreate(final PreparedUpdate update, final UpdateContext updateContext, final IpTree ipTree, final IpInterval ipInterval) {
         final RpslObject updatedObject = update.getUpdatedObject();
-        if (!allChildrenHaveCorrectStatus(update, updateContext, ipTree, ipInterval)) {
-            return;
-        }
 
-        final CIString statusValue = updatedObject.getValueForAttribute(AttributeType.STATUS);
-        if (statusValue.equals(InetnumStatus.NOT_SET)) {
-            updateContext.addMessage(update, UpdateMessages.statusRequiresAuthorization(InetnumStatus.NOT_SET.toString()));
+// TODO: Not sure if we want to do this check. [Dragan]
+//        if (!allChildrenHaveCorrectStatus(update, updateContext, ipTree, ipInterval)) {
+//            return;
+//        }
+
+        final InetStatus currentStatus = InetStatusHelper.getStatus(update);
+        if (currentStatus.requiresAllocMaintainer()) {
+            checkAllocMaintainer(update, updateContext);
         } else {
-            final InetStatus currentStatus = InetStatusHelper.getStatus(update);
-            final IpEntry parent = (IpEntry) ipTree.findFirstLessSpecific(ipInterval).get(0);
-
-            if (currentStatus.requiresAllocMaintainer()) {
-                checkAuthorisationForStatus(update, updateContext, updatedObject, currentStatus);
-            } else {
-
-            }
-
-            final RpslObject parentObject = objectDao.getById(parent.getObjectId());
-            final List<RpslAttribute> parentStatuses = parentObject.findAttributes(AttributeType.STATUS);
-            if (parentStatuses.isEmpty()) {
-                updateContext.addMessage(update, UpdateMessages.objectLacksStatus("Parent", parentObject.getKey()));
-                return;
-            }
-
-            final InetStatus parentStatus = InetStatusHelper.getStatus(parentObject);
-            if (parentStatus == null) {
-                updateContext.addMessage(update, UpdateMessages.objectHasInvalidStatus("Parent", parentObject.getKey(), parentObject.getValueForAttribute(AttributeType.STATUS)));
-                return;
-            }
-
-            final Set<CIString> updateMntBy = updatedObject.getValuesForAttribute(AttributeType.MNT_BY);
-            final boolean hasRsMaintainer = !Sets.intersection(maintainers.getRsMaintainers(), updateMntBy).isEmpty();
-
-            if (currentStatus.equals(InetnumStatus.ASSIGNED_PORTABLE) && parentStatus.equals(InetnumStatus.ASSIGNED_PORTABLE)) {
-                checkAuthorizationForStatusInHierarchy(update, updateContext, ipTree, ipInterval, UpdateMessages.incorrectParentStatus(updatedObject.getType(), parentStatus.toString()));
-            } else if (!currentStatus.worksWithParentStatus(parentStatus, hasRsMaintainer)) {
-                updateContext.addMessage(update, UpdateMessages.incorrectParentStatus(updatedObject.getType(), parentStatus.toString()));
-            }
-
-            if (currentStatus.equals(InetnumStatus.ASSIGNED_NON_PORTABLE)) {
-                if (parentStatus.equals(InetnumStatus.ASSIGNED_NON_PORTABLE)) {
-                    final Set<CIString> parentMntBy = parentObject.getValuesForAttribute(AttributeType.MNT_BY);
-                    final boolean parentHasRsMaintainer = !Sets.intersection(maintainers.getRsMaintainers(), parentMntBy).isEmpty();
-                    if (parentHasRsMaintainer) {
-                        updateContext.addMessage(update, UpdateMessages.incorrectParentStatus(updatedObject.getType(), parentStatus.toString()));
-                    }
-                }
-
-                checkAuthorizationForStatusInHierarchy(update, updateContext, ipTree, ipInterval, UpdateMessages.incorrectParentStatus(updatedObject.getType(), parentStatus.toString()));
-            }
+            checkParentStatus(update, updateContext);
         }
     }
 
-    private void checkAuthorizationForStatusInHierarchy(final PreparedUpdate update, final UpdateContext updateContext, final IpTree ipTree, final IpInterval ipInterval, final Message errorMessage) {
-        final RpslObject parentInHierarchyMaintainedByRs = findParentWithRsMaintainer(ipTree, ipInterval);
-
-        if (parentInHierarchyMaintainedByRs != null) {
-
-            final List<RpslAttribute> parentStatuses = parentInHierarchyMaintainedByRs.findAttributes(AttributeType.STATUS);
-            if (parentStatuses.isEmpty()) {
-                return;
-            }
-
-            final CIString parentStatusValue = parentStatuses.get(0).getCleanValue();
-            final InetStatus parentStatus = getStatus(parentStatusValue, update);
-
-            if (parentStatus == null) {
-                updateContext.addMessage(update, UpdateMessages.objectHasInvalidStatus("Parent", parentInHierarchyMaintainedByRs.getKey(), parentStatusValue));
-            } else {
-                final Set<CIString> mntLower = parentInHierarchyMaintainedByRs.getValuesForAttribute(AttributeType.MNT_LOWER);
-                final boolean parentHasRsMntLower = !Sets.intersection(maintainers.getRsMaintainers(), mntLower).isEmpty();
-                final InetStatus currentStatus = InetStatusHelper.getStatus(update);
-
-                if (!currentStatus.worksWithParentInHierarchy(parentStatus, parentHasRsMntLower)) {
-                    updateContext.addMessage(update, errorMessage);
-                }
-            }
-        }
-    }
-
-    @CheckForNull
-    private RpslObject findParentWithRsMaintainer(final IpTree ipTree, final IpInterval ipInterval) {
-        @SuppressWarnings("unchecked")
-        final List<IpEntry> allLessSpecific = Lists.reverse(ipTree.findAllLessSpecific(ipInterval));
-        for (final IpEntry parent : allLessSpecific) {
-            final RpslObject parentObject = objectDao.getById(parent.getObjectId());
-            final Set<CIString> mntBy = parentObject.getValuesForAttribute(AttributeType.MNT_BY);
-
-            final boolean missingRsMaintainer = Sets.intersection(maintainers.getRsMaintainers(), mntBy).isEmpty();
-            if (!missingRsMaintainer) {
-                return parentObject;
-            }
-        }
-
-        return null;
-    }
-
-//    has_lir_or_nir_maintainer path:
-//        get all mnt-by for object
-//        get all ALLOCMNT
-//        if any mnt-by is in ALLOCMNT
-//            SUCCESS
-//        else
-//            FAIL
-    private void checkAuthorisationForStatus(final PreparedUpdate update, final UpdateContext updateContext, final RpslObject updatedObject, final InetStatus currentStatus) {
+    private void checkAllocMaintainer(final PreparedUpdate update, final UpdateContext updateContext) {
+        final RpslObject updatedObject = update.getUpdatedObject();
         final Set<CIString> mntBy = updatedObject.getValuesForAttribute(AttributeType.MNT_BY);
 
-        final boolean hasOnlyAllocMaintainer = Sets.intersection(maintainers.getAllocMaintainers(), mntBy).containsAll(mntBy);
-        if (!hasOnlyAllocMaintainer) {
-            updateContext.addMessage(update, UpdateMessages.statusRequiresAuthorization(currentStatus.toString()));
+        if (Sets.intersection(maintainers.getAllocMaintainers(), mntBy).isEmpty()) {
+            updateContext.addMessage(update, net.apnic.db.whois.update.domain.UpdateMessages.portableStatusRequiresAllocMaintainer());
             return;
         }
-        if (!updateContext.getSubject(update).hasPrincipal(Principal.ALLOC_MAINTAINER)) {
-            updateContext.addMessage(update, UpdateMessages.statusRequiresAuthorization(currentStatus.toString()));
-            return;
+    }
+
+    private void checkParentStatus(final PreparedUpdate update, final UpdateContext updateContext) {
+
+        final IpInterval ipInterval = IpInterval.parse(update.getUpdatedObject().getKey());
+        final List<IpEntry> parents = update.getType().equals(ObjectType.INETNUM) ? ((IpTree) ipv4Tree).findAllLessSpecific(ipInterval) : ((IpTree) ipv6Tree).findAllLessSpecific(ipInterval);
+
+        for (IpEntry parent : parents) {
+            final RpslObject parentObject = objectDao.getById(parent.getObjectId());
+            InetStatus parentStatus = InetStatusHelper.getStatus(parentObject);
+            if (parentStatus instanceof InetnumStatus) {
+                if (!allowedParentInetStatuses.contains(parentStatus)) {
+                    updateContext.addMessage(update, net.apnic.db.whois.update.domain.UpdateMessages.invalidParentStatus(parentObject.getKey(), allowedParentInetStatusMessage));
+                }
+            } else {
+                if (!allowedParentInet6Statuses.contains(parentStatus)) {
+                    updateContext.addMessage(update, net.apnic.db.whois.update.domain.UpdateMessages.invalidParentStatus(parentObject.getKey(), allowedParentInet6StatusMessage));
+                }
+            }
         }
     }
 
@@ -242,38 +181,48 @@ public class StatusValidator implements BusinessRuleValidator {
         return true;
     }
 
-    private void validateModify(PreparedUpdate update, UpdateContext updateContext) {
-        final CIString originalStatus = update.getReferenceObject().getValueForAttribute(AttributeType.STATUS);
-        final CIString updateStatus = update.getUpdatedObject().getValueForAttribute(AttributeType.STATUS);
+    private void checkAuthorizationForStatusInHierarchy(final PreparedUpdate update, final UpdateContext updateContext, final IpTree ipTree, final IpInterval ipInterval, final Message errorMessage) {
+        final RpslObject parentInHierarchyMaintainedByRs = findParentWithRsMaintainer(ipTree, ipInterval);
 
-        final IpInterval ipInterval = IpInterval.parse(update.getUpdatedObject().getKey());
-        if (update.getType().equals(ObjectType.INETNUM)) {
-            if (!allChildrenHaveCorrectStatus(update, updateContext, ipv4Tree, ipInterval)) {
+        if (parentInHierarchyMaintainedByRs != null) {
+
+            final List<RpslAttribute> parentStatuses = parentInHierarchyMaintainedByRs.findAttributes(AttributeType.STATUS);
+            if (parentStatuses.isEmpty()) {
                 return;
             }
-        } else {
-            if (!allChildrenHaveCorrectStatus(update, updateContext, ipv6Tree, ipInterval)) {
-                return;
-            }
-        }
-        if (!originalStatus.equals(updateStatus)) {
-            updateContext.addMessage(update, UpdateMessages.statusChange());
-        }
-    }
 
-    private void validateDelete(PreparedUpdate update, UpdateContext updateContext) {
-        if (update.getUpdatedObject().getValueForAttribute(AttributeType.STATUS).equals(InetnumStatus.NOT_SET)) {
-            updateContext.addMessage(update, UpdateMessages.deleteWithStatusRequiresAuthorization(InetnumStatus.NOT_SET.toString()));
-        } else {
-            final InetStatus status = getStatus(update);
+            final CIString parentStatusValue = parentStatuses.get(0).getCleanValue();
+            final InetStatus parentStatus = net.apnic.db.whois.update.handler.validator.inetnum.InetStatusHelper.getStatus(parentStatusValue, update);
 
-            if (status != null && status.requiresRsMaintainer()) {
-                final Set<CIString> mntBy = update.getUpdatedObject().getValuesForAttribute(AttributeType.MNT_BY);
-                if (Sets.intersection(maintainers.getRsMaintainers(), mntBy).isEmpty()) {
-                    updateContext.addMessage(update, UpdateMessages.deleteWithStatusRequiresAuthorization(status.toString()));
+            if (parentStatus == null) {
+                updateContext.addMessage(update, UpdateMessages.objectHasInvalidStatus("Parent", parentInHierarchyMaintainedByRs.getKey(), parentStatusValue));
+            } else {
+                final Set<CIString> mntLower = parentInHierarchyMaintainedByRs.getValuesForAttribute(AttributeType.MNT_LOWER);
+                final boolean parentHasRsMntLower = !Sets.intersection(maintainers.getRsMaintainers(), mntLower).isEmpty();
+                final InetStatus currentStatus = net.apnic.db.whois.update.handler.validator.inetnum.InetStatusHelper.getStatus(update);
+
+                if (!currentStatus.worksWithParentInHierarchy(parentStatus, parentHasRsMntLower)) {
+                    updateContext.addMessage(update, errorMessage);
                 }
             }
         }
+    }
+
+    @CheckForNull
+    private RpslObject findParentWithRsMaintainer(final IpTree ipTree, final IpInterval ipInterval) {
+        @SuppressWarnings("unchecked")
+        final List<IpEntry> allLessSpecific = Lists.reverse(ipTree.findAllLessSpecific(ipInterval));
+        for (final IpEntry parent : allLessSpecific) {
+            final RpslObject parentObject = objectDao.getById(parent.getObjectId());
+            final Set<CIString> mntBy = parentObject.getValuesForAttribute(AttributeType.MNT_BY);
+
+            final boolean missingRsMaintainer = Sets.intersection(maintainers.getRsMaintainers(), mntBy).isEmpty();
+            if (!missingRsMaintainer) {
+                return parentObject;
+            }
+        }
+
+        return null;
     }
 
 }
