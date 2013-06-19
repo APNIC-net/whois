@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.attrs.MntRoutes;
 import net.ripe.db.whois.common.profiles.WhoisVariant;
+import net.ripe.db.whois.common.profiles.WhoisVariantHelperFactory;
 import org.apache.commons.lang.Validate;
 
 import javax.annotation.CheckForNull;
@@ -23,14 +24,7 @@ import static net.ripe.db.whois.common.domain.CIString.ciString;
 @Immutable
 public final class RpslAttribute {
 
-    public static final String DBM_EMAIL_POSTFIX_REGEX;
-    static {
-        if (WhoisVariant.isAPNIC()) {
-            DBM_EMAIL_POSTFIX_REGEX = "\\-dbm@apnic\\.net";
-        } else {
-            DBM_EMAIL_POSTFIX_REGEX = "\\-dbm@ripe\\.net";
-        }
-    }
+    public static final String DBM_EMAIL_POSTFIX_REGEX = WhoisVariantHelperFactory.getDbmEmailPostfixRegex();
 
     private static final int LEADING_CHARS = 16;
     private static final int LEADING_CHARS_SHORTHAND = 5;

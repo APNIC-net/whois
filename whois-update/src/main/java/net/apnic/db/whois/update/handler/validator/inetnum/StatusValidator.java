@@ -37,7 +37,6 @@ import static net.apnic.db.whois.update.handler.validator.inetnum.InetStatusHelp
 @WhoisVariantContext(includeWhen = WhoisVariant.Type.APNIC)
 @Component
 public class StatusValidator implements BusinessRuleValidator {
-    private static final CIString NOT_SET = CIString.ciString("NOT-SET");
     private final RpslObjectDao objectDao;
     private final Ipv4Tree ipv4Tree;
     private final Ipv6Tree ipv6Tree;
@@ -75,7 +74,7 @@ public class StatusValidator implements BusinessRuleValidator {
             validateCreate(update, updateContext);
         } else if (update.getAction().equals(Action.DELETE)) {
             validateDelete(update, updateContext);
-        } else {
+        } else if (update.getAction().equals(Action.MODIFY)) {
             validateModify(update, updateContext);
         }
     }
@@ -97,13 +96,17 @@ public class StatusValidator implements BusinessRuleValidator {
         }
 
         final CIString statusValue = updatedObject.getValueForAttribute(AttributeType.STATUS);
-        if (statusValue.equals(NOT_SET)) {
-            updateContext.addMessage(update, UpdateMessages.statusRequiresAuthorization(NOT_SET.toString()));
+        if (statusValue.equals(InetnumStatus.NOT_SET)) {
+            updateContext.addMessage(update, UpdateMessages.statusRequiresAuthorization(InetnumStatus.NOT_SET.toString()));
         } else {
             final InetStatus currentStatus = InetStatusHelper.getStatus(update);
             final IpEntry parent = (IpEntry) ipTree.findFirstLessSpecific(ipInterval).get(0);
 
-            checkAuthorisationForStatus(update, updateContext, updatedObject, currentStatus);
+            if (currentStatus.requiresAllocMaintainer()) {
+                checkAuthorisationForStatus(update, updateContext, updatedObject, currentStatus);
+            } else {
+
+            }
 
             final RpslObject parentObject = objectDao.getById(parent.getObjectId());
             final List<RpslAttribute> parentStatuses = parentObject.findAttributes(AttributeType.STATUS);
@@ -185,30 +188,24 @@ public class StatusValidator implements BusinessRuleValidator {
         return null;
     }
 
+//    has_lir_or_nir_maintainer path:
+//        get all mnt-by for object
+//        get all ALLOCMNT
+//        if any mnt-by is in ALLOCMNT
+//            SUCCESS
+//        else
+//            FAIL
     private void checkAuthorisationForStatus(final PreparedUpdate update, final UpdateContext updateContext, final RpslObject updatedObject, final InetStatus currentStatus) {
         final Set<CIString> mntBy = updatedObject.getValuesForAttribute(AttributeType.MNT_BY);
 
-        if (currentStatus.requiresAllocMaintainer()) {
-            final boolean hasOnlyAllocMaintainer = Sets.intersection(maintainers.getAllocMaintainers(), mntBy).containsAll(mntBy);
-            if (!hasOnlyAllocMaintainer) {
-                updateContext.addMessage(update, UpdateMessages.statusRequiresAuthorization(currentStatus.toString()));
-                return;
-            }
-            if (!updateContext.getSubject(update).hasPrincipal(Principal.ALLOC_MAINTAINER)) {
-                updateContext.addMessage(update, UpdateMessages.statusRequiresAuthorization(currentStatus.toString()));
-                return;
-            }
+        final boolean hasOnlyAllocMaintainer = Sets.intersection(maintainers.getAllocMaintainers(), mntBy).containsAll(mntBy);
+        if (!hasOnlyAllocMaintainer) {
+            updateContext.addMessage(update, UpdateMessages.statusRequiresAuthorization(currentStatus.toString()));
+            return;
         }
-
-        if (currentStatus.requiresRsMaintainer()) {
-            final boolean missingRsMaintainer = Sets.intersection(maintainers.getRsMaintainers(), mntBy).isEmpty();
-            if (missingRsMaintainer) {
-                updateContext.addMessage(update, UpdateMessages.statusRequiresAuthorization(updatedObject.getValueForAttribute(AttributeType.STATUS).toString()));
-                return;
-            }
-            if (!updateContext.getSubject(update).hasPrincipal(Principal.RS_MAINTAINER)) {
-                updateContext.addMessage(update, UpdateMessages.authorisationRequiredForSetStatus(currentStatus.toString()));
-            }
+        if (!updateContext.getSubject(update).hasPrincipal(Principal.ALLOC_MAINTAINER)) {
+            updateContext.addMessage(update, UpdateMessages.statusRequiresAuthorization(currentStatus.toString()));
+            return;
         }
     }
 
@@ -249,14 +246,24 @@ public class StatusValidator implements BusinessRuleValidator {
         final CIString originalStatus = update.getReferenceObject().getValueForAttribute(AttributeType.STATUS);
         final CIString updateStatus = update.getUpdatedObject().getValueForAttribute(AttributeType.STATUS);
 
+        final IpInterval ipInterval = IpInterval.parse(update.getUpdatedObject().getKey());
+        if (update.getType().equals(ObjectType.INETNUM)) {
+            if (!allChildrenHaveCorrectStatus(update, updateContext, ipv4Tree, ipInterval)) {
+                return;
+            }
+        } else {
+            if (!allChildrenHaveCorrectStatus(update, updateContext, ipv6Tree, ipInterval)) {
+                return;
+            }
+        }
         if (!originalStatus.equals(updateStatus)) {
             updateContext.addMessage(update, UpdateMessages.statusChange());
         }
     }
 
     private void validateDelete(PreparedUpdate update, UpdateContext updateContext) {
-        if (update.getUpdatedObject().getValueForAttribute(AttributeType.STATUS).equals(NOT_SET)) {
-            updateContext.addMessage(update, UpdateMessages.deleteWithStatusRequiresAuthorization(NOT_SET));
+        if (update.getUpdatedObject().getValueForAttribute(AttributeType.STATUS).equals(InetnumStatus.NOT_SET)) {
+            updateContext.addMessage(update, UpdateMessages.deleteWithStatusRequiresAuthorization(InetnumStatus.NOT_SET.toString()));
         } else {
             final InetStatus status = getStatus(update);
 

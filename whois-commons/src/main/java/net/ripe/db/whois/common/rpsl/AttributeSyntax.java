@@ -3,18 +3,9 @@ package net.ripe.db.whois.common.rpsl;
 import com.google.common.base.Splitter;
 import net.ripe.db.whois.common.domain.Ipv4Resource;
 import net.ripe.db.whois.common.domain.Ipv6Resource;
-import net.ripe.db.whois.common.domain.attrs.AddressPrefixRange;
-import net.ripe.db.whois.common.domain.attrs.Inet6numStatus;
-import net.ripe.db.whois.common.domain.attrs.InetnumStatus;
-import net.ripe.db.whois.common.domain.attrs.OrgType;
-import net.ripe.db.whois.common.domain.attrs.RangeOperation;
-import net.ripe.db.whois.common.generated.ComponentsParser;
-import net.ripe.db.whois.common.generated.ComponentsR6Parser;
-import net.ripe.db.whois.common.generated.FilterParser;
-import net.ripe.db.whois.common.generated.InjectParser;
-import net.ripe.db.whois.common.generated.InjectR6Parser;
-import net.ripe.db.whois.common.generated.V6FilterParser;
-import net.ripe.db.whois.common.profiles.WhoisVariant;
+import net.ripe.db.whois.common.domain.attrs.*;
+import net.ripe.db.whois.common.generated.*;
+import net.ripe.db.whois.common.profiles.WhoisVariantHelperFactory;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -24,9 +15,7 @@ import static net.ripe.db.whois.common.domain.CIString.ciString;
 
 public interface AttributeSyntax extends Documented {
 
-    static Map<AttributeSyntaxType, AttributeSyntax> implementationMap = WhoisVariant.isAPNIC() ?
-            net.apnic.db.whois.common.rpsl.AttributeSyntaxImpl.getAttributeSyntaxMap() :
-            net.ripe.db.whois.common.rpsl.AttributeSyntaxImpl.getAttributeSyntaxMap();
+    static Map<AttributeSyntaxType, AttributeSyntax> implementationMap = WhoisVariantHelperFactory.getAttributeSyntaxMap();
 
     static AttributeSyntax ANY_SYNTAX = implementationMap.get(AttributeSyntaxType.ANY_SYNTAX);
     static AttributeSyntax ADDRESS_PREFIX_RANGE_SYNTAX = implementationMap.get(AttributeSyntaxType.ADDRESS_PREFIX_RANGE_SYNTAX);
