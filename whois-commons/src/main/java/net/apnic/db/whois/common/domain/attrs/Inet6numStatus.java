@@ -12,6 +12,7 @@ import java.util.Set;
 import static net.ripe.db.whois.common.domain.CIString.ciString;
 
 public enum Inet6numStatus implements InetStatus {
+
     ALLOCATED_PORTABLE("ALLOCATED PORTABLE"),
     ALLOCATED_NON_PORTABLE("ALLOCATED NON-PORTABLE"),
     ASSIGNED_PORTABLE("ASSIGNED PORTABLE"),
