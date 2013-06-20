@@ -105,9 +105,28 @@
 
                 <rpm.name>apnic-whois-db</rpm.name>
                 <rpm.install.basedir>/opt/whois</rpm.install.basedir>
-                <rpm.install.bin>${rpm.install.basedir}/bin</rpm.install.bin>
-                <rpm.install.conf>${rpm.install.basedir}/conf</rpm.install.conf>
-                <rpm.install.var>${rpm.install.basedir}/var</rpm.install.var>
+                <rpm.install.dir.bin>${rpm.install.basedir}/bin</rpm.install.dir.bin>
+                <rpm.install.dir.conf>${rpm.install.basedir}/conf</rpm.install.dir.conf>
+                <rpm.install.dir.var>${rpm.install.basedir}/var</rpm.install.dir.var>
+
+                <rpm.install.dir.export>${rpm.install.dir.var}/export</rpm.install.dir.export>
+                <rpm.install.dir.export.tmp>${rpm.install.dir.var}/export_tmp</rpm.install.dir.export.tmp>
+                <rpm.install.dir.freetext>${rpm.install.dir.var}/freetext</rpm.install.dir.freetext>
+                <rpm.install.dir.wsearch>${rpm.install.dir.var}/wsearch</rpm.install.dir.wsearch>
+
+                <rpm.install.dir.log>${rpm.install.dir.var}/log</rpm.install.dir.log>
+                <rpm.install.dir.log.audit>${rpm.install.dir.log}/audit</rpm.install.dir.log.audit>
+
+                <rpm.install.dir.grs.import>${rpm.install.dir.var}/grs</rpm.install.dir.grs.import>
+
+                <rpm.install.dir.schema>${rpm.install.basedir}/schema</rpm.install.dir.schema>
+                <rpm.source.dir.schema>${project.basedir}/../whois-commons/src/main/resources</rpm.source.dir.schema>
+
+                <whois.init.variant>apnic</whois.init.variant>
+                <whois.init.operator>gary@apnic.net</whois.init.operator>
+                <whois.init.sendlogs>0</whois.init.sendlogs>
+                <whois.init.user>whois</whois.init.user>
+                <whois.init.basedir>/opt/whois</whois.init.basedir>
             </properties>
 
             <build>
@@ -147,7 +166,8 @@
                                             <equals arg1="${parsedVersion.qualifier}" arg2="SNAPSHOT"/>
                                         </condition>
 
-                                        <echoproperties/>
+                                        <!-- Uncomment this for property dump during build -->
+                                        <!--<echoproperties/>-->
                                     </target>
                                     <exportAntProperties>true</exportAntProperties>
                                 </configuration>
@@ -165,6 +185,9 @@
                                 <!-- Technically this should run as part of the package phase
                                      However, maven cannot guarantee that it runs after shade (from the release profile)
                                      So we set it to run on the verify phase
+
+                                     Update: appears to work in package phase now
+                                      - in multiple runs shade no longer jumps the queue
                                 -->
                                 <!--<phase>verify</phase>-->
                                 <goals>
@@ -190,6 +213,8 @@
                                         <require>mailx</require>        <!-- mail -->
                                         <require>sendmail</require>     <!-- sendmail -->
                                         <require>chkconfig</require>    <!-- chkconfig -->
+                                        <require>logrotate</require>
+                                        <require>initscripts</require>
                                     </requires>
                                     <mappings>
                                         <mapping>
@@ -197,7 +222,7 @@
                                             <directory>${rpm.install.basedir}</directory>
                                         </mapping>
                                         <mapping>
-                                            <directory>${rpm.install.bin}</directory>
+                                            <directory>${rpm.install.dir.bin}</directory>
                                             <sources>
                                                 <source>
                                                     <location>
@@ -208,7 +233,7 @@
                                             </sources>
                                         </mapping>
                                         <mapping>
-                                            <directory>${rpm.install.conf}</directory>
+                                            <directory>${rpm.install.dir.conf}</directory>
                                             <configuration>noreplace</configuration>
                                             <sources>
                                                 <source>
@@ -217,11 +242,65 @@
                                             </sources>
                                         </mapping>
                                         <mapping>
-                                            <directory>${rpm.install.var}</directory>
+                                            <directory>${rpm.install.dir.var}</directory>
                                             <!-- TODO: Should setup a role_user property for this -->
                                             <!-- TODO: and setup filter for the initscript -->
                                             <username>whois</username>
                                             <groupname>whois</groupname>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.dir.export}</directory>
+                                            <username>whois</username>
+                                            <groupname>whois</groupname>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.dir.export.tmp}</directory>
+                                            <username>whois</username>
+                                            <groupname>whois</groupname>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.dir.freetext}</directory>
+                                            <username>whois</username>
+                                            <groupname>whois</groupname>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.dir.wsearch}</directory>
+                                            <username>whois</username>
+                                            <groupname>whois</groupname>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.dir.log}</directory>
+                                            <username>whois</username>
+                                            <groupname>whois</groupname>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.dir.log.audit}</directory>
+                                            <username>whois</username>
+                                            <groupname>whois</groupname>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.dir.grs.import}</directory>
+                                            <username>whois</username>
+                                            <groupname>whois</groupname>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.dir.schema}</directory>
+                                            <sources>
+                                                <source>
+                                                    <location>${rpm.source.dir.schema}</location>
+                                                    <includes>
+                                                        <include>*.sql</include>
+                                                    </includes>
+                                                </source>
+                                            </sources>
+                                        </mapping>
+                                        <mapping>
+                                            <directory>${rpm.install.dir.schema}/patch</directory>
+                                            <sources>
+                                                <source>
+                                                    <location>${rpm.source.dir.schema}/patch</location>
+                                                </source>
+                                            </sources>
                                         </mapping>
                                         <mapping>
                                             <directory>/etc/init.d</directory>
@@ -229,8 +308,10 @@
                                             <sources>
                                                 <source>
                                                     <location>rpm/centos6-64/init.d/whois</location>
+                                                    <filter>true</filter>
                                                 </source>
                                             </sources>
+                                            <filemode>0755</filemode>
                                         </mapping>
                                     </mappings>
                                     <postinstallScriptlet>

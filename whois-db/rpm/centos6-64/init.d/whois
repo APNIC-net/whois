@@ -10,19 +10,19 @@
 SERVICE=whois
 
 # Variant
-VARIANT=apnic
+VARIANT=${whois.init.variant}
 
 # Email address of operator
-OPEREMAIL=unread@ripe.net
+OPEREMAIL=${whois.init.operator}
 
 # Send logs to operator
-SENDLOGS=0
+SENDLOGS=${whois.init.sendlogs}
 
 # user to run whois.jar (non-root!)
-ROLE_USER=whois
+ROLE_USER=${whois.init.user}
 
 # Base Whois Location
-BASEDIR=/opt/whois
+BASEDIR=${whois.init.basedir}
 
 # Configuration location
 CONFDIR=$BASEDIR/conf
@@ -80,20 +80,27 @@ if [[ "$UID" -eq 0 ]]; then
 fi
 
 if [[ "$USER" != "$ROLE_USER" ]]; then
-        echo "You must run this service as user $ROLE_USER"
-        exit 1
+    echo "You must run this service as user $ROLE_USER"
+    exit 1
 fi
 
-##############################################################################################
-# set COLUMNS
-if ! [[ $COLUMNS ]] || [[ $COLUMNS -lt 160 ]]; then
-	COLUMNS=160
-fi
-export COLUMNS
+. /etc/init.d/functions
 
 # print server status
 function print_status() {
 	echo -en "\033[2K\rStatus: $(tail -1 $LOG | cut -c-$((COLUMNS-10)) )"
+}
+
+##############################################################################################
+# get server PID
+function server_pid() {
+    pgrep -f -u "$ROLE_USER" "$COMMAND_REGEXP"
+}
+
+##############################################################################################
+# is server running
+function server_running() {
+    server_pid >/dev/null
 }
 
 ##############################################################################################
@@ -105,17 +112,36 @@ function server_up() {
 }
 
 ##############################################################################################
+# rotate log file
+function rotate_log() {
+    local STATEFILE= CONFIGFILE=
+    STATEFILE=$(mktemp)
+    CONFIGFILE=$(mktemp)
+    # Make best attempt to clean up
+    trap "rm -f $STATEFILE $CONFIGFILE" RETURN
+    (cat <<CONFIG
+$LOG {
+    rotate 9
+    create
+    missingok
+}
+CONFIG
+    ) >$CONFIGFILE
+    /usr/sbin/logrotate -f -s $STATEFILE $CONFIGFILE 2>/dev/null
+}
+
+##############################################################################################
 # fatal error notifier
 function my_log() {
-        echo "$@"
-        #echo "[`date +'%y%m%d %H:%M:%S'`] $@" >>$LOG
+    echo "$@"
+    #echo "[`date +'%y%m%d %H:%M:%S'`] $@" >>$LOG
 }
 
 function my_panic() {
-        SUBJECT=$1 ; shift
-        my_log "$@"
-        echo -e "$@" | mail -s "$SUBJECT" "$OPEREMAIL"
-        my_log "Email sent to $OPEREMAIL"
+    SUBJECT=$1 ; shift
+    my_log "$@"
+    echo -e "$@" | mail -s "$SUBJECT" "$OPEREMAIL"
+    my_log "Email sent to $OPEREMAIL"
 }
 
 ##############################################################################################
@@ -124,11 +150,18 @@ function my_panic() {
 function check_server() {
     # give server a chance
     my_log 'Waiting for the server to come up... (If you know what you are doing, hit ESC to skip waiting)'
-    NUM=0
-    key=""; escape=$'\x1b';
+    local NUM=0 key="" escape=$'\x1b' INTFLAG=
 
-    while ! server_up; do
+    trap 'INTFLAG=1' INT
+
+    while ! server_up && [[ -n INTFLAG ]]; do
         print_status
+
+        if ! server_running; then
+            my_log
+            my_log " *** Server terminated early"
+            break
+        fi
 
         read -t1 -s -n1 key || ([[ $? == 1 ]] && sleep 1)       # gracefully handle lack of terminal
         if [[ "$key" == "$escape" ]]; then
@@ -137,22 +170,37 @@ function check_server() {
             break
         fi
         NUM=$[NUM+1]
-        if [ $NUM -gt 300 ]; then
+        if [ $NUM -gt 800 ]; then
             # bail out
             my_log
-            my_log "Server does not seem to be up after 240 seconds, giving up. Here is the end of ${LOG}:"
+            my_log "Server does not seem to be up after 720 seconds, giving up. Here is the end of ${LOG}:"
             echo '-------------------------------------------------------------------------------------'
             tail -15 $LOG
             echo '-------------------------------------------------------------------------------------'
-            return
+            break
         fi
     done
 
+    trap - INT
+
+    local RETCODE=
 	my_log
-    my_log "$SERVICE started successfully."
+	if server_running; then
+	    if server_up; then
+	        my_log "$SERVICE started successfully."
+	        RETCODE=0
+	    else
+	        my_log "$SERVICE running, but is not ready."
+	        RETCODE=4
+	    fi
+	else
+	    my_log "$SERVICE failed to startup."
+	    RETCODE=1
+	fi
 
     # record size of console log file
     LOGPOS=$(stat -c %s $LOG)
+    return $RETCODE
 }
 
 ##############################################################################################
@@ -160,20 +208,15 @@ function check_server() {
 function check_log() {
 	# kill child sleep process on exit to avoid them stacking up
 	trap "pkill -P $BASHPID; exit 0" TERM HUP
-	WHOIS_PID=$(pgrep -f -u "$ROLE_USER" "$COMMAND_REGEXP")
+	WHOIS_PID=$(server_pid)
 
 	# let whois finish startup
 	sleep 3
 
 	while true; do
+# TODO: need to find a way to short-circuit this sleep if the server dies in the middle of it....
 		sleep 4h &
 		wait	# so bash responds to signals, like the one above
-
-		# exit if server already exited
-		PID=$(pgrep -f -u "$ROLE_USER" "$COMMAND_REGEXP")
-		if [[ $PID -ne $WHOIS_PID ]]; then
-			exit 1
-		fi
 
 		NEWLOGPOS=$(stat -c %s $LOG)
 		DIFF=$[NEWLOGPOS-LOGPOS]
@@ -200,63 +243,92 @@ function check_log() {
 			fi
 		fi
 		LOGPOS=$NEWLOGPOS
+
+		# exit if server already exited
+		PID=$(server_pid)
+		if [[ $PID -ne $WHOIS_PID ]]; then
+			exit 1
+		fi
 	done
 }
 
 ##############################################################################################
 # MAIN
 case "$1" in
-	start)
-		PID=$(pgrep -f -u "$ROLE_USER" "$COMMAND_REGEXP")
-		if [[ $PID ]]; then
-			echo "$SERVICE is already running"
-			exit 1
-		fi
+    start)
+        PID=$(server_pid)
+        if [[ $PID ]]; then
+            echo "$SERVICE is already running"
+            exit 1
+        fi
 
-		echo "Starting $SERVICE..."
-		# rotate console.log
-		LOG="$LOG$(date +'.%Y%m%d.%H%M%S')"
-		# start server
-		echo "${COMMAND[@]}"
-		"${COMMAND[@]}" >>$LOG 2>&1 </dev/null &
-		# check if server startup successful
-		check_server
-		if [[ $SENDLOGS ]]; then
-		    check_log </dev/null &>/dev/null &
-		fi
-		;;
-	stop)
-		# kill log checker process (if running)
-		PID=$(pgrep -f -u "$ROLE_USER" "$0 start")
-		if [[ $PID ]]; then
-			kill $PID	# also kills sleep
-		fi
+        if [[ -e "$PROPERTIES" ]]; then
+            echo "Starting $SERVICE..."
+            # rotate console.log
+            rotate_log
+            # start server
+            "${COMMAND[@]}" >>$LOG 2>&1 </dev/null &
+            # check if server startup successful
+            check_server
+            STATUS=$?
+        else
+            echo "Missing properties file: $PROPERTIES"
+            STATUS=1
+        fi
 
-		# kill jvm
-		PID=$(pgrep -f -u "$ROLE_USER" "$COMMAND_REGEXP")
-		if [[ $PID ]]; then
-			echo " *** If there is a long update running, $SERVICE can take up to 2 hours to exit gracefully!"
-			echo -n "Stopping $SERVICE"
-			kill $PID
-			while true; do
-				sleep 1
-				echo -n "."
-				PID=$(pgrep -f -u "$ROLE_USER" "$COMMAND_REGEXP")
-				if ! [[ $PID ]]; then
-					echo
-					break
-				fi
-			done
-		else
-			echo "$SERVICE does not seem to be running"
-			echo "Running java processes:"
-			ps uxww | grep [j]ava
-			exit 1
-		fi
-		;;
+        echo -n "$SERVICE startup"
+        case "$STATUS" in
+            1)  # Failed startup
+                failed
+                exit 1
+                ;;
+            0)  # Successful startup
+                success
+                ;;
+            4)  # Possible startup
+                passed
+                ;;
+            *)
+                warning
+                echo "Unknown server status: [$STATUS]"
+                ;;
+        esac
+        if [[ "$SENDLOGS" -gt 0 ]]; then
+            check_log </dev/null &>/dev/null &
+        fi
+        ;;
+    stop)
+        # kill log checker process (if running)
+        PID=$(pgrep -f -u "$ROLE_USER" "$0 start")
+        if [[ $PID ]]; then
+            kill $PID	# also kills sleep
+        fi
+
+        # kill jvm
+        PID=$(server_pid)
+        if [[ $PID ]]; then
+            echo " *** If there is a long update running, $SERVICE can take up to 2 hours to exit gracefully!"
+            echo -n "Stopping $SERVICE"
+            kill $PID
+            while true; do
+                sleep 1
+                echo -n "."
+                PID=$(server_pid)
+                if ! [[ $PID ]]; then
+                    echo
+                    break
+                fi
+            done
+        else
+            echo "$SERVICE does not seem to be running"
+            echo "Running java processes:"
+            ps uxww | grep [j]ava
+            exit 1
+        fi
+        ;;
     jmx)
         # drop into JMX console
-        PID=$(pgrep -f -u "$ROLE_USER" "$COMMAND_REGEXP")
+        PID=$(server_pid)
         if [[ $PID ]]; then
             # only-digits URL is handled specially, as a process id of a JVM to connect to
             java -jar jmxterm-1.0-alpha-4-uber.jar --url $PID
@@ -264,11 +336,11 @@ case "$1" in
         else
             echo "$SERVICE does not seem to be running"
             exit 1
-            fi
+        fi
         ;;
     threaddump)
         # dump thread state to the console
-        PID=$(pgrep -f -u "$ROLE_USER" "$COMMAND_REGEXP")
+        PID=$(server_pid)
         if [[ $PID ]]; then
                 echo "Sending signal to $SERVICE to dump thread state to console."
                 kill -3 $PID
@@ -277,14 +349,28 @@ case "$1" in
                 exit 1
         fi
         ;;
-	restart)
-		$0 stop
-		$0 start
-		;;
-	*)
-		echo "Usage: $0 {start|stop|restart|jmx|threaddump}"
-		exit 1
-		;;
+    restart)
+        $0 stop
+        $0 start
+        ;;
+    status)
+        if server_running; then
+            if server_up; then
+                echo "$SERVICE is up and running"
+                exit 0
+            else
+                echo "$SERVICE is running, but not ready"
+                exit 4
+            fi
+        else
+            echo "$SERVICE is not running"
+            exit 1
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|jmx|threaddump}"
+        exit 1
+        ;;
 esac
 
 exit 0
