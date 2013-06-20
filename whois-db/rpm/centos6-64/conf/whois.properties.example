@@ -6,6 +6,7 @@ whois.default.sources=
 port.query=-1
 port.api.internal=-1
 port.api.public=-1
+port.api.rdap=-1
 port.nrtm=-1
 port.nrtm.legacy=-1
 
