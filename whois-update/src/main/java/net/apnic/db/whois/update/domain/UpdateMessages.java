@@ -25,5 +25,7 @@ public final class UpdateMessages {
         return new Message(Type.ERROR, "Parent %s does not have status:\n        %s", key, allowedParentInetStatusMessage);
     }
 
-
+    public static Message hasNoParents(String objectType, CIString key) {
+        return new Message(Type.ERROR, "%s %s has no parents", objectType, key);
+    }
 }

@@ -6,9 +6,7 @@ import net.apnic.db.whois.common.domain.attrs.Inet6numStatus;
 import net.apnic.db.whois.common.domain.attrs.InetnumStatus;
 import net.ripe.db.whois.common.Message;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
-import net.ripe.db.whois.common.domain.CIString;
-import net.ripe.db.whois.common.domain.IpInterval;
-import net.ripe.db.whois.common.domain.Maintainers;
+import net.ripe.db.whois.common.domain.*;
 import net.ripe.db.whois.common.domain.attrs.InetStatus;
 import net.ripe.db.whois.common.iptree.IpEntry;
 import net.ripe.db.whois.common.iptree.IpTree;
@@ -42,13 +40,11 @@ public class StatusValidator implements BusinessRuleValidator {
     private static final Set<InetnumStatus> allowedParentInetStatuses = Collections.unmodifiableSet(
             Sets.newHashSet(InetnumStatus.ALLOCATED_NON_PORTABLE, InetnumStatus.ALLOCATED_PORTABLE)
     );
-
     private static final Set<Inet6numStatus> allowedParentInet6Statuses = Collections.unmodifiableSet(
             Sets.newHashSet(Inet6numStatus.ALLOCATED_NON_PORTABLE, Inet6numStatus.ALLOCATED_PORTABLE)
     );
-
-    private static String allowedParentInetStatusMessage = "";
-    private static String allowedParentInet6StatusMessage = "";
+    protected static String allowedParentInetStatusMessage = "";
+    protected static String allowedParentInet6StatusMessage = "";
 
     static {
         for (InetnumStatus InetnumStatus : allowedParentInetStatuses) {
@@ -131,18 +127,28 @@ public class StatusValidator implements BusinessRuleValidator {
     private void checkParentStatus(final PreparedUpdate update, final UpdateContext updateContext) {
 
         final IpInterval ipInterval = IpInterval.parse(update.getUpdatedObject().getKey());
-        final List<IpEntry> parents = update.getType().equals(ObjectType.INETNUM) ? ((IpTree) ipv4Tree).findAllLessSpecific(ipInterval) : ((IpTree) ipv6Tree).findAllLessSpecific(ipInterval);
+        final List<IpEntry> parents = Lists.newArrayList();
 
-        for (IpEntry parent : parents) {
-            final RpslObject parentObject = objectDao.getById(parent.getObjectId());
-            InetStatus parentStatus = InetStatusHelper.getStatus(parentObject);
-            if (parentStatus instanceof InetnumStatus) {
-                if (!allowedParentInetStatuses.contains(parentStatus)) {
-                    updateContext.addMessage(update, net.apnic.db.whois.update.domain.UpdateMessages.invalidParentStatus(parentObject.getKey(), allowedParentInetStatusMessage));
-                }
-            } else {
-                if (!allowedParentInet6Statuses.contains(parentStatus)) {
-                    updateContext.addMessage(update, net.apnic.db.whois.update.domain.UpdateMessages.invalidParentStatus(parentObject.getKey(), allowedParentInet6StatusMessage));
+        if (update.getType().equals(ObjectType.INETNUM)) {
+            parents.addAll(ipv4Tree.findAllLessSpecific((Ipv4Resource) ipInterval));
+        } else {
+            parents.addAll(ipv6Tree.findAllLessSpecific((Ipv6Resource) ipInterval));
+        }
+
+        if (parents.isEmpty()) {
+            updateContext.addMessage(update, net.apnic.db.whois.update.domain.UpdateMessages.hasNoParents(update.getType().getName(), update.getUpdatedObject().getKey()));
+        } else {
+            for (IpEntry parent : parents) {
+                final RpslObject parentObject = objectDao.getById(parent.getObjectId());
+                InetStatus parentStatus = InetStatusHelper.getStatus(parentObject);
+                if (parentStatus instanceof InetnumStatus) {
+                    if (!allowedParentInetStatuses.contains(parentStatus)) {
+                        updateContext.addMessage(update, net.apnic.db.whois.update.domain.UpdateMessages.invalidParentStatus(parentObject.getKey(), allowedParentInetStatusMessage));
+                    }
+                } else {
+                    if (!allowedParentInet6Statuses.contains(parentStatus)) {
+                        updateContext.addMessage(update, net.apnic.db.whois.update.domain.UpdateMessages.invalidParentStatus(parentObject.getKey(), allowedParentInet6StatusMessage));
+                    }
                 }
             }
         }
