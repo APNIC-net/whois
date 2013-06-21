@@ -280,6 +280,7 @@ case "$1" in
         case "$STATUS" in
             1)  # Failed startup
                 failed
+                echo
                 exit 1
                 ;;
             0)  # Successful startup
@@ -290,9 +291,11 @@ case "$1" in
                 ;;
             *)
                 warning
-                echo "Unknown server status: [$STATUS]"
+                echo
+                echo -n "Unknown server status: [$STATUS]"
                 ;;
         esac
+        echo
         if [[ "$SENDLOGS" -gt 0 ]]; then
             check_log </dev/null &>/dev/null &
         fi
