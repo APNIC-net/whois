@@ -145,7 +145,7 @@ class EndToEndSpec extends Specification {
     }
 
     def oneBasicFixture(String key) {
-        def s = BasicFixtures.basicFixtures[key]
+        def s = getBasicFixtures()[key]
         if (s == null) {
             throw new IllegalArgumentException('No fixture for ${key}')
         }
