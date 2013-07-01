@@ -244,43 +244,43 @@
                                             <directory>${rpm.install.dir.var}</directory>
                                             <!-- TODO: Should setup a role_user property for this -->
                                             <!-- TODO: and setup filter for the initscript -->
-                                            <username>whois</username>
-                                            <groupname>whois</groupname>
+                                            <username>${whois.init.user}</username>
+                                            <groupname>${whois.init.user}</groupname>
                                         </mapping>
                                         <mapping>
                                             <directory>${rpm.install.dir.export}</directory>
-                                            <username>whois</username>
-                                            <groupname>whois</groupname>
+                                            <username>${whois.init.user}</username>
+                                            <groupname>${whois.init.user}</groupname>
                                         </mapping>
                                         <mapping>
                                             <directory>${rpm.install.dir.export.tmp}</directory>
-                                            <username>whois</username>
-                                            <groupname>whois</groupname>
+                                            <username>${whois.init.user}</username>
+                                            <groupname>${whois.init.user}</groupname>
                                         </mapping>
                                         <mapping>
                                             <directory>${rpm.install.dir.freetext}</directory>
-                                            <username>whois</username>
-                                            <groupname>whois</groupname>
+                                            <username>${whois.init.user}</username>
+                                            <groupname>${whois.init.user}</groupname>
                                         </mapping>
                                         <mapping>
                                             <directory>${rpm.install.dir.wsearch}</directory>
-                                            <username>whois</username>
-                                            <groupname>whois</groupname>
+                                            <username>${whois.init.user}</username>
+                                            <groupname>${whois.init.user}</groupname>
                                         </mapping>
                                         <mapping>
                                             <directory>${rpm.install.dir.log}</directory>
-                                            <username>whois</username>
-                                            <groupname>whois</groupname>
+                                            <username>${whois.init.user}</username>
+                                            <groupname>${whois.init.user}</groupname>
                                         </mapping>
                                         <mapping>
                                             <directory>${rpm.install.dir.log.audit}</directory>
-                                            <username>whois</username>
-                                            <groupname>whois</groupname>
+                                            <username>${whois.init.user}</username>
+                                            <groupname>${whois.init.user}</groupname>
                                         </mapping>
                                         <mapping>
                                             <directory>${rpm.install.dir.grs.import}</directory>
-                                            <username>whois</username>
-                                            <groupname>whois</groupname>
+                                            <username>${whois.init.user}</username>
+                                            <groupname>${whois.init.user}</groupname>
                                         </mapping>
                                         <mapping>
                                             <directory>${rpm.install.dir.schema}</directory>
@@ -307,12 +307,26 @@
                                             <sources>
                                                 <source>
                                                     <location>rpm/centos6-64/init.d/whois</location>
-                                                    <filter>true</filter>
                                                 </source>
                                             </sources>
                                             <filemode>0755</filemode>
                                         </mapping>
+                                        <mapping>
+                                            <configuration>noreplace</configuration>
+                                            <directory>/etc/sysconfig</directory>
+                                            <directoryIncluded>false</directoryIncluded>
+                                            <sources>
+                                                <source>
+                                                    <location>rpm/centos6-64/init.d/whois-config</location>
+                                                    <filter>true</filter>
+                                                    <destination>whois</destination>
+                                                </source>
+                                            </sources>
+                                        </mapping>
                                     </mappings>
+                                    <preinstallScriptlet>
+                                        /usr/sbin/useradd ${whois.init.user}
+                                    </preinstallScriptlet>
                                     <postinstallScriptlet>
                                         <!-- Refresh the init scripts -->
                                         <script>

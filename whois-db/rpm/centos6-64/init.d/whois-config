@@ -1,0 +1,30 @@
+#!/bin/sh
+# Service name
+SERVICE=whois
+
+# Variant
+VARIANT=${whois.init.variant}
+
+# Email address of operator
+OPEREMAIL=${whois.init.operator}
+
+# Send logs to operator
+SENDLOGS=${whois.init.sendlogs}
+
+# user to run whois.jar (non-root!)
+ROLE_USER=${whois.init.user}
+
+# Base Whois Location
+BASEDIR=${whois.init.basedir}
+
+# Configuration location
+CONFDIR=$BASEDIR/conf
+
+# Whois Properties file
+PROPERTIES=$CONFDIR/whois.properties
+
+# Binary location
+BINJAR=$BASEDIR/bin/whois.jar
+
+# Console log location
+LOG=$BASEDIR/var/console.log

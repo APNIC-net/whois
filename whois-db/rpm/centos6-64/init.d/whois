@@ -1,40 +1,19 @@
 #!/bin/bash
 #
+#   whois   Init script for Whois Service
+#
 # chkconfig: 3 99 15
 # description: Whois Server
 #
+#
+# config: /etc/sysconfig/whois
 
-# Init script for RIPE Database
-
-# Service name
-SERVICE=whois
-
-# Variant
-VARIANT=${whois.init.variant}
-
-# Email address of operator
-OPEREMAIL=${whois.init.operator}
-
-# Send logs to operator
-SENDLOGS=${whois.init.sendlogs}
-
-# user to run whois.jar (non-root!)
-ROLE_USER=${whois.init.user}
-
-# Base Whois Location
-BASEDIR=${whois.init.basedir}
-
-# Configuration location
-CONFDIR=$BASEDIR/conf
-
-# Whois Properties file
-PROPERTIES=$CONFDIR/whois.properties
-
-# Binary location
-BINJAR=$BASEDIR/bin/whois.jar
-
-# Console log location
-LOG=$BASEDIR/var/console.log
+if [[ -r /etc/sysconfig/whois ]]; then
+    . /etc/sysconfig/whois
+else
+    echo "Config file not readable" >&2
+    exit 1
+fi
 
 ### JVM to use to start whois
 JAVA="java"
