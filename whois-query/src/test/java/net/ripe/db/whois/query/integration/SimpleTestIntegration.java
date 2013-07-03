@@ -54,7 +54,7 @@ public class SimpleTestIntegration extends AbstractWhoisIntegrationTest {
 
     @After
     public void shutdownWhoisServer() {
-        queryServer.stop();
+        queryServer.stop(true);
     }
 
     @Test
