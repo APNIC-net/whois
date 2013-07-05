@@ -13,6 +13,7 @@ public interface AttributeTypeBuilder extends Documented {
         ABUSE_MAILBOX,
         ABUSE_C,
         ADDRESS,
+        ADDRESS_PREFIX_RANGE,
         ADMIN_C,
         AGGR_BNDRY,
         AGGR_MTD,
@@ -107,7 +108,16 @@ public interface AttributeTypeBuilder extends Documented {
         TECH_C,
         TEXT,
         UPD_TO,
-        ZONE_C
+        ZONE_C,
+        // APNIC
+        DOM_NET,
+        LIMERICK,
+        OBJECT_NAME,
+        MEMBERS_AS,
+        PERSON_NAME,
+        REGISTRY_NAME,
+        SUBDOMAIN_NAME,
+        // REFER,
     }
 
     abstract String getName();

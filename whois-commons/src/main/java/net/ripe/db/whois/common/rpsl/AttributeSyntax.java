@@ -33,11 +33,11 @@ public interface AttributeSyntax extends Documented {
     static AttributeSyntax COMPONENTS_SYNTAX = implementationMap.get(AttributeSyntaxType.COMPONENTS_SYNTAX);
     static AttributeSyntax COUNTRY_CODE_SYNTAX = implementationMap.get(AttributeSyntaxType.COUNTRY_CODE_SYNTAX);
     static AttributeSyntax DEFAULT_SYNTAX = implementationMap.get(AttributeSyntaxType.DEFAULT_SYNTAX);
-    static AttributeSyntax FREE_FORM_SYNTAX = implementationMap.get(AttributeSyntaxType.FREE_FORM_SYNTAX);
     static AttributeSyntax DOMAIN_SYNTAX = implementationMap.get(AttributeSyntaxType.DOMAIN_SYNTAX);
     static AttributeSyntax DS_RDATA_SYNTAX = implementationMap.get(AttributeSyntaxType.DS_RDATA_SYNTAX);
     static AttributeSyntax EXPORT_SYNTAX = implementationMap.get(AttributeSyntaxType.EXPORT_SYNTAX);
     static AttributeSyntax EXPORT_COMPS_SYNTAX = implementationMap.get(AttributeSyntaxType.EXPORT_COMPS_SYNTAX);
+    static AttributeSyntax FREE_FORM_SYNTAX = implementationMap.get(AttributeSyntaxType.FREE_FORM_SYNTAX);
     static AttributeSyntax PHONE_SYNTAX = implementationMap.get(AttributeSyntaxType.PHONE_SYNTAX);
     static AttributeSyntax FILTER_SYNTAX = implementationMap.get(AttributeSyntaxType.FILTER_SYNTAX);
     static AttributeSyntax FILTER_SET_SYNTAX = implementationMap.get(AttributeSyntaxType.FILTER_SET_SYNTAX);
@@ -86,6 +86,17 @@ public interface AttributeSyntax extends Documented {
     static AttributeSyntax RTR_SET_SYNTAX = implementationMap.get(AttributeSyntaxType.RTR_SET_SYNTAX);
     static AttributeSyntax SOURCE_SYNTAX = implementationMap.get(AttributeSyntaxType.SOURCE_SYNTAX);
     static AttributeSyntax STATUS_SYNTAX = implementationMap.get(AttributeSyntaxType.STATUS_SYNTAX);
+    // APNIC
+    static AttributeSyntax DOM_NET_SYNTAX = implementationMap.get(AttributeSyntaxType.DOM_NET_SYNTAX);
+    static AttributeSyntax FINGERPR_SYNTAX = implementationMap.get(AttributeSyntaxType.FINGERPR_SYNTAX);
+    // static AttributeSyntax MEMBERS_AS_SYNTAX = implementationMap.get(AttributeSyntaxType.MEMBERS_AS_SYNTAX);
+    static AttributeSyntax LIMERICK_SYNTAX = implementationMap.get(AttributeSyntaxType.LIMERICK_SYNTAX);
+    static AttributeSyntax PERSON_NAME_SYNTAX = implementationMap.get(AttributeSyntaxType.PERSON_NAME_SYNTAX);
+    static AttributeSyntax PUBLIC_KEY_SYNTAX = implementationMap.get(AttributeSyntaxType.PUBLIC_KEY_SYNTAX);
+    static AttributeSyntax REFERRAL_BY_SYNTAX = implementationMap.get(AttributeSyntaxType.REFERRAL_BY_SYNTAX);
+    static AttributeSyntax REGISTRY_NAME_SYNTAX= implementationMap.get(AttributeSyntaxType.REGISTRY_NAME_SYNTAX);
+    static AttributeSyntax SUBDOMAIN_NAME_SYNTAX = implementationMap.get(AttributeSyntaxType.SUBDOMAIN_NAME_SYNTAX);
+    // static AttributeSyntax REFER_SYNTAX = implementationMap.get(AttributeSyntaxType.REFER_SYNTAX);
 
     boolean matches(ObjectType objectType, String value);
 
@@ -109,8 +120,6 @@ public interface AttributeSyntax extends Documented {
         public String getDescription(final ObjectType objectType) {
             return description;
         }
-
-
     }
 
     static class AttributeSyntaxRegexp implements AttributeSyntax {
@@ -688,6 +697,17 @@ public interface AttributeSyntax extends Documented {
         ROUTE_SET_SYNTAX,
         RTR_SET_SYNTAX,
         SOURCE_SYNTAX,
-        STATUS_SYNTAX;
+        STATUS_SYNTAX,
+        // APNIC
+        DOM_NET_SYNTAX,
+        FINGERPR_SYNTAX,
+        LIMERICK_SYNTAX,
+        // MEMBERS_AS_SYNTAX,
+        PERSON_NAME_SYNTAX,
+        PUBLIC_KEY_SYNTAX,
+        REFERRAL_BY_SYNTAX,
+        REGISTRY_NAME_SYNTAX,
+        SUBDOMAIN_NAME_SYNTAX,
+        // REFER_SYNTAX,
     }
 }
