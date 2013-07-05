@@ -2,6 +2,8 @@ package net.ripe.db.whois.common.rpsl;
 
 import com.google.common.collect.Maps;
 import net.ripe.db.whois.common.domain.CIString;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
+import org.springframework.beans.factory.BeanInitializationException;
 
 import javax.annotation.CheckForNull;
 import java.util.Collections;
@@ -12,7 +14,6 @@ import static net.ripe.db.whois.common.domain.CIString.ciString;
 import static net.ripe.db.whois.common.rpsl.AttributeValueType.LIST_VALUE;
 
 public enum AttributeType implements AttributeTypeBuilder {
-
     ABUSE_MAILBOX(AttributeTypeBuilder.implementationMap.get(Enum.ABUSE_MAILBOX)),
     ABUSE_C(AttributeTypeBuilder.implementationMap.get(Enum.ABUSE_C)),
     ADDRESS(AttributeTypeBuilder.implementationMap.get(Enum.ADDRESS)),
@@ -110,13 +111,33 @@ public enum AttributeType implements AttributeTypeBuilder {
     TECH_C(AttributeTypeBuilder.implementationMap.get(Enum.TECH_C)),
     TEXT(AttributeTypeBuilder.implementationMap.get(Enum.TEXT)),
     UPD_TO(AttributeTypeBuilder.implementationMap.get(Enum.UPD_TO)),
-    ZONE_C(AttributeTypeBuilder.implementationMap.get(Enum.ZONE_C));
+    ZONE_C(AttributeTypeBuilder.implementationMap.get(Enum.ZONE_C)),
+    // APNIC
+    ADDRESS_PREFIX_RANGE(AttributeTypeBuilder.implementationMap.get(Enum.ADDRESS_PREFIX_RANGE)),
+    DOM_NET(AttributeTypeBuilder.implementationMap.get(Enum.DOM_NET)),
+    LIMERICK(AttributeTypeBuilder.implementationMap.get(Enum.LIMERICK)),
+    // MEMBERS_AS(AttributeTypeBuilder.implementationMap.get(Enum.MEMBERS_AS)),
+    // REFER(AttributeTypeBuilder.implementationMap.get(Enum.REFER)),
+    REGISTRY_NAME(AttributeTypeBuilder.implementationMap.get(Enum.REGISTRY_NAME)),
+    SUBDOMAIN_NAME(AttributeTypeBuilder.implementationMap.get(Enum.SUBDOMAIN_NAME));
+
+
 
     private static final Map<CIString, AttributeType> TYPE_NAMES = Maps.newHashMapWithExpectedSize(AttributeType.values().length);
 
     static {
+        int cnt=0;
         for (final AttributeType type : AttributeType.values()) {
+            System.out.println(cnt++);
+            if (TYPE_NAMES.get(ciString(type.getName())) != null) {
+                throw new BeanInitializationException("Attribute type mapping exception: " + ciString(type.getName()));
+            }
+
             TYPE_NAMES.put(ciString(type.getName()), type);
+
+            if (TYPE_NAMES.get(ciString(type.getFlag())) != null) {
+                throw new BeanInitializationException("Attribute type mapping exception: " + ciString(type.getFlag()));
+            }
             TYPE_NAMES.put(ciString(type.getFlag()), type);
         }
     }
