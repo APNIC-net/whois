@@ -23,18 +23,17 @@ public class AttributeSyntaxTest {
 //        verifyFailure(ObjectType.INET_RTR, AttributeType.ALIAS, "RIPE-test_.net");
 //    }
 
-    // ROUTE attribute.
     @Test
     public void addressPrefix() {
-        verifyFailure(ObjectType.ROUTE, AttributeType.ADDRESS_PREFIX_RANGE, "");
-        verifyFailure(ObjectType.ROUTE, AttributeType.ADDRESS_PREFIX_RANGE, "100.100.100");
-        verifyFailure(ObjectType.ROUTE, AttributeType.ADDRESS_PREFIX_RANGE, "300.300.300.300");
-        verifyFailure(ObjectType.ROUTE, AttributeType.ADDRESS_PREFIX_RANGE, "0/100");
-        verifyFailure(ObjectType.ROUTE, AttributeType.ADDRESS_PREFIX_RANGE, "::0/0");
-        verifyFailure(ObjectType.ROUTE, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.0.0 -");
-        verifyFailure(ObjectType.ROUTE, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.1.0 _ 192.168.1.255");
-        verifySuccess(ObjectType.ROUTE, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.1.0/24");
-        verifySuccess(ObjectType.ROUTE, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.0.0/22");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "100.100.100");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "300.300.300.300");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "0/100");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "::0/0");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.0.0 -");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.1.0 _ 192.168.1.255");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.1.0/24");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.0.0/22");
     }
 
     @Test
@@ -106,6 +105,8 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.AS_SET, AttributeType.AS_SET, "AS1:AS-EXPORT:AS2");
     }
 
+
+
 //    @Test
 //    public void assignmentSize() throws Exception {
 //        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "");
@@ -156,6 +157,8 @@ public class AttributeSyntaxTest {
        verifyFailure(ObjectType.IRT, AttributeType.AUTH, "pgpkey-0123456");
        verifyFailure(ObjectType.IRT, AttributeType.AUTH, "pgpkey-012345678");
    }
+
+
 
     @Test
     public void changed() throws Exception {
@@ -216,6 +219,7 @@ public class AttributeSyntaxTest {
 //    }
 //
 
+
     @Test
     public void domNet() {
         verifyFailure(ObjectType.DOMAIN, AttributeType.DOM_NET, "");
@@ -248,11 +252,12 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.DOMAIN, AttributeType.DOMAIN, "Brisbane.apnic.net.com");
     }
 
-//    @After
-//    public void tearDown() throws Exception {
-//
-//
-//    }
+
+    @After
+    public void tearDown() throws Exception {
+
+
+    }
 
     @Test
     public void dsRdata() {

@@ -177,7 +177,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
         attributeSyntaxTypeMap.put(AttributeSyntaxType.DEFAULT_SYNTAX,  new AttributeSyntaxParser(new DefaultParser(), "" +
                 "to <peering> [action <action>] [networks <filter>]"));
 
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.DOM_NET_SYNTAX, new AttributeSyntaxRegexp(
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.DOM_NET_SYNTAX, new AttributeSyntaxRegexp(254,
                 Pattern.compile("^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"), "" +
                 "An IPv4 address is represented as a sequence of four\n" +
                 "integers in the range from 0 to 255 separated by the\n" +
