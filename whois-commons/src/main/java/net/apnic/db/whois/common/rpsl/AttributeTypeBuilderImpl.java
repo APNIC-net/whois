@@ -38,7 +38,7 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("Full postal address of a contact")
                 .syntax(AttributeSyntax.FREE_FORM_SYNTAX));
 
-        mapHelperAdd(new AttributeTypeBuilderImpl("address-prefix", "ap", Enum.ROUTE)
+        mapHelperAdd(new AttributeTypeBuilderImpl("address-prefix", "ap", Enum.ADDRESS_PREFIX_RANGE)
                 .doc("Specifies a range of IPv4 that inetnum object presents. " +
                         "The ending address should be greater than the starting one.")
                 .syntax(AttributeSyntax.ADDRESS_PREFIX_RANGE_SYNTAX));
@@ -232,7 +232,7 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("Identifies the language.")
                 .syntax(AttributeSyntax.LANGUAGE_CODE_SYNTAX));
 
-        mapHelperAdd(new AttributeTypeBuilderImpl("limerick", "lr", Enum.TEXT)
+        mapHelperAdd(new AttributeTypeBuilderImpl("limerick", "lr", Enum.LIMERICK)
                 .doc("Text of the limerick. Must be humorous, but not malicious or\n" +
                      "insulting.\n")
                 .syntax(AttributeSyntax.LIMERICK_SYNTAX));

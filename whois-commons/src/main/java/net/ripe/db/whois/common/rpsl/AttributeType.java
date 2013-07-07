@@ -117,18 +117,17 @@ public enum AttributeType implements AttributeTypeBuilder {
     DOM_NET(AttributeTypeBuilder.implementationMap.get(Enum.DOM_NET)),
     LIMERICK(AttributeTypeBuilder.implementationMap.get(Enum.LIMERICK)),
     // MEMBERS_AS(AttributeTypeBuilder.implementationMap.get(Enum.MEMBERS_AS)),
-    // REFER(AttributeTypeBuilder.implementationMap.get(Enum.REFER)),
+    //REFER(AttributeTypeBuilder.implementationMap.get(Enum.REFER)),
     REGISTRY_NAME(AttributeTypeBuilder.implementationMap.get(Enum.REGISTRY_NAME)),
     SUBDOMAIN_NAME(AttributeTypeBuilder.implementationMap.get(Enum.SUBDOMAIN_NAME));
-
 
 
     private static final Map<CIString, AttributeType> TYPE_NAMES = Maps.newHashMapWithExpectedSize(AttributeType.values().length);
 
     static {
-        int cnt=0;
+//        int cnt=0;
         for (final AttributeType type : AttributeType.values()) {
-            System.out.println(cnt++);
+//            System.out.println(cnt++);
             if (TYPE_NAMES.get(ciString(type.getName())) != null) {
                 throw new BeanInitializationException("Attribute type mapping exception: " + ciString(type.getName()));
             }
