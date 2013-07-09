@@ -39,11 +39,13 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
         attributeSyntaxTypeMap.put(AttributeSyntaxType.ANY_SYNTAX, new AnySyntax());
 
         // No tests for this
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.ADDRESS_PREFIX_RANGE_SYNTAX, new AttributeSyntaxRegexp(
-                Pattern.compile("^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))/([12]?[0-9]|3[012])$"), "" +
-                "An IP address prefix represented as an IPv4 address followed\n" +
-                "by the character slash \"/\" followed by an integer in the\n" +
-                "range from 0 to 32.\n"));
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.ADDRESS_PREFIX_RANGE_SYNTAX, new AttributeSyntaxParser(new AttributeParser.AddressPrefixRangeParser()));
+//
+//        attributeSyntaxTypeMap.put(AttributeSyntaxType.ADDRESS_PREFIX_RANGE_SYNTAX, new AttributeSyntaxRegexp(
+//                Pattern.compile("^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))/([12]?[0-9]|3[012])$"), "" +
+//                "An IP address prefix represented as an IPv4 address followed\n" +
+//                "by the character slash \"/\" followed by an integer in the\n" +
+//                "range from 0 to 32.\n"));
 
 
 //
@@ -55,29 +57,31 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
 //
 
         // Taking core regex
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.AS_BLOCK_SYNTAX, new AttributeSyntaxRegexp(
-                Pattern.compile("(?i)^AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5]) - AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])$"), "" +
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.AS_BLOCK_SYNTAX, new AttributeSyntaxParser(new AttributeParser.AsBlockParser(), "" +
                 "<as-number> - <as-number>\n"));
 
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.AS_NUMBER_SYNTAX, new AttributeSyntaxRegexp(12,
-                Pattern.compile("(?i)^AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])$"), "" +
+//        attributeSyntaxTypeMap.put(AttributeSyntaxType.AS_NUMBER_SYNTAX, new AttributeSyntaxRegexp(12,
+//                Pattern.compile("(?i)^AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])$"), "" +
+//                "     Four-byte ASNs    AS<high order 16 bit value in decimal>.\n" +
+//                "                       <low order 16 bit value in decimal>\n"));
+
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.AS_NUMBER_SYNTAX, new AttributeSyntaxParser(new AttributeParser.AutNumParser(), "" +
                 "     Four-byte ASNs    AS<high order 16 bit value in decimal>.\n" +
                 "                       <low order 16 bit value in decimal>\n"));
 
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.AS_SET_SYNTAX, new AttributeSyntaxRegexp(80,
-                Pattern.compile("(?i)^((AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])|as-[A-Z0-9_-]*[A-Z0-9]):)*as-[A-Z0-9_-]*[A-Z0-9](:(AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])|as-[A-Z0-9_-]*[A-Z0-9]))*$"),
-                "" +
-                "An as-set name is made up of letters, digits, the\n" +
-                "character underscore \"_\", and the character hyphen \"-\"; it\n" +
-                "must start with \"AS-\", and the last character of a name must\n" +
-                "be a letter or a digit.\n" +
-                "\n" +
-                "Advanced syntax:\n" +
-                "\n" +
-                "An as-set name can also be hierarchical.  A hierarchical as-set\n" +
-                "name is a sequence of as-set names and AS numbers separated by\n" +
-                "colons \":\".  At least one component of such a name must be\n" +
-                "an actual set name (i.e. start with \"AS-\").\n"));
+
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.AS_SET_SYNTAX, new AttributeSyntaxParser(new AttributeParser.AsSetParser(), "" +
+                        "An as-set name is made up of letters, digits, the\n" +
+                        "character underscore \"_\", and the character hyphen \"-\"; it\n" +
+                        "must start with \"AS-\", and the last character of a name must\n" +
+                        "be a letter or a digit.\n" +
+                        "\n" +
+                        "Advanced syntax:\n" +
+                        "\n" +
+                        "An as-set name can also be hierarchical.  A hierarchical as-set\n" +
+                        "name is a sequence of as-set names and AS numbers separated by\n" +
+                        "colons \":\".  At least one component of such a name must be\n" +
+                        "an actual set name (i.e. start with \"AS-\").\n"));
 
         attributeSyntaxTypeMap.put(AttributeSyntaxType.AGGR_BNDRY_SYNTAX, new AttributeSyntaxParser(new AggrBndryParser(), "" +
                 "[<as-expression>]\n"));
@@ -158,8 +162,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                 "separates the header from the key body.\n"));
         
         // # (Hash) is taken as start of a comment hence # cannot be entered changed field
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.CHANGED_SYNTAX, new AttributeSyntaxRegexp(
-                Pattern.compile("(?i)^((([A-Z0-9~#$%&'*+=?^_`{|}~/-]+\\.)*[A-Z0-9~#$%&'*+=?^_`{|}~/-]+)|(\"[^\"@\\\\]+\";))@([A-Z0-9-]+(\\.[A-Z0-9-]+)+)( [0-9]{8})?$"), "" +
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.CHANGED_SYNTAX, new AttributeSyntaxParser(new AttributeParser.ChangedParser(), "" +
                 "An e-mail address as defined in RFC 2822, followed by a date\n" +
                 "in the format YYYYMMDD.\n"));
 
@@ -184,11 +187,9 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                 "character dot (\".\").  For example, 128.9.128.5 represents a\n" +
                 "valid IPv4 address.\n"));
 
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.DOMAIN_SYNTAX, new AttributeSyntaxRegexp(254,
-                Pattern.compile("(?i)^[A-Z0-9]([-A-Z0-9]*[A-Z0-9])?(\\.[A-Z0-9]([-A-Z0-9]*[A-Z0-9])?)*(\\.)?$"), "" +
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.DOMAIN_SYNTAX, new AttributeSyntaxParser(new AttributeParser.DomainParser(), "" +
                 "Domain name as specified in RFC 1034 without trailing dot.\n" +
                 "The total length should not exceed 254 characters (octets).\n"));
-
 
         attributeSyntaxTypeMap.put(AttributeSyntaxType.DS_RDATA_SYNTAX, new AttributeSyntaxRegexp(255,
                 Pattern.compile("(?i)^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-4])( (([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|RSAMD5|DH|DSA|ECC|RSASHA1|INDIRECT|PRIVATEDNS|PRIVATEOID))( ([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))( [(]?[ 0-9a-fA-F]{1,128}[)]?)$"), "" +
@@ -223,19 +224,16 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                 "to <peering-N> [action <action-N>]\n" +
                 "announce <filter>\n"));
 
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.FINGERPR_SYNTAX, new AttributeSyntaxRegexp(
+                Pattern.compile("(?i)^(([A-F0-9]{4} ){9}[A-F0-9]{4})|(([A-F0-9]{2} ){15}[A-F0-9]{2})|(([A-F0-9]{2}:){15}[A-F0-9]{2})$"), "" +
+                "Attribute generated by server.\n"));
+
         attributeSyntaxTypeMap.put(AttributeSyntaxType.FILTER_SYNTAX, new AttributeSyntaxParser(new FilterParser(), "" +
                 "Logical expression which when applied to a set of routes\n" +
                 "returns a subset of these routes. Please refer to RFC 2622\n" +
                 "for more information.\n"));
 
-
-
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.FINGERPR_SYNTAX, new AttributeSyntaxRegexp(
-                Pattern.compile("(?i)^(([A-F0-9]{4} ){9}[A-F0-9]{4})|(([A-F0-9]{2} ){15}[A-F0-9]{2})|(([A-F0-9]{2}:){15}[A-F0-9]{2})$"), "" +
-                "Attribute generated by server.\n"));
-
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.FILTER_SET_SYNTAX,
-                new AttributeSyntaxRegexp(Pattern.compile("(?i)^((AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])|fltr-[A-Z0-9_-]*[A-Z0-9]):)*fltr-[A-Z0-9_-]*[A-Z0-9](:(AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])|fltr-[A-Z0-9_-]*[A-Z0-9]))*$"),
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.FILTER_SET_SYNTAX, new AttributeSyntaxParser(new AttributeParser.FilterSetParser(),
                 "" +
                 "A filter-set name is made up of letters, digits, the\n" +
                 "character underscore \"_\", and the character hyphen \"-\"; it\n" +
@@ -286,9 +284,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
 
 
         // 192.168.1.0 - 192.168.1.255"
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.IPV4_SYNTAX, new AttributeSyntaxRegexp(
-              Pattern.compile("^((((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])) - ((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])))|(((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))/([89]|[12][0-9]|3[012])))$"),
-              "" +
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.IPV4_SYNTAX, new AttributeSyntaxParser(new AttributeParser.Ipv4ResourceParser(), "" +
               "<ipv4-address> - <ipv4-address>"));
 
         attributeSyntaxTypeMap.put(AttributeSyntaxType.IPV6_SYNTAX, new AttributeSyntaxParser(new AttributeParser.Ipv6ResourceParser(), "" +
@@ -311,9 +307,9 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
 //        attributeSyntaxTypeMap.put(AttributeSyntaxType.LANGUAGE_CODE_SYNTAX,  new AttributeSyntaxRegexp(Pattern.compile("(?i)^[a-z]{2}$"), "" +
 //                "Valid two-letter ISO 639-1 language code.\n"));
 //
-
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.LIMERICK_SYNTAX, new AttributeSyntaxRegexp(80,
-                Pattern.compile("(?i)^lim-[A-Z0-9_-]*$"), ""));
+//
+//        attributeSyntaxTypeMap.put(AttributeSyntaxType.LIMERICK_SYNTAX, new AttributeSyntaxRegexp(80,
+//                Pattern.compile("(?i)^lim-[A-Z0-9_-]*$"), ""));
 
         attributeSyntaxTypeMap.put(AttributeSyntaxType.MBRS_BY_REF_SYNTAX,  new AttributeSyntaxRegexp(80,
                 Pattern.compile("(?i)^(as-any|rs-any|peeras|and|or|not|atomic|from|to|at|action|accept|announce|except|refine|networks|into|inbound|outbound|rs-.*|rtrs-.*|fltr-.*|prng-.*)$"),
@@ -375,8 +371,6 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                 "        <filter> refine <importexpression>)\n"));
 
         attributeSyntaxTypeMap.put(AttributeSyntaxType.MP_MEMBERS_SYNTAX, new MembersSyntax(true));
-
-
 
         attributeSyntaxTypeMap.put(AttributeSyntaxType.MP_PEER_SYNTAX, new AttributeSyntaxParser(new MpPeerParser(), new Multiple(new HashMap<ObjectType, String>() {{
             put(ObjectType.INET_RTR, "" +
@@ -474,22 +468,20 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
         attributeSyntaxTypeMap.put(AttributeSyntaxType.PEERING_SYNTAX, new AttributeSyntaxParser(new PeeringParser(), "" +
                 "<peering>\n"));
 
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.PEERING_SET_SYNTAX, new AttributeSyntaxRegexp(80,
-                Pattern.compile("(?i)^((AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])|prng-[A-Z0-9_-]*[A-Z0-9]):)*prng-[A-Z0-9_-]*[A-Z0-9](:(AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])|prng-[A-Z0-9_-]*[A-Z0-9]))*$"),
-                "" +
-                        "A peering-set name is made up of letters, digits, the\n" +
-                        "character underscore \"_\", and the character hyphen \"-\"; it\n" +
-                        "must start with \"PRNG-\", and the last character of a name\n" +
-                        "must be a letter or a digit.\n" +
-                        "\n" +
-                        "Advanced syntax:\n" +
-                        "\n" +
-                        "A peering-set name can also be hierarchical.  A \n" +
-                        "hierarchical set name is a sequence of set names and AS \n" +
-                        "numbers separated by colons \":\".  At least one component of \n" +
-                        "such a name must start with \"PRNG-\".  All the set name\n" +
-                        "components of a hierarchical peering-set name have to be \n" +
-                        "peering-set names.\n"));
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.PEERING_SET_SYNTAX, new AttributeSyntaxParser(new AttributeParser.PeeringSetParser(), "" +
+                "A peering-set name is made up of letters, digits, the\n" +
+                "character underscore \"_\", and the character hyphen \"-\"; it\n" +
+                "must start with \"PRNG-\", and the last character of a name\n" +
+                "must be a letter or a digit.\n" +
+                "\n" +
+                "Advanced syntax:\n" +
+                "\n" +
+                "A peering-set name can also be hierarchical.  A \n" +
+                "hierarchical set name is a sequence of set names and AS \n" +
+                "numbers separated by colons \":\".  At least one component of \n" +
+                "such a name must start with \"PRNG-\".  All the set name\n" +
+                "components of a hierarchical peering-set name have to be \n" +
+                "peering-set names.\n"));
 
         attributeSyntaxTypeMap.put(AttributeSyntaxType.PERSON_NAME_SYNTAX, new AttributeSyntaxRegexp(80,
                 Pattern.compile("(?i)^[A-Z]([A-Z0-9.`'_-]*[A-Z0-9`'_-])?([\\s]+[A-Z0-9.`'_-]+)*[\\s]+[A-Z]([A-Z0-9.`'_-]*[A-Z0-9`'_-])?$"), "" +
@@ -509,12 +501,12 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
 
 //        attributeSyntaxTypeMap.put(AttributeSyntaxType.PERSON_ROLE_NAME_SYNTAX, new PersonRoleSyntax());
 
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.POEM_SYNTAX, new AttributeSyntaxRegexp(80,
-                Pattern.compile("(?i)^POEM-[A-Z0-9][A-Z0-9_-]*$"), "" +
-                "POEM-<string>\n" +
-                "\n" +
-                "<string> can include alphanumeric characters, and \"_\" and\n" +
-                "\"-\" characters.\n"));
+//        attributeSyntaxTypeMap.put(AttributeSyntaxType.POEM_SYNTAX, new AttributeSyntaxRegexp(80,
+//                Pattern.compile("(?i)^POEM-[A-Z0-9][A-Z0-9_-]*$"), "" +
+//                "POEM-<string>\n" +
+//                "\n" +
+//                "<string> can include alphanumeric characters, and \"_\" and\n" +
+//                "\"-\" characters.\n"));
 
         attributeSyntaxTypeMap.put(AttributeSyntaxType.PHONE_SYNTAX, new AttributeSyntaxRegexp(30,
                 Pattern.compile("(?i)^\\+\\s*[0-9][0-9.\\s-]*(\\([0-9.\\s-]*[0-9][0-9.\\s-]*\\))?([0-9.\\s-]*[0-9][0-9.\\s-]*)?([\\s]+ext.[0-9.\\s-]*[0-9][0-9.\\s-]*)?$"),
@@ -527,13 +519,13 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
 
 //        attributeSyntaxTypeMap.put(AttributeSyntaxType.PINGABLE_SYNTAX, new RoutePrefixSyntax());
 
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.POETIC_FORM_SYNTAX, new AttributeSyntaxRegexp(80,
-                Pattern.compile("(?i)^FORM-[A-Z0-9][A-Z0-9_-]*$"), "" +
-                "FORM-<string>\n" +
-                "\n" +
-                "<string> can include alphanumeric characters, and \"_\" and\n" +
-                "\"-\" characters.\n"));
-
+//        attributeSyntaxTypeMap.put(AttributeSyntaxType.POETIC_FORM_SYNTAX, new AttributeSyntaxRegexp(80,
+//                Pattern.compile("(?i)^FORM-[A-Z0-9][A-Z0-9_-]*$"), "" +
+//                "FORM-<string>\n" +
+//                "\n" +
+//                "<string> can include alphanumeric characters, and \"_\" and\n" +
+//                "\"-\" characters.\n"));
+//
 //        attributeSyntaxTypeMap.put(AttributeSyntaxType.REFER_SYNTAX, new AttributeSyntaxParser(new AttributeParser.ReferParser(), "" +
 //                "Syntax:\n" +
 //                "\n" +
@@ -560,9 +552,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                 Pattern.compile("(?i)^[A-Za-z]([A-Za-z0-9_-]*[A-Za-z0-9])?$"), "" +
                 "Use \"APNIC\" only for the APNIC Whois Database.\n"));
 
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.ROUTE_SET_SYNTAX, new AttributeSyntaxRegexp(80,
-                Pattern.compile("(?i)^((AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])|rs-[A-Z0-9_-]*[A-Z0-9]):)*rs-[A-Z0-9_-]*[A-Z0-9](:(AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])|rs-[A-Z0-9_-]*[A-Z0-9]))*$"),
-                "" +
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.ROUTE_SET_SYNTAX, new AttributeSyntaxParser(new AttributeParser.RouteSetParser(), "" +
                 "An route-set name is made up of letters, digits, the\n" +
                 "character underscore \"_\", and the character hyphen \"-\"; it\n" +
                 "must start with \"RS-\", and the last character of a name must\n" +
@@ -575,20 +565,18 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                 "by colons \":\".  At least one component of such a name must\n" +
                 "be an actual route-set name (i.e. start with \"RS-\").\n"));
 
-        attributeSyntaxTypeMap.put(AttributeSyntaxType.RTR_SET_SYNTAX, new AttributeSyntaxRegexp(80,
-                Pattern.compile("(?i)^((AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])|rtrs-[A-Z0-9_-]*[A-Z0-9]):)*rtrs-[A-Z0-9_-]*[A-Z0-9](:(AS(0|[1-9][0-9]{0,8}|[1-3][0-9]{9}|4[01][0-9]{8}|42[0-8][0-9]{7}|429[0-3][0-9]{6}|4294[0-8][0-9]{5}|42949[0-5][0-9]{4}|429496[0-6][0-9]{3}|4294967[01][0-9]{2}|42949672[0-8][0-9]{1}|429496729[0-5])|rtrs-[A-Z0-9_-]*[A-Z0-9]))*$"),
-                "" +
-                        "A router-set name is made up of letters, digits, the\n" +
-                        "character underscore \"_\", and the character hyphen \"-\"; it\n" +
-                        "must start with \"RTRS-\", and the last character of a name\n" +
-                        "must be a letter or a digit.\n" +
-                        "\n" +
-                        "A router-set name can also be hierarchical.  A hierarchical\n" +
-                        "set name is a sequence of set names and AS numbers separated\n" +
-                        "by colons \":\".  At least one component of such a name must\n" +
-                        "be an actual set name (i.e. start with \"RTRS-\").  All the\n" +
-                        "set name components of a hierarchical router-set name have\n" +
-                        "to be router-set names.\n"));
+        attributeSyntaxTypeMap.put(AttributeSyntaxType.RTR_SET_SYNTAX, new AttributeSyntaxParser(new AttributeParser.RtrSetParser(), "" +
+                "A router-set name is made up of letters, digits, the\n" +
+                "character underscore \"_\", and the character hyphen \"-\"; it\n" +
+                "must start with \"RTRS-\", and the last character of a name\n" +
+                "must be a letter or a digit.\n" +
+                "\n" +
+                "A router-set name can also be hierarchical.  A hierarchical\n" +
+                "set name is a sequence of set names and AS numbers separated\n" +
+                "by colons \":\".  At least one component of such a name must\n" +
+                "be an actual set name (i.e. start with \"RTRS-\").  All the\n" +
+                "set name components of a hierarchical router-set name have\n" +
+                "to be router-set names.\n"));
 
 //        attributeSyntaxTypeMap.put(AttributeSyntaxType.ROUTE_SYNTAX, new AttributeSyntaxParser(new AttributeParser.RouteResourceParser(), "" +
 //                "An address prefix is represented as an IPv4 address followed\n" +
@@ -601,6 +589,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
 //        attributeSyntaxTypeMap.put(AttributeSyntaxType.ROUTE6_SYNTAX, new AttributeSyntaxParser(new AttributeParser.Route6ResourceParser(), "" +
 //                "<ipv6-address>/<prefix>\n"));
 //
+
           // The following statement has been changed and not working.  Found that need to change RIPE inetnumStatus module to suit APNIC
           attributeSyntaxTypeMap.put(AttributeSyntaxType.STATUS_SYNTAX, new AttributeSyntaxRegexp(
                 Pattern.compile("(?i)^(ALLOCATED|ASSIGNED) (PORTABLE|NON-PORTABLE)$"), "" +

@@ -111,7 +111,7 @@ public interface AttributeTypeBuilder extends Documented {
         ZONE_C,
         // APNIC
         DOM_NET,
-        LIMERICK,
+        // LIMERICK,
         OBJECT_NAME,
         MEMBERS_AS,
         PERSON_NAME,

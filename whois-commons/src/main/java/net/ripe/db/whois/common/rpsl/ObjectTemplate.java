@@ -10,10 +10,7 @@ import net.ripe.db.whois.common.profiles.WhoisVariantHelperFactory;
 import org.apache.commons.lang.WordUtils;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Cardinality.SINGLE;
 import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Key;

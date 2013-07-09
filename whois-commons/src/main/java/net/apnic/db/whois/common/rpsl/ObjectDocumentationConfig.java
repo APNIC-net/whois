@@ -90,11 +90,11 @@ public class ObjectDocumentationConfig {
                 "      referenced.  Once the object is created, the value of the\n" +
                 "      \"person:\" attribute cannot be changed.\n");
 
-        DOCUMENTATION.put(ObjectType.POEM, "" +
-                "      A poem object contains poems that are submitted by users.\n");
-
-        DOCUMENTATION.put(ObjectType.POETIC_FORM, "" +
-                "      A poetic-form object defines the supported poem types. \n");
+//        DOCUMENTATION.put(ObjectType.POEM, "" +
+//                "      A poem object contains poems that are submitted by users.\n");
+//
+//        DOCUMENTATION.put(ObjectType.POETIC_FORM, "" +
+//                "      A poetic-form object defines the supported poem types. \n");
 
         DOCUMENTATION.put(ObjectType.ROLE, "" +
                 "      The role class is similar to the person class.  However, instead\n" +

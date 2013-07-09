@@ -29,7 +29,6 @@ public class AttributeSyntaxTest {
         verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "100.100.100");
         verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "300.300.300.300");
         verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "0/100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "::0/0");
         verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.0.0 -");
         verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.1.0 _ 192.168.1.255");
         verifySuccess(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.1.0/24");
@@ -74,11 +73,11 @@ public class AttributeSyntaxTest {
     @Test
     public void asBlock() {
         verifyFailure(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS7-8");
-        //verifyFailure(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS7 - AS6");
+        verifyFailure(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS7 - AS6");
         verifyFailure(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS7 - ");
         verifyFailure(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS7");
-        verifyFailure(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS6-AS7");
 
+        verifySuccess(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS6-AS7");
         verifySuccess(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS0 - AS5");
         verifySuccess(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS7 - AS7");
         verifySuccess(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS1877 - AS1901");
@@ -158,27 +157,26 @@ public class AttributeSyntaxTest {
        verifyFailure(ObjectType.IRT, AttributeType.AUTH, "pgpkey-012345678");
    }
 
-
-
     @Test
     public void changed() throws Exception {
         verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "a@a");
         verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "a.a.a");
-        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "a@a 20010101");
-        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "a.a.a 20010101");
-        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "a@a.a 2001010101");
-        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "a@a.a 2001010");
-        verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "foo@provider.com 01234567");
-        verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "0@2.45678901234567890123456789012345678901234567890123456789012345678901234567890 20010101");
-        verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "0@2.45678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
 
         verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "foo@provider.com");
-        verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "foo@provider.com 20010101");
         verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "a@a.a");
+        verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "'anthingcan1242go!@(&)^!(&@^21here\"@0.2345678901234567890123456789012345678901");
+        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "0@2.45678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
+
+        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "a@a 20010101");
+        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "a.a.a 20010101");
+        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "a@a.a 2001010");
+        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "foo@provider.com 01234567");
+
+        verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "foo@provider.com 20010101");
         verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "a@a.a 20010101");
-        verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "Aa23~@foo.bar");
-        verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "Aa23~$%&'*+=?^_`{|}~/-.Aa23~$%&'*+=?^_`{|}~/-@foo.bar");
-        verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "'anythingcan1242@0.2345678901234567890123456789 20010101");
+        verifySuccess(ObjectType.PERSON, AttributeType.CHANGED, "'anthingcan1242go!@(&)^!(&@^21here\"@0.2345678901234567890123456789012345678901 20010101");
+        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "0@2.45678901234567890123456789012345678901234567890123456789012345678901234567890 20010101");
+        verifyFailure(ObjectType.PERSON, AttributeType.CHANGED, "a@a.a 2001010101");
     }
 
     @Test
@@ -236,27 +234,18 @@ public class AttributeSyntaxTest {
     @Test
     public void domain() {
         verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "-core.swip.net");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "icm-$-london-1.icp.net");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "icm-$-sydney-1.icp.net");
         verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "Brisbane.apnic.net..");
         verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "Brisbane.apnic.net");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "Brisbane.in-addr.arpa");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "01-03.0.0.193.in-addr.arpa");
 
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DOMAIN, "Brisbane.apnic.net");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DOMAIN, "Brisbane.in-addr.arpa");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DOMAIN, "01-03.0.0.193.in-addr.arpa");
         verifySuccess(ObjectType.DOMAIN, AttributeType.DOMAIN, "36.116.62.in-addr.arpa");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DOMAIN, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz.abcdefghijklmnopqrstuvwxyz.abcdefghijklmnopq.e164.arpa");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DOMAIN, "alpha.e164.arpa.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DOMAIN, "23024.194.196.in-addr.arpa");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz.abcdefghijklmnopqrstuvwxyz.abcdefghijklmnopq.e164.arpa");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "alpha.e164.arpa.");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "23024.194.196.in-addr.arpa");
         verifySuccess(ObjectType.DOMAIN, AttributeType.DOMAIN, "4.3.2.1.6.7.9.8.6.4.e164.arpa.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DOMAIN, "Brisbane.apnic.net.com");
-    }
-
-
-    @After
-    public void tearDown() throws Exception {
-
-
     }
 
     @Test
@@ -617,19 +606,19 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.KEY_CERT, AttributeType.KEY_CERT, "AUTO-123");
     }
 
-    @Test
-    public void limerick() throws Exception {
-        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "");
-        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim.ASDf");
-        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim");
-        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "LIM -");
-        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "");
-        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim_1214");
-
-        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "lim-1231");
-        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "LIM-1111_ASDF");
-        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "LIM-AS12-PO23");
-    }
+//    @Test
+//    public void limerick() throws Exception {
+//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "");
+//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim.ASDf");
+//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim");
+//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "LIM -");
+//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "");
+//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim_1214");
+//
+//        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "lim-1231");
+//        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "LIM-1111_ASDF");
+//        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "LIM-AS12-PO23");
+//    }
 
 //    @Test
 //    public void membersAs() throws Exception {
@@ -795,8 +784,8 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.ROUTE_SET, AttributeType.MP_MEMBERS, "195.66.224.0/23");
         verifySuccess(ObjectType.ROUTE_SET, AttributeType.MP_MEMBERS, "RS-SIX-BLOG^16-24");
         verifySuccess(ObjectType.ROUTE_SET, AttributeType.MP_MEMBERS, "AS13646:RS-TEST");
-        verifyFailure(ObjectType.ROUTE_SET, AttributeType.MP_MEMBERS, "172.184.0.0/13, 172.184.0.0/23^24");
         verifyFailure(ObjectType.ROUTE_SET, AttributeType.MP_MEMBERS, "13646:RS-TEST");
+        verifyFailure(ObjectType.ROUTE_SET, AttributeType.MP_MEMBERS, "195.66.224.0");
 
         verifySuccess(ObjectType.RTR_SET, AttributeType.MP_MEMBERS, "2a00:10C0::");
         verifySuccess(ObjectType.RTR_SET, AttributeType.MP_MEMBERS, "2a00:10C0::/32");
@@ -1224,31 +1213,31 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.PERSON, AttributeType.PHONE, "+31610210776 EXT.123");
     }
 
-    @Test
-    public void poem() {
-        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem");
-        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem-");
-        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem poem");
-        verifyFailure(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM");
-
-        verifySuccess(ObjectType.POEM, AttributeType.POEM, "poem-poem");
-        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM");
-        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-POEM");
-        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-A1-B2-C3");
-    }
-
-    @Test
-    public void poeticForm() {
-        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form");
-        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form-");
-        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form form");
-        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM");
-
-        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form-form");
-        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM");
-        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-FORM");
-        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-A1-B2-C3");
-    }
+//    @Test
+//    public void poem() {
+//        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem");
+//        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem-");
+//        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem poem");
+//        verifyFailure(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM");
+//
+//        verifySuccess(ObjectType.POEM, AttributeType.POEM, "poem-poem");
+//        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM");
+//        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-POEM");
+//        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-A1-B2-C3");
+//    }
+//
+//    @Test
+//    public void poeticForm() {
+//        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form");
+//        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form-");
+//        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form form");
+//        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM");
+//
+//        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form-form");
+//        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM");
+//        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-FORM");
+//        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-A1-B2-C3");
+//    }
 
     //  Any syntax
     @Test

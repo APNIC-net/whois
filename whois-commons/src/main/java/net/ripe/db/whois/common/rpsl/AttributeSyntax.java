@@ -90,7 +90,7 @@ public interface AttributeSyntax extends Documented {
     static AttributeSyntax DOM_NET_SYNTAX = implementationMap.get(AttributeSyntaxType.DOM_NET_SYNTAX);
     static AttributeSyntax FINGERPR_SYNTAX = implementationMap.get(AttributeSyntaxType.FINGERPR_SYNTAX);
     // static AttributeSyntax MEMBERS_AS_SYNTAX = implementationMap.get(AttributeSyntaxType.MEMBERS_AS_SYNTAX);
-    static AttributeSyntax LIMERICK_SYNTAX = implementationMap.get(AttributeSyntaxType.LIMERICK_SYNTAX);
+    // static AttributeSyntax LIMERICK_SYNTAX = implementationMap.get(AttributeSyntaxType.LIMERICK_SYNTAX);
     static AttributeSyntax PERSON_NAME_SYNTAX = implementationMap.get(AttributeSyntaxType.PERSON_NAME_SYNTAX);
     static AttributeSyntax PUBLIC_KEY_SYNTAX = implementationMap.get(AttributeSyntaxType.PUBLIC_KEY_SYNTAX);
     static AttributeSyntax REFERRAL_BY_SYNTAX = implementationMap.get(AttributeSyntaxType.REFERRAL_BY_SYNTAX);
@@ -696,7 +696,7 @@ public interface AttributeSyntax extends Documented {
         // APNIC
         DOM_NET_SYNTAX,
         FINGERPR_SYNTAX,
-        LIMERICK_SYNTAX,
+        // LIMERICK_SYNTAX,
         // MEMBERS_AS_SYNTAX,
         PERSON_NAME_SYNTAX,
         PUBLIC_KEY_SYNTAX,

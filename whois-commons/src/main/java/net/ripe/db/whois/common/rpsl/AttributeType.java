@@ -115,9 +115,9 @@ public enum AttributeType implements AttributeTypeBuilder {
     // APNIC
     ADDRESS_PREFIX_RANGE(AttributeTypeBuilder.implementationMap.get(Enum.ADDRESS_PREFIX_RANGE)),
     DOM_NET(AttributeTypeBuilder.implementationMap.get(Enum.DOM_NET)),
-    LIMERICK(AttributeTypeBuilder.implementationMap.get(Enum.LIMERICK)),
+    // LIMERICK(AttributeTypeBuilder.implementationMap.get(Enum.LIMERICK)),
     // MEMBERS_AS(AttributeTypeBuilder.implementationMap.get(Enum.MEMBERS_AS)),
-    //REFER(AttributeTypeBuilder.implementationMap.get(Enum.REFER)),
+    // REFER(AttributeTypeBuilder.implementationMap.get(Enum.REFER)),
     REGISTRY_NAME(AttributeTypeBuilder.implementationMap.get(Enum.REGISTRY_NAME)),
     SUBDOMAIN_NAME(AttributeTypeBuilder.implementationMap.get(Enum.SUBDOMAIN_NAME));
 
