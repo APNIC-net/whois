@@ -208,24 +208,20 @@ public class Authenticator {
         }
     }
 
-    boolean isDeferredAuthenticationAllowed(final PreparedUpdate preparedUpdate, final UpdateContext updateContext, final Subject subject) {
-        if (updateContext.hasErrors(preparedUpdate)) {
+    boolean isPending(final PreparedUpdate update, final UpdateContext updateContext, final Subject subject) {
+        // TODO: [AH] delete this when deploying pending updates
+        if (WhoisProfile.isDeployed()) {
             return false;
         }
 
-        if (!Action.CREATE.equals(preparedUpdate.getAction())) {
+        if (!Action.CREATE.equals(update.getAction())) {
             return false;
         }
 
-        final Set<String> strategiesWithDeferredAuthentication = typesWithDeferredAuthentication.get(preparedUpdate.getType());
-        if (strategiesWithDeferredAuthentication == null) {
-            return false;
-        }
-
-        final boolean failedSupportedOnly = Sets.difference(subject.getFailedAuthentications(), strategiesWithDeferredAuthentication).isEmpty();
-        final boolean passedAtLeastOneSupported = !Sets.intersection(subject.getPassedAuthentications(), strategiesWithDeferredAuthentication).isEmpty();
-
-        return failedSupportedOnly && passedAtLeastOneSupported;
+        return !updateContext.hasErrors(update)
+                && subject.getFailedAuthentications().isEmpty()
+                && typesWithPendingAuthenticationSupport.containsKey(update.getType())
+                && subject.getPendingAuthentications().size() < typesWithPendingAuthenticationSupport.get(update.getType()).size();
     }
 
     public boolean isAuthenticationForTypeComplete(final ObjectType objectType, final Set<String> authentications) {

@@ -3,8 +3,6 @@ package net.ripe.db.whois.update.authentication.strategy;
 
 import net.ripe.db.whois.common.dao.RpslObjectDao;
 import net.ripe.db.whois.common.domain.CIString;
-import net.ripe.db.whois.common.profiles.WhoisVariant;
-import net.ripe.db.whois.common.profiles.WhoisVariantContext;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
@@ -20,7 +18,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-@WhoisVariantContext(excludeWhen = WhoisVariant.Type.APNIC)
 @Component
 class AutnumAuthentication extends AuthenticationStrategyBase {
     private final RpslObjectDao objectDao;

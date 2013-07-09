@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -51,7 +52,7 @@ public class AutnumAuthentication extends AuthenticationStrategyBase {
 
         List<RpslObject> asBlockList = objectDao.findAsBlockIntersections(number, number);
         if (CollectionUtils.isEmpty(asBlockList)) {
-            throw new AuthenticationFailedException(UpdateMessages.noParentAsBlockFound(pkey));
+            throw new AuthenticationFailedException(UpdateMessages.noParentAsBlockFound(pkey), Collections.<RpslObject>emptyList());
         }
 
         List<Message> authenticationErrorMessages = Lists.newArrayList();
@@ -75,7 +76,7 @@ public class AutnumAuthentication extends AuthenticationStrategyBase {
         }
 
         if (authenticatedBy.isEmpty()) {
-            throw new AuthenticationFailedException(authenticationErrorMessages);
+            throw new AuthenticationFailedException(authenticationErrorMessages, Collections.<RpslObject>emptyList());
         }
 
         return Lists.newArrayList(authenticatedBy);
