@@ -9,7 +9,7 @@ import static org.junit.Assert.fail;
 public class AttributeTypeTest {
     @Test
     public void getByName() {
-        for (AttributeType attributeType : AttributeType.values()) {
+        for (AttributeType attributeType : AttributeType.implementedValues()) {
             assertThat("by name " + attributeType.toString(), AttributeType.getByName(attributeType.getName()), is(attributeType));
             assertThat("by flag " + attributeType.toString(), AttributeType.getByName(attributeType.getFlag()), is(attributeType));
         }
@@ -17,7 +17,7 @@ public class AttributeTypeTest {
 
     @Test
     public void getByNameOrNull() {
-        for (AttributeType attributeType : AttributeType.values()) {
+        for (AttributeType attributeType : AttributeType.implementedValues()) {
             assertThat("by name " + attributeType.toString(), AttributeType.getByNameOrNull(attributeType.getName()), is(attributeType));
             assertThat("by flag " + attributeType.toString(), AttributeType.getByNameOrNull(attributeType.getFlag()), is(attributeType));
         }

@@ -2,6 +2,7 @@ package net.ripe.db.whois.common.rpsl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.springframework.beans.factory.BeanInitializationException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,12 +10,8 @@ import java.util.Map;
 
 import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Cardinality.MULTIPLE;
 import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Cardinality.SINGLE;
-import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Key.INVERSE_KEY;
-import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Key.LOOKUP_KEY;
-import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Key.PRIMARY_KEY;
-import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Requirement.GENERATED;
-import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Requirement.MANDATORY;
-import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Requirement.OPTIONAL;
+import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Key.*;
+import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Requirement.*;
 import static net.ripe.db.whois.common.rpsl.AttributeType.*;
 
 public class ObjectTemplateMapConfig {
@@ -387,7 +384,11 @@ public class ObjectTemplateMapConfig {
 
         final Map<ObjectType, ObjectTemplate> templateMap = Maps.newEnumMap(ObjectType.class);
         for (final ObjectTemplate objectTemplate : objectTemplates) {
-            templateMap.put(objectTemplate.getObjectType(), objectTemplate);
+            if (templateMap.get(objectTemplate.getObjectType()) == null) {
+                templateMap.put(objectTemplate.getObjectType(), objectTemplate);
+            } else {
+                throw new BeanInitializationException("Object Template duplicate mapping exception: " + objectTemplate.getObjectType());
+            }
         }
 
         TEMPLATE_MAP = Collections.unmodifiableMap(templateMap);

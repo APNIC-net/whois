@@ -135,4 +135,6 @@ public interface AttributeTypeBuilder extends Documented {
     abstract Enum getEnumType();
 
     abstract Map<Enum, AttributeTypeBuilder> getAttributeTypeBuilderMap();
+
+    abstract boolean isImplemented();
 }

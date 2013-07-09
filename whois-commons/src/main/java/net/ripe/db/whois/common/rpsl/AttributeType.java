@@ -1,12 +1,12 @@
 package net.ripe.db.whois.common.rpsl;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.ripe.db.whois.common.domain.CIString;
-import net.ripe.db.whois.common.profiles.WhoisVariant;
-import org.springframework.beans.factory.BeanInitializationException;
 
 import javax.annotation.CheckForNull;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -124,20 +124,15 @@ public enum AttributeType implements AttributeTypeBuilder {
 
     private static final Map<CIString, AttributeType> TYPE_NAMES = Maps.newHashMapWithExpectedSize(AttributeType.values().length);
 
+    private static List<AttributeType> implementedValues = Lists.newArrayList();
+
     static {
-//        int cnt=0;
         for (final AttributeType type : AttributeType.values()) {
-//            System.out.println(cnt++);
-            if (TYPE_NAMES.get(ciString(type.getName())) != null) {
-                throw new BeanInitializationException("Attribute type mapping exception: " + ciString(type.getName()));
+            if (type.isImplemented()) {
+                TYPE_NAMES.put(ciString(type.getName()), type);
+                TYPE_NAMES.put(ciString(type.getFlag()), type);
+                implementedValues.add(type);
             }
-
-            TYPE_NAMES.put(ciString(type.getName()), type);
-
-            if (TYPE_NAMES.get(ciString(type.getFlag())) != null) {
-                throw new BeanInitializationException("Attribute type mapping exception: " + ciString(type.getFlag()));
-            }
-            TYPE_NAMES.put(ciString(type.getFlag()), type);
         }
     }
 
@@ -167,6 +162,7 @@ public enum AttributeType implements AttributeTypeBuilder {
     }
 
     public String getName() {
+        //return attributeTypeBuilder != null ? attributeTypeBuilder.getName() : name();
         return attributeTypeBuilder.getName();
     }
 
@@ -227,4 +223,11 @@ public enum AttributeType implements AttributeTypeBuilder {
         return attributeTypeBuilder.getDescription(objectType);
     }
 
+    public boolean isImplemented() {
+        return attributeTypeBuilder != null;
+    }
+
+    public static List<AttributeType> implementedValues() {
+       return implementedValues;
+    }
 }

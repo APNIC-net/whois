@@ -2,6 +2,7 @@ package net.ripe.db.whois.common.rpsl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.springframework.beans.factory.BeanInitializationException;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -247,6 +248,7 @@ public class AttributeTypeBuilderImpl implements AttributeTypeBuilder {
         mapHelperAdd(new AttributeTypeBuilderImpl("method", "mh", Enum.METHOD)
                 .doc("Defines the type of the public key.")
                 .syntax(AttributeSyntax.METHOD_SYNTAX));
+
 
         mapHelperAdd(new AttributeTypeBuilderImpl("mntner", "mt", Enum.MNTNER)
                 .doc("A unique identifier of the mntner object.")
@@ -545,6 +547,16 @@ public class AttributeTypeBuilderImpl implements AttributeTypeBuilder {
 
     }
 
+    private static void mapHelperAdd(AttributeTypeBuilderImpl entry) {
+        // Test for duplicates
+        if (localMap.get(entry.getEnumType()) == null) {
+            localMap.put(entry.getEnumType(), entry);
+        } else {
+            throw new BeanInitializationException("Attribute Type duplicate mapping exception: " + entry.getEnumType());
+        }
+    }
+
+
     private final String name;
     private final String flag;
     private Documented description;
@@ -621,10 +633,9 @@ public class AttributeTypeBuilderImpl implements AttributeTypeBuilder {
         return localMap;
     }
 
-    private static void mapHelperAdd(AttributeTypeBuilderImpl entry) {
-        // Test for duplicates
-        assert (localMap.get(entry.getEnumType()) == null);
-        localMap.put(entry.getEnumType(), entry);
+
+    public boolean isImplemented() {
+        return enumType != null;
     }
 }
 

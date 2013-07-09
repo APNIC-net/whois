@@ -107,7 +107,7 @@ public class UnrefCleanup implements DailyScheduledTask {
     private static final Set<AttributeType> REFERENCE_ATTRIBUTETYPES = Sets.newHashSet();
 
     static {
-        for (final AttributeType attributeType : AttributeType.values()) {
+        for (final AttributeType attributeType : AttributeType.implementedValues()) {
             if (!Sets.intersection(attributeType.getReferences(), CLEANUP_OBJECTS).isEmpty()) {
                 REFERENCE_ATTRIBUTETYPES.add(attributeType);
             }

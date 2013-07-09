@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import net.ripe.db.whois.common.rpsl.AttributeTemplate;
 import net.ripe.db.whois.common.rpsl.ObjectTemplate;
 import net.ripe.db.whois.common.rpsl.ObjectType;
+import org.springframework.beans.factory.BeanInitializationException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -390,9 +391,12 @@ public class ObjectTemplateMapConfig {
 
         final Map<ObjectType, ObjectTemplate> templateMap = Maps.newEnumMap(ObjectType.class);
         for (final ObjectTemplate objectTemplate : objectTemplates) {
-            templateMap.put(objectTemplate.getObjectType(), objectTemplate);
+            if (templateMap.get(objectTemplate.getObjectType()) == null) {
+                templateMap.put(objectTemplate.getObjectType(), objectTemplate);
+            } else {
+                throw new BeanInitializationException("Object Template duplicate mapping exception: " + objectTemplate.getObjectType());
+            }
         }
-
         TEMPLATE_MAP = Collections.unmodifiableMap(templateMap);
     }
 

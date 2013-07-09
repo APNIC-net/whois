@@ -5,7 +5,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.ripe.db.whois.common.profiles.WhoisVariant;
 import net.ripe.db.whois.common.profiles.WhoisVariantHelperFactory;
 import org.apache.commons.lang.WordUtils;
 
@@ -14,9 +13,7 @@ import java.util.*;
 
 import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Cardinality.SINGLE;
 import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Key;
-import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Key.INVERSE_KEY;
-import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Key.LOOKUP_KEY;
-import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Key.PRIMARY_KEY;
+import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Key.*;
 import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Requirement.GENERATED;
 import static net.ripe.db.whois.common.rpsl.AttributeTemplate.Requirement.MANDATORY;
 

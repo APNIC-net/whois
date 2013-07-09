@@ -125,8 +125,8 @@ public class DummifierLegacyTest {
             AttributeType objectAttributeType = AttributeType.getByName(objectType.getName());
 
             List<RpslAttribute> optionalAttributes = Lists.newArrayList();
-            for (AttributeType attributeType : AttributeType.values()) {
-                if (!attributeType.equals(objectAttributeType)) {
+            for (AttributeType attributeType : AttributeType.implementedValues()) {
+                if (!attributeType.equals(objectAttributeType) && attributeType.isImplemented() ) {
                     final RpslAttribute rpslAttribute = new RpslAttribute(attributeType, "FOO");
                     optionalAttributes.add(rpslAttribute);
                 }

@@ -51,7 +51,7 @@ public class SearchQueryExecutorTest {
 
     @Test
     public void all_attributes_handled() {
-        for (final AttributeType attributeType : AttributeType.values()) {
+        for (final AttributeType attributeType : AttributeType.implementedValues()) {
             assertTrue(subject.supports(Query.parse("-i " + attributeType.getName() + " query")));
         }
     }

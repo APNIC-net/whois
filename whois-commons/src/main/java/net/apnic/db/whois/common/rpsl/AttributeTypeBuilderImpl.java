@@ -7,6 +7,7 @@ import net.ripe.db.whois.common.rpsl.AttributeTypeBuilder;
 import net.ripe.db.whois.common.rpsl.AttributeValueType;
 import net.ripe.db.whois.common.rpsl.Documented;
 import net.ripe.db.whois.common.rpsl.ObjectType;
+import org.springframework.beans.factory.BeanInitializationException;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -603,7 +604,12 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
     }
 
     private static void mapHelperAdd(AttributeTypeBuilderImpl entry) {
-        localMap.put(entry.getEnumType(), entry);
+        // Test for duplicates
+        if (localMap.get(entry.getEnumType()) == null) {
+            localMap.put(entry.getEnumType(), entry);
+        } else {
+            throw new BeanInitializationException("Attribute Type duplicate mapping exception: " + entry.getEnumType());
+        }
     }
 
     private final String name;
@@ -682,5 +688,10 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
     public Map<Enum, AttributeTypeBuilder> getAttributeTypeBuilderMap() {
         return localMap;
     }
+
+    public boolean isImplemented() {
+        return enumType != null;
+    }
+
 }
 

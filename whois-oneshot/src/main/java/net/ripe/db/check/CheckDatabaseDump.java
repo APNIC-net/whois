@@ -87,7 +87,7 @@ public class CheckDatabaseDump {
                 continue;
             }
 
-            for (final AttributeType attributeType : AttributeType.values()) {
+            for (final AttributeType attributeType : AttributeType.implementedValues()) {
                 if (ignoreAttributes.contains(attributeType)) {
                     continue;
                 }

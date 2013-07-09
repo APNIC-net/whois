@@ -193,7 +193,7 @@ public class JdbcIndexDao implements IndexDao {
     }
 
     private void deleteIndexesForMissingObjects() {
-        for (final AttributeType attributeType : AttributeType.values()) {
+        for (final AttributeType attributeType : AttributeType.implementedValues()) {
             deleteIndexForMissingObjects(attributeType);
         }
     }

@@ -65,8 +65,8 @@ public class FreeTextIndex extends RebuildableIndex {
     private static final FieldType INDEXED_NOT_TOKENIZED;
 
     static {
-        final List<String> names = Lists.newArrayListWithExpectedSize(AttributeType.values().length);
-        for (final AttributeType attributeType : AttributeType.values()) {
+        final List<String> names = Lists.newArrayListWithExpectedSize(AttributeType.implementedValues().size());
+        for (final AttributeType attributeType : AttributeType.implementedValues()) {
             if (!SKIPPED_ATTRIBUTES.contains(attributeType)) {
                 names.add(attributeType.getName());
             }

@@ -137,7 +137,7 @@ public class RpslObjectSearcherTest {
 
     @Test
     public void inverse_lookup_never_returns_null() {
-        for (final AttributeType attributeType : AttributeType.values()) {
+        for (final AttributeType attributeType : AttributeType.implementedValues()) {
             assertNotNull(subject.search(Query.parse("-i " + attributeType.getName() + " query")));
         }
     }
