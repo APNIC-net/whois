@@ -25,6 +25,7 @@ public class ObjectTemplateTest {
             "referral-by:     DEV-MNT\n" +
             "changed:         BECHA@example.net 20101010\n" +
             "source:          DEV";
+
     private ObjectTemplate subject;
 
     @Before
