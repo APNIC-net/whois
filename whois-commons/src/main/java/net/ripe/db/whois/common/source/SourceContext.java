@@ -52,8 +52,8 @@ public class SourceContext {
             @Value("${whois.source}") final String mainSourceNameString,
             @Value("${whois.additional.sources}") final String additionalSourceNames,
             @Value("${grs.sources}") final String grsSourceNames,
-            @Value("${mirror.sources}") final String mirrorSourceNames,
             @Value("${nrtm.import.sources}") final String nrtmSourceNames,
+            @Value("${mirror.sources}") final String mirrorSourceNames,
             @Value("${grs.sources.dummify}") final String grsSourceNamesForDummification,
             @Value("${whois.db.grs.master.baseurl}") final String grsMasterBaseUrl,
             @Value("${whois.db.master.username}") final String whoisMasterUsername,
@@ -133,7 +133,7 @@ public class SourceContext {
             }
         }
 
-        for (final CIString mirrorSourceName : Iterables.concat(mirrorSourceNameIterable, nrtmSourceNameIterable)) {
+        for (final CIString mirrorSourceName : mirrorSourceNameIterable) {
             if (!mirrorSources.add(mirrorSourceName)) {
                 LOGGER.warn("Mirror Source already configured: {}", mirrorSourceName);
                 continue;

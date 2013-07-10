@@ -29,11 +29,13 @@ public class SourceContextTest {
     final String additionalSourceNames = "RIPE,RIPE-GRS,APNIC-GRS";
     final String grsSourceNames = "RIPE-GRS,APNIC-GRS";
     final String nrtmSourceNames = "NRTM-GRS";
+    final String mirrorSourceNames = "TEST";
     final String grsSourceNamesForDummification = "RIPE-GRS";
     final String grsMasterBaseUrl = "jdbc://localhost/master";
     final String whoisMasterUsername = "masterUser";
     final String whoisMasterPassword = "masterPw";
     final String grsSlaveBaseUrl = "jdbc://localhost/slave";
+    final String mirrorSlaveBaseUrl = "jdbc://localhost/slave";
     final String whoisSlaveUsername = "slaveUser";
     final String whoisSlavePassword = "slavePw";
     @Mock DataSource whoisMasterDataSource;
@@ -51,11 +53,13 @@ public class SourceContextTest {
                 additionalSourceNames,
                 grsSourceNames,
                 nrtmSourceNames,
+                mirrorSourceNames,
                 grsSourceNamesForDummification,
                 grsMasterBaseUrl,
                 whoisMasterUsername,
                 whoisMasterPassword,
                 grsSlaveBaseUrl,
+                mirrorSlaveBaseUrl,
                 whoisSlaveUsername,
                 whoisSlavePassword,
                 whoisMasterDataSource,
@@ -115,11 +119,13 @@ public class SourceContextTest {
                 invalidAdditionalSource,
                 grsSourceNames,
                 nrtmSourceNames,
+                mirrorSourceNames,
                 grsSourceNamesForDummification,
                 grsMasterBaseUrl,
                 whoisMasterUsername,
                 whoisMasterPassword,
                 grsSlaveBaseUrl,
+                mirrorSlaveBaseUrl,
                 whoisSlaveUsername,
                 whoisSlavePassword,
                 whoisMasterDataSource,
@@ -140,11 +146,13 @@ public class SourceContextTest {
             noAdditionalSources,
             grsSourceNames,
             nrtmSourceNames,
+            mirrorSourceNames,
             grsSourceNamesForDummification,
             grsMasterBaseUrl,
             whoisMasterUsername,
             whoisMasterPassword,
             grsSlaveBaseUrl,
+            mirrorSlaveBaseUrl,
             whoisSlaveUsername,
             whoisSlavePassword,
             whoisMasterDataSource,
