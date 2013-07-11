@@ -3,7 +3,7 @@ package net.apnic.db.whois.spec.query
 import net.apnic.db.whois.spec.BaseSpec
 import net.apnic.db.whois.spec.TemplateObject
 
-class SyntaxSpec extends BaseSpec {
+class TemplateSpec extends BaseSpec {
     def "as-block"() {
       when:
         def template = new TemplateObject("as-block")
@@ -200,10 +200,10 @@ class SyntaxSpec extends BaseSpec {
 
     def "inetnum"() {
       when:
-        def template = new TemplateObject("inetnum");
+        def template = new TemplateObject("inetnum")
 
       then:
-        template.description =~ /inetnum/;
+        template.description =~ /inetnum/
         template.basicTemplate == [
                 ["inetnum",     "mandatory",    "single",   "primary/look-up key"],
                 ["netname",     "mandatory",    "single",   "lookup key"],
@@ -228,11 +228,11 @@ class SyntaxSpec extends BaseSpec {
         template.getAttributeDescription("country") =~ /EU/
         template.getAttributeDescription("admin-c") =~ /-AP/
         template.getAttributeDescription("tech-c") =~ /-AP/
-        template.getAttributeDescription("status") =~ /ALLOCATED PORTABLE/;
-        template.getAttributeDescription("status") =~ /ALLOCATED NON-PORTABLE/;
-        template.getAttributeDescription("status") =~ /ASSIGNED PORTABLE/;
-        template.getAttributeDescription("status") =~ /ASSIGNED NON-PORTABLE/;
-        template.getAttributeDescription("source") =~ /APNIC/;
+        template.getAttributeDescription("status") =~ /ALLOCATED PORTABLE/
+        template.getAttributeDescription("status") =~ /ALLOCATED NON-PORTABLE/
+        template.getAttributeDescription("status") =~ /ASSIGNED PORTABLE/
+        template.getAttributeDescription("status") =~ /ASSIGNED NON-PORTABLE/
+        template.getAttributeDescription("source") =~ /APNIC/
     }
 
     def "key-cert"() {
@@ -258,7 +258,7 @@ class SyntaxSpec extends BaseSpec {
         ]
         template.getAttributeDescription("admin-c") =~ /-AP/
         template.getAttributeDescription("tech-c") =~ /-AP/
-        template.getAttributeDescription("source") =~ /APNIC/;
+        template.getAttributeDescription("source") =~ /APNIC/
     }
 
     def "mntner"() {
@@ -266,6 +266,7 @@ class SyntaxSpec extends BaseSpec {
         def template = new TemplateObject("mntner")
 
       then:
+        template.description =~ /mntner/
         template.basicTemplate == [
                 ["mntner",      "mandatory",    "single",   "primary/look-up key"],
                 ["descr",       "mandatory",    "multiple", ""],
@@ -543,7 +544,6 @@ class SyntaxSpec extends BaseSpec {
                 ["org",         "optional",     "multiple", "inverse key"],
                 ["admin-c",     "optional",     "multiple", "inverse key"],
                 ["tech-c",      "optional",     "multiple", "inverse key"],
-                ["abuse-c",     "optional",     "single",   ""],
                 ["ref-nfy",     "optional",     "multiple", "inverse key"],
                 ["mnt-ref",     "mandatory",    "multiple", "inverse key"],
                 ["notify",      "optional",     "multiple", "inverse key"],
