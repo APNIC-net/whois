@@ -99,7 +99,35 @@ public interface AttributeSyntax extends Documented {
     // static AttributeSyntax APNIC_MEMBERS_AS_SYNTAX = implementationMap.get(AttributeSyntaxType.MEMBERS_AS_SYNTAX);
     // static AttributeSyntax APNIC_LIMERICK_SYNTAX = implementationMap.get(AttributeSyntaxType.LIMERICK_SYNTAX);
 
-    boolean matches(ObjectType objectType, String value);
+
+    static class AttributeSyntaxRegexp implements AttributeSyntax {
+        private final Integer maxLength;
+        private final Pattern matchPattern;
+        private final String description;
+
+        public AttributeSyntaxRegexp(final Pattern matchPattern, final String description) {
+            this(null, matchPattern, description);
+        }
+
+        public AttributeSyntaxRegexp(final Integer maxLength, final Pattern matchPattern, final String description) {
+            this.maxLength = maxLength;
+            this.matchPattern = matchPattern;
+            this.description = description;
+        }
+
+        @Override
+        public boolean matches(final ObjectType objectType, final String value) {
+            final boolean lengthOk = maxLength == null || value.length() <= maxLength;
+            final boolean matches = matchPattern.matcher(value).matches();
+
+            return lengthOk && matches;
+        }
+
+        @Override
+        public String getDescription(final ObjectType objectType) {
+            return description;
+        }
+    }
 
     static class AnySyntax implements AttributeSyntax {
         private final String description;
@@ -115,36 +143,6 @@ public interface AttributeSyntax extends Documented {
         @Override
         public boolean matches(final ObjectType objectType, final String value) {
             return true;
-        }
-
-        @Override
-        public String getDescription(final ObjectType objectType) {
-            return description;
-        }
-    }
-
-    static class AttributeSyntaxRegexp implements AttributeSyntax {
-        private final Integer maxLength;
-        private final Pattern matchPattern;
-        private final String description;
-
-        public AttributeSyntaxRegexp(final Pattern matchPattern, final String description) {
-            this(null, matchPattern, description);
-        }
-
-        public AttributeSyntaxRegexp(final Integer maxLength, final Pattern matchPattern, final String description) {
-            this.maxLength = maxLength;
-            this.matchPattern = matchPattern;
-            this.description = description;
-
-        }
-
-        @Override
-        public boolean matches(final ObjectType objectType, final String value) {
-            final boolean lengthOk = maxLength == null || value.length() <= maxLength;
-            final boolean matches = matchPattern.matcher(value).matches();
-
-            return lengthOk && matches;
         }
 
         @Override
@@ -186,7 +184,7 @@ public interface AttributeSyntax extends Documented {
         }
     }
 
-    static class GeolocSyntax  implements AttributeSyntax {
+    static class GeolocSyntax implements AttributeSyntax {
         private static final Pattern GEOLOC_PATTERN = Pattern.compile("^[+-]?(\\d*\\.?\\d+)\\s+[+-]?(\\d*\\.?\\d+)$");
 
         private static final double LATITUDE_RANGE = 90.0;
@@ -353,11 +351,19 @@ public interface AttributeSyntax extends Documented {
                             "<as-number> or\n" +
                             "<as-set-name>\n";
                 case ROUTE_SET:
-                    return "" +
-                            "list of\n" +
-                            "<address-prefix-range> or\n" +
-                            "<route-set-name> or\n" +
-                            "<route-set-name><range-operator>.\n";
+                    if (allowIpv6) {
+                        return "" +
+                                "list of\n" +
+                                "<address-prefix-range> or\n" +
+                                "<route-set-name> or\n" +
+                                "<route-set-name><range-operator>.\n";
+                    } else {
+                        return "" +
+                                "list of\n" +
+                                "<ipv4-address-prefix-range> or\n" +
+                                "<route-set-name> or\n" +
+                                "<route-set-name><range-operator>.\n";
+                    }
 
                 case RTR_SET:
                     return allowIpv6 ? "" +
@@ -400,7 +406,7 @@ public interface AttributeSyntax extends Documented {
     }
 
 
-    class OrgTypeSyntax implements AttributeSyntax {
+    static class OrgTypeSyntax implements AttributeSyntax {
         @Override
         public boolean matches(final ObjectType objectType, final String value) {
             return OrgType.getFor(value) != null;
@@ -623,6 +629,8 @@ public interface AttributeSyntax extends Documented {
             return description.getDescription(objectType);
         }
     }
+
+    boolean matches(ObjectType objectType, String value);
 
     enum AttributeSyntaxType {
         ADDRESS_PREFIX_RANGE_SYNTAX,
