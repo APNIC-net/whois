@@ -70,7 +70,6 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
             put(attributeSyntaxTypeMap, AttributeSyntaxType.AGGR_MTD_SYNTAX,  new AttributeSyntaxParser(new AggrMtdParser(), "" +
                     "inbound | outbound [<as-expression>]\n"));
 
-//
             put(attributeSyntaxTypeMap, AttributeSyntaxType.AUTH_SCHEME_SYNTAX, new AttributeSyntaxRegexp(90,
                     Pattern.compile("(?i)^(CRYPT-PW [A-Z0-9./]{13}|MD5-PW \\$1\\$[A-Z0-9./]{1,8}\\$[A-Z0-9./]{22}|PGPKEY-[A-F0-9]{8}|X509-[1-9][0-9]*|AUTO-[1-9][0-9]*)$"),
                     "" +

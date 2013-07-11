@@ -89,7 +89,7 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.NIC_HANDLE_SYNTAX)
                 .references(ObjectType.PERSON, ObjectType.ROLE));
 
-        mapHelperAdd(new AttributeTypeBuilderImpl("as-number", "an", Enum.AUT_NUM)
+        mapHelperAdd(new AttributeTypeBuilderImpl("aut-num", "an", Enum.AUT_NUM)
                 .doc("The autonomous system number.")
                 .syntax(AttributeSyntax.AS_NUMBER_SYNTAX));
 
@@ -98,20 +98,22 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.PUBLIC_KEY_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("changed", "ch", Enum.CHANGED)
-                .doc("Specifies who submitted the update, and when the object was updated. " +
+                .doc("The email address of who last updated the object and the date it occurred. " +
                         "This attribute is filtered from the default whois output.")
                 .syntax(AttributeSyntax.CHANGED_SYNTAX));
 
-        mapHelperAdd(new AttributeTypeBuilderImpl("components", "co", Enum.COMPONENTS)
+            mapHelperAdd(new AttributeTypeBuilderImpl("components", "co", Enum.COMPONENTS)
                 .doc("The \"components:\" attribute defines what component routes are used to form the aggregate.")
                 .syntax(AttributeSyntax.COMPONENTS_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("country", "cy", Enum.COUNTRY)
-                .doc("Identifies the country.")
+                .doc("Identifies the country associated with the object.")
                 .syntax(AttributeSyntax.COUNTRY_CODE_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("default", "df", Enum.DEFAULT)
-                .doc("Specifies default routing policies.")
+                .doc("The peer network the AS will use for as default, that is, when " +
+                        "the AS has no more-specific information on where to send the " +
+                        "traffic.")
                 .syntax(AttributeSyntax.DEFAULT_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("descr", "de", Enum.DESCR)
@@ -119,16 +121,15 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.FREE_FORM_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("dom-net", "di", Enum.DOM_NET)
-                .doc("This attribute is not applicable to reverse domains. Do not use\n" +
-                      "this attribute.\n" +
-                      "\n" +
-                      "APNIC Whois Database uses RIPE database software. Some functions\n" +
-                      "and options in RIPE software are not applicable to the\n" +
-                      "APNIC Whois Database.\n")
+                .doc("This attribute is not applicable to reverse domains. Do not use " +
+                      "this attribute. " +
+                      "APNIC Whois Database uses RIPE database software. Some functions " +
+                      "and options in RIPE software are not applicable to the " +
+                      "APNIC Whois Database.")
                 .syntax(AttributeSyntax.DOM_NET_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("domain", "dn", Enum.DOMAIN)
-                .doc("Domain name.")
+                .doc("Reverse delegation domain name.")
                 .syntax(AttributeSyntax.DOMAIN_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("ds-rdata", "ds", Enum.DS_RDATA)
@@ -141,8 +142,14 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.KEY_CERT_SYNTAX)
                 .references(ObjectType.KEY_CERT));
 
+        mapHelperAdd(new AttributeTypeBuilderImpl("e-mail", "em", Enum.E_MAIL)
+                .doc("A contact e-mail address. This attribute is filtered from the default " +
+                        "whois output when at least one of the objects returned by the query " +
+                        "contains an abuse-mailbox attribute.")
+                .syntax(AttributeSyntax.EMAIL_SYNTAX));
+
         mapHelperAdd(new AttributeTypeBuilderImpl("export", "ex", Enum.EXPORT)
-                .doc("Specifies an export policy expression.")
+                .doc("The outbound IPv4 routing policy of the AS.")
                 .syntax(AttributeSyntax.EXPORT_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("export-comps", "ec", Enum.EXPORT_COMPS)
@@ -150,18 +157,12 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                         "routes returns a subset of these routes.")
                 .syntax(AttributeSyntax.EXPORT_COMPS_SYNTAX));
 
-        mapHelperAdd(new AttributeTypeBuilderImpl("e-mail", "em", Enum.E_MAIL)
-                .doc("The e-mail address of a person, role, organisation or irt team. " +
-                        "This attribute is filtered from the default whois output when at least one of the objects " +
-                        "returned by the query contains an abuse-mailbox attribute.")
-                .syntax(AttributeSyntax.EMAIL_SYNTAX));
-
         mapHelperAdd(new AttributeTypeBuilderImpl("fax-no", "fx", Enum.FAX_NO)
-                .doc("The fax number of a contact.")
+                .doc("A contact fax number.")
                 .syntax(AttributeSyntax.PHONE_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("filter", "fi", Enum.FILTER)
-                .doc("Defines the set's policy filter.")
+                .doc("Defines the set's IPv4 policy filter.")
                 .syntax(AttributeSyntax.FILTER_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("filter-set", "fs", Enum.FILTER_SET)
@@ -169,7 +170,10 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.FILTER_SET_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("fingerpr", "fp", Enum.FINGERPR)
-                .doc("A fingerprint of a key certificate generated by the database.")
+                .doc("A fingerprint of a key certificate generated by the database. " +
+                        "This attribute is generated automatically by the database software " +
+                        "and must be omitted from the template when creating a key-cert " +
+                        "object.")
                 .syntax(AttributeSyntax.FINGERPR_SYNTAX));
 
         // Form is obsolete, removing this is breaking. This should be removed later
@@ -179,10 +183,12 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .references(ObjectType.POETIC_FORM)
                 .listValue());
 
+        // Not in current attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("geoloc", "gl", Enum.GEOLOC)
                 .doc("The location coordinates for the resource.")
                 .syntax(AttributeSyntax.GEOLOC_SYNTAX));
 
+        // Not in current attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("holes", "ho", Enum.HOLES)
                 .doc("Lists the component address prefixes that are not reachable through the aggregate route" +
                         "(perhaps that part of the address space is unallocated).")
@@ -190,48 +196,49 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .listValue());
 
         mapHelperAdd(new AttributeTypeBuilderImpl("ifaddr", "if", Enum.IFADDR)
-                .doc("Specifies an interface address within an Internet router.")
+                .doc("Specifies an IPv4 interface address within an Internet router.")
                 .syntax(AttributeSyntax.IFADDR_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("import", "ip", Enum.IMPORT)
-                .doc("Specifies import policy expression.")
+                .doc("The inbound IPv4 routing policy of the AS.")
                 .syntax(AttributeSyntax.IMPORT_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("inet6num", "i6", Enum.INET6NUM)
-                .doc("Specifies a range of IPv6 addresses in prefix notation.")
+                .doc("The range of IPv6 addresses, in prefix notation, the inet6num object.")
                 .syntax(AttributeSyntax.IPV6_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("inetnum", "in", Enum.INETNUM)
-                .doc("Specifies a range of IPv4 that inetnum object presents. " +
-                        "The ending address should be greater than the starting one.")
+                .doc("The range of IPv4 address space the inetnum object presents.")
                 .syntax(AttributeSyntax.IPV4_SYNTAX));
 
-
         mapHelperAdd(new AttributeTypeBuilderImpl("inet-rtr", "ir", Enum.INET_RTR)
-                .doc("Fully qualified DNS name of the inet-rtr without trailing \".\".")
+                .doc("Fully qualified DNS name of the inet-rtr without trailing dot (\".\").")
                 .syntax(AttributeSyntax.INET_RTR_SYNTAX));
 
+        // supports inject-rt, inject-r6 in attribute.xml
+        // .doc is same as in attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("inject", "ij", Enum.INJECT)
                 .doc("Specifies which routers perform the aggregation and when they perform it.")
                 .syntax(AttributeSyntax.INJECT_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("interface", "ie", Enum.INTERFACE)
-                .doc("Specifies a multiprotocol interface address within an Internet router.")
+                .doc("Specifies a multiprotocol (IPv4 or IPv6) interface address within an Internet router.")
                 .syntax(AttributeSyntax.INTERFACE_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("irt", "it", Enum.IRT)
                 .doc("Specifies the name of the irt object. The name should start with the prefix \"IRT-\", " +
-                        "reserved for this type of object.")
+                        "which is reserved for this type of object.")
                 .syntax(AttributeSyntax.IRT_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("irt-nfy", "iy", Enum.IRT_NFY)
-                .doc("Specifies the e-mail address to be notified when a reference to the irt object is added or removed.")
+                .doc("The e-mail address to be notified when a reference to the irt object is added or removed.")
                 .syntax(AttributeSyntax.EMAIL_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("key-cert", "kc", Enum.KEY_CERT)
                 .doc("Defines the public key stored in the database.")
                 .syntax(AttributeSyntax.KEY_CERT_SYNTAX));
 
+        // Not in current attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("language", "ln", Enum.LANGUAGE)
                 .doc("Identifies the language.")
                 .syntax(AttributeSyntax.LANGUAGE_CODE_SYNTAX));
@@ -245,20 +252,21 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("Specifies the autonomous system that operates the router.")
                 .syntax(AttributeSyntax.AS_NUMBER_SYNTAX));
 
-        mapHelperAdd(new AttributeTypeBuilderImpl("mbrs-by-ref", "mc", Enum.MBRS_BY_REF)
-                .doc("This attribute can be used in all \"set\" objects; it allows indirect population of a set. " +
-                        "If this attribute is used, the set also includes objects of the corresponding type " +
-                        "(aut-num objects for as-set, for example) that are protected by one of these maintainers " +
-                        "and whose \"member-of:\" attributes refer to the name of the set. " +
-                        "If the value of a \"mbrs-by-ref:\" attribute is ANY, any object of the corresponding type " +
-                        "referring to the set is a member of the set. If the \"mbrs-by-ref:\" attribute is missing, " +
-                        "the set is defined explicitly by the \"members:\" attribute.")
+        mapHelperAdd(new AttributeTypeBuilderImpl("mbrs-by-ref", "mr", Enum.MBRS_BY_REF)
+                .doc("Allows indirect population of the set. If the mbrs-by-ref " +
+                        "attribute is missing, the set is defined explicitly by the " +
+                        "members attribute.")
                 .syntax(AttributeSyntax.MBRS_BY_REF_SYNTAX)
                 .references(ObjectType.MNTNER)
                 .listValue());
 
+        // Uses members for members-as and members-is hence left RIPE's .doc
+        // Change .doc as per attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("members", "ms", Enum.MEMBERS)
-                .doc("Lists the members of the set.")
+                .doc(new Multiple(new HashMap<ObjectType, String>() {{
+                    put(ObjectType.RTR_SET, "Lists the members of the rtr_set.");
+                    put(ObjectType.AS_SET, "Lists the members of the as_set.");
+                }}))
                 .syntax(AttributeSyntax.MEMBERS_SYNTAX)
                 .listValue()); // No reference checking should be performed for members!
 
@@ -266,17 +274,19 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
 //                .doc("Specifies the as-number or as-set-name")
 //                .syntax(AttributeSyntax.MEMBERS_AS_SYNTAX));
 
+
+        // Supports member-of-ir, member-of-rt, member-of-an in attribute.xml
+        // Changed .doc as per attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("member-of", "mo", Enum.MEMBER_OF)
-                .doc("This attribute can be used in the route, aut-num and inet-rtr classes. " +
-                        "The value of the \"member-of:\" attribute identifies a set object that this object wants " +
-                        "to be a member of. This claim, however, should be acknowledged by a " +
-                        "respective \"mbrs-by-ref:\" attribute in the referenced object.")
+                .doc("Identifies any rtr-set objects this router wants to be a member " +
+                        "This claim, however, should be acknowledged by a respective " +
+                        "mbrs-by-ref attribute in the referenced rtr-set object.")
                 .syntax(AttributeSyntax.MEMBER_OF_SYNTAX)
                 .references(ObjectType.AS_SET, ObjectType.ROUTE_SET, ObjectType.RTR_SET)
                 .listValue());
 
         mapHelperAdd(new AttributeTypeBuilderImpl("method", "mh", Enum.METHOD)
-                .doc("Defines the type of the public key.")
+                .doc("The type of the public key.")
                 .syntax(AttributeSyntax.METHOD_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("mntner", "mt", Enum.MNTNER)
@@ -284,8 +294,7 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.OBJECT_NAME_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("mnt-by", "mb", Enum.MNT_BY)
-                .doc("Specifies the identifier of a registered mntner object used for authorisation of operations " +
-                        "performed with the object that contains this attribute.")
+                .doc("Lists a registered mntner used to authorise and authenticate changes to this object.")
                 .syntax(AttributeSyntax.OBJECT_NAME_SYNTAX)
                 .references(ObjectType.MNTNER)
                 .listValue());
@@ -299,18 +308,23 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .listValue());
 
         mapHelperAdd(new AttributeTypeBuilderImpl("mnt-irt", "mi", Enum.MNT_IRT)
-                .doc("May appear in an inetnum or inet6num object. It points to an irt object representing a " +
-                        "Computer Security Incident Response Team (CSIRT) that handles security incidents for " +
-                        "the address space specified by the inetnum or inet6num object.")
+                .doc("The identifier of an irt object representing a Computer Security " +
+                        "Incident Response Team (CSIRT) that handles security incidents for " +
+                        "the IP address range specified in this object.")
                 .syntax(AttributeSyntax.IRT_SYNTAX)
                 .references(ObjectType.IRT)
                 .listValue());
 
         mapHelperAdd(new AttributeTypeBuilderImpl("mnt-lower", "ml", Enum.MNT_LOWER)
-                .doc("Specifies the identifier of a registered mntner object used for hierarchical authorisation. " +
-                        "Protects creation of objects directly (one level) below in the hierarchy of an object type. " +
-                        "The authentication method of this maintainer object will then be used upon creation of any " +
-                        "object directly below the object that contains the \"mnt-lower:\" attribute.")
+                .doc("Lists a registered mntner used to authorise and authenticate the " +
+                        "creation of any object more specific than this object.\n" +
+                        "\n" +
+                        "Note:\n" +
+                        "\n" +
+                        "Mnt-lower can be used to authorise and authenticate the creation " +
+                        "of route and route6 objects if  mnt-routes is not specified in the " +
+                        "aut-num object or in a less specific inetnum, inet6num, route or" +
+                        "route6 object.")
                 .syntax(AttributeSyntax.OBJECT_NAME_SYNTAX)
                 .references(ObjectType.MNTNER)
                 .listValue());
@@ -326,7 +340,9 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .references(ObjectType.MNTNER)
                 .listValue());
 
-        mapHelperAdd(new AttributeTypeBuilderImpl("mnt-routes", "mr", Enum.MNT_ROUTES)
+        // Supports mnt-routes, mnt-routes6, mnt-routes-an in attribute.xml
+        // Need to review the .doc for each object and change as per APNIC context
+        mapHelperAdd(new AttributeTypeBuilderImpl("mnt-routes", "mu", Enum.MNT_ROUTES)
                 .doc(new Documented.Multiple(new HashMap<ObjectType, String>() {{
                     put(ObjectType.AUT_NUM, "" +
                             "This attribute references a maintainer object which is used in\n" +
@@ -377,36 +393,42 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.MNT_ROUTES_SYNTAX)
                 .references(ObjectType.MNTNER));
 
-
         mapHelperAdd(new AttributeTypeBuilderImpl("mp-default", "ma", Enum.MP_DEFAULT)
-                .doc("Specifies default multiprotocol routing policies.")
+                .doc("Specifies default multiprotocol (IPv4 and IPv6) 6routing policies.")
                 .syntax(AttributeSyntax.MP_DEFAULT_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("mp-export", "me", Enum.MP_EXPORT)
-                .doc("Specifies a multiprotocol export policy expression.")
+                .doc("The outbound (IPv4 or IPv6) routing policy of the AS.")
                 .syntax(AttributeSyntax.MP_EXPORT_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("mp-filter", "mf", Enum.MP_FILTER)
-                .doc("Defines the set's multiprotocol policy filter.")
+                .doc("Defines the set's multiprotocol (IPv4 and IPv6) policy filter.")
                 .syntax(AttributeSyntax.MP_FILTER_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("mp-import", "my", Enum.MP_IMPORT)
-                .doc("Specifies multiprotocol import policy expression.")
+                .doc("The inbound multiprotocol (IPv4 or IPv6) routing policy of the AS.")
                 .syntax(AttributeSyntax.MP_IMPORT_SYNTAX));
 
+        // Supports mp-members-is and mep-members-as as in attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("mp-members", "mm", Enum.MP_MEMBERS)
-                .doc("Lists the multiprotocol members of the set.")
+                .doc(new Multiple(new HashMap<ObjectType, String>() {{
+                    put(ObjectType.RTR_SET, "Lists the multiprotocol (IPv4 or IPv6) members of the rtr-set.");
+                    put(ObjectType.ROUTE_SET, "Lists the multiprotocol (IPv4 or IPv6) members of the route-set.");
+                }}))
                 .syntax(AttributeSyntax.MP_MEMBERS_SYNTAX).listValue());
 
         mapHelperAdd(new AttributeTypeBuilderImpl("mp-peer", "mp", Enum.MP_PEER)
                 .doc(new Multiple(new HashMap<ObjectType, String>() {{
-                    put(ObjectType.INET_RTR, "Details of any (interior or exterior) multiprotocol router peerings.");
+                    put(ObjectType.INET_RTR, "Details of any (interior or exterior) multiprotocol (IPv4 and IPv6) router peerings.");
                     put(ObjectType.PEERING_SET, "Defines a multiprotocol peering that can be used for importing or exporting routes.");
                 }}))
                 .syntax(AttributeSyntax.MP_PEER_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("mp-peering", "mg", Enum.MP_PEERING)
-                .doc("Defines a multiprotocol peering that can be used for importing or exporting routes.")
+                .doc("Defines a multiprotocol (IPv4 or IPv6) peering that can be used for importing or exporting routes.\n" +
+                        "\n" +
+                        "NOTE: Although the mp-peering attribute is optional, at least one " +
+                        "peering or mp-peering must be present in the peering-set object.")
                 .syntax(AttributeSyntax.MP_PEERING_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("netname", "na", Enum.NETNAME)
@@ -414,25 +436,36 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.NETNAME_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("nic-hdl", "nh", Enum.NIC_HDL)
-                .doc("Specifies the NIC handle of a role or person object. When creating an object, one can also " +
-                        "specify an \"AUTO\" NIC handle by setting the value of the attribute to \"AUTO-1\" " +
-                        "or AUTO-1<Initials>. In such case the database will assign the NIC handle automatically.")
+                .doc("The NIC-handle of a person object. When creating an " +
+                        "object, set the value of the attribute to either:\n" +
+                        "\n" +
+                        "- AUTO-1\n" +
+                        "\n" +
+                        "The database will generate the NIC-handle based on the " +
+                        "initials of the name in the person or role attribute.\n" +
+                        "\n" +
+                        "- AUTO-1<initials>\n" +
+                        "\n" +
+                        "The database will generate a NIC-handle based on the " +
+                        "initials specified.")
                 .syntax(AttributeSyntax.NIC_HANDLE_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("notify", "ny", Enum.NOTIFY)
-                .doc("Specifies the e-mail address to which notifications of changes to an object should be sent. " +
+                .doc("Specifies the e-mail address to which notifications of changes to this object should be sent. " +
                         "This attribute is filtered from the default whois output.")
                 .syntax(AttributeSyntax.EMAIL_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("nserver", "ns", Enum.NSERVER)
-                .doc("Specifies the nameservers of the domain.")
+                .doc("The nameservers of the domain. A minimum of two is mandatory.")
                 .syntax(AttributeSyntax.NSERVER_SYNTAX));
 
+        // No APNIC .doc
         mapHelperAdd(new AttributeTypeBuilderImpl("org", "og", Enum.ORG)
                 .doc("Points to an existing organisation object representing the entity that holds the resource.")
                 .syntax(AttributeSyntax.ORGANISATION_SYNTAX)
                 .references(ObjectType.ORGANISATION));
 
+        // Not in current attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("org-name", "on", Enum.ORG_NAME)
                 .doc("Specifies the name of the organisation that this organisation object represents in the whois" +
                         "database. This is an ASCII-only text attribute. The restriction is because this attribute is" +
@@ -441,10 +474,12 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                         "the \"descr:\" attribute if required.")
                 .syntax(AttributeSyntax.ORG_NAME_SYNTAX));
 
+        // Not in current attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("org-type", "ot", Enum.ORG_TYPE)
                 .doc("Specifies the type of the organisation.")
                 .syntax(AttributeSyntax.ORG_TYPE_SYNTAX));
 
+        // Not in current attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("organisation", "oa", Enum.ORGANISATION)
                 .doc("Specifies the ID of an organisation object. When creating an object, one has to specify " +
                         "an \"AUTO\" ID by setting the value of the attribute to \"AUTO-1\" or \"AUTO-1<letterCombination>\", " +
@@ -452,7 +487,7 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.ORGANISATION_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("origin", "or", Enum.ORIGIN)
-                .doc("Specifies the AS that originates the route." +
+                .doc("The AS that originates the route. " +
                         "The corresponding aut-num object should be registered in the database.")
                 .syntax(AttributeSyntax.AS_NUMBER_SYNTAX)
                 .references(ObjectType.AUT_NUM));
@@ -466,37 +501,38 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.PEER_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("peering", "pg", Enum.PEERING)
-                .doc("Defines a peering that can be used for importing or exporting routes.")
+                .doc("Defines a peering that can be used for importing or exporting IPv4 routes. \n" +
+                    "\n" +
+                    "NOTE: Although the peering attribute is optional, at least one " +
+                    "peering or mp-peering must be present in the peering-set object.")
                 .syntax(AttributeSyntax.PEERING_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("peering-set", "ps", Enum.PEERING_SET)
                 .doc("Specifies the name of the peering-set.")
                 .syntax(AttributeSyntax.PEERING_SET_SYNTAX));
 
-        mapHelperAdd(new AttributeTypeBuilderImpl("person", "pn", Enum.PERSON)
-                .doc("Specifies the full name of an administrative, technical or zone contact person for " +
-                        "other objects in the database." +
-                        "Person name cannot contain titles such as \"Dr.\", \"Prof.\", \"Mv.\", \"Ms.\", \"Mr.\", etc." +
-                        "It is composed of alphabetic characters.")
-                .syntax(AttributeSyntax.PERSON_ROLE_NAME_SYNTAX));
+//        mapHelperAdd(new AttributeTypeBuilderImpl("person", "pn", Enum.PERSON)
+//                .doc("The full name of an administrative, technical or zone contact person for " +
+//                        "other objects in the database.")
+//                .syntax(AttributeSyntax.PERSON_ROLE_NAME_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("person", "pn", Enum.PERSON)
-                .doc("Specifies the full name of an administrative, technical or zone contact person for " +
-                        "other objects in the database." +
-                        "Person name cannot contain titles such as \"Dr.\", \"Prof.\", \"Mv.\", \"Ms.\", \"Mr.\", etc." +
-                        "It is composed of alphabetic characters.")
+                .doc("The full name of an administrative, technical or zone contact person for " +
+                        "other objects in the database.")
                 .syntax(AttributeSyntax.PERSON_NAME_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("phone", "ph", Enum.PHONE)
-                .doc("Specifies a telephone number of the contact.")
+                .doc("A contact telephone number.")
                 .syntax(AttributeSyntax.PHONE_SYNTAX));
 
+        // Not in current attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("ping-hdl", "pc", Enum.PING_HDL)
                 .doc("References a person or role capable of responding to queries concerning the IP address(es) " +
                         "specified in the 'pingable' attribute.")
                 .syntax(AttributeSyntax.NIC_HANDLE_SYNTAX)
                 .references(ObjectType.PERSON, ObjectType.ROLE));
 
+        //Not in current attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("pingable", "pa", Enum.PINGABLE)
                 .doc("Allows a network operator to advertise an IP address of a node that should be reachable from outside " +
                         "networks. This node can be used as a destination address for diagnostic tests. " +
@@ -519,8 +555,8 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
 //                        "for lookups for domain objects.\n"));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("referral-by", "rb", Enum.REFERRAL_BY)
-                .doc("This attribute is required in the maintainer object. It may never be altered after the addition " +
-                        "of the maintainer. This attribute refers to the maintainer that created this maintainer. " +
+                .doc("This attribute is required in the mntner object. It may never be altered after the addition " +
+                        "of the mntner. This attribute refers to the mntner that created this mntner. " +
                         "It may be multiple if more than one signature appeared on the transaction creating the object.")
                 .syntax(AttributeSyntax.REFERRAL_BY_SYNTAX)
                 .references(ObjectType.MNTNER));
@@ -531,35 +567,33 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                         "objects returned by the query contains an abuse-mailbox attribute.")
                 .syntax(AttributeSyntax.EMAIL_SYNTAX));
 
+        // Not in current attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("registry-name", "rg", Enum.REGISTRY_NAME)
                 .doc("Specifies the registry name as 'APNIC'.")
                 .syntax(AttributeSyntax.REGISTRY_NAME_SYNTAX));
 
+
         mapHelperAdd(new AttributeTypeBuilderImpl("remarks", "rm", Enum.REMARKS)
-                .doc("Contains remarks.")
+                .doc("Information about the object that cannot be stated in other " +
+                        "attributes.")
                 .syntax(AttributeSyntax.FREE_FORM_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("role", "ro", Enum.ROLE)
-                .doc("Specifies the full name of a role entity, e.g. APNIC DBM.")
+                .doc("The full name of a role entity.")
                 .syntax(AttributeSyntax.PERSON_ROLE_NAME_SYNTAX));
-
-        mapHelperAdd(new AttributeTypeBuilderImpl("role", "ro", Enum.ROLE)
-                .doc("Specifies the full name of a role entity, e.g. APNIC DBM.")
-                .syntax(AttributeSyntax.PERSON_ROLE_NAME_SYNTAX));
-
 
         mapHelperAdd(new AttributeTypeBuilderImpl("route", "rt", Enum.ROUTE)
-                .doc("Specifies the prefix of the interAS route. Together with the \"origin:\" attribute, " +
-                        "constitutes a primary key of the route object.")
+                .doc("The prefix of the interAS route. Together with the origin " +
+                        "attribute, it forms the primary key of the route object.")
                 .syntax(AttributeSyntax.ROUTE_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("route6", "r6", Enum.ROUTE6)
-                .doc("Specifies the IPv6 prefix of the interAS route. Together with the \"origin:\" attribute," +
+                .doc("The IPv6 prefix of the interAS route. Together with the origin attribute, " +
                         "constitutes a primary key of the route6 object.")
                 .syntax(AttributeSyntax.ROUTE6_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("route-set", "rs", Enum.ROUTE_SET)
-                .doc("Specifies the name of the route set. It is a primary key for the route-set object.")
+                .doc("Specifies the name of the route-set.")
                 .syntax(AttributeSyntax.ROUTE_SET_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("rtr-set", "is", Enum.RTR_SET)
@@ -572,33 +606,35 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .references(ObjectType.KEY_CERT));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("source", "so", Enum.SOURCE)
-                .doc("Specifies the registry where the object is registered. Should be \"APNIC\" for the APNIC Database.")
+                .doc("The database where the object is registered.")
                 .syntax(AttributeSyntax.SOURCE_SYNTAX));
 
+        // Working for both status-in and status-i6 xmlnames.
         mapHelperAdd(new AttributeTypeBuilderImpl("status", "st", Enum.STATUS)
-                .doc("Specifies the status of the address range represented by inetnum or inet6num object.")
+                .doc("The status of the address range represented by inetnum or inet6num object.")
                 .syntax(AttributeSyntax.STATUS_SYNTAX));
 
+        // Not in current attribute.xml
         mapHelperAdd(new AttributeTypeBuilderImpl("subdomain-name", "sb", Enum.SUBDOMAIN_NAME)
                 .doc("Specifies Domain name as in RFC 1034 without trailing dot (\".\").")
                 .syntax(AttributeSyntax.SUBDOMAIN_NAME_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("tech-c", "tc", Enum.TECH_C)
-                .doc("References a technical contact.")
+                .doc("The NIC-handle of a technical contact.")
                 .syntax(AttributeSyntax.NIC_HANDLE_SYNTAX)
                 .references(ObjectType.PERSON, ObjectType.ROLE));
 
         // Text is obsolete in APNIC context, removing this is breaking. This should be removed later
         mapHelperAdd(new AttributeTypeBuilderImpl("text", "tx", Enum.TEXT)
-                .doc("Text of the poem. Must be humorous, but not malicious or insulting.")
+                .doc("Text of the limerick. Must be humorous, but not malicious or insulting.")
                 .syntax(AttributeSyntax.FREE_FORM_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("upd-to", "dt", Enum.UPD_TO)
-                .doc("Specifies the e-mail address to be notified when an object protected by a mntner is unsuccessfully updated.")
+                .doc("The e-mail address to be notified when an object protected by a mntner is unsuccessfully updated.")
                 .syntax(AttributeSyntax.EMAIL_SYNTAX));
 
         mapHelperAdd(new AttributeTypeBuilderImpl("zone-c", "zc", Enum.ZONE_C)
-                .doc("References a zone contact.")
+                .doc("The NIC-handle of a zone contact.")
                 .syntax(AttributeSyntax.NIC_HANDLE_SYNTAX)
                 .references(ObjectType.PERSON, ObjectType.ROLE));
     }

@@ -12,8 +12,7 @@ import static org.junit.Assert.assertThat;
 
 public class AttributeSyntaxTest {
 
-//
-//
+
 //    @Test
 //    public void alias() {
 //        verifySuccess(ObjectType.INET_RTR, AttributeType.ALIAS, "Moscow-BNS003-Gig0-1-707.free.net");
@@ -104,8 +103,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.AS_SET, AttributeType.AS_SET, "AS1:AS-EXPORT:AS2");
     }
 
-
-
 //    @Test
 //    public void assignmentSize() throws Exception {
 //        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "");
@@ -155,7 +152,7 @@ public class AttributeSyntaxTest {
        verifyFailure(ObjectType.IRT, AttributeType.AUTH, "md5-pw $1$abc012./$./012345678901234567890");
        verifyFailure(ObjectType.IRT, AttributeType.AUTH, "pgpkey-0123456");
        verifyFailure(ObjectType.IRT, AttributeType.AUTH, "pgpkey-012345678");
-   }
+    }
 
     @Test
     public void changed() throws Exception {
@@ -290,7 +287,7 @@ public class AttributeSyntaxTest {
         //verifySuccess(ObjectType.PERSON, AttributeType.E_MAIL, "'anthingcan1242go!@(&)^!(&@^21here\"@0.2345678901234567890123456789012345678901");
         verifyFailure(ObjectType.PERSON, AttributeType.E_MAIL, "0@2.45678901234567890123456789012345678901234567890123456789012345678901234567890");
     }
-//
+
 //    @Test
 //    public void encryption() throws Exception {
 //        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "PGPKEY-");
@@ -542,7 +539,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.INET6NUM, AttributeType.INET6NUM, "2a01:00e0::/32");
         verifySuccess(ObjectType.INET6NUM, AttributeType.INET6NUM, "2a01:00e0::/32");
     }
-
 
     @Test
     public void inject() {
@@ -906,7 +902,7 @@ public class AttributeSyntaxTest {
         verifyFailure(ObjectType.AUT_NUM, AttributeType.MP_IMPORT, " afi ipv6.unicast  AS3248  AS39560");
         verifyFailure(ObjectType.AUT_NUM, AttributeType.MP_IMPORT, "INVALID");
     }
-//
+
 //    @Test
 //    public void mpPeer() throws Exception {
 //        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 2001::1A asno(AS2334)");
@@ -1174,9 +1170,7 @@ public class AttributeSyntaxTest {
 //        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "AS20773:");
 //        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, ":PRNG-AUTH-PLOT-BOGUS-FROM-RS3724");
 //    }
-
-
-
+//
 //    @Test
 //    public void person() {
 //        verifyFailure(ObjectType.PERSON, AttributeType.PERSON, "some [name]");
@@ -1192,7 +1186,6 @@ public class AttributeSyntaxTest {
 //
 //        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Martin . Fowler");
 //    }
-//
 
     @Test
     public void phone() {
@@ -1245,8 +1238,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.KEY_CERT, AttributeType.CERTIF, "mQGiBD0GnVIRBADDmMMFTKQ1Ye7r8T+Rg4y1kqjQBd1rCVU8ifZjQBy9G7W9MZa1");
         verifySuccess(ObjectType.KEY_CERT, AttributeType.CERTIF, "Rj5NPpvAxQ5T7PyGVQ1EHL+vsFPRyQ2g4XQUytRn7Isp1/j8RmnXFNoBawaGwcuS");
     }
-
-
 
 //    @Test
 //    public void remarks() {
@@ -1349,8 +1340,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.RTR_SET, AttributeType.RTR_SET, "AS20773:RTRS-HOSTEUROPE");
         verifySuccess(ObjectType.RTR_SET, AttributeType.RTR_SET, "RTRS-RIPE:RTRS-ALLOCBNDR:RTRS-IPV6");
     }
-
-
 
 //    @Test
 //    public void pingable() {
