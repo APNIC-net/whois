@@ -4,7 +4,6 @@ import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectMessages;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
-import org.junit.After;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
@@ -217,15 +216,15 @@ public class AttributeSyntaxTest {
 
     @Test
     public void domNet() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DOM_NET, "");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DOM_NET, "100.100.100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DOM_NET, "300.300.300.300");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DOM_NET, "0/100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DOM_NET, "::0/0");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DOM_NET, "192.168.1.0/24");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DOM_NET, "192.168.0.0/22");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DOM_NET, "192.168.1.0");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DOM_NET, "192.168.0.0");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "100.100.100");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "300.300.300.300");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "0/100");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "::0/0");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.1.0/24");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.0.0/22");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.1.0");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.0.0");
     }
 
     @Test
@@ -618,17 +617,17 @@ public class AttributeSyntaxTest {
 
 //    @Test
 //    public void membersAs() throws Exception {
-//        verifyFailure(ObjectType.AS_SET, AttributeType.MEMBERS_AS, "AS");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.MEMBERS_AS, "");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.MEMBERS_AS, "AS00123");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.MEMBERS_AS, "as-");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.MEMBERS_AS, "as-asdfsdf:asdfsd");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.MEMBERS_AS, "as-1231;as-asfd");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.MEMBERS_AS, "AS01234");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.MEMBERS_AS, "AS102112341313131312312313");
+//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS");
+//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "");
+//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS00123");
+//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-");
+//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-asdfsdf:asdfsd");
+//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-1231;as-asfd");
+//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS01234");
+//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS102112341313131312312313");
 //
-//        verifySuccess(ObjectType.AS_SET, AttributeType.MEMBERS_AS, "AS123424324");
-//        verifySuccess(ObjectType.AS_SET, AttributeType.MEMBERS_AS, "as-123123:as-0123123");
+//        verifySuccess(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS123424324");
+//        verifySuccess(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-123123:as-0123123");
 //
 //    }
 
@@ -1305,14 +1304,14 @@ public class AttributeSyntaxTest {
 
     @Test
     public void registryName() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.REGISTRY_NAME, "registry-");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.REGISTRY_NAME, "registry APNIC");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.REGISTRY_NAME, "Re4istry-A234");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.REGISTRY_NAME, "Registry-Name-is-APNIC");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.REGISTRY_NAME, "Registry-Name");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.REGISTRY_NAME, "REGISTRY-NAME");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.REGISTRY_NAME, "REGISTRY-NAME-APNIC");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.REGISTRY_NAME, "Registry-Name-is-A1-B2-C3");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "registry-");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "registry APNIC");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Re4istry-A234");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Registry-Name-is-APNIC");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Registry-Name");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "REGISTRY-NAME");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "REGISTRY-NAME-APNIC");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Registry-Name-is-A1-B2-C3");
     }
 
     @Test
@@ -1395,17 +1394,17 @@ public class AttributeSyntaxTest {
 
     @Test
     public void subdomainIn() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.SUBDOMAIN_NAME, "");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.SUBDOMAIN_NAME, ".");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.SUBDOMAIN_NAME, "..");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.SUBDOMAIN_NAME, "-.-.");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.SUBDOMAIN_NAME, "SOME-INVALID-STATUS.ALSO-");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.SUBDOMAIN_NAME, "SOME-INVALID-STATUS.-.");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, ".");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "..");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "-.-.");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "SOME-INVALID-STATUS.ALSO-");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "SOME-INVALID-STATUS.-.");
 
-        verifySuccess(ObjectType.DOMAIN, AttributeType.SUBDOMAIN_NAME, "0000-1111.STATUS-2222.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.SUBDOMAIN_NAME, "STATUS-abcd.STATUS-2222.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.SUBDOMAIN_NAME, "subdomain-1111.sUbdomain-ABCD-2222.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.SUBDOMAIN_NAME, "0000-1111.");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "0000-1111.STATUS-2222.");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "STATUS-abcd.STATUS-2222.");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "subdomain-1111.sUbdomain-ABCD-2222.");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "0000-1111.");
     }
 
 

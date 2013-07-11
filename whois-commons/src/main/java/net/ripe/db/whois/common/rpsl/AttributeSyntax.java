@@ -86,17 +86,18 @@ public interface AttributeSyntax extends Documented {
     static AttributeSyntax RTR_SET_SYNTAX = implementationMap.get(AttributeSyntaxType.RTR_SET_SYNTAX);
     static AttributeSyntax SOURCE_SYNTAX = implementationMap.get(AttributeSyntaxType.SOURCE_SYNTAX);
     static AttributeSyntax STATUS_SYNTAX = implementationMap.get(AttributeSyntaxType.STATUS_SYNTAX);
+
     // APNIC
-    static AttributeSyntax DOM_NET_SYNTAX = implementationMap.get(AttributeSyntaxType.DOM_NET_SYNTAX);
-    static AttributeSyntax FINGERPR_SYNTAX = implementationMap.get(AttributeSyntaxType.FINGERPR_SYNTAX);
-    // static AttributeSyntax MEMBERS_AS_SYNTAX = implementationMap.get(AttributeSyntaxType.MEMBERS_AS_SYNTAX);
-    // static AttributeSyntax LIMERICK_SYNTAX = implementationMap.get(AttributeSyntaxType.LIMERICK_SYNTAX);
-    static AttributeSyntax PERSON_NAME_SYNTAX = implementationMap.get(AttributeSyntaxType.PERSON_NAME_SYNTAX);
-    static AttributeSyntax PUBLIC_KEY_SYNTAX = implementationMap.get(AttributeSyntaxType.PUBLIC_KEY_SYNTAX);
-    static AttributeSyntax REFERRAL_BY_SYNTAX = implementationMap.get(AttributeSyntaxType.REFERRAL_BY_SYNTAX);
-    static AttributeSyntax REGISTRY_NAME_SYNTAX= implementationMap.get(AttributeSyntaxType.REGISTRY_NAME_SYNTAX);
-    static AttributeSyntax SUBDOMAIN_NAME_SYNTAX = implementationMap.get(AttributeSyntaxType.SUBDOMAIN_NAME_SYNTAX);
-    // static AttributeSyntax REFER_SYNTAX = implementationMap.get(AttributeSyntaxType.REFER_SYNTAX);
+    static AttributeSyntax APNIC_DOM_NET_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_DOM_NET_SYNTAX);
+    static AttributeSyntax APNIC_FINGERPR_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_FINGERPR_SYNTAX);
+    static AttributeSyntax APNIC_PERSON_NAME_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_PERSON_NAME_SYNTAX);
+    static AttributeSyntax APNIC_PUBLIC_KEY_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_PUBLIC_KEY_SYNTAX);
+    static AttributeSyntax APNIC_REFERRAL_BY_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_REFERRAL_BY_SYNTAX);
+    static AttributeSyntax APNIC_REGISTRY_NAME_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_REGISTRY_NAME_SYNTAX);
+    static AttributeSyntax APNIC_SUBDOMAIN_NAME_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_SUBDOMAIN_NAME_SYNTAX);
+    // static AttributeSyntax APNIC_REFER_SYNTAX = implementationMap.get(AttributeSyntaxType.REFER_SYNTAX);
+    // static AttributeSyntax APNIC_MEMBERS_AS_SYNTAX = implementationMap.get(AttributeSyntaxType.MEMBERS_AS_SYNTAX);
+    // static AttributeSyntax APNIC_LIMERICK_SYNTAX = implementationMap.get(AttributeSyntaxType.LIMERICK_SYNTAX);
 
     boolean matches(ObjectType objectType, String value);
 
@@ -624,85 +625,86 @@ public interface AttributeSyntax extends Documented {
     }
 
     enum AttributeSyntaxType {
-        ANY_SYNTAX,
         ADDRESS_PREFIX_RANGE_SYNTAX,
-        EMAIL_SYNTAX,
         AGGR_BNDRY_SYNTAX,
         AGGR_MTD_SYNTAX,
         ALIAS_SYNTAX,
-        NUMBER_SYNTAX,
+        ANY_SYNTAX,
         AS_BLOCK_SYNTAX,
+        AS_NUMBER_SYNTAX,
         AS_SET_SYNTAX,
         AUTH_SCHEME_SYNTAX,
-        NIC_HANDLE_SYNTAX,
         CERTIF_SYNTAX,
         CHANGED_SYNTAX,
         COMPONENTS_SYNTAX,
         COUNTRY_CODE_SYNTAX,
         DEFAULT_SYNTAX,
-        FREE_FORM_SYNTAX,
         DOMAIN_SYNTAX,
         DS_RDATA_SYNTAX,
-        EXPORT_SYNTAX,
+        EMAIL_SYNTAX,
         EXPORT_COMPS_SYNTAX,
-        PHONE_SYNTAX,
-        FILTER_SYNTAX,
+        EXPORT_SYNTAX,
         FILTER_SET_SYNTAX,
+        FILTER_SYNTAX,
+        FREE_FORM_SYNTAX,
         GENERATED_SYNTAX,
-        POETIC_FORM_SYNTAX,
         GEOLOC_SYNTAX,
         HOLES_SYNTAX,
         IFADDR_SYNTAX,
         IMPORT_SYNTAX,
-        IPV6_SYNTAX,
-        IPV4_SYNTAX,
         INET_RTR_SYNTAX,
         INJECT_SYNTAX,
         INTERFACE_SYNTAX,
+        IPV4_SYNTAX,
+        IPV6_SYNTAX,
+        IRT_SYNTAX,
         KEY_CERT_SYNTAX,
         LANGUAGE_CODE_SYNTAX,
-        AS_NUMBER_SYNTAX,
         MBRS_BY_REF_SYNTAX,
-        MEMBERS_SYNTAX,
         MEMBER_OF_SYNTAX,
+        MEMBERS_SYNTAX,
         METHOD_SYNTAX,
-        OBJECT_NAME_SYNTAX,
-        IRT_SYNTAX,
         MNT_ROUTES_SYNTAX,
         MP_DEFAULT_SYNTAX,
         MP_EXPORT_SYNTAX,
         MP_FILTER_SYNTAX,
         MP_IMPORT_SYNTAX,
         MP_MEMBERS_SYNTAX,
-        MP_PEER_SYNTAX,
         MP_PEERING_SYNTAX,
+        MP_PEER_SYNTAX,
         NETNAME_SYNTAX,
+        NIC_HANDLE_SYNTAX,
         NSERVER_SYNTAX,
+        NUMBER_SYNTAX,
+        OBJECT_NAME_SYNTAX,
         ORGANISATION_SYNTAX,
         ORG_NAME_SYNTAX,
         ORG_TYPE_SYNTAX,
-        PEER_SYNTAX,
-        PEERING_SYNTAX,
         PEERING_SET_SYNTAX,
+        PEERING_SYNTAX,
+        PEER_SYNTAX,
         PERSON_ROLE_NAME_SYNTAX,
+        PHONE_SYNTAX,
         PINGABLE_SYNTAX,
         POEM_SYNTAX,
-        ROUTE_SYNTAX,
+        POETIC_FORM_SYNTAX,
         ROUTE6_SYNTAX,
         ROUTE_SET_SYNTAX,
+        ROUTE_SYNTAX,
         RTR_SET_SYNTAX,
         SOURCE_SYNTAX,
         STATUS_SYNTAX,
+
         // APNIC
-        DOM_NET_SYNTAX,
-        FINGERPR_SYNTAX,
-        // LIMERICK_SYNTAX,
-        // MEMBERS_AS_SYNTAX,
-        PERSON_NAME_SYNTAX,
-        PUBLIC_KEY_SYNTAX,
-        REFERRAL_BY_SYNTAX,
-        REGISTRY_NAME_SYNTAX,
-        SUBDOMAIN_NAME_SYNTAX,
-        // REFER_SYNTAX,
+        APNIC_DOM_NET_SYNTAX,
+        APNIC_FINGERPR_SYNTAX,
+        APNIC_PERSON_NAME_SYNTAX,
+        APNIC_PUBLIC_KEY_SYNTAX,
+        APNIC_REFERRAL_BY_SYNTAX,
+        APNIC_REGISTRY_NAME_SYNTAX,
+        APNIC_SUBDOMAIN_NAME_SYNTAX,
+        // APNIC_LIMERICK_SYNTAX,
+        // APNIC_MEMBERS_AS_SYNTAX,
+        // APNIC_REFER_SYNTAX,
     }
 }
