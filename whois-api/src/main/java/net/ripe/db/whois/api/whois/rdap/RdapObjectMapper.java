@@ -63,6 +63,8 @@ class RdapObjectMapper {
                 break;
             case PERSON:
             case ROLE:
+            // TODO: [RL] Configuration (property?) for allowed RPSL object types for entity lookups
+            // TODO: [ES] Denis to review
             case ORGANISATION:
             case IRT:
                 rdapResponse = createEntity(rpslObject, requestUrl, baseUrl);

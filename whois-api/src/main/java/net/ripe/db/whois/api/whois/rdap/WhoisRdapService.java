@@ -88,6 +88,8 @@ public class WhoisRdapService {
             case "entity":
                 whoisObjectTypes.add(PERSON);
                 whoisObjectTypes.add(ROLE);
+                // TODO: [RL] Configuration (property?) for allowed RPSL object types for entity lookups
+                // TODO: [AS] Denis will look into if this should be used or not
                 whoisObjectTypes.add(ORGANISATION);
                 whoisObjectTypes.add(IRT);
                 break;
