@@ -162,7 +162,7 @@ public class WhoisRdapService {
             });
 
             if (result.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
             }
 
             // The result size will be > 1 if we allow related objects

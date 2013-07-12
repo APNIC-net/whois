@@ -569,22 +569,19 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
-    @Ignore
     public void noOrg() throws Exception {
         final ClientResponse clientResponse = createResource(AUDIENCE, "entity/ORG-NONE-TEST").get(ClientResponse.class);
 
         assertThat(clientResponse.getStatus(), equalTo(404));
-        assertThat(clientResponse.getEntity(String.class), equalTo(""));
     }
 
     @Test
-    @Ignore
     public void lookupOrg() throws Exception {
-        final ClientResponse clientResponse = createResource(AUDIENCE, "entity/ORG-ONE-TEST").accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
+        final ClientResponse clientResponse = createResource(AUDIENCE, "entity/ORG-TEST1-TEST").accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
 
         assertThat(clientResponse.getStatus(), equalTo(200));
         final Entity entity = clientResponse.getEntity(Entity.class);
-        assertThat(entity.getHandle(), equalTo("ORG-ONE-TEST"));
+        assertThat(entity.getHandle(), equalTo("ORG-TEST1-TEST"));
 
         final List<Event> events = entity.getEvents();
         assertThat(events.size(), equalTo(1));

@@ -1,14 +1,15 @@
 package net.ripe.db.whois.api.whois.rdap.domain;
 
+import com.google.common.collect.Lists;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "notice", propOrder = {
+@XmlType(name = "exception", propOrder = {
         "errorCode",
         "title",
         "description"
@@ -29,9 +30,9 @@ public class Exception {
 
     public List<String> getDescription () {
         if (description == null)  {
-            return new ArrayList<String>();
+            description = Lists.newArrayList();
         }
 
-        return description;
+        return this.description;
     }
 }
