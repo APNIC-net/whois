@@ -129,7 +129,7 @@ public class WhoisRdapService {
         }));
 
         final Query query = Query.parse(
-                String.format("%s %s %s %s %s %s %s",
+                String.format("%s %s %s %s %s %s %s %s",
                         QueryFlag.NO_GROUPING.getLongFlag(),
                         // TODO: [RL] Configuration (property?) to control whether to fetch related objects? Maybe the results have to be filtered after the fact?
                         // QueryFlag.NO_REFERENCED.getLongFlag(),
