@@ -184,7 +184,6 @@ public class RdapObjectMapperTest {
         assertThat(result.getHandle(), is("102.130.in-addr.arpa"));
     }
 
-    @Ignore("TODO ds-rdata syntax")
     @Test
     public void domain_29_12_202_in_addr_arpa() {
         final Domain result = (Domain)map((RpslObject.parse("" +
