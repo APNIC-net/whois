@@ -15,8 +15,8 @@ public class RdapException {
                 break;
             case 403:
                 exception.setTitle("Forbidden");
-                exception.getDescription().add("You're a part of the Rebel Alliance...");
-                exception.getDescription().add("and a traitor. Take her away!");
+                exception.getDescription().add("You're a part of the Rebel Alliance and a traitor.");
+                exception.getDescription().add("Take her away!");
                 break;
             case 404:
                 exception.setTitle("Not found");
@@ -30,8 +30,7 @@ public class RdapException {
             case 500:
                 exception.setTitle("Internal server error");
                 exception.getDescription().add("I felt a great disturbance in the Force...");
-                exception.getDescription().add("as if millions of voices suddenly cried out in terror");
-                exception.getDescription().add("and were suddenly silenced.");
+                exception.getDescription().add("As if millions of voices cried out in terror and were suddenly silenced.");
                 exception.getDescription().add("I fear something terrible has happened.");
                 break;
 
