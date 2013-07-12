@@ -41,6 +41,10 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
             public Set<Object> getSingletons() {
                 final JacksonJaxbJsonProvider jaxbJsonProvider = new JacksonJaxbJsonProvider();
                 jaxbJsonProvider.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+
+                // TODO find a non-depricated one of these
+
+                jaxbJsonProvider.configure(SerializationConfig.Feature.WRITE_NULL_PROPERTIES,false);
                 return Sets.newLinkedHashSet(Lists.<Object>newArrayList(
                         whoisRDAPService,
                         defaultExceptionMapper,

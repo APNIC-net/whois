@@ -29,8 +29,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -583,7 +581,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final Entity entity = clientResponse.getEntity(Entity.class);
         assertThat(entity.getHandle(), equalTo("ORG-TEST1-TEST"));
 
-        final List<Event> events = entity.getEvents();
+        /*final List<Event> events = entity.getEvents();
         assertThat(events.size(), equalTo(1));
 
         final Event event = events.get(0);
@@ -636,7 +634,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final Link selfLink = links.get(0);
         assertThat(selfLink.getRel(), equalTo("self"));
         assertThat(selfLink.getValue(), equalTo(linkValue));
-        assertThat(selfLink.getHref(), equalTo(linkValue));
+        assertThat(selfLink.getHref(), equalTo(linkValue));*/
     }
 
     @Override
