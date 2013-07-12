@@ -420,13 +420,13 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                             "PRNG-   reserved for peering-set names\n" +
                             "IRT-    reserved for irt names (irt not yet implemented by APNIC)\n"));
 
-//        put(attributeSyntaxTypeMap, AttributeSyntaxType.SOURCE_SYNTAX, new AttributeSyntaxRegexp(80,
-//                Pattern.compile("(?i)^[A-Z][A-Z0-9_-]*[A-Z0-9]$"), "" +
-//                "Made up of letters, digits, the character underscore \"_\",\n" +
-//                "and the character hyphen \"-\"; the first character of a\n" +
-//                "registry name must be a letter, and the last character of a\n" +
-//                "registry name must be a letter or a digit."));
-//
+        put(attributeSyntaxTypeMap, AttributeSyntaxType.SOURCE_SYNTAX, new AttributeSyntaxRegexp(80,
+                Pattern.compile("(?i)^[A-Z][A-Z0-9_-]*[A-Z0-9]$"), "" +
+                "Made up of letters, digits, the character underscore \"_\",\n" +
+                "and the character hyphen \"-\"; the first character of a\n" +
+                "registry name must be a letter, and the last character of a\n" +
+                "registry name must be a letter or a digit."));
+
             put(attributeSyntaxTypeMap, AttributeSyntaxType.ORGANISATION_SYNTAX, new AttributeSyntaxRegexp(30,
                     Pattern.compile("(?i)^(ORG-([A-Z]{2,4}([1-9][0-9]{0,5})?(-[A-Z]([A-Z0-9_-]{0,7}[A-Z0-9])))|(AUTO-[0-9]+([A-Z]{2,4})?))$"),
                     ""));

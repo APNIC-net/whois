@@ -112,7 +112,6 @@ public enum AttributeType implements AttributeTypeBuilder {
     TEXT(AttributeTypeBuilder.implementationMap.get(Enum.TEXT)),
     UPD_TO(AttributeTypeBuilder.implementationMap.get(Enum.UPD_TO)),
     ZONE_C(AttributeTypeBuilder.implementationMap.get(Enum.ZONE_C)),
-
     // APNIC
     ADDRESS_PREFIX_RANGE(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_ADDRESS_PREFIX_RANGE)),
     APNIC_DOM_NET(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_DOM_NET)),
@@ -170,7 +169,7 @@ public enum AttributeType implements AttributeTypeBuilder {
         return attributeTypeBuilder.getFlag();
     }
 
-    boolean isListValue() {
+    public boolean isListValue() {
         return attributeTypeBuilder.getValueType().equals(LIST_VALUE);
     }
 

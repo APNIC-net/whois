@@ -85,6 +85,7 @@ public final class RpslAttribute {
     public Set<CIString> getCleanValues() {
         if (cleanValues == null) {
             final String cleanedValue = determineCleanValue(value);
+            // System.out.println("cleanedValue:" + cleanedValue);
 
             final Set<CIString> values;
             if (type == null) {
@@ -143,6 +144,8 @@ public final class RpslAttribute {
 
     private static String determineCleanValue(final String value) {
         final StringBuilder result = new StringBuilder(value.length());
+
+        //System.out.println("initialValue" + value);
 
         boolean comment = false;
         boolean space = false;
