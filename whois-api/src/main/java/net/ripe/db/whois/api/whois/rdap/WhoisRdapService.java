@@ -131,7 +131,9 @@ public class WhoisRdapService {
         final Query query = Query.parse(
                 String.format("%s %s %s %s %s %s %s",
                         QueryFlag.NO_GROUPING.getLongFlag(),
-                        QueryFlag.NO_REFERENCED.getLongFlag(),
+                        // TODO: [RL] Configuration (property?) to control whether to fetch related objects?
+                        // QueryFlag.NO_REFERENCED.getLongFlag(),
+                        // TODO: [RL] Configure what sources to query? (APNIC will need additional sources)
                         QueryFlag.SOURCES.getLongFlag(),
                         source,
                         QueryFlag.SELECT_TYPES.getLongFlag(),
@@ -163,17 +165,20 @@ public class WhoisRdapService {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            if (result.size() > 1) {
-                throw new IllegalStateException("Unexpected result size: " + result.size());
-            }
+            // The result size will be > 1 if we allow related objects
+//            if (result.size() > 1) {
+//                throw new IllegalStateException("Unexpected result size: " + result.size());
+//            }
 
-            final RpslObject resultObject = result.get(0);
+            final RpslObject resultObject = result.remove(0);
 
             return Response.ok(
                     RdapObjectMapper.map(
                         getRequestUrl(request),
                         getBaseUrl(request),
                         resultObject,
+                        result,
+                        // TODO: [RL] move these into RdapObjectMapper so that they can be used for nested objects?
                         versionDao.findByKey(resultObject.getType(), resultObject.getKey().toString()),
                         abuseCFinder.findAbuseContacts(resultObject))).build();
 

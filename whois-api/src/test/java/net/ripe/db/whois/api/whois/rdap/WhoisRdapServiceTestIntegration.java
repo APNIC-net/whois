@@ -70,7 +70,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "changed:       dbtest@ripe.net 20120101\n" +
                 "source:        TEST\n");
 
-        databaseHelper.updateObject("" +
+        databaseHelper.addObject("" +
                 "person:        Test Person2\n" +
                 "address:       Test Address\n" +
                 "phone:         +61-1234-1234\n" +
@@ -80,7 +80,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "changed:       noreply@ripe.net 20120101\n" +
                 "source:        TEST\n");
 
-        databaseHelper.updateObject("" +
+        databaseHelper.addObject("" +
                 "person:        Pauleth Palthen\n" +
                 "address:       Singel 258\n" +
                 "phone:         +31-1234567890\n" +
@@ -371,8 +371,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 .get(Autnum.class);
 
         assertThat(autnum.getHandle(), equalTo("AS123"));
-        assertThat(autnum.getStartAutnum(), equalTo(0L));
-        assertThat(autnum.getEndAutnum(), equalTo(0L));
+        assertThat(autnum.getStartAutnum(), equalTo(123L));
+        assertThat(autnum.getEndAutnum(), equalTo(123L));
         assertThat(autnum.getName(), equalTo("AS-TEST"));
         assertThat(autnum.getType(), equalTo("DIRECT ALLOCATION"));
 

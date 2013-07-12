@@ -40,20 +40,20 @@ class RdapObjectMapper {
         typeToRole.put(AttributeType.MNT_BY,  "registrant");
     }
 
-    public static Object map(final String requestUrl, final String baseUrl, final RpslObject rpslObject, final VersionLookupResult versionLookupResult, final List<RpslObject> abuseContacts) {
+    public static Object map(final String requestUrl, final String baseUrl, final RpslObject rpslObject, List<RpslObject> rpslObjectList, final VersionLookupResult versionLookupResult, final List<RpslObject> abuseContacts) {
         RdapObject rdapResponse;
         final ObjectType rpslObjectType = rpslObject.getType();
-        final List<VersionInfo> versions = (versionLookupResult == null || rpslObjectType == PERSON || rpslObjectType == ROLE) ? Collections.<VersionInfo>emptyList() : versionLookupResult.getVersionInfos();
+        List<VersionInfo> versions = null;
 
         String noticeValue = requestUrl;
 
         switch (rpslObjectType) {
             case DOMAIN:
-                rdapResponse = createDomain(rpslObject, requestUrl, baseUrl);
+                rdapResponse = createDomain(rpslObject, rpslObjectList, requestUrl, baseUrl);
                 noticeValue = noticeValue + "/domain/";
                 break;
             case AUT_NUM:
-                rdapResponse = createAutnumResponse(rpslObject, requestUrl, baseUrl);
+                rdapResponse = createAutnumResponse(rpslObject, rpslObjectList, requestUrl, baseUrl);
                 noticeValue = noticeValue + "/autnum/";
                 break;
             case INETNUM:
@@ -67,13 +67,18 @@ class RdapObjectMapper {
             // TODO: [ES] Denis to review
             case ORGANISATION:
             case IRT:
-                rdapResponse = createEntity(rpslObject, requestUrl, baseUrl);
+                rdapResponse = createEntity(rpslObject, rpslObjectList, requestUrl, baseUrl);
+                // TODO: [RL] Allow for APNIC?
+                versions = Collections.<VersionInfo>emptyList();
                 break;
             default:
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
         }
 
-        rdapResponse.getRdapConformance().add("rdap_level_0");
+        if (versions == null) {
+            versions = (versionLookupResult == null) ? Collections.<VersionInfo>emptyList() : versionLookupResult.getVersionInfos();
+        }
+
         rdapResponse.getRemarks().add(createRemark(rpslObject));
         rdapResponse.getEvents().addAll(createEvents(versions));
 
@@ -85,7 +90,7 @@ class RdapObjectMapper {
         rdapResponse.getLinks().add(COPYRIGHT_LINK);
 
         for (final RpslObject abuseContact : abuseContacts) {
-            rdapResponse.getEntities().add(createEntity(abuseContact, requestUrl, baseUrl));
+            rdapResponse.getEntities().add(createEntity(abuseContact, rpslObjectList, requestUrl, baseUrl));
         }
 
         return rdapResponse;
@@ -125,6 +130,10 @@ class RdapObjectMapper {
 
     private static Remark createRemark(final RpslObject rpslObject) {
         final Remark remark = new Remark();
+        for (final CIString descriptionValue  : rpslObject.getValuesForAttribute(AttributeType.REMARKS)) {
+            remark.getDescription().add(descriptionValue.toString());
+        }
+
         for (final CIString descriptionValue : rpslObject.getValuesForAttribute(AttributeType.DESCR)) {
             remark.getDescription().add(descriptionValue.toString());
         }
@@ -150,7 +159,7 @@ class RdapObjectMapper {
         return events;
     }
 
-    private static void setEntities(final RdapObject rdapObject, final RpslObject rpslObject, final Set<AttributeType> attributeTypes, final String requestUrl, final String baseUrl) {
+    private static void setEntities(final RdapObject rdapObject, final RpslObject rpslObject, List<RpslObject> rpslObjectList, final Set<AttributeType> attributeTypes, final String requestUrl, final String baseUrl) {
         /* Construct a map for finding the entity objects in the query
          * results. */
         final Map<CIString, RpslObject> objectMap = Maps.newHashMap();
@@ -177,7 +186,7 @@ class RdapObjectMapper {
             final Set<AttributeType> attributes = valueToRoles.get(key);
             final RpslObject object = objectMap.get(key);
             if (object != null) {
-                final Entity entity = createEntity(object, requestUrl, baseUrl);
+                final Entity entity = createEntity(object, rpslObjectList, requestUrl, baseUrl);
                 final List<String> roles = entity.getRoles();
                 for (final AttributeType at : attributes) {
                     roles.add(typeToRole.get(at));
@@ -187,7 +196,7 @@ class RdapObjectMapper {
         }
     }
 
-    private static Entity createEntity(final RpslObject rpslObject, final String requestUrl, final String baseUrl) {
+    private static Entity createEntity(final RpslObject rpslObject, List<RpslObject> rpslObjectList, final String requestUrl, final String baseUrl) {
         final Entity entity = new Entity();
         entity.setHandle(rpslObject.getKey().toString());
         entity.setVCardArray(createVCard(rpslObject));
@@ -203,13 +212,13 @@ class RdapObjectMapper {
             final Set<AttributeType> contactAttributeTypes = Sets.newHashSet();
             contactAttributeTypes.add(AttributeType.ADMIN_C);
             contactAttributeTypes.add(AttributeType.TECH_C);
-            setEntities(entity, rpslObject, contactAttributeTypes, requestUrl, baseUrl);
+            setEntities(entity, rpslObject, rpslObjectList, contactAttributeTypes, requestUrl, baseUrl);
         }
 
         return entity;
     }
 
-    private static Autnum createAutnumResponse(final RpslObject rpslObject, final String requestUrl, final String baseUrl) {
+    private static Autnum createAutnumResponse(final RpslObject rpslObject, List<RpslObject> rpslObjectList, final String requestUrl, final String baseUrl) {
         final Autnum autnum = new Autnum();
         autnum.setHandle(rpslObject.getKey().toString());
 
@@ -240,14 +249,14 @@ class RdapObjectMapper {
         final Set<AttributeType> contactAttributeTypes = Sets.newHashSet();
         contactAttributeTypes.add(AttributeType.ADMIN_C);
         contactAttributeTypes.add(AttributeType.TECH_C);
-        setEntities(autnum, rpslObject, contactAttributeTypes, requestUrl, baseUrl);
+        setEntities(autnum, rpslObject, rpslObjectList, contactAttributeTypes, requestUrl, baseUrl);
 
         autnum.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(baseUrl + "/autnum/" + new Long(startAndEnd).toString()));
 
         return autnum;
     }
 
-    private static Domain createDomain(final RpslObject rpslObject, final String requestUrl, final String baseUrl) {
+    private static Domain createDomain(final RpslObject rpslObject, List<RpslObject> rpslObjectList, final String requestUrl, final String baseUrl) {
         Domain domain = new Domain();
         domain.setHandle(rpslObject.getKey().toString());
         domain.setLdhName(rpslObject.getKey().toString());
@@ -321,7 +330,7 @@ class RdapObjectMapper {
         final Set<AttributeType> contactAttributeTypes = Sets.newHashSet();
         contactAttributeTypes.add(AttributeType.ADMIN_C);
         contactAttributeTypes.add(AttributeType.TECH_C);
-        setEntities(domain, rpslObject, contactAttributeTypes, requestUrl, baseUrl);
+        setEntities(domain, rpslObject, rpslObjectList, contactAttributeTypes, requestUrl, baseUrl);
 
         domain.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(baseUrl + "/domain/" + domain.getHandle()));
 
@@ -346,7 +355,15 @@ class RdapObjectMapper {
                 builder.addKind("org");
                 break;
             case ROLE:
+                for (final RpslAttribute attribute : rpslObject.findAttributes(AttributeType.ROLE)) {
+                    builder.addFn(attribute.getCleanValue().toString());
+                }
+                builder.addKind("group");
+                break;
             case IRT:
+                for (final RpslAttribute attribute : rpslObject.findAttributes(AttributeType.IRT)) {
+                    builder.addFn(attribute.getCleanValue().toString());
+                }
                 builder.addKind("group");
                 break;
             default:
@@ -358,7 +375,11 @@ class RdapObjectMapper {
         }
 
         for (final CIString phone : rpslObject.getValuesForAttribute(AttributeType.PHONE)) {
-            builder.addTel(phone.toString());
+            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", new String[]{"work", "voice"})),phone.toString());
+        }
+
+        for (final CIString fax : rpslObject.getValuesForAttribute(AttributeType.FAX_NO)) {
+            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", "work")),fax.toString());
         }
 
         for (final CIString email : rpslObject.getValuesForAttribute(AttributeType.E_MAIL)) {
@@ -368,6 +389,10 @@ class RdapObjectMapper {
 
         for (final CIString org : rpslObject.getValuesForAttribute(AttributeType.ORG)) {
             builder.addOrg(org.toString());
+        }
+
+        for (final CIString geoloc : rpslObject.getValuesForAttribute(AttributeType.GEOLOC)) {
+            builder.addGeo(VCardHelper.createMap(Maps.immutableEntry("type", "work")), geoloc.toString());
         }
 
         return builder.build();

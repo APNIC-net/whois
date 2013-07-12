@@ -13,6 +13,8 @@ import org.joda.time.LocalDateTime;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.List;
+
 import static net.ripe.db.whois.common.rpsl.ObjectType.INETNUM;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -224,6 +226,6 @@ public class RdapObjectMapperTest {
     }
 
     private Object map(final RpslObject rpslObject, final VersionLookupResult versionLookupResult) {
-        return RdapObjectMapper.map("http://localhost/", "http://localhost/", rpslObject, versionLookupResult, Lists.<RpslObject>newArrayList());
+        return RdapObjectMapper.map("http://localhost/", "http://localhost/", rpslObject, Lists.<RpslObject>newArrayList(), versionLookupResult, Lists.<RpslObject>newArrayList());
     }
 }
