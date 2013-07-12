@@ -216,6 +216,8 @@ public class RdapResponseJsonTest {
         remark.getDescription().addAll(remarkList);
         domain.getRemarks().add(remark);
 
+        domain.setPort43("whois.example.com");
+
         final Link link = new Link();
         link.setHref("http://example.net/domain/XXXXX");
         link.setValue("http://example.net/domain/XXXX");
@@ -242,13 +244,15 @@ public class RdapResponseJsonTest {
         entity.getEvents().add(registrationEvent);
         entity.getEvents().add(lastChangedEvent);
 
-        domain.getEntities().add(entity);
-
         final Link entityLink = new Link();
         entityLink.setHref("http://example.net/entity/xxxx");
         entityLink.setValue("http://example.net/entity/xxxx");
         entityLink.setRel("self");
         entity.getLinks().add(entityLink);
+
+        entity.setPort43("whois.example.com");
+
+        domain.getEntities().add(entity);
 
         final VCardBuilder builder = new VCardBuilder();
 
@@ -324,7 +328,8 @@ public class RdapResponseJsonTest {
                 "      \"eventAction\" : \"last changed\",\n" +
                 "      \"eventDate\" : \"2013-06-26T04:48:44Z\",\n" +
                 "      \"eventActor\" : \"joe@example.com\"\n" +
-                "    } ]\n" +
+                "    } ],\n" +
+                "    \"port43\" : \"whois.example.com\"\n" +
                 "  } ],\n" +
                 "  \"remarks\" : [ {\n" +
                 "    \"description\" : [ \"She sells sea shells down by the sea shore.\", \"Originally written by Terry Sullivan.\" ]\n" +
@@ -341,7 +346,8 @@ public class RdapResponseJsonTest {
                 "    \"eventAction\" : \"last changed\",\n" +
                 "    \"eventDate\" : \"2013-06-26T04:48:44Z\",\n" +
                 "    \"eventActor\" : \"joe@example.com\"\n" +
-                "  } ]\n" +
+                "  } ],\n" +
+                "  \"port43\" : \"whois.example.com\"\n" +
                 "}"));
     }
 
@@ -385,6 +391,8 @@ public class RdapResponseJsonTest {
         lastChangedEvent.setEventActor("joe@example.com");
         ip.getEvents().add(lastChangedEvent);
 
+        ip.setPort43("whois.example.com");
+
         final Entity entity = new Entity();
         entity.setHandle("XXXX");
 
@@ -403,13 +411,16 @@ public class RdapResponseJsonTest {
         entity.getRemarks().add(remark);
         entity.getEvents().add(registrationEvent);
         entity.getEvents().add(lastChangedEvent);
-        ip.getEntities().add(entity);
 
         final Link entityLink = new Link()
                 .setHref("http://example.net/entity/xxxx")
                 .setValue("http://example.net/entity/xxxx")
                 .setRel("self");
         entity.getLinks().add(entityLink);
+
+        entity.setPort43("whois.example.com");
+
+        ip.getEntities().add(entity);
 
         assertThat(marshal(ip), equalTo("" +
                 "{\n" +
@@ -450,7 +461,8 @@ public class RdapResponseJsonTest {
                 "      \"eventAction\" : \"last changed\",\n" +
                 "      \"eventDate\" : \"" + DATE_TIME + "\",\n" +
                 "      \"eventActor\" : \"joe@example.com\"\n" +
-                "    } ]\n" +
+                "    } ],\n" +
+                "    \"port43\" : \"whois.example.com\"\n" +
                 "  } ],\n" +
                 "  \"remarks\" : [ {\n" +
                 "    \"description\" : [ \"She sells sea shells down by the sea shore.\", \"Originally written by Terry Sullivan.\" ]\n" +
@@ -471,7 +483,8 @@ public class RdapResponseJsonTest {
                 "    \"eventAction\" : \"last changed\",\n" +
                 "    \"eventDate\" : \"" + DATE_TIME + "\",\n" +
                 "    \"eventActor\" : \"joe@example.com\"\n" +
-                "  } ]\n" +
+                "  } ],\n" +
+                "  \"port43\" : \"whois.example.com\"\n" +
                 "}"));
     }
 
