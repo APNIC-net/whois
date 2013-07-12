@@ -63,7 +63,8 @@ class RdapObjectMapper {
                 break;
             case PERSON:
             case ROLE:
-//            case ORGANISATION:        // TODO: [ES] Denis to review
+            case ORGANISATION:
+            case IRT:
                 rdapResponse = createEntity(rpslObject, requestUrl, baseUrl);
                 break;
             default:

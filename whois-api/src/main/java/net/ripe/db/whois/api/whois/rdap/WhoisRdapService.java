@@ -26,7 +26,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -34,8 +38,6 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Set;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static net.ripe.db.whois.common.rpsl.ObjectType.*;
 
 @ExternallyManagedLifecycle
@@ -86,17 +88,26 @@ public class WhoisRdapService {
             case "entity":
                 whoisObjectTypes.add(PERSON);
                 whoisObjectTypes.add(ROLE);
-//                whoisObjectTypes.add(ORGANISATION);  //TODO Denis will look into if this should be used or not
+                whoisObjectTypes.add(ORGANISATION);
+                whoisObjectTypes.add(IRT);
                 break;
-
-            case "nameserver":
-                return Response.status(NOT_FOUND).build();
-
-            default:
-                return Response.status(BAD_REQUEST).build();
         }
 
-        return lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key));
+        Response response;
+
+        if (!whoisObjectTypes.isEmpty()) {
+            try {
+                response = lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key));
+            } catch (WebApplicationException webEx) {
+                response = Response.status(webEx.getResponse().getStatus()).entity(RdapException.build(webEx.getResponse().getStatus())).build();
+            }
+        } else if (objectType.equals("nameserver")) {
+            response = Response.status(Response.Status.NOT_FOUND).entity(RdapException.build(Response.Status.NOT_FOUND.getStatusCode())).build();
+        } else {
+            response = Response.status(Response.Status.BAD_REQUEST).entity(RdapException.build(Response.Status.BAD_REQUEST.getStatusCode())).build();
+        }
+
+        return response;
     }
 
     private String getKey(final Set<ObjectType> objectTypes, final String key) {
