@@ -15,7 +15,8 @@ import java.util.List;
     "events",
     "lang",
     "rdapConformance",
-    "notices"
+    "notices",
+    "port43"
 })
 @XmlSeeAlso({
     Nameserver.class,
@@ -34,6 +35,8 @@ public class RdapObject implements Serializable {
     @XmlElement(required = true)
     protected List<String> rdapConformance;
     protected List<Notice> notices;
+    // TODO: [RL] Make port43 value into a property
+    protected String port43 = "whois.apnic.net";
 
     public List<Object> getStatus() {
         if (status == null) {
@@ -90,5 +93,13 @@ public class RdapObject implements Serializable {
             notices = Lists.newArrayList();
         }
         return this.notices;
+    }
+
+    public String getPort43() {
+        return port43;
+    }
+
+    public void setPort43(final String value) {
+        this.port43 = value;
     }
 }

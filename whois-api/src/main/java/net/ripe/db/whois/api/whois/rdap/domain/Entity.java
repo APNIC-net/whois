@@ -13,8 +13,7 @@ import java.util.Map;
     "handle",
     "vcardArray",
     "roles",
-    "publicIds",
-    "port43"
+    "publicIds"
 })
 public class Entity extends RdapObject implements Serializable {
     @XmlElement(required = true)
@@ -23,7 +22,6 @@ public class Entity extends RdapObject implements Serializable {
     protected List<Object> vcardArray;
     protected List<String> roles;
     protected Map publicIds;
-    protected String port43;
 
     public String getHandle() {
         return handle;
@@ -58,13 +56,5 @@ public class Entity extends RdapObject implements Serializable {
 
     public void setPublicIds(final Map value) {
         this.publicIds = value;
-    }
-
-    public String getPort43() {
-        return port43;
-    }
-
-    public void setPort43(final String value) {
-        this.port43 = value;
     }
 }
