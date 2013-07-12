@@ -205,6 +205,7 @@ public class ObjectTemplateMapConfig {
                 new ObjectTemplate(ObjectType.MNTNER, 40,
                         new AttributeTemplate(MNTNER, MANDATORY, SINGLE, PRIMARY_KEY, LOOKUP_KEY),
                         new AttributeTemplate(DESCR, MANDATORY, MULTIPLE),
+                        new AttributeTemplate(COUNTRY, MANDATORY, MULTIPLE),
                         new AttributeTemplate(ORG, OPTIONAL, MULTIPLE, INVERSE_KEY),
                         new AttributeTemplate(ADMIN_C, MANDATORY, MULTIPLE, INVERSE_KEY),
                         new AttributeTemplate(TECH_C, OPTIONAL, MULTIPLE, INVERSE_KEY),

@@ -1,9 +1,12 @@
 package net.apnic.db.whois.common.rpsl;
 
+import com.google.common.collect.Lists;
 import net.ripe.db.whois.common.Message;
 import net.ripe.db.whois.common.rpsl.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +16,16 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class WhoisV3TemplateTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WhoisV3TemplateTest.class);
+
+    static List<ObjectType> objectTypeSupportedValues = Lists.newArrayList(ObjectType.values());
+
+    // Remove unsupported object types
+    static {
+        objectTypeSupportedValues.remove(ObjectType.POEM);
+        objectTypeSupportedValues.remove(ObjectType.POETIC_FORM);
+    }
+
     private static final String MAINTAINER_OBJECT_STRING = "" +
                 "mntner:            MAINT-NZ-EXAMPLENET\n" +
                 "descr:             maintainer for Example net Pty Ltd\n" +
@@ -27,7 +40,7 @@ public class WhoisV3TemplateTest {
                 "notify:            manager@examplenet.com\n" +
                 "abuse-mailbox:     spam@abusenet.com\n" +
                 "mnt-by:            MAINT-EXAMPLENET-AP\n" +
-                "referral-by:       DEV-MNT\n" +
+                "referral-by:       APNIC-DBM-MNT\n" +
                 "changed:           abc@examplenet.com 20101231\n" +
                 "source:            APNIC";
 
@@ -111,7 +124,7 @@ public class WhoisV3TemplateTest {
 
     @Test
     public void isSet() {
-        for (ObjectType objectType : ObjectType.values()) {
+        for (ObjectType objectType : objectTypeSupportedValues) {
             assertThat(objectType.getName().toLowerCase().contains("set"), is(ObjectTemplate.getTemplate(objectType).isSet()));
         }
     }
@@ -182,14 +195,14 @@ public class WhoisV3TemplateTest {
 
     @Test
     public void allObjectTypesSupported() {
-        for (final ObjectType objectType : ObjectType.values()) {
+        for (final ObjectType objectType : objectTypeSupportedValues) {
             ObjectTemplate.getTemplate(objectType);
         }
     }
 
     @Test
     public void allAttributesSupported() {
-        for (final ObjectType objectType : ObjectType.values()) {
+        for (final ObjectType objectType : objectTypeSupportedValues) {
             final ObjectTemplate objectTemplate = ObjectTemplate.getTemplate(objectType);
 
             for (final AttributeTemplate attributeTemplate : objectTemplate.getAttributeTemplates()) {
@@ -203,7 +216,7 @@ public class WhoisV3TemplateTest {
 
     @Test
     public void type_or_keys_occur_only_once() {
-        for (final ObjectType objectType : ObjectType.values()) {
+        for (final ObjectType objectType : objectTypeSupportedValues) {
             final ObjectTemplate objectTemplate = ObjectTemplate.getTemplate(objectType);
 
             boolean first = true;
