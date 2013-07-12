@@ -79,7 +79,7 @@ class RdapObjectMapper {
             versions = (versionLookupResult == null) ? Collections.<VersionInfo>emptyList() : versionLookupResult.getVersionInfos();
         }
 
-        rdapResponse.getRemarks().add(createRemark(rpslObject));
+        rdapResponse.getRemarks().addAll(createRemark(rpslObject));
         rdapResponse.getEvents().addAll(createEvents(versions));
 
         noticeValue = noticeValue + rpslObject.getKey();
@@ -122,23 +122,37 @@ class RdapObjectMapper {
     }
 
     private static void setRemarks(final RdapObject rdapObject, final RpslObject rpslObject) {
-        final Remark remark = createRemark(rpslObject);
-        if (remark.getDescription().size() > 0) {
-            rdapObject.getRemarks().add(remark);
+        final List<Remark> remarks = createRemark(rpslObject);
+        if (!remarks.isEmpty()) {
+            rdapObject.getRemarks().addAll(remarks);
         }
     }
 
-    private static Remark createRemark(final RpslObject rpslObject) {
-        final Remark remark = new Remark();
+    private static List<Remark> createRemark(final RpslObject rpslObject) {
+        final List<Remark> remarks = Lists.newArrayList();
+
+        final Remark descriptionRemark = new Remark();
+        // TODO: [RL] description and remarks should be separate remarks
         for (final CIString descriptionValue  : rpslObject.getValuesForAttribute(AttributeType.REMARKS)) {
-            remark.getDescription().add(descriptionValue.toString());
+            if (!descriptionValue.toString().isEmpty()) {
+                descriptionRemark.getDescription().add(descriptionValue.toString());
+            }
+        }
+        if (!descriptionRemark.getDescription().isEmpty()) {
+            remarks.add(descriptionRemark);
         }
 
+        final Remark remark = new Remark();
         for (final CIString descriptionValue : rpslObject.getValuesForAttribute(AttributeType.DESCR)) {
-            remark.getDescription().add(descriptionValue.toString());
+            if (!descriptionValue.toString().isEmpty()) {
+                remark.getDescription().add(descriptionValue.toString());
+            }
+        }
+        if (!remark.getDescription().isEmpty()) {
+            remarks.add(remark);
         }
 
-        return remark;
+        return remarks;
     }
 
     private static List<Event> createEvents(final List<VersionInfo> versions) {
@@ -205,10 +219,14 @@ class RdapObjectMapper {
         entity.setVCardArray(createVCard(rpslObject));
         setRemarks(entity, rpslObject);
 
-        entity.getLinks().add(new Link()
-                .setRel("self")
-                .setValue(requestUrl)
-                .setHref(baseUrl + "/entity/" + entity.getHandle()));
+        final String selfUrl = baseUrl + "/entity/" + entity.getHandle();
+
+        if (!selfUrl.equals(requestUrl)) {
+            entity.getLinks().add(new Link()
+                    .setRel("self")
+                    .setValue(requestUrl)
+                   .setHref(baseUrl + "/entity/" + entity.getHandle()));
+        }
 
         if (rpslObject.getType() == ObjectType.ORGANISATION) {
             final Set<AttributeType> contactAttributeTypes = Sets.newHashSet();
@@ -384,7 +402,7 @@ class RdapObjectMapper {
 
         for (final CIString email : rpslObject.getValuesForAttribute(AttributeType.E_MAIL)) {
             // TODO ?? Is it valid to have more than 1 email
-            builder.addEmail(email.toString());
+            builder.addEmail(VCardHelper.createMap(Maps.immutableEntry("type", "work")),email.toString());
         }
 
         for (final CIString org : rpslObject.getValuesForAttribute(AttributeType.ORG)) {

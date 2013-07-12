@@ -97,10 +97,11 @@ public class RdapObjectMapperTest {
         assertThat(result.getEvents().get(1).getEventDate(), is(VERSION_TIMESTAMP));
         assertThat(result.getName(), is("End-User-2"));
         assertThat(result.getType(), is("DIRECT ALLOCATION"));
-        assertThat(result.getLinks(), hasSize(3));
+        assertThat(result.getLinks(), hasSize(2));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
         assertThat(result.getLinks().get(1).getRel(), is("copyright"));
-        assertThat(result.getRemarks().get(0).getDescription().get(0), is("description"));
+        assertThat(result.getRemarks().get(0).getDescription().get(0), is("remarkable"));
+        assertThat(result.getRemarks().get(1).getDescription().get(0), is("description"));
     }
 
     @Test

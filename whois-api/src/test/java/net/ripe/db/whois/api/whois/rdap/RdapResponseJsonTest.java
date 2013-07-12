@@ -54,6 +54,8 @@ public class RdapResponseJsonTest {
         entity.setHandle("XXXX");
         entity.setVCardArray(vcard);
 
+        entity.setPort43("whois.example.com");
+
         assertThat(marshal(entity), equalTo("" +
                 "{\n  \"handle\" : \"XXXX\",\n" +
                 "  \"vcardArray\" :" +
@@ -62,7 +64,9 @@ public class RdapResponseJsonTest {
                 " [ \"fn\", {\n  }, \"text\", \"Joe User\" ]," +
                 " [ \"n\", {\n  }, \"text\", [ \"User\", \"Joe\", \"\", [ \"ing. jr\", \"M.Sc.\" ] ] ]," +
                 " [ \"gender\", {\n  }, \"text\", \"M\" ], [ \"lang\", {\n    \"pref\" : \"1\"\n  }, \"language-tag\", \"fr\" ]" +
-                " ] ]\n}"));
+                " ] ],\n" +
+                "  \"port43\" : \"whois.example.com\"" +
+                "\n}"));
     }
 
     @Test

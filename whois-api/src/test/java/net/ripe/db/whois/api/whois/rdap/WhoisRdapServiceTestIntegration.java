@@ -1,9 +1,6 @@
 package net.ripe.db.whois.api.whois.rdap;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -27,11 +24,9 @@ import org.junit.experimental.categories.Category;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -48,7 +43,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         databaseHelper.addObject("" +
                 "person: Test Person\n" +
                 "nic-hdl: TP1-TEST");
-
         databaseHelper.addObject("" +
                 "mntner:        OWNER-MNT\n" +
                 "descr:         Owner Maintainer\n" +
@@ -59,7 +53,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "referral-by:   OWNER-MNT\n" +
                 "changed:       dbtest@ripe.net 20120101\n" +
                 "source:        TEST");
-
         databaseHelper.updateObject("" +
                 "person:        Test Person\n" +
                 "address:       Singel 258\n" +
@@ -68,7 +61,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "mnt-by:        OWNER-MNT\n" +
                 "changed:       dbtest@ripe.net 20120101\n" +
                 "source:        TEST\n");
-
         databaseHelper.addObject("" +
                 "person:        Test Person2\n" +
                 "address:       Test Address\n" +
@@ -78,7 +70,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "nic-hdl:       TP2-TEST\n" +
                 "changed:       noreply@ripe.net 20120101\n" +
                 "source:        TEST\n");
-
         databaseHelper.addObject("" +
                 "person:        Pauleth Palthen\n" +
                 "address:       Singel 258\n" +
@@ -91,7 +82,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "changed:       noreply@ripe.net 20120103\n" +
                 "remarks:       remark\n" +
                 "source:        TEST\n");
-
         databaseHelper.addObject("" +
                 "domain:        31.12.202.in-addr.arpa\n" +
                 "descr:         Test domain\n" +
@@ -108,7 +98,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "changed:       test@test.net.au 20121121\n" +
                 "mnt-by:        OWNER-MNT\n" +
                 "source:        TEST\n");
-
         databaseHelper.addObject("" +
                 "aut-num:       AS123\n" +
                 "as-name:       AS-TEST\n" +
@@ -118,7 +107,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "changed:       test@test.net.au 20010816\n" +
                 "mnt-by:        OWNER-MNT\n" +
                 "source:        TEST\n");
-
         databaseHelper.addObject("" +
                 "aut-num:       AS1234\n" +
                 "as-name:       AS-TEST\n" +
@@ -143,7 +131,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "mnt-by:        OWNER-MNT\n" +
                 "changed:       test@test.net.au 20121121\n" +
                 "source:        TEST\n");
-
         databaseHelper.addObject("" +
                 "organisation:  ORG-ONE-TEST\n" +
                 "org-name:      Organisation One\n" +
@@ -157,7 +144,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "mnt-by:        OWNER-MNT\n" +
                 "changed:       test@test.net.au 20000228\n" +
                 "source:        TEST\n");
-
         databaseHelper.addObject("" +
                 "as-block:       AS100 - AS200\n" +
                 "descr:          ARIN ASN block\n" +
@@ -166,7 +152,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "changed:        dbtest@ripe.net   20121214\n" +
                 "source:         TEST\n" +
                 "password:       test\n");
-
         ipTreeUpdater.rebuild();
     }
 
@@ -308,23 +293,15 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 .get(Entity.class);
 
         assertThat(response.getHandle(), equalTo("PP1-TEST"));
-
-        final List vcardArray = response.getVCardArray();
-        assertThat(vcardArray.size(), is(2));
-        assertThat(vcardArray.get(0).toString(), is("vcard"));
-        final List vcard = (List)vcardArray.get(1);
-        assertThat(vcard.size(), is(6));
-        assertThat(((ArrayList<Object>)vcard.get(0)), equalTo(Lists.<Object>newArrayList("version", Maps.newHashMap(), "text", "4.0")));
-        assertThat(((ArrayList<Object>)vcard.get(1)), equalTo(Lists.<Object>newArrayList("fn", Maps.newHashMap(), "text", "Pauleth Palthen")));
-        assertThat(((ArrayList<Object>)vcard.get(2)), equalTo(Lists.<Object>newArrayList("kind", Maps.newHashMap(), "text", "individual")));
-        final Map adrParameters = Maps.newHashMap();
-        adrParameters.put("label", "Singel 258");
-        assertThat(((ArrayList<Object>) vcard.get(3)), equalTo(Lists.<Object>newArrayList("adr", adrParameters, "text", null)));
-        final Map telType = Maps.newHashMap();
-        telType.put("type", Lists.newArrayList("work", "voice"));
-        assertThat(((ArrayList<Object>) vcard.get(4)), equalTo(Lists.<Object>newArrayList("tel", telType, "uri", "+31-1234567890")));
-        assertThat(((ArrayList<Object>) vcard.get(5)), equalTo(Lists.<Object>newArrayList("email", Maps.newHashMap(), "text", "noreply@ripe.net")));
-
+        assertThat(response.getVCardArray().size(), is(2));
+        assertThat(response.getVCardArray().get(0).toString(), is("vcard"));
+        assertThat(response.getVCardArray().get(1).toString().toString(), equalTo("" +
+                "[[version, {}, text, 4.0], " +
+                "[fn, {}, text, Pauleth Palthen], " +
+                "[kind, {}, text, individual], " +
+                "[adr, {label=Singel 258}, text, null], " +
+                "[tel, {type=[work, voice]}, uri, +31-1234567890], " +
+                "[email, {type=work}, text, noreply@ripe.net]]"));
         assertThat(response.getRdapConformance().get(0), equalTo("rdap_level_0"));
     }
 
@@ -419,7 +396,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final Link selfLink = links.get(0);
         assertThat(selfLink.getRel(), equalTo("self"));
 
-        final String ru = createResource(AUDIENCE, "autnum/123").toString();
+        final String ru = createResource(AUDIENCE, "autnum/123").toString();      // TODO: self link includes prefix
         assertThat(selfLink.getValue(), equalTo(ru));
         assertThat(selfLink.getHref(), equalTo(ru));
 
@@ -513,7 +490,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "mnt-by:    OWNER-MNT\n" +
                 "source:    TEST\n" +
                 "password:  test\n";
-        final String response = doPostOrPutRequest(getUrl("test", ""), "POST", "DATA=" + encode(start), MediaType.APPLICATION_FORM_URLENCODED, HttpURLConnection.HTTP_OK);
+        final String response = doPostOrPutRequest(getSyncupdatesUrl("test", ""), "POST", "DATA=" + encode(start), MediaType.APPLICATION_FORM_URLENCODED, HttpURLConnection.HTTP_OK);
         assertThat(response, containsString("Modify SUCCEEDED: [aut-num] AS123"));
 
         final String deleteString = "" +
@@ -528,10 +505,10 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "delete:    reason\n" +
                 "password:  test\n";
 
-        final String delete = doPostOrPutRequest(getUrl("test", ""), "POST", "DATA=" + encode(deleteString), MediaType.APPLICATION_FORM_URLENCODED, HttpURLConnection.HTTP_OK);
+        final String delete = doPostOrPutRequest(getSyncupdatesUrl("test", ""), "POST", "DATA=" + encode(deleteString), MediaType.APPLICATION_FORM_URLENCODED, HttpURLConnection.HTTP_OK);
         assertThat(delete, containsString("Delete SUCCEEDED: [aut-num] AS123"));
 
-        final String recreate = doPostOrPutRequest(getUrl("test", ""), "POST", "DATA=" + encode(start) + "&NEW=yes", MediaType.APPLICATION_FORM_URLENCODED, HttpURLConnection.HTTP_OK);
+        final String recreate = doPostOrPutRequest(getSyncupdatesUrl("test", ""), "POST", "DATA=" + encode(start) + "&NEW=yes", MediaType.APPLICATION_FORM_URLENCODED, HttpURLConnection.HTTP_OK);
         assertThat(recreate, containsString("Create SUCCEEDED: [aut-num] AS123"));
 
         final String modifiedAgain = "" +
@@ -544,7 +521,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "mnt-by:    OWNER-MNT\n" +
                 "source:    TEST\n" +
                 "password:  test\n";
-        final String last = doPostOrPutRequest(getUrl("test", ""), "POST", "DATA=" + encode(modifiedAgain), MediaType.APPLICATION_FORM_URLENCODED, HttpURLConnection.HTTP_OK);
+        final String last = doPostOrPutRequest(getSyncupdatesUrl("test", ""), "POST", "DATA=" + encode(modifiedAgain), MediaType.APPLICATION_FORM_URLENCODED, HttpURLConnection.HTTP_OK);
         assertThat(last, containsString("Modify SUCCEEDED: [aut-num] AS123"));
 
         final Autnum autnum = createResource(AUDIENCE, "autnum/123")
@@ -559,7 +536,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
-    public void abuseContact_as_vcard() {
+    public void lookup_inetnum_abuse_contact_as_vcard() {
         databaseHelper.addObject("" +
                 "role:          Abuse Contact\n" +
                 "address:       Singel 258\n" +
@@ -569,7 +546,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "mnt-by:        OWNER-MNT\n" +
                 "changed:       dbtest@ripe.net 20120101\n" +
                 "source:        TEST\n");
-
         databaseHelper.addObject("" +
                 "organisation:  ORG-TO2-TEST\n" +
                 "org-name:      Test organisation\n" +
@@ -584,7 +560,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "mnt-by:        OWNER-MNT\n" +
                 "changed:       test@test.net.au 20121121\n" +
                 "source:        TEST\n");
-
         databaseHelper.addObject("" +
                 "inetnum:      192.0.0.0 - 192.255.255.255\n" +
                 "netname:      TEST-NET-NAME\n" +
@@ -596,7 +571,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "mnt-by:       OWNER-MNT\n" +
                 "changed:      dbtest@ripe.net 20020101\n" +
                 "source:       TEST");
-
         databaseHelper.addObject("" +
                 "inetnum:      192.0.0.0 - 192.0.0.255\n" +
                 "netname:      TEST-NET-NAME\n" +
@@ -614,10 +588,14 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 .get(Ip.class);
 
         assertThat(ip.getEntities().get(0).getHandle(), is("AB-TEST"));
+        assertThat(ip.getEntities().get(0).getVCardArray(), hasSize(2));
         assertThat(ip.getEntities().get(0).getVCardArray().get(0).toString(), is("vcard"));
-
-        final String expectedStr = "[[version, {}, text, 4.0], [fn, {}, text, Abuse Contact], [kind, {}, text, group], [adr, {label=Singel 258}, text, null], [tel, {type=[work, voice]}, uri, +31 6 12345678]]";
-        assertThat(ip.getEntities().get(0).getVCardArray().get(1).toString(), is(expectedStr));
+        assertThat(ip.getEntities().get(0).getVCardArray().get(1).toString(), is("" +
+            "[[version, {}, text, 4.0], " +
+            "[fn, {}, text, Abuse Contact], " +
+            "[kind, {}, text, group], " +
+            "[adr, {label=Singel 258}, text, null], " +
+            "[tel, {type=[work, voice]}, uri, +31 6 12345678]]"));
     }
 
     // organisation entity
@@ -625,7 +603,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     // TODO Denis will look into if this should be used or not
 
     @Test
-    public void lookup_org_entity() throws Exception {
+    public void lookup_org_entity_handle() throws Exception {
         final Entity response = createResource(AUDIENCE, "entity/ORG-TEST1-TEST")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(Entity.class);
@@ -634,25 +612,30 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
-    public void noOrg() throws Exception {
-        final ClientResponse clientResponse = createResource(AUDIENCE, "entity/ORG-NONE-TEST").get(ClientResponse.class);
-
-        assertThat(clientResponse.getStatus(), equalTo(404));
+    public void lookup_org_not_found() throws Exception {
+        try {
+            createResource(AUDIENCE, "entity/ORG-NONE-TEST")
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .get(Entity.class);
+            fail();
+        } catch (UniformInterfaceException e) {
+            assertThat(e.getResponse().getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
+        }
     }
 
     @Test
-    public void lookupOrg() throws Exception {
-        final ClientResponse clientResponse = createResource(AUDIENCE, "entity/ORG-TEST1-TEST").accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
+    public void lookup_org_entity() throws Exception {
+        final Entity entity = createResource(AUDIENCE, "entity/ORG-ONE-TEST") // TODO: [RL] Was originally 'ORG-TEST1-TEST'. Would that work with the commented code below?
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(Entity.class);
 
-        assertThat(clientResponse.getStatus(), equalTo(200));
-        final Entity entity = clientResponse.getEntity(Entity.class);
-        assertThat(entity.getHandle(), equalTo("ORG-TEST1-TEST"));
+        assertThat(entity.getHandle(), equalTo("ORG-ONE-TEST"));
 
-        /*final List<Event> events = entity.getEvents();
-        assertThat(events.size(), equalTo(1));
-
-        final Event event = events.get(0);
-        assertThat(event.getEventDate().toString(), equalTo(""));
+//        final List<Event> events = entity.getEvents();
+//        assertThat(events.size(), equalTo(1));
+//
+//        final Event event = events.get(0);
+//        assertThat(event.getEventDate().toString(), equalTo(""));
 
         final List<Entity> entities = entity.getEntities();
         assertThat(entities.size(), equalTo(2));
@@ -696,12 +679,12 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(tp2Links.get(0).getHref(), equalTo(tp2Link));
 
         final List<Link> links = entity.getLinks();
-        assertThat(links.size(), equalTo(1));
+        assertThat(links.size(), equalTo(2));
 
         final Link selfLink = links.get(0);
         assertThat(selfLink.getRel(), equalTo("self"));
         assertThat(selfLink.getValue(), equalTo(linkValue));
-        assertThat(selfLink.getHref(), equalTo(linkValue));*/
+        assertThat(selfLink.getHref(), equalTo(linkValue));
     }
 
     @Override
@@ -709,7 +692,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         return client.resource(String.format("http://localhost:%s/rdap/%s", getPort(audience), path));
     }
 
-    private String getUrl(final String instance, final String command) {
+    private String getSyncupdatesUrl(final String instance, final String command) {
         return "http://localhost:" + getPort(Audience.PUBLIC) + String.format("/whois/syncupdates/%s?%s", instance, command);
     }
 }
