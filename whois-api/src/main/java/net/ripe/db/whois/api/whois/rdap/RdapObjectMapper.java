@@ -163,6 +163,9 @@ class RdapObjectMapper {
         /* Construct a map for finding the entity objects in the query
          * results. */
         final Map<CIString, RpslObject> objectMap = Maps.newHashMap();
+        for (final RpslObject object : rpslObjectList) {
+            objectMap.put(object.getKey(), object);
+        }
 
         /* Construct a map from attribute value to a list of the
          * attribute types against which it is recorded. (To handle
@@ -202,11 +205,10 @@ class RdapObjectMapper {
         entity.setVCardArray(createVCard(rpslObject));
         setRemarks(entity, rpslObject);
 
-        final Link selfLink = new Link();
-        selfLink.setRel("self");
-        selfLink.setValue(requestUrl);
-        selfLink.setHref(baseUrl + "/entity/" + entity.getHandle());
-        entity.getLinks().add(selfLink);
+        entity.getLinks().add(new Link()
+                .setRel("self")
+                .setValue(requestUrl)
+                .setHref(baseUrl + "/entity/" + entity.getHandle()));
 
         if (rpslObject.getType() == ObjectType.ORGANISATION) {
             final Set<AttributeType> contactAttributeTypes = Sets.newHashSet();
@@ -244,14 +246,12 @@ class RdapObjectMapper {
         /* None of the statuses from [9.1] in json-response is
          * applicable here, so 'status' will be left empty for now. */
 
-        setRemarks(autnum, rpslObject);
-
         final Set<AttributeType> contactAttributeTypes = Sets.newHashSet();
         contactAttributeTypes.add(AttributeType.ADMIN_C);
         contactAttributeTypes.add(AttributeType.TECH_C);
         setEntities(autnum, rpslObject, rpslObjectList, contactAttributeTypes, requestUrl, baseUrl);
 
-        autnum.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(baseUrl + "/autnum/" + new Long(startAndEnd).toString()));
+//        autnum.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(baseUrl + "/autnum/" + new Long(startAndEnd).toString()));
 
         return autnum;
     }
@@ -332,7 +332,7 @@ class RdapObjectMapper {
         contactAttributeTypes.add(AttributeType.TECH_C);
         setEntities(domain, rpslObject, rpslObjectList, contactAttributeTypes, requestUrl, baseUrl);
 
-        domain.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(baseUrl + "/domain/" + domain.getHandle()));
+//        domain.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(baseUrl + "/domain/" + domain.getHandle()));
 
         return domain;
     }

@@ -20,10 +20,12 @@ import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.common.IntegrationTest;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.joda.time.LocalDateTime;
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -116,6 +118,16 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "descr:         A single ASN\n" +
                 "admin-c:       TP1-TEST\n" +
                 "tech-c:        TP1-TEST\n" +
+                "changed:       test@test.net.au 20010816\n" +
+                "mnt-by:        OWNER-MNT\n" +
+                "source:        TEST\n");
+
+        databaseHelper.addObject("" +
+                "aut-num:       AS1234\n" +
+                "as-name:       AS-TEST\n" +
+                "descr:         A single ASN\n" +
+                "admin-c:       TP1-TEST\n" +
+                "tech-c:        TP2-TEST\n" +
                 "changed:       test@test.net.au 20010816\n" +
                 "mnt-by:        OWNER-MNT\n" +
                 "source:        TEST\n");
@@ -365,7 +377,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
-    public void lookup_single_autnum() throws Exception {
+    public void lookup_single_autnum_AS123() throws Exception {
         final Autnum autnum = createResource(AUDIENCE, "autnum/123")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(Autnum.class);
@@ -387,27 +399,20 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertTrue(lastEvent.getEventDate().isAfter(firstEvent.getEventDate()) || lastEvent.getEventDate().equals(firstEvent.getEventDate()));
         assertThat(lastEvent.getEventAction(), is("last changed"));
 
-//        final List<Entity> entities = autnum.getEntities();                           // TODO: implement
-//        assertThat(entities, hasSize(2));
-//        Collections.sort(entities, new Comparator<Entity>() {
-//            public int compare(final Entity e1, final Entity e2) {
-//                return e1.getHandle().compareTo(e2.getHandle());
-//            }
-//        });
-//
-//        final Entity entityTp1 = entities.get(0);
-//        assertThat(entityTp1.getHandle(), equalTo("TP1-TEST"));
+        final List<Entity> entities = autnum.getEntities();
+        assertThat(entities, hasSize(1));
+        Collections.sort(entities, new Comparator<Entity>() {
+            public int compare(final Entity e1, final Entity e2) {
+                return e1.getHandle().compareTo(e2.getHandle());
+            }
+        });
 
-//        final List<String> adminRoles = entityTp1.getRoles();
-//        assertThat(adminRoles, hasSize(1));
-//        assertThat(adminRoles.get(0), equalTo("administrative"));
-//
-//        final Entity entityTp2 = entities.get(1);
-//        assertThat(entityTp2.getHandle(), equalTo("TP2-TEST"));
-//
-//        final List<String> techRoles = entityTp2.getRoles();
-//        assertThat(techRoles, hasSize(1));
-//        assertThat(techRoles.get(0), equalTo("technical"));
+        final Entity entityTp1 = entities.get(0);
+        assertThat(entityTp1.getHandle(), equalTo("TP1-TEST"));
+
+        final List<String> roles = entityTp1.getRoles();
+        assertThat(roles, hasSize(2));
+        assertThat(roles, containsInAnyOrder("administrative","technical"));
 
         final List<Link> links = autnum.getLinks();
         assertThat(links, hasSize(2));
@@ -415,6 +420,65 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(selfLink.getRel(), equalTo("self"));
 
         final String ru = createResource(AUDIENCE, "autnum/123").toString();
+        assertThat(selfLink.getValue(), equalTo(ru));
+        assertThat(selfLink.getHref(), equalTo(ru));
+
+        final List<Remark> remarks = autnum.getRemarks();
+        assertThat(remarks, hasSize(1));
+        assertThat(remarks.get(0).getDescription().get(0), is("A single ASN"));
+    }
+
+    @Test
+    public void lookup_single_autnum_AS1234() throws Exception {
+        final Autnum autnum = createResource(AUDIENCE, "autnum/1234")
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(Autnum.class);
+
+        assertThat(autnum.getHandle(), equalTo("AS1234"));
+        assertThat(autnum.getStartAutnum(), equalTo(1234L));
+        assertThat(autnum.getEndAutnum(), equalTo(1234L));
+        assertThat(autnum.getName(), equalTo("AS-TEST"));
+        assertThat(autnum.getType(), equalTo("DIRECT ALLOCATION"));
+
+        final List<Event> events = autnum.getEvents();
+        assertThat(events, hasSize(2));
+
+        final Event firstEvent = events.get(0);
+        assertTrue(firstEvent.getEventDate().isBefore(LocalDateTime.now()));
+        assertThat(firstEvent.getEventAction(), is("registration"));
+
+        final Event lastEvent = events.get(1);
+        assertTrue(lastEvent.getEventDate().isAfter(firstEvent.getEventDate()) || lastEvent.getEventDate().equals(firstEvent.getEventDate()));
+        assertThat(lastEvent.getEventAction(), is("last changed"));
+
+        final List<Entity> entities = autnum.getEntities();
+        assertThat(entities, hasSize(2));
+        Collections.sort(entities, new Comparator<Entity>() {
+            public int compare(final Entity e1, final Entity e2) {
+                return e1.getHandle().compareTo(e2.getHandle());
+            }
+        });
+
+        final Entity entityTp1 = entities.get(0);
+        assertThat(entityTp1.getHandle(), equalTo("TP1-TEST"));
+
+        final List<String> adminRoles = entityTp1.getRoles();
+        assertThat(adminRoles, hasSize(1));
+        assertThat(adminRoles, contains("administrative"));
+
+        final Entity entityTp2 = entities.get(1);
+        assertThat(entityTp2.getHandle(), equalTo("TP2-TEST"));
+
+        final List<String> technicalRoles = entityTp2.getRoles();
+        assertThat(technicalRoles, hasSize(1));
+        assertThat(technicalRoles, contains("technical"));
+
+        final List<Link> links = autnum.getLinks();
+        assertThat(links, hasSize(2));
+        final Link selfLink = links.get(0);
+        assertThat(selfLink.getRel(), equalTo("self"));
+
+        final String ru = createResource(AUDIENCE, "autnum/1234").toString();
         assertThat(selfLink.getValue(), equalTo(ru));
         assertThat(selfLink.getHref(), equalTo(ru));
 
@@ -495,7 +559,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
-    public void abuseContact_as_vcard() {
+    public void abuseContact_as_vcard() throws JSONException {
         databaseHelper.addObject("" +
                 "role:          Abuse Contact\n" +
                 "address:       Singel 258\n" +
@@ -551,6 +615,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         assertThat(ip.getEntities().get(0).getHandle(), is("AB-TEST"));
         assertThat(ip.getEntities().get(0).getVCardArray().get(0).toString(), is("vcard"));
+
+        JSONAssert.assertEquals("[[version, {}, text, 4.0], [fn, {}, text, Abuse Contact], [kind, {}, text, group], [adr, {label=Singel 258}, text, null], [tel, {type = [work, voice]}, uri, +31 6 12345678]]", ip.getEntities().get(0).getVCardArray().get(1).toString(), false);
         assertThat(ip.getEntities().get(0).getVCardArray().get(1).toString(), is("[[version, {}, text, 4.0], [adr, {label=Singel 258}, text, null], [tel, {}, uri, +31 6 12345678]]"));
     }
 

@@ -131,9 +131,9 @@ public class WhoisRdapService {
         final Query query = Query.parse(
                 String.format("%s %s %s %s %s %s %s",
                         QueryFlag.NO_GROUPING.getLongFlag(),
-                        // TODO: [RL] Configuration (property?) to control whether to fetch related objects?
+                        // TODO: [RL] Configuration (property?) to control whether to fetch related objects? Maybe the results have to be filtered after the fact?
                         // QueryFlag.NO_REFERENCED.getLongFlag(),
-                        // TODO: [RL] Configure what sources to query? (APNIC will need additional sources)
+                        // TODO: [RL] Configure what sources to query? (APNIC will need results from multiple sources)
                         QueryFlag.SOURCES.getLongFlag(),
                         source,
                         QueryFlag.SELECT_TYPES.getLongFlag(),
@@ -165,7 +165,7 @@ public class WhoisRdapService {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            // The result size will be > 1 if we allow related objects
+//            The result size will be > 1 when we allow related objects
 //            if (result.size() > 1) {
 //                throw new IllegalStateException("Unexpected result size: " + result.size());
 //            }
@@ -178,8 +178,9 @@ public class WhoisRdapService {
                         getBaseUrl(request),
                         resultObject,
                         result,
-                        // TODO: [RL] move these into RdapObjectMapper so that they can be used for nested objects?
+                        // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
                         versionDao.findByKey(resultObject.getType(), resultObject.getKey().toString()),
+                        // TODO: [RL] for the equivalent, APNIC needs to find the referenced IRT object
                         abuseCFinder.findAbuseContacts(resultObject))).build();
 
         } catch (final QueryException e) {
