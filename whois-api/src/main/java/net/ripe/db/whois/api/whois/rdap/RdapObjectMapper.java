@@ -375,7 +375,7 @@ class RdapObjectMapper {
         }
 
         for (final CIString phone : rpslObject.getValuesForAttribute(AttributeType.PHONE)) {
-            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", new String[]{"work", "voice"})),phone.toString());
+            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", Lists.newArrayList("work", "voice"))),phone.toString());
         }
 
         for (final CIString fax : rpslObject.getValuesForAttribute(AttributeType.FAX_NO)) {

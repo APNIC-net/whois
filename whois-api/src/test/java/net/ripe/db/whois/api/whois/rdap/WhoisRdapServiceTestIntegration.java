@@ -20,17 +20,16 @@ import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.common.IntegrationTest;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.joda.time.LocalDateTime;
-import org.json.JSONException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -314,14 +313,17 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(vcardArray.size(), is(2));
         assertThat(vcardArray.get(0).toString(), is("vcard"));
         final List vcard = (List)vcardArray.get(1);
-        assertThat(vcard.size(), is(5));
+        assertThat(vcard.size(), is(6));
         assertThat(((ArrayList<Object>)vcard.get(0)), equalTo(Lists.<Object>newArrayList("version", Maps.newHashMap(), "text", "4.0")));
         assertThat(((ArrayList<Object>)vcard.get(1)), equalTo(Lists.<Object>newArrayList("fn", Maps.newHashMap(), "text", "Pauleth Palthen")));
+        assertThat(((ArrayList<Object>)vcard.get(2)), equalTo(Lists.<Object>newArrayList("kind", Maps.newHashMap(), "text", "individual")));
         final Map adrParameters = Maps.newHashMap();
         adrParameters.put("label", "Singel 258");
-        assertThat(((ArrayList<Object>) vcard.get(2)), equalTo(Lists.<Object>newArrayList("adr", adrParameters, "text", null)));
-        assertThat(((ArrayList<Object>) vcard.get(3)), equalTo(Lists.<Object>newArrayList("tel", Maps.newHashMap(), "uri", "+31-1234567890")));
-        assertThat(((ArrayList<Object>) vcard.get(4)), equalTo(Lists.<Object>newArrayList("email", Maps.newHashMap(), "text", "noreply@ripe.net")));
+        assertThat(((ArrayList<Object>) vcard.get(3)), equalTo(Lists.<Object>newArrayList("adr", adrParameters, "text", null)));
+        final Map telType = Maps.newHashMap();
+        telType.put("type", Lists.newArrayList("work", "voice"));
+        assertThat(((ArrayList<Object>) vcard.get(4)), equalTo(Lists.<Object>newArrayList("tel", telType, "uri", "+31-1234567890")));
+        assertThat(((ArrayList<Object>) vcard.get(5)), equalTo(Lists.<Object>newArrayList("email", Maps.newHashMap(), "text", "noreply@ripe.net")));
 
         assertThat(response.getRdapConformance().get(0), equalTo("rdap_level_0"));
     }
@@ -557,7 +559,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
-    public void abuseContact_as_vcard() throws JSONException {
+    public void abuseContact_as_vcard() {
         databaseHelper.addObject("" +
                 "role:          Abuse Contact\n" +
                 "address:       Singel 258\n" +
@@ -614,8 +616,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(ip.getEntities().get(0).getHandle(), is("AB-TEST"));
         assertThat(ip.getEntities().get(0).getVCardArray().get(0).toString(), is("vcard"));
 
-        JSONAssert.assertEquals("[[version, {}, text, 4.0], [fn, {}, text, Abuse Contact], [kind, {}, text, group], [adr, {label=Singel 258}, text, null], [tel, {type = [work, voice]}, uri, +31 6 12345678]]", ip.getEntities().get(0).getVCardArray().get(1).toString(), false);
-        assertThat(ip.getEntities().get(0).getVCardArray().get(1).toString(), is("[[version, {}, text, 4.0], [adr, {label=Singel 258}, text, null], [tel, {}, uri, +31 6 12345678]]"));
+        final String expectedStr = "[[version, {}, text, 4.0], [fn, {}, text, Abuse Contact], [kind, {}, text, group], [adr, {label=Singel 258}, text, null], [tel, {type=[work, voice]}, uri, +31 6 12345678]]";
+        assertThat(ip.getEntities().get(0).getVCardArray().get(1).toString(), is(expectedStr));
     }
 
     // organisation entity
@@ -623,7 +625,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     // TODO Denis will look into if this should be used or not
 
     @Test
-    @Ignore
     public void lookup_org_entity() throws Exception {
         final Entity response = createResource(AUDIENCE, "entity/ORG-TEST1-TEST")
                 .accept(MediaType.APPLICATION_JSON_TYPE)

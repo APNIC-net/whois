@@ -45,6 +45,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getHandle(), is("10.0.0.0 - 10.255.255.255"));
         assertThat(result.getEvents(), hasSize(2));
         assertThat(result.getEvents().get(0).getEventAction(), is("registration"));
+        // TODO: [RL] Make these timestamp values timezone independent: they currently fail in UTC+10
         assertThat(result.getEvents().get(0).getEventDate(), is((LocalDateTime.parse("2044-04-26T00:02:03.000"))));
         assertThat(result.getEvents().get(1).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(1).getEventDate(), is((LocalDateTime.parse("2044-04-26T00:02:03.000"))));
