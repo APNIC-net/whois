@@ -77,6 +77,7 @@ public class ObjectTemplate implements Comparable<ObjectTemplate> {
     }
 
     public static ObjectTemplate getTemplate(final ObjectType type) {
+        System.out.println("type" + type);
         final ObjectTemplate objectTemplate = TEMPLATE_MAP.get(type);
         if (objectTemplate == null) {
             throw new IllegalStateException("No template for " + type);
@@ -212,9 +213,12 @@ public class ObjectTemplate implements Comparable<ObjectTemplate> {
                 attributeDescription = attributeDescription.substring(0, attributeDescription.length() - 1);
             }
 
-            String syntaxDescription = attributeType.getSyntax().getDescription(objectType);
-            if (syntaxDescription.endsWith("\n")) {
-                syntaxDescription = syntaxDescription.substring(0, syntaxDescription.length() - 1);
+            String syntaxDescription = "";
+            if (attributeType.getSyntax() != null) {
+                syntaxDescription = attributeType.getSyntax().getDescription(objectType);
+                if (syntaxDescription.endsWith("\n")) {
+                    syntaxDescription = syntaxDescription.substring(0, syntaxDescription.length() - 1);
+                }
             }
 
             result.append(attributeType.getName())

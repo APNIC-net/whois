@@ -113,13 +113,13 @@ public enum AttributeType implements AttributeTypeBuilder {
     UPD_TO(AttributeTypeBuilder.implementationMap.get(Enum.UPD_TO)),
     ZONE_C(AttributeTypeBuilder.implementationMap.get(Enum.ZONE_C)),
     // APNIC
-    ADDRESS_PREFIX_RANGE(AttributeTypeBuilder.implementationMap.get(Enum.ADDRESS_PREFIX_RANGE)),
-    DOM_NET(AttributeTypeBuilder.implementationMap.get(Enum.DOM_NET)),
-    // LIMERICK(AttributeTypeBuilder.implementationMap.get(Enum.LIMERICK)),
-    // MEMBERS_AS(AttributeTypeBuilder.implementationMap.get(Enum.MEMBERS_AS)),
-    // REFER(AttributeTypeBuilder.implementationMap.get(Enum.REFER)),
-    REGISTRY_NAME(AttributeTypeBuilder.implementationMap.get(Enum.REGISTRY_NAME)),
-    SUBDOMAIN_NAME(AttributeTypeBuilder.implementationMap.get(Enum.SUBDOMAIN_NAME));
+    ADDRESS_PREFIX_RANGE(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_ADDRESS_PREFIX_RANGE)),
+    APNIC_DOM_NET(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_DOM_NET)),
+    APNIC_REGISTRY_NAME(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_REGISTRY_NAME)),
+    APNIC_SUBDOMAIN_NAME(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_SUBDOMAIN_NAME));
+    // APNIC_LIMERICK(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_LIMERICK)),
+    // APNIC_MEMBERS_AS(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_MEMBERS_AS)),
+    // APNIC_REFER(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_REFER)),
 
 
     private static final Map<CIString, AttributeType> TYPE_NAMES = Maps.newHashMapWithExpectedSize(AttributeType.values().length);
@@ -162,7 +162,6 @@ public enum AttributeType implements AttributeTypeBuilder {
     }
 
     public String getName() {
-        //return attributeTypeBuilder != null ? attributeTypeBuilder.getName() : name();
         return attributeTypeBuilder.getName();
     }
 
@@ -170,7 +169,7 @@ public enum AttributeType implements AttributeTypeBuilder {
         return attributeTypeBuilder.getFlag();
     }
 
-    boolean isListValue() {
+    public boolean isListValue() {
         return attributeTypeBuilder.getValueType().equals(LIST_VALUE);
     }
 

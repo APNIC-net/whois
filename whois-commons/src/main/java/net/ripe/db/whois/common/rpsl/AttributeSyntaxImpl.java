@@ -15,12 +15,9 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
     static {
         put(attributeSyntaxTypeMap, AttributeSyntaxType.ANY_SYNTAX, new AnySyntax());
 
-        put(attributeSyntaxTypeMap, AttributeSyntaxType.EMAIL_SYNTAX, new AttributeSyntaxRegexp(80, Pattern.compile("(?i)^.+@([^.]+[.])+[^.]+$"),
-                "An e-mail address as defined in RFC 2822.\n"));
-
         put(attributeSyntaxTypeMap, AttributeSyntaxType.ADDRESS_PREFIX_RANGE_SYNTAX, new AttributeSyntaxParser(new AttributeParser.AddressPrefixRangeParser()));
 
-        put(attributeSyntaxTypeMap, AttributeSyntaxType.ALIAS_SYNTAX,new AttributeSyntaxRegexp(254,
+        put(attributeSyntaxTypeMap, AttributeSyntaxType.ALIAS_SYNTAX, new AttributeSyntaxRegexp(254,
                 Pattern.compile("(?i)^[A-Z0-9]([-A-Z0-9]*[A-Z0-9])?(\\.[A-Z0-9]([-A-Z0-9]*[A-Z0-9])?)*(\\.)?$"), "" +
                 "Domain name as specified in RFC 1034 (point 5.2.1.2) with or\n" +
                 "without trailing dot (\".\").  The total length should not exceed\n" +
@@ -49,7 +46,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
         put(attributeSyntaxTypeMap, AttributeSyntaxType.AGGR_BNDRY_SYNTAX, new AttributeSyntaxParser(new AggrBndryParser(), "" +
                 "[<as-expression>]\n"));
 
-        put(attributeSyntaxTypeMap, AttributeSyntaxType.AGGR_MTD_SYNTAX,  new AttributeSyntaxParser(new AggrMtdParser(), "" +
+        put(attributeSyntaxTypeMap, AttributeSyntaxType.AGGR_MTD_SYNTAX, new AttributeSyntaxParser(new AggrMtdParser(), "" +
                 "inbound | outbound [<as-expression>]\n"));
 
         put(attributeSyntaxTypeMap, AttributeSyntaxType.AUTH_SCHEME_SYNTAX, new AttributeSyntaxRegexp(
@@ -80,7 +77,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                 "                                  corresponding key-cert object's\n" +
                 "                                  \"key-cert:\" attribute (X509-nnn).\n"));
 
-        put(attributeSyntaxTypeMap, AttributeSyntaxType.CERTIF_SYNTAX,     new AnySyntax("" +
+        put(attributeSyntaxTypeMap, AttributeSyntaxType.CERTIF_SYNTAX, new AnySyntax("" +
                 "The value of the public key should be supplied either using\n" +
                 "multiple \"certif:\" attributes, or in one \"certif:\"\n" +
                 "attribute. In the first case, this is easily done by\n" +
@@ -101,7 +98,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
 
         put(attributeSyntaxTypeMap, AttributeSyntaxType.COMPONENTS_SYNTAX, new ComponentsSyntax());
 
-        put(attributeSyntaxTypeMap, AttributeSyntaxType.DEFAULT_SYNTAX,  new AttributeSyntaxParser(new DefaultParser(), "" +
+        put(attributeSyntaxTypeMap, AttributeSyntaxType.DEFAULT_SYNTAX, new AttributeSyntaxParser(new DefaultParser(), "" +
                 "to <peering> [action <action>] [networks <filter>]"));
 
         put(attributeSyntaxTypeMap, AttributeSyntaxType.DOMAIN_SYNTAX, new AttributeSyntaxParser(new AttributeParser.DomainParser(), "" +
@@ -111,19 +108,21 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
 
         put(attributeSyntaxTypeMap, AttributeSyntaxType.DS_RDATA_SYNTAX, new AttributeSyntaxRegexp(255,
                 Pattern.compile("(?i)^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-4])( ([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))( ([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|RSAMD5|DH|DSA|ECC|RSASHA1|INDIRECT|PRIVATEDNS|PRIVATEOID)([ 0-9a-fA-F]{1,128})$"), "" +
-                "<Keytag> | <Algorithm> | <Digest type> | <Digest> | ; <Comment>\n" +
+                "<Keytag> <Algorithm> <Digest type> <Digest>\n" +
                 "\n" +
                 "Keytag is represented by an unsigned decimal integer (0-65535).\n" +
                 "\n" +
-                "Algorithm is represented by an unsigned decimal integer (0-255) or one of the following mnemonics:\n" +
-                "RSAMD5, DH, DSA, ECC, RSASHA1, INDIRECT, PRIVATEDNS, PRIVATEOID.\n" +
+                "Algorithm is represented by an unsigned decimal integer (0-255).\n" +
                 "\n" +
-                "Digest type may be represented by a unsigned decimal integer (0-255) and is usually 1, which stands for SHA-1.\n" +
+                "Digest type is represented by a unsigned decimal integer (0-255).\n" +
                 "\n" +
                 "Digest is a digest in hexadecimal representation (case insensitive). Its length varies for various digest types.\n" +
                 "For digest type SHA-1 digest is represented by 20 octets (40 characters, plus possible spaces).\n" +
                 "\n" +
                 "For more details, see RFC4034.\n"));
+
+        put(attributeSyntaxTypeMap, AttributeSyntaxType.EMAIL_SYNTAX, new AttributeSyntaxRegexp(80, Pattern.compile("(?i)^.+@([^.]+[.])+[^.]+$"),
+                "An e-mail address as defined in RFC 2822.\n"));
 
         put(attributeSyntaxTypeMap, AttributeSyntaxType.EXPORT_COMPS_SYNTAX, new ExportCompsSyntax());
 
@@ -154,7 +153,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                 "set name components of a hierarchical filter-name have to be\n" +
                 "filter-set names.\n"));
 
-        put(attributeSyntaxTypeMap, AttributeSyntaxType.FREE_FORM_SYNTAX,  new AttributeSyntaxRegexp(Pattern.compile("(?s)^.*$"), "" +
+        put(attributeSyntaxTypeMap, AttributeSyntaxType.FREE_FORM_SYNTAX, new AttributeSyntaxRegexp(Pattern.compile("(?s)^.*$"), "" +
                 "A sequence of ASCII characters.\n"));
 
         put(attributeSyntaxTypeMap, AttributeSyntaxType.GENERATED_SYNTAX, new AnySyntax("" +
@@ -208,10 +207,10 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                 "<id> is  the PGP key ID of the public key in 8-digit\n" +
                 "hexadecimal format without \"0x\" prefix."));
 
-        put(attributeSyntaxTypeMap, AttributeSyntaxType.LANGUAGE_CODE_SYNTAX,  new AttributeSyntaxRegexp(Pattern.compile("(?i)^[a-z]{2}$"), "" +
+        put(attributeSyntaxTypeMap, AttributeSyntaxType.LANGUAGE_CODE_SYNTAX, new AttributeSyntaxRegexp(Pattern.compile("(?i)^[a-z]{2}$"), "" +
                 "Valid two-letter ISO 639-1 language code.\n"));
 
-        put(attributeSyntaxTypeMap, AttributeSyntaxType.MBRS_BY_REF_SYNTAX,  new AnySyntax("" +
+        put(attributeSyntaxTypeMap, AttributeSyntaxType.MBRS_BY_REF_SYNTAX, new AnySyntax("" +
                 "<mntner-name> | ANY\n"));
 
         put(attributeSyntaxTypeMap, AttributeSyntaxType.MEMBER_OF_SYNTAX, new MemberOfSyntax());
