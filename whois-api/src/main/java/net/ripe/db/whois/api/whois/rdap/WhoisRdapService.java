@@ -102,12 +102,13 @@ public class WhoisRdapService {
             try {
                 response = lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key));
             } catch (WebApplicationException webEx) {
-                response = Response.status(webEx.getResponse().getStatus()).entity(RdapException.build(webEx.getResponse().getStatus())).build();
+                int statusCode = webEx.getResponse().getStatus();
+                response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode))).build();
             }
         } else if (objectType.equals("nameserver")) {
-            response = Response.status(Response.Status.NOT_FOUND).entity(RdapException.build(Response.Status.NOT_FOUND.getStatusCode())).build();
+            response = Response.status(Response.Status.NOT_FOUND).entity(RdapException.build(Response.Status.NOT_FOUND)).build();
         } else {
-            response = Response.status(Response.Status.BAD_REQUEST).entity(RdapException.build(Response.Status.BAD_REQUEST.getStatusCode())).build();
+            response = Response.status(Response.Status.BAD_REQUEST).entity(RdapException.build(Response.Status.BAD_REQUEST)).build();
         }
 
         return response;
