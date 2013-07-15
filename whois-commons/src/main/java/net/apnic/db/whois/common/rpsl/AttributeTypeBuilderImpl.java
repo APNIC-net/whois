@@ -62,9 +62,9 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("The canonical DNS name for the router.")
                 .syntax(AttributeSyntax.ALIAS_SYNTAX));
 
-        put(new AttributeTypeBuilderImpl("assignment-size", "ae", Enum.ASSIGNMENT_SIZE)
-                .doc("Specifies the size of blocks assigned to end users from this aggregated inet6num assignment.")
-                .syntax(AttributeSyntax.NUMBER_SYNTAX));
+//        put(new AttributeTypeBuilderImpl("assignment-size", "ae", Enum.ASSIGNMENT_SIZE)
+//                .doc("Specifies the size of blocks assigned to end users from this aggregated inet6num assignment.")
+//                .syntax(AttributeSyntax.NUMBER_SYNTAX));
 
         put(new AttributeTypeBuilderImpl("as-block", "ak", Enum.AS_BLOCK)
                 .doc("Range of AS numbers.")
