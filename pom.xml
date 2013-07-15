@@ -742,7 +742,7 @@
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups/>
                 <test.files.unit>None</test.files.unit>
-                <test.files.integration>**/whois/spec/query/*Spec*.java,**/whois/spec/update/*Spec*.java
+                <test.files.integration>net/ripe/**/whois/spec/query/*Spec*.java,net/ripe/**/whois/spec/update/*Spec*.java
                 </test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
             </properties>
@@ -776,26 +776,58 @@
         </profile>
 
         <profile>
-            <id>APNIC</id>
+            <id>apnic</id>
             <properties>
                 <whois.variant>apnic</whois.variant>
+                <test.redirectOutput>true</test.redirectOutput>
+                <test.groups>None</test.groups>
+                <test.forkCount.integration>1</test.forkCount.integration>
+                <test.files.unit>net/apnic/**/*Test.class</test.files.unit>
+                <test.files.integration>None</test.files.integration>
+            </properties>
+        </profile>
+        <profile>
+            <id>apnic-integration</id>
+            <properties>
+                <whois.variant>apnic</whois.variant>
+                <test.redirectOutput>true</test.redirectOutput>
+                <test.groups>net.apnic.db.whois.common.IntegrationTest</test.groups>
+                <test.forkCount.integration>3</test.forkCount.integration>
+                <test.files.unit>None</test.files.unit>
+                <test.files.integration>**/*TestIntegration.class</test.files.integration>
+            </properties>
+        </profile>
+        <profile>
+            <id>apnic-endtoend</id>
+            <properties>
+                <whois.variant>apnic</whois.variant>
+                <test.redirectOutput>true</test.redirectOutput>
+                <test.groups/>
+                <test.files.unit>None</test.files.unit>
+                <test.files.integration>net/apnic/**/whois/spec/query/*Spec.java,net/apnic/**/whois/spec/update/*Spec.java
+                </test.files.integration>
+                <test.forkCount.integration>3</test.forkCount.integration>
+            </properties>
+        </profile>
+        <profile>
+            <id>apnic-all</id>
+            <properties>
+                <test.redirectOutput>true</test.redirectOutput>
                 <test.groups>net.apnic.db.whois.common.IntegrationTest</test.groups>
                 <test.files.unit>net/apnic/**/*Test.class</test.files.unit>
+                <test.files.integration>net/apnic/**/*Test*.class,net/apnic/**/*Spec.class</test.files.integration>
+                <test.forkCount.integration>3</test.forkCount.integration>
             </properties>
-            <distributionManagement>
-                <repository>
-                    <id>nexus</id>
-                    <name>Nexus Release Repository</name>
-                    <url>http://nexus.apnic.net:8081/nexus/content/repositories/releases</url>
-                    <uniqueVersion>true</uniqueVersion>
-                </repository>
-                <snapshotRepository>
-                    <id>nexus</id>
-                    <name>Nexus Snapshot Repository</name>
-                    <url>http://nexus.apnic.net:8081/nexus/content/repositories/snapshots</url>
-                    <uniqueVersion>false</uniqueVersion>
-                </snapshotRepository>
-            </distributionManagement>
+        </profile>
+        <profile>
+            <id>apnic-release</id>
+            <properties>
+                <whois.variant>apnic</whois.variant>
+                <test.redirectOutput>true</test.redirectOutput>
+                <test.groups>None</test.groups>
+                <test.files.unit>None</test.files.unit>
+                <test.files.integration>None</test.files.integration>
+            </properties>
         </profile>
     </profiles>
 </project>
