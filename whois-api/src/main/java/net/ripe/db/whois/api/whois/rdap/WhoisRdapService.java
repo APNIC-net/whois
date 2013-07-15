@@ -121,7 +121,6 @@ public class WhoisRdapService {
     }
 
     protected Response lookupObject(final HttpServletRequest request, final Set<ObjectType> objectTypes, final String key) {
-        final String source = sourceContext.getWhoisSlaveSource().getName().toString();
         final String objectTypesString = Joiner.on(",").join(Iterables.transform(objectTypes, new Function<ObjectType, String>() {
             @Override
             public String apply(final ObjectType input) {
@@ -130,13 +129,8 @@ public class WhoisRdapService {
         }));
 
         final Query query = Query.parse(
-                String.format("%s %s %s %s %s %s %s",
+                String.format("%s %s %s %s %s",
                         QueryFlag.NO_GROUPING.getLongFlag(),
-                        // TODO: [RL] Configuration (property?) to control whether to fetch related objects? Maybe the results have to be filtered after the fact?
-                        // QueryFlag.NO_REFERENCED.getLongFlag(),
-                        // TODO: [RL] Configure what sources to query? (APNIC will need results from multiple sources)
-                        QueryFlag.SOURCES.getLongFlag(),
-                        source,
                         QueryFlag.SELECT_TYPES.getLongFlag(),
                         objectTypesString,
                         QueryFlag.NO_FILTERING.getLongFlag(),
@@ -182,7 +176,8 @@ public class WhoisRdapService {
                             // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
                             objectDao.getLastUpdated(resultObject.getObjectId()),
                             // TODO: [RL] for the equivalent, APNIC needs to find the referenced IRT object
-                            getAbuseContacts(resultObject))).build();
+                            getAbuseContacts(resultObject),
+                            null)).build();
 
         } catch (final QueryException e) {
             if (e.getCompletionInfo() == QueryCompletionInfo.BLOCKED) {
