@@ -42,7 +42,7 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
                 final JacksonJaxbJsonProvider jaxbJsonProvider = new JacksonJaxbJsonProvider();
                 jaxbJsonProvider.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 
-                // TODO find a non-depricated one of these
+                // TODO find a non-deprecated one of these
 
                 jaxbJsonProvider.configure(SerializationConfig.Feature.WRITE_NULL_PROPERTIES,false);
                 return Sets.newLinkedHashSet(Lists.<Object>newArrayList(
