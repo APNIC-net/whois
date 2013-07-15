@@ -35,8 +35,7 @@ public class RdapObject implements Serializable {
     @XmlElement(required = true)
     protected List<String> rdapConformance;
     protected List<Notice> notices;
-    // TODO: [RL] Make port43 value into a property
-    protected String port43 = "whois.apnic.net";
+    protected String port43;
 
     public List<Object> getStatus() {
         if (status == null) {

@@ -25,6 +25,7 @@ import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import org.joda.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +48,15 @@ class RdapObjectMapper {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(AttributeType.MNT_BY, "registrant");
     }
 
-    public static Object map(final String requestUrl, final String baseUrl, final RpslObject rpslObject, final List<RpslObject> relatedObjects, final LocalDateTime lastChangedTimestamp, final List<RpslObject> abuseContacts) {
+    public static Object map(
+            final String requestUrl,
+            final String baseUrl,
+            final RpslObject rpslObject,
+            final List<RpslObject> relatedObjects,
+            final LocalDateTime lastChangedTimestamp,
+            final List<RpslObject> abuseContacts,
+            @Value("${rdap.public.port43:}") final String port43) {
+
         RdapObject rdapResponse;
         final ObjectType rpslObjectType = rpslObject.getType();
 
@@ -88,6 +97,8 @@ class RdapObjectMapper {
 
         rdapResponse.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(requestUrl));
         rdapResponse.getLinks().add(COPYRIGHT_LINK);
+
+        rdapResponse.setPort43(port43);
 
         for (final RpslObject abuseContact : abuseContacts) {
             rdapResponse.getEntities().add(createEntity(abuseContact, Lists.<RpslObject>newArrayList(), requestUrl, baseUrl));
