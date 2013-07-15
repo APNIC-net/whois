@@ -80,8 +80,11 @@ public class VCardBuilder {
         return this;
     }
 
+
+    // TODO: the value isnt always a uri, so best to default to text?
+
     public VCardBuilder addTel(final Map parameters, final String value) {
-        properties.add(new VCardProperty("tel", parameters, "uri", value));
+        properties.add(new VCardProperty("tel", parameters, "text", value));
         return this;
     }
 
