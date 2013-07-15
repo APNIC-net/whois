@@ -5,23 +5,15 @@ import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
 import net.ripe.db.whois.api.whois.rdap.domain.Domain;
 import net.ripe.db.whois.api.whois.rdap.domain.Entity;
 import net.ripe.db.whois.api.whois.rdap.domain.Ip;
-import net.ripe.db.whois.common.dao.VersionInfo;
-import net.ripe.db.whois.common.dao.VersionLookupResult;
-import net.ripe.db.whois.common.domain.serials.Operation;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
 
-import java.util.List;
-
-import static net.ripe.db.whois.common.rpsl.ObjectType.INETNUM;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class RdapObjectMapperTest {
     private static final LocalDateTime VERSION_TIMESTAMP = LocalDateTime.parse("2044-04-26T00:02:03.000");
-
-    private static final VersionLookupResult VERSION_LOOKUP_RESULT = new VersionLookupResult(Lists.<VersionInfo>newArrayList(new VersionInfo(true, 1, 1, (VERSION_TIMESTAMP.toDate().getTime() / 1000), Operation.UPDATE)), INETNUM, "10.0.0.0 - 10.255.255.255");
 
     @Test
     public void ip() {
@@ -41,14 +33,12 @@ public class RdapObjectMapperTest {
                 "notify:         notify@test.net\n" +
                 "org:            ORG-TOL1-TEST\n" +
                 "changed:        ripe@test.net 20120101\n" +
-                "source:         TEST")), VERSION_LOOKUP_RESULT);
+                "source:         TEST")));
 
         assertThat(result.getHandle(), is("10.0.0.0 - 10.255.255.255"));
-        assertThat(result.getEvents(), hasSize(2));
-        assertThat(result.getEvents().get(0).getEventAction(), is("registration"));
+        assertThat(result.getEvents(), hasSize(1));
+        assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(VERSION_TIMESTAMP));
-        assertThat(result.getEvents().get(1).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(1).getEventDate(), is(VERSION_TIMESTAMP));
         assertThat(result.getCountry(), is("NL"));
         assertThat(result.getEndAddress(), is("10.255.255.255/32"));
         assertThat(result.getIpVersion(), is("v4"));
@@ -85,23 +75,21 @@ public class RdapObjectMapperTest {
                 "mnt-by:         UPD-MNT\n" +
                 "changed:        noreply@ripe.net 20120101\n" +
                 "source:         TEST\n" +
-                "password:       update")), VERSION_LOOKUP_RESULT);
+                "password:       update")));
 
         assertThat(result.getHandle(), is("AS102"));
         assertThat(result.getStartAutnum(), is(102l));
         assertThat(result.getEndAutnum(), is(102l));
-        assertThat(result.getEvents(), hasSize(2));
-        assertThat(result.getEvents().get(0).getEventAction(), is("registration"));
+        assertThat(result.getEvents(), hasSize(1));
+        assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(VERSION_TIMESTAMP));
-        assertThat(result.getEvents().get(1).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(1).getEventDate(), is(VERSION_TIMESTAMP));
         assertThat(result.getName(), is("End-User-2"));
         assertThat(result.getType(), is("DIRECT ALLOCATION"));
         assertThat(result.getLinks(), hasSize(2));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
         assertThat(result.getLinks().get(1).getRel(), is("copyright"));
-        assertThat(result.getRemarks().get(0).getDescription().get(0), is("remarkable"));
-        assertThat(result.getRemarks().get(1).getDescription().get(0), is("description"));
+        assertThat(result.getRemarks().get(0).getDescription().get(0), is("description"));
+        assertThat(result.getRemarks().get(1).getDescription().get(0), is("remarkable"));
     }
 
     @Test
@@ -116,19 +104,16 @@ public class RdapObjectMapperTest {
                 "mnt-by:          RIPE-NCC-MNT\n" +
                 "changed:         test@ripe.net 20120505\n" +
                 "source:          TEST\n" +
-                "password:        update")), VERSION_LOOKUP_RESULT);
+                "password:        update")));
 
         assertThat(result.getHandle(), is("2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
         assertThat(result.getLdhName(), is("2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
         assertThat(result.getNameservers(), hasSize(1));
         assertThat(result.getNameservers().get(0).getLdhName(), is("ns.1.net"));
-        assertThat(result.getEvents(), hasSize(2));
-        assertThat(result.getEvents().get(0).getEventAction(), is("registration"));
+        assertThat(result.getEvents(), hasSize(1));
+        assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(VERSION_TIMESTAMP));
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
-        assertThat(result.getEvents().get(1).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(1).getEventDate(), is(VERSION_TIMESTAMP));
-        assertThat(result.getEvents().get(1).getEventActor(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(2));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
         assertThat(result.getLinks().get(1).getRel(), is("copyright"));
@@ -155,7 +140,7 @@ public class RdapObjectMapperTest {
                 "changed:  test@test.net.au 20010816\n" +
                 "changed:  test@test.net.au 20121121\n" +
                 "mnt-by:   OWNER-MNT\n" +
-                "source:   TEST\n")), VERSION_LOOKUP_RESULT);
+                "source:   TEST\n")));
 
         assertThat(result.getHandle(), is("31.12.202.in-addr.arpa"));
     }
@@ -178,7 +163,7 @@ public class RdapObjectMapperTest {
                 "changed:        hm-changed@apnic.net 20031020\n" +
                 "changed:        hm-changed@apnic.net 20040319\n" +
                 "changed:        d.thomas@its.uq.edu.au 20070226\n" +
-                "source:         APNIC\n")), VERSION_LOOKUP_RESULT);
+                "source:         APNIC\n")));
 
         assertThat(result.getHandle(), is("102.130.in-addr.arpa"));
     }
@@ -199,7 +184,7 @@ public class RdapObjectMapperTest {
                 "mnt-by:         MAINT-APNIC-IS-AP\n" +
                 "changed:        hm-changed@apnic.net 20120504\n" +
                 "changed:        hm-changed@apnic.net 20120508\n" +
-                "source:         APNIC\n")), VERSION_LOOKUP_RESULT);
+                "source:         APNIC\n")));
 
         assertThat(result.getHandle(), is("29.12.202.in-addr.arpa"));
     }
@@ -219,12 +204,12 @@ public class RdapObjectMapperTest {
                 "abuse-mailbox: first@last.org\n" +
                 "mnt-by:        TST-MNT\n" +
                 "changed:       first@last.org 20120220\n" +
-                "source:        TEST"), VERSION_LOOKUP_RESULT);
+                "source:        TEST"));
 
-        assertThat(result.getEvents(), hasSize(0));
+        assertThat(result.getEvents(), hasSize(1));
     }
 
-    private Object map(final RpslObject rpslObject, final VersionLookupResult versionLookupResult) {
-        return RdapObjectMapper.map("http://localhost/", "http://localhost/", rpslObject, Lists.<RpslObject>newArrayList(), versionLookupResult, Lists.<RpslObject>newArrayList());
+    private Object map(final RpslObject rpslObject) {
+        return RdapObjectMapper.map("http://localhost/", "http://localhost/", rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP, Lists.<RpslObject>newArrayList());
     }
 }

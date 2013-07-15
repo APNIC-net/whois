@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import net.ripe.db.whois.api.whois.ApiResponseHandler;
-import net.ripe.db.whois.common.dao.VersionDao;
+import net.ripe.db.whois.common.dao.RpslObjectDao;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
@@ -35,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.InetAddress;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -45,20 +46,20 @@ import static net.ripe.db.whois.common.rpsl.ObjectType.*;
 @Path("/")
 public class WhoisRdapService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WhoisRdapService.class);
-
     private static final int STATUS_TOO_MANY_REQUESTS = 429;
+    private static final Set<ObjectType> ABUSE_CONTACT_TYPES = Sets.newHashSet(AUT_NUM, INETNUM, INET6NUM);
 
     private final SourceContext sourceContext;
     private final QueryHandler queryHandler;
-    private final VersionDao versionDao;
+    private final RpslObjectDao objectDao;
     private final AbuseCFinder abuseCFinder;
     private final String baseUrl;
 
     @Autowired
-    public WhoisRdapService(final SourceContext sourceContext, final QueryHandler queryHandler, final VersionDao versionDao, final AbuseCFinder abuseCFinder, @Value("${rdap.public.baseUrl:}") final String baseUrl) {
+    public WhoisRdapService(final SourceContext sourceContext, final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder, @Value("${rdap.public.baseUrl:}") final String baseUrl) {
         this.sourceContext = sourceContext;
         this.queryHandler = queryHandler;
-        this.versionDao = versionDao;
+        this.objectDao = objectDao;
         this.abuseCFinder = abuseCFinder;
         this.baseUrl = baseUrl;
     }
@@ -174,14 +175,14 @@ public class WhoisRdapService {
 
             return Response.ok(
                     RdapObjectMapper.map(
-                        getRequestUrl(request),
-                        getBaseUrl(request),
-                        resultObject,
-                        result,
-                        // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
-                        versionDao.findByKey(resultObject.getType(), resultObject.getKey().toString()),
-                        // TODO: [RL] for the equivalent, APNIC needs to find the referenced IRT object
-                        abuseCFinder.findAbuseContacts(resultObject))).build();
+                            getRequestUrl(request),
+                            getBaseUrl(request),
+                            resultObject,
+                            result,
+                            // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
+                            objectDao.getLastUpdated(resultObject.getObjectId()),
+                            // TODO: [RL] for the equivalent, APNIC needs to find the referenced IRT object
+                            getAbuseContacts(resultObject))).build();
 
         } catch (final QueryException e) {
             if (e.getCompletionInfo() == QueryCompletionInfo.BLOCKED) {
@@ -211,5 +212,13 @@ public class WhoisRdapService {
             buffer.append(request.getQueryString());
         }
         return buffer.toString();
+    }
+
+    private List<RpslObject> getAbuseContacts(final RpslObject rpslObject) {
+        final ObjectType objectType = rpslObject.getType();
+        if (ABUSE_CONTACT_TYPES.contains(objectType)) {
+            return abuseCFinder.findAbuseContacts(rpslObject);
+        }
+        return Collections.emptyList();
     }
 }

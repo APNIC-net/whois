@@ -4,10 +4,16 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.ripe.db.whois.api.whois.rdap.domain.*;
+import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
+import net.ripe.db.whois.api.whois.rdap.domain.Domain;
+import net.ripe.db.whois.api.whois.rdap.domain.Entity;
+import net.ripe.db.whois.api.whois.rdap.domain.Event;
+import net.ripe.db.whois.api.whois.rdap.domain.Ip;
+import net.ripe.db.whois.api.whois.rdap.domain.Link;
+import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
+import net.ripe.db.whois.api.whois.rdap.domain.RdapObject;
+import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.api.whois.rdap.domain.vcard.VCard;
-import net.ripe.db.whois.common.dao.VersionInfo;
-import net.ripe.db.whois.common.dao.VersionLookupResult;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.Ipv4Resource;
@@ -18,32 +24,32 @@ import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
 import net.ripe.db.whois.common.rpsl.RpslObject;
+import org.joda.time.LocalDateTime;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static net.ripe.db.whois.common.rpsl.ObjectType.*;
+import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
 
 class RdapObjectMapper {
     private static final String TERMS_AND_CONDITIONS = "http://www.ripe.net/data-tools/support/documentation/terms";
     private static final Link COPYRIGHT_LINK = new Link().setRel("copyright").setValue(TERMS_AND_CONDITIONS).setHref(TERMS_AND_CONDITIONS);
-    private static final List<String> RDAPCONFORMANCE = Lists.newArrayList("rdap_level_0");
 
-    private static final Map<AttributeType, String> typeToRole;
+    private static final List<String> RDAP_CONFORMANCE_LEVEL = Lists.newArrayList("rdap_level_0");
+
+    private static final Set<AttributeType> CONTACT_ATTRIBUTES = Sets.newHashSet(AttributeType.ADMIN_C, AttributeType.TECH_C);
+    private static final Map<AttributeType, String> CONTACT_ATTRIBUTE_TO_ROLE_NAME = Maps.newHashMap();
     static {
-        typeToRole = Maps.newHashMap();
-        typeToRole.put(AttributeType.ADMIN_C, "administrative");
-        typeToRole.put(AttributeType.TECH_C,  "technical");
-        typeToRole.put(AttributeType.MNT_BY,  "registrant");
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(AttributeType.ADMIN_C, "administrative");
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(AttributeType.TECH_C, "technical");
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(AttributeType.MNT_BY, "registrant");
     }
 
-    public static Object map(final String requestUrl, final String baseUrl, final RpslObject rpslObject, List<RpslObject> rpslObjectList, final VersionLookupResult versionLookupResult, final List<RpslObject> abuseContacts) {
+    public static Object map(final String requestUrl, final String baseUrl, final RpslObject rpslObject, final List<RpslObject> rpslObjectList, final LocalDateTime lastChangedTimestamp, final List<RpslObject> abuseContacts) {
         RdapObject rdapResponse;
         final ObjectType rpslObjectType = rpslObject.getType();
-        List<VersionInfo> versions = null;
 
         String noticeValue = requestUrl;
 
@@ -68,23 +74,17 @@ class RdapObjectMapper {
             case ORGANISATION:
             case IRT:
                 rdapResponse = createEntity(rpslObject, rpslObjectList, requestUrl, baseUrl);
-                // TODO: [RL] Allow for APNIC?
-                versions = Collections.<VersionInfo>emptyList();
                 break;
             default:
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
         }
 
-        if (versions == null) {
-            versions = (versionLookupResult == null) ? Collections.<VersionInfo>emptyList() : versionLookupResult.getVersionInfos();
-        }
-
-        rdapResponse.getRemarks().addAll(createRemark(rpslObject));
-        rdapResponse.getEvents().addAll(createEvents(versions));
+        setRemarks(rdapResponse, rpslObject);
+        rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         noticeValue = noticeValue + rpslObject.getKey();
-        rdapResponse.getRdapConformance().addAll(RDAPCONFORMANCE);
-        rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(noticeValue,rpslObject));
+        rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
+        rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(noticeValue, rpslObject));
 
         rdapResponse.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(requestUrl));
         rdapResponse.getLinks().add(COPYRIGHT_LINK);
@@ -117,111 +117,102 @@ class RdapObjectMapper {
 
 //        ip.getLinks().add(new Link().setRel("up")... //TODO parent (first less specific) - do parentHandle at the same time
 
-        //TODO [AS] is parentHandle optional or not?
         return ip;
     }
 
     private static void setRemarks(final RdapObject rdapObject, final RpslObject rpslObject) {
-        final List<Remark> remarks = createRemark(rpslObject);
+        final List<Remark> remarks = createRemarks(rpslObject);
         if (!remarks.isEmpty()) {
             rdapObject.getRemarks().addAll(remarks);
         }
     }
 
-    private static List<Remark> createRemark(final RpslObject rpslObject) {
-        final List<Remark> remarks = Lists.newArrayList();
+    private static List<Remark> createRemarks(final RpslObject rpslObject) {
+        final List<Remark> remarkList = Lists.newArrayList();
 
-        final Remark descriptionRemark = new Remark();
-        // TODO: [RL] description and remarks should be separate remarks
-        for (final CIString descriptionValue  : rpslObject.getValuesForAttribute(AttributeType.REMARKS)) {
-            if (!descriptionValue.toString().isEmpty()) {
-                descriptionRemark.getDescription().add(descriptionValue.toString());
-            }
-        }
-        if (!descriptionRemark.getDescription().isEmpty()) {
-            remarks.add(descriptionRemark);
+        final List<String> descriptions = Lists.newArrayList();
+
+        for (final CIString description : rpslObject.getValuesForAttribute(AttributeType.DESCR)) {
+            descriptions.add(description.toString());
         }
 
-        final Remark remark = new Remark();
-        for (final CIString descriptionValue : rpslObject.getValuesForAttribute(AttributeType.DESCR)) {
-            if (!descriptionValue.toString().isEmpty()) {
-                remark.getDescription().add(descriptionValue.toString());
-            }
-        }
-        if (!remark.getDescription().isEmpty()) {
-            remarks.add(remark);
+        if (!descriptions.isEmpty()) {
+            remarkList.add(new Remark(descriptions));
         }
 
-        return remarks;
+        final List<String> remarks = Lists.newArrayList();
+
+        for (final CIString description : rpslObject.getValuesForAttribute(AttributeType.REMARKS)) {
+            remarks.add(description.toString());
+        }
+
+        if (!remarks.isEmpty()) {
+            remarkList.add(new Remark(remarks));
+        }
+
+        return remarkList;
     }
 
-    private static List<Event> createEvents(final List<VersionInfo> versions) {
-        final List<Event> events = Lists.newArrayList();
-        if (!versions.isEmpty()) {
-            final VersionInfo first = versions.get(0);
-            final Event registrationEvent = new Event();
-            registrationEvent.setEventAction("registration");
-            registrationEvent.setEventDate(first.getTimestamp().toLocalDateTime());
-            events.add(registrationEvent);
-
-            final VersionInfo last = versions.get(versions.size() - 1);
-            final Event lastChangedEvent = new Event();
-            lastChangedEvent.setEventAction("last changed");
-            lastChangedEvent.setEventDate(last.getTimestamp().toLocalDateTime());
-            events.add(lastChangedEvent);
-        }
-        return events;
+    private static Event createEvent(final LocalDateTime lastChanged) {
+        final Event lastChangedEvent = new Event();
+        lastChangedEvent.setEventAction("last changed");
+        lastChangedEvent.setEventDate(lastChanged);
+        return lastChangedEvent;
     }
 
-    private static void setEntities(final RdapObject rdapObject, final RpslObject rpslObject, List<RpslObject> rpslObjectList, final Set<AttributeType> attributeTypes, final String requestUrl, final String baseUrl) {
-        /* Construct a map for finding the entity objects in the query
-         * results. */
+    private static void setEntities(final RdapObject rdapObject, final RpslObject rpslObject, List<RpslObject> rpslObjectList, final String requestUrl, final String baseUrl) {
+        final List<Entity> entities = Lists.newArrayList();
+
+        final Map<String, Set<AttributeType>> contacts = Maps.newHashMap();
+
         final Map<CIString, RpslObject> objectMap = Maps.newHashMap();
         for (final RpslObject object : rpslObjectList) {
             objectMap.put(object.getKey(), object);
         }
 
-        /* Construct a map from attribute value to a list of the
-         * attribute types against which it is recorded. (To handle
-         * the case where a single person/role/similar occurs multiple
-         * times in a record.) */
-        final Map<CIString, Set<AttributeType>> valueToRoles = Maps.newHashMap();
-        for (final RpslAttribute attribute : rpslObject.findAttributes(attributeTypes)) {
-            final CIString key = attribute.getCleanValue();
-            final Set<AttributeType> roleAttributeTypes = valueToRoles.get(key);
-
-            if (roleAttributeTypes != null) {
-                roleAttributeTypes.add(attribute.getType());
+        for (final RpslAttribute attribute : rpslObject.findAttributes(CONTACT_ATTRIBUTES)) {
+            final String contactName = attribute.getCleanValue().toString();
+            if (contacts.containsKey(contactName)) {
+                contacts.get(contactName).add(attribute.getType());
             } else {
-                final Set<AttributeType> newAttributes = Sets.newHashSet();
-                newAttributes.add(attribute.getType());
-                valueToRoles.put(key, newAttributes);
+                final Set<AttributeType> attributeTypes = Sets.newHashSet();
+                attributeTypes.add(attribute.getType());
+                contacts.put(contactName, attributeTypes);
             }
         }
 
-        for (final CIString key : valueToRoles.keySet()) {
-            final Set<AttributeType> attributes = valueToRoles.get(key);
-            final RpslObject object = objectMap.get(key);
+        for (Map.Entry<String, Set<AttributeType>> entry : contacts.entrySet()) {
+            final RpslObject object = objectMap.get(entry.getKey());
             if (object != null) {
                 final Entity entity = createEntity(object, rpslObjectList, requestUrl, baseUrl);
                 final List<String> roles = entity.getRoles();
-                for (final AttributeType at : attributes) {
-                    roles.add(typeToRole.get(at));
+                for (final AttributeType at : CONTACT_ATTRIBUTES) {
+                    roles.add(CONTACT_ATTRIBUTE_TO_ROLE_NAME.get(at));
                 }
-                rdapObject.getEntities().add(entity);
+                entities.add(entity);
+            } else {
+                final Entity entity = new Entity();
+                entity.setHandle(entry.getKey());
+                for (AttributeType attributeType : entry.getValue()) {
+                    entity.getRoles().add(CONTACT_ATTRIBUTE_TO_ROLE_NAME.get(attributeType));
+                }
+                entities.add(entity);
             }
         }
+
+        rdapObject.getEntities().addAll(entities);
     }
 
     private static Entity createEntity(final RpslObject rpslObject, List<RpslObject> rpslObjectList, final String requestUrl, final String baseUrl) {
         final Entity entity = new Entity();
         entity.setHandle(rpslObject.getKey().toString());
         entity.setVCardArray(createVCard(rpslObject));
-        setRemarks(entity, rpslObject);
 
         final String selfUrl = baseUrl + "/entity/" + entity.getHandle();
 
         if (!selfUrl.equals(requestUrl)) {
+            setRemarks(entity, rpslObject);
+
             entity.getLinks().add(new Link()
                     .setRel("self")
                     .setValue(requestUrl)
@@ -229,10 +220,7 @@ class RdapObjectMapper {
         }
 
         if (rpslObject.getType() == ObjectType.ORGANISATION) {
-            final Set<AttributeType> contactAttributeTypes = Sets.newHashSet();
-            contactAttributeTypes.add(AttributeType.ADMIN_C);
-            contactAttributeTypes.add(AttributeType.TECH_C);
-            setEntities(entity, rpslObject, rpslObjectList, contactAttributeTypes, requestUrl, baseUrl);
+            setEntities(entity, rpslObject, rpslObjectList, requestUrl, baseUrl);
         }
 
         return entity;
@@ -253,23 +241,9 @@ class RdapObjectMapper {
         }
 
         autnum.setName(rpslObject.getValueForAttribute(AttributeType.AS_NAME).toString().replace(" ", ""));
-
-        /* aut-num records don't have a 'type' or 'status' field, and
-         * each is allocated directly by the relevant RIR. 'DIRECT
-         * ALLOCATION' is the default value used in the response
-         * draft, and it makes sense to use it here too, at least for
-         * now. */
         autnum.setType("DIRECT ALLOCATION");
 
-        /* None of the statuses from [9.1] in json-response is
-         * applicable here, so 'status' will be left empty for now. */
-
-        final Set<AttributeType> contactAttributeTypes = Sets.newHashSet();
-        contactAttributeTypes.add(AttributeType.ADMIN_C);
-        contactAttributeTypes.add(AttributeType.TECH_C);
-        setEntities(autnum, rpslObject, rpslObjectList, contactAttributeTypes, requestUrl, baseUrl);
-
-//        autnum.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(baseUrl + "/autnum/" + new Long(startAndEnd).toString()));
+        setEntities(autnum, rpslObject, rpslObjectList, requestUrl, baseUrl);
 
         return autnum;
     }
@@ -279,7 +253,7 @@ class RdapObjectMapper {
         domain.setHandle(rpslObject.getKey().toString());
         domain.setLdhName(rpslObject.getKey().toString());
 
-        final HashMap<CIString,Set<IpInterval>> hostnameMap = new HashMap<>();
+        final HashMap<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
 
         for (final RpslAttribute rpslAttribute : rpslObject.findAttributes(AttributeType.NSERVER)) {
             final NServer nserver = NServer.parse(rpslAttribute.getCleanValue().toString());
@@ -289,8 +263,7 @@ class RdapObjectMapper {
             final Set<IpInterval> ipIntervalSet;
             if (hostnameMap.containsKey(hostname)) {
                 ipIntervalSet = hostnameMap.get(hostname);
-            }
-            else {
+            } else {
                 ipIntervalSet = Sets.newHashSet();
                 hostnameMap.put(hostname, ipIntervalSet);
             }
@@ -343,14 +316,7 @@ class RdapObjectMapper {
             domain.setSecureDNS(secureDNS);
         }
 
-        setRemarks(domain, rpslObject);
-
-        final Set<AttributeType> contactAttributeTypes = Sets.newHashSet();
-        contactAttributeTypes.add(AttributeType.ADMIN_C);
-        contactAttributeTypes.add(AttributeType.TECH_C);
-        setEntities(domain, rpslObject, rpslObjectList, contactAttributeTypes, requestUrl, baseUrl);
-
-//        domain.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(baseUrl + "/domain/" + domain.getHandle()));
+        setEntities(domain, rpslObject, rpslObjectList, requestUrl, baseUrl);
 
         return domain;
     }
