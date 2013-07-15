@@ -35,9 +35,6 @@ import java.util.Set;
 import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
 
 class RdapObjectMapper {
-    private static final String TERMS_AND_CONDITIONS = "http://www.ripe.net/data-tools/support/documentation/terms";
-    private static final Link COPYRIGHT_LINK = new Link().setRel("copyright").setValue(TERMS_AND_CONDITIONS).setHref(TERMS_AND_CONDITIONS);
-
     private static final List<String> RDAP_CONFORMANCE_LEVEL = Lists.newArrayList("rdap_level_0");
 
     private static final Set<AttributeType> CONTACT_ATTRIBUTES = Sets.newHashSet(AttributeType.ADMIN_C, AttributeType.TECH_C);
@@ -60,21 +57,16 @@ class RdapObjectMapper {
         RdapObject rdapResponse;
         final ObjectType rpslObjectType = rpslObject.getType();
 
-        String noticeValue = requestUrl;
-
         switch (rpslObjectType) {
             case DOMAIN:
                 rdapResponse = createDomain(rpslObject, relatedObjects, requestUrl, baseUrl);
-                noticeValue = noticeValue + "/domain/";
                 break;
             case AUT_NUM:
                 rdapResponse = createAutnumResponse(rpslObject, relatedObjects, requestUrl, baseUrl);
-                noticeValue = noticeValue + "/autnum/";
                 break;
             case INETNUM:
             case INET6NUM:
                 rdapResponse = createIp(rpslObject);
-                noticeValue = noticeValue + "/ip/";
                 break;
             case PERSON:
             case ROLE:
@@ -88,21 +80,18 @@ class RdapObjectMapper {
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
         }
 
-        setRemarks(rdapResponse, rpslObject);
-        rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
-
-        noticeValue = noticeValue + rpslObject.getKey();
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
-        rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(noticeValue, rpslObject));
-
         rdapResponse.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(requestUrl));
-        rdapResponse.getLinks().add(COPYRIGHT_LINK);
-
         rdapResponse.setPort43(port43);
+        rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, requestUrl));
+        rdapResponse.getRemarks().addAll(createRemarks(rpslObject));
+        rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
             rdapResponse.getEntities().add(createEntity(abuseContact, Lists.<RpslObject>newArrayList(), requestUrl, baseUrl));
         }
+
+        rdapResponse.getEntities().addAll(contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl));
 
         return rdapResponse;
     }
@@ -129,13 +118,6 @@ class RdapObjectMapper {
 //        ip.getLinks().add(new Link().setRel("up")... //TODO parent (first less specific) - do parentHandle at the same time
 
         return ip;
-    }
-
-    private static void setRemarks(final RdapObject rdapObject, final RpslObject rpslObject) {
-        final List<Remark> remarks = createRemarks(rpslObject);
-        if (!remarks.isEmpty()) {
-            rdapObject.getRemarks().addAll(remarks);
-        }
     }
 
     private static List<Remark> createRemarks(final RpslObject rpslObject) {
@@ -171,7 +153,7 @@ class RdapObjectMapper {
         return lastChangedEvent;
     }
 
-    private static void setEntities(final RdapObject rdapObject, final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
+    private static List<Entity> contactEntities(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
         final List<Entity> entities = Lists.newArrayList();
 
         final Map<String, Set<AttributeType>> contacts = Maps.newHashMap();
@@ -207,7 +189,7 @@ class RdapObjectMapper {
             entities.add(entity);
         }
 
-        rdapObject.getEntities().addAll(entities);
+        return entities;
     }
 
     private static Entity createEntity(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
@@ -218,15 +200,15 @@ class RdapObjectMapper {
         final String selfUrl = baseUrl + "/entity/" + entity.getHandle();
 
         if (!selfUrl.equals(requestUrl)) {
-            setRemarks(entity, rpslObject);
-
+            entity.getRemarks().addAll(createRemarks(rpslObject));
             entity.getLinks().add(new Link()
                     .setRel("self")
                     .setValue(requestUrl)
                    .setHref(baseUrl + "/entity/" + entity.getHandle()));
-        }
+            entity.getEntities().addAll(contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl));
 
-        setEntities(entity, rpslObject, relatedObjects, requestUrl, baseUrl);
+            // TODO: [RL] Add abuse contact here?
+        }
 
         return entity;
     }
@@ -247,8 +229,6 @@ class RdapObjectMapper {
 
         autnum.setName(rpslObject.getValueForAttribute(AttributeType.AS_NAME).toString().replace(" ", ""));
         autnum.setType("DIRECT ALLOCATION");
-
-        setEntities(autnum, rpslObject, relatedObjects, requestUrl, baseUrl);
 
         return autnum;
     }
@@ -320,8 +300,6 @@ class RdapObjectMapper {
         if (secureDNS.isDelegationSigned()) {
             domain.setSecureDNS(secureDNS);
         }
-
-        setEntities(domain, rpslObject, relatedObjects, requestUrl, baseUrl);
 
         return domain;
     }

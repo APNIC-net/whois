@@ -46,9 +46,10 @@ public class RdapObjectMapperTest {
         assertThat(result.getParentHandle(), is(nullValue()));
         assertThat(result.getStartAddress(), is("10.0.0.0/32"));
         assertThat(result.getType(), is("OTHER"));
-        assertThat(result.getLinks(), hasSize(2));
+        assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
+// TODO: [RL] test for copyright in notices
+//        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("some descr"));
     }
 
@@ -85,9 +86,10 @@ public class RdapObjectMapperTest {
         assertThat(result.getEvents().get(0).getEventDate(), is(VERSION_TIMESTAMP));
         assertThat(result.getName(), is("End-User-2"));
         assertThat(result.getType(), is("DIRECT ALLOCATION"));
-        assertThat(result.getLinks(), hasSize(2));
+        assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
+// TODO: [RL] test for copyright in notices
+//        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("description"));
         assertThat(result.getRemarks().get(1).getDescription().get(0), is("remarkable"));
     }
@@ -114,9 +116,10 @@ public class RdapObjectMapperTest {
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(VERSION_TIMESTAMP));
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
-        assertThat(result.getLinks(), hasSize(2));
+        assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
+// TODO: [RL] test for copyright in notices
+//        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("enum domain"));
     }
 

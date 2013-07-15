@@ -62,7 +62,7 @@ public class NoticeFactory {
         }
     }
 
-    public static List<Notice> generateNotices (String selfLink, RpslObject rpslObject) {
+    public static List<Notice> generateNotices(RpslObject rpslObject, String selfLink) {
         List<Notice> notices = new ArrayList<Notice>();
 
         if (noticeFactory != null) {
