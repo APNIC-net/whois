@@ -67,7 +67,7 @@ public class DailyScheduler {
                         LOGGER.debug("Starting scheduled task: {}", task);
                         task.run();
                     } catch (RuntimeException e) {
-                        LOGGER.error("Exception in scheduled task: {}", task, e);
+                        LOGGER.error("Error in scheduled task: {}", task, e);
                     } finally {
                         LOGGER.info("Scheduled task: {} took {}", task, stopwatch.stop());
                     }

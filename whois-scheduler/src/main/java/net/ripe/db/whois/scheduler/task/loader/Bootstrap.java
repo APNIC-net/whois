@@ -68,7 +68,7 @@ public class Bootstrap implements DailyScheduledTask {
                 LOGGER.info(bootstrap);
             }
         } catch (Exception e) {
-            LOGGER.error("Exception caught", e);
+            LOGGER.error("Error caught", e);
         }
     }
 }

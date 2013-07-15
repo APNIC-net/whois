@@ -71,7 +71,7 @@ class DailyLogFolder {
                     }
                 }
             } catch (IOException e) {
-                LOGGER.warn("Exception processing folder: {}", folder.getAbsolutePath(), e);
+                LOGGER.warn("Error processing folder: {}", folder.getAbsolutePath(), e);
             } finally {
                 IOUtils.closeQuietly(is);
             }

@@ -15,7 +15,7 @@ import java.util.List;
         "description"
 })
 @XmlRootElement
-public class Exception {
+public class Error {
     protected int errorCode;
     protected String title;
     protected List<String> description;

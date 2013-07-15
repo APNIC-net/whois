@@ -1,11 +1,11 @@
 package net.ripe.db.whois.api.whois.rdap;
 
-import net.ripe.db.whois.api.whois.rdap.domain.Exception;
+import net.ripe.db.whois.api.whois.rdap.domain.Error;
 
 public class RdapException {
 
     public static Object build (final int status) {
-        final Exception exception = new Exception();
+        final Error exception = new Error();
         exception.setErrorCode(status);
 
         switch (status) {
