@@ -431,7 +431,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(roles, containsInAnyOrder("administrative","technical"));
 
         final List<Link> links = autnum.getLinks();
-        assertThat(links, hasSize(2));
+        assertThat(links, hasSize(1));
         final Link selfLink = links.get(0);
         assertThat(selfLink.getRel(), equalTo("self"));
 
@@ -490,7 +490,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(technicalRoles, contains("technical"));
 
         final List<Link> links = autnum.getLinks();
-        assertThat(links, hasSize(2));
+        assertThat(links, hasSize(1));
         final Link selfLink = links.get(0);
         assertThat(selfLink.getRel(), equalTo("self"));
 
@@ -712,7 +712,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final List<Notice> notices = entity.getNotices();
         assertThat(notices.get(0).getLinks().getHref(), equalTo("http://www.ripe.net/data-tools/support/documentation/terms"));
         assertThat(notices.get(0).getLinks().getValue(), equalTo(orgLink));
-        assertThat(notices.get(0).getTitle(), equalTo("copyright"));
+        assertThat(notices.get(0).getLinks().getRel(), equalTo("terms-of-service"));
+        assertThat(notices.get(0).getTitle(), equalTo("Terms and Conditions"));
     }
 
     @Override
