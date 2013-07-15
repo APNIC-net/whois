@@ -537,4 +537,8 @@ public final class UpdateMessages {
     public static Message dryRunNotice() {
         return new Message(Type.INFO, "Dry-run performed, no changes to the database have been made");
     }
+
+    public static Message objectNotAllowed(ObjectType objectType) {
+        return new Message(Type.ERROR, "%s objects are not allowed", objectType.getName());
+    }
 }
