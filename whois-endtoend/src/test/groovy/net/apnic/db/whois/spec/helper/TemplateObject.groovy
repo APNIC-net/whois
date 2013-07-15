@@ -1,4 +1,4 @@
-package net.apnic.db.whois.spec
+package net.apnic.db.whois.spec.helper
 
 import net.ripe.db.whois.common.support.DummyWhoisClient
 import net.ripe.db.whois.query.QueryServer

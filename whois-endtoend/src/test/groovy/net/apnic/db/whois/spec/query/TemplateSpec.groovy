@@ -1,7 +1,7 @@
 package net.apnic.db.whois.spec.query
 
 import net.apnic.db.whois.spec.BaseSpec
-import net.apnic.db.whois.spec.TemplateObject
+import net.apnic.db.whois.spec.helper.TemplateObject
 
 class TemplateSpec extends BaseSpec {
     def "as-block"() {
