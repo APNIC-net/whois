@@ -107,8 +107,12 @@ class RdapObjectMapper {
             ipInterval = Ipv4Resource.parse(rpslObject.getKey());
             ip.setIpVersion("v4");
         }
-        ip.setStartAddress(IpInterval.asIpInterval(ipInterval.beginAsInetAddress()).toString());
-        ip.setEndAddress(IpInterval.asIpInterval(ipInterval.endAsInetAddress()).toString());
+
+        // TODO: find a better way to remove the cidr notation
+        String startAddr = IpInterval.asIpInterval(ipInterval.beginAsInetAddress()).toString();
+        String endAddr = IpInterval.asIpInterval(ipInterval.endAsInetAddress()).toString();
+        ip.setStartAddress(startAddr.split("/")[0]);
+        ip.setEndAddress(endAddr.split("/")[0]);
 
         ip.setName(rpslObject.getValueForAttribute(AttributeType.NETNAME).toString());
         ip.setCountry(rpslObject.getValueForAttribute(AttributeType.COUNTRY).toString());

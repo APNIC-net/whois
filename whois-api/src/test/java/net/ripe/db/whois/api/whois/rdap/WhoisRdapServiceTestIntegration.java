@@ -266,8 +266,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getHandle(), is("2001:2002:2003::/48"));
         assertThat(response.getIpVersion(), is("v6"));
         assertThat(response.getCountry(), is("NL"));
-        assertThat(response.getStartAddress(), is("2001:2002:2003::/128"));
-        assertThat(response.getEndAddress(), is("2001:2002:2003:ffff:ffff:ffff:ffff:ffff/128"));
+        assertThat(response.getStartAddress(), is("2001:2002:2003::"));
+        assertThat(response.getEndAddress(), is("2001:2002:2003:ffff:ffff:ffff:ffff:ffff"));
         assertThat(response.getName(), is("RIPE-NCC"));
     }
 
@@ -680,7 +680,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(event.getEventDate(), equalTo(now));
         assertThat(event.getEventAction(), equalTo("last changed"));
 
-        /*assertThat(entity.getEntities(), hasSize(4));
+        assertThat(entity.getEntities(), hasSize(4));
         final List<Entity> entities = entity.getEntities();
         Collections.sort(entities);
         assertThat(entities.get(0).getHandle(), is("TP1-TEST"));
@@ -707,7 +707,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getValue(), equalTo(orgLink));
         assertThat(links.get(0).getHref(), equalTo(orgLink));
-        assertThat(links.get(0).getRel(), equalTo("self"));*/
+        assertThat(links.get(0).getRel(), equalTo("self"));
     }
 
     @Override
