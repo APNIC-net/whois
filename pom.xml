@@ -828,6 +828,14 @@
                 <test.files.unit>None</test.files.unit>
                 <test.files.integration>None</test.files.integration>
             </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>

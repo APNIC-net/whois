@@ -92,9 +92,13 @@
         </profile>
 
         <profile>
-            <id>APNIC</id>
+            <id>apnic-release</id>
 
             <properties>
+                <!-- START: RIPE Release Procedure -->
+                <whois.main>net.ripe.db.whois.WhoisServer</whois.main>
+                <!-- END: RIPE Release Procedure -->
+
                 <build-helper-maven-plugin.version>1.8</build-helper-maven-plugin.version>
                 <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
                 <maven-rpm-plugin.version>2.1-alpha-2</maven-rpm-plugin.version>
@@ -130,6 +134,32 @@
 
             <build>
                 <plugins>
+                    <!-- START: RIPE Release Procedure -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </plugin>
+                    <!-- END: RIPE Release Procedure -->
+
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
@@ -324,9 +354,9 @@
                                             </sources>
                                         </mapping>
                                     </mappings>
-                                    <preinstallScriptlet>
+                                    <preinstallScriplet>
                                         /usr/sbin/useradd ${whois.init.user}
-                                    </preinstallScriptlet>
+                                    </preinstallScriplet>
                                     <postinstallScriptlet>
                                         <!-- Refresh the init scripts -->
                                         <script>
