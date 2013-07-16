@@ -4,16 +4,23 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.ripe.db.whois.api.whois.rdap.domain.*;
+import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
+import net.ripe.db.whois.api.whois.rdap.domain.Domain;
+import net.ripe.db.whois.api.whois.rdap.domain.Entity;
+import net.ripe.db.whois.api.whois.rdap.domain.Event;
+import net.ripe.db.whois.api.whois.rdap.domain.Ip;
+import net.ripe.db.whois.api.whois.rdap.domain.Link;
+import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
+import net.ripe.db.whois.api.whois.rdap.domain.RdapObject;
+import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.api.whois.rdap.domain.vcard.VCard;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.Ipv4Resource;
 import net.ripe.db.whois.common.domain.Ipv6Resource;
-import net.ripe.db.whois.common.domain.attrs.AutNum;
+import net.ripe.db.whois.common.domain.attrs.AsBlockRange;
 import net.ripe.db.whois.common.domain.attrs.DsRdata;
 import net.ripe.db.whois.common.domain.attrs.NServer;
-import net.ripe.db.whois.common.domain.attrs.AsBlockRange;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
@@ -26,7 +33,12 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
 
@@ -166,7 +178,7 @@ class RdapObjectMapper {
     private static Event createEvent(final LocalDateTime lastChanged) {
         final Event lastChangedEvent = new Event();
         lastChangedEvent.setEventAction("last changed");
-        lastChangedEvent.setEventDate(convertToXMLGregorianCalendar(lastChanged));
+        lastChangedEvent.setEventDate(convertToXMLGregorianCalendar(lastChanged).toString());
         return lastChangedEvent;
     }
 

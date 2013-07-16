@@ -49,7 +49,8 @@ public class Event
 
     protected String eventAction;
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar eventDate;
+    //protected XMLGregorianCalendar eventDate;
+    protected String eventDate;
     protected String eventActor;
 
     /**
@@ -84,7 +85,7 @@ public class Event
      *     {@link XMLGregorianCalendar }
      *
      */
-    public XMLGregorianCalendar getEventDate() {
+    public String getEventDate() { //XMLGregorianCalendar getEventDate() {
         return eventDate;
     }
 
@@ -96,7 +97,7 @@ public class Event
      *     {@link XMLGregorianCalendar }
      *
      */
-    public void setEventDate(XMLGregorianCalendar value) {
+    public void setEventDate(String value) { //(XMLGregorianCalendar value) {
         this.eventDate = value;
     }
 
