@@ -13,6 +13,7 @@ import net.ripe.db.whois.api.whois.rdap.domain.Entity;
 import net.ripe.db.whois.api.whois.rdap.domain.Event;
 import net.ripe.db.whois.api.whois.rdap.domain.Ip;
 import net.ripe.db.whois.api.whois.rdap.domain.Link;
+import net.ripe.db.whois.api.whois.rdap.domain.Notice;
 import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.common.IntegrationTest;
 import net.ripe.db.whois.common.TestDateTimeProvider;
@@ -203,8 +204,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getIpVersion(), is("v4"));
         assertThat(response.getLang(), is("en"));
         assertThat(response.getCountry(), is("NL"));
-        assertThat(response.getStartAddress(), is("192.0.0.0/32"));
-        assertThat(response.getEndAddress(), is("192.255.255.255/32"));
+        assertThat(response.getStartAddress(), is("192.0.0.0"));
+        assertThat(response.getEndAddress(), is("192.255.255.255"));
         assertThat(response.getName(), is("TEST-NET-NAME"));
     }
 
@@ -229,8 +230,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getHandle(), is("192.0.0.0 - 192.255.255.255"));
         assertThat(response.getIpVersion(), is("v4"));
         assertThat(response.getCountry(), is("NL"));
-        assertThat(response.getStartAddress(), is("192.0.0.0/32"));
-        assertThat(response.getEndAddress(), is("192.255.255.255/32"));
+        assertThat(response.getStartAddress(), is("192.0.0.0"));
+        assertThat(response.getEndAddress(), is("192.255.255.255"));
         assertThat(response.getName(), is("TEST-NET-NAME"));
     }
 
@@ -294,8 +295,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getHandle(), is("2001:2002:2003::/48"));
         assertThat(response.getIpVersion(), is("v6"));
         assertThat(response.getCountry(), is("NL"));
-        assertThat(response.getStartAddress(), is("2001:2002:2003::/128"));
-        assertThat(response.getEndAddress(), is("2001:2002:2003:ffff:ffff:ffff:ffff:ffff/128"));
+        assertThat(response.getStartAddress(), is("2001:2002:2003::"));
+        assertThat(response.getEndAddress(), is("2001:2002:2003:ffff:ffff:ffff:ffff:ffff"));
         assertThat(response.getName(), is("RIPE-NCC"));
     }
 
@@ -315,8 +316,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "[[version, {}, text, 4.0], " +
                 "[fn, {}, text, Pauleth Palthen], " +
                 "[kind, {}, text, individual], " +
-                "[adr, {label=Singel 258}, text, null], " +
-                "[tel, {type=[work, voice]}, uri, +31-1234567890], " +
+                "[adr, {label=Singel 258, type=work}, text, null], " +
+                "[tel, {type=[work, voice]}, text, +31-1234567890], " +
                 "[email, {type=work}, text, noreply@ripe.net]]"));
         assertThat(response.getRdapConformance(), hasSize(1));
         assertThat(response.getRdapConformance().get(0), equalTo("rdap_level_0"));
@@ -358,7 +359,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "[[version, {}, text, 4.0], " +
                 "[fn, {}, text, First Role], " +
                 "[kind, {}, text, group], " +
-                "[adr, {label=Singel 258}, text, null], " +
+                "[adr, {label=Singel 258, type=work}, text, null], " +
                 "[email, {type=work}, text, dbtest@ripe.net]]"));
 
         assertThat(response.getEntities(), hasSize(1));
@@ -431,7 +432,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(roles, containsInAnyOrder("administrative","technical"));
 
         final List<Link> links = autnum.getLinks();
-        assertThat(links, hasSize(2));
+        assertThat(links, hasSize(1));
         final Link selfLink = links.get(0);
         assertThat(selfLink.getRel(), equalTo("self"));
 
@@ -490,7 +491,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(technicalRoles, contains("technical"));
 
         final List<Link> links = autnum.getLinks();
-        assertThat(links, hasSize(2));
+        assertThat(links, hasSize(1));
         final Link selfLink = links.get(0);
         assertThat(selfLink.getRel(), equalTo("self"));
 
@@ -633,8 +634,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
             "[[version, {}, text, 4.0], " +
             "[fn, {}, text, Abuse Contact], " +
             "[kind, {}, text, group], " +
-            "[adr, {label=Singel 258}, text, null], " +
-            "[tel, {type=[work, voice]}, uri, +31 6 12345678]]"));
+            "[adr, {label=Singel 258, type=work}, text, null], " +
+            "[tel, {type=[work, voice]}, text, +31 6 12345678]]"));
     }
 
     // organisation entity
@@ -677,12 +678,12 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 //        final Event event = events.get(0);
 //        assertThat(event.getEventDate().toString(), equalTo(""));
 
-/*        assertThat(entity.getEvents().size(), equalTo(1));
+        assertThat(entity.getEvents().size(), equalTo(1));
         final Event event = entity.getEvents().get(0);
         assertThat(event.getEventDate(), equalTo(now));
         assertThat(event.getEventAction(), equalTo("last changed"));
 
-        assertThat(entity.getEntities(), hasSize(4));
+        assertThat(entity.getEntities(), hasSize(2));
         final List<Entity> entities = entity.getEntities();
         Collections.sort(entities);
         assertThat(entities.get(0).getHandle(), is("TP1-TEST"));
@@ -690,7 +691,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(entities.get(1).getHandle(), is("TP2-TEST"));
         assertThat(entities.get(1).getRoles(), containsInAnyOrder("administrative", "technical"));
 
-        final String orgLink = createResource(AUDIENCE, "entity/ORG-ONE-TEST").toString();        // TODO: implement
+        final String orgLink = createResource(AUDIENCE, "entity/ORG-ONE-TEST").toString();
         final String tp1Link = createResource(AUDIENCE, "entity/TP1-TEST").toString();
         final String tp2Link = createResource(AUDIENCE, "entity/TP2-TEST").toString();
 
@@ -703,16 +704,18 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(entities.get(1).getLinks().get(0).getValue(), is(orgLink));
         assertThat(entities.get(1).getLinks().get(0).getHref(), is(tp2Link));
 
+        final List<Notice> notices = entity.getNotices();
+        assertThat(notices.get(0).getLinks().getHref(), equalTo("http://www.ripe.net/data-tools/support/documentation/terms"));
+        assertThat(notices.get(0).getLinks().getValue(), equalTo(orgLink));
+        assertThat(notices.get(0).getLinks().getRel(), equalTo("terms-of-service"));
+        assertThat(notices.get(0).getTitle(), equalTo("Terms and Conditions"));
+	
         final List<Link> links = entity.getLinks();
         assertThat(links, hasSize(1));
         Collections.sort(links);
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getValue(), equalTo(orgLink));
         assertThat(links.get(0).getHref(), equalTo(orgLink));
-        assertThat(links.get(0).getRel(), equalTo("self"));
-        */
-
-        //Thread.sleep(1500000);
     }
 
     @Override
