@@ -361,9 +361,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "[adr, {label=Singel 258, type=work}, text, null], " +
                 "[email, {type=work}, text, dbtest@ripe.net]]"));
 
-        // FIX ME DK !!!
-        //assertThat(response.getEntities(), hasSize(1));
-        assertThat(response.getEntities(), hasSize(2));
+        assertThat(response.getEntities(), hasSize(1));
         assertThat(response.getEntities().get(0).getHandle(), is("PP1-TEST"));
         assertThat(response.getEntities().get(0).getRoles(), containsInAnyOrder("administrative", "technical"));
         assertThat(response.getRdapConformance(), hasSize(1));
@@ -666,9 +664,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(event.getEventAction(), equalTo("last changed"));
 
         final List<SortedEntity> entities = SortedEntity.createSortedEntities(entity.getEntities());
-        // FIX ME DK !!!
-        // assertThat(entity.getEntities(), hasSize(2));
-        assertThat(entity.getEntities(), hasSize(4));
+        assertThat(entity.getEntities(), hasSize(2));
         assertThat(entities.get(0).getHandle(), is("TP1-TEST"));
         assertThat(entities.get(0).getRoles(), contains("technical"));
         assertThat(entities.get(1).getHandle(), is("TP2-TEST"));

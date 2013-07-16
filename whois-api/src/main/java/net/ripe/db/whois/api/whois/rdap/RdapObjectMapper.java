@@ -211,11 +211,11 @@ class RdapObjectMapper {
         if (!selfUrl.equals(requestUrl)) {
             setRemarks(entity, rpslObject);
             entity.getLinks().add( createLink("self", requestUrl,baseUrl + "/entity/" + entity.getHandle()));
-        }
 
-        List<Entity> contactEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
-        if (!contactEntities.isEmpty()) {
-            entity.getEntities().addAll(contactEntities);
+            List<Entity> contactEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
+            if (!contactEntities.isEmpty()) {
+                entity.getEntities().addAll(contactEntities);
+            }
         }
 
         // TODO: [RL] Add abuse contact here?
