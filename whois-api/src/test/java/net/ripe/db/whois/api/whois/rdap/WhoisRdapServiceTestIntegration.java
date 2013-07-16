@@ -498,6 +498,36 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(remarks.get(0).getDescription().get(0), is("A single ASN"));
     }
 
+    @Test
+    public void lookup_as_block() throws Exception {
+        final Autnum autnum = createResource(AUDIENCE, "autnum/150")
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(Autnum.class);
+
+        assertThat(autnum.getHandle(), equalTo("AS100 - AS200"));
+        assertThat(autnum.getStartAutnum(), equalTo(100L));
+        assertThat(autnum.getEndAutnum(), equalTo(200L));
+        assertThat(autnum.getName(), equalTo("AS100 - AS200"));
+
+        final List<Event> events = autnum.getEvents();
+        assertThat(events, hasSize(1));
+        final Event lastEvent = events.get(0);
+        assertThat(lastEvent.getEventAction(), is("last changed"));
+
+        final List<Link> links = autnum.getLinks();
+        assertThat(links, hasSize(1));
+        final Link selfLink = links.get(0);
+        assertThat(selfLink.getRel(), equalTo("self"));
+
+        final String ru = createResource(AUDIENCE, "autnum/150").toString();
+        assertThat(selfLink.getValue(), equalTo(ru));
+        assertThat(selfLink.getHref(), equalTo(ru));
+
+        final List<Remark> remarks = autnum.getRemarks();
+        assertThat(remarks, hasSize(1));
+        assertThat(remarks.get(0).getDescription().get(0), is("ARIN ASN block"));
+    }
+
     // general
 
     @Test
