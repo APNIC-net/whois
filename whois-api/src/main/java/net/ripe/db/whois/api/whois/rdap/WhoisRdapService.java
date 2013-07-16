@@ -49,15 +49,13 @@ public class WhoisRdapService {
     private static final int STATUS_TOO_MANY_REQUESTS = 429;
     private static final Set<ObjectType> ABUSE_CONTACT_TYPES = Sets.newHashSet(AUT_NUM, INETNUM, INET6NUM);
 
-    private final SourceContext sourceContext;
     private final QueryHandler queryHandler;
     private final RpslObjectDao objectDao;
     private final AbuseCFinder abuseCFinder;
     private final String baseUrl;
 
     @Autowired
-    public WhoisRdapService(final SourceContext sourceContext, final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder, @Value("${rdap.public.baseUrl:}") final String baseUrl) {
-        this.sourceContext = sourceContext;
+    public WhoisRdapService(final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder, @Value("${rdap.public.baseUrl:}") final String baseUrl) {
         this.queryHandler = queryHandler;
         this.objectDao = objectDao;
         this.abuseCFinder = abuseCFinder;
