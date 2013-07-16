@@ -75,7 +75,7 @@ public class MessageParser {
         } catch (MessagingException e) {
             loggerContext.log(new Message(Messages.Type.ERROR, "Unable to parse message using java mail"), e);
         } catch (IOException e) {
-            loggerContext.log(new Message(Messages.Type.ERROR, "Exception parsing message"), e);
+            loggerContext.log(new Message(Messages.Type.ERROR, "Error parsing message"), e);
         } catch (RuntimeException e) {
             LOGGER.error("Unexpected error parsing message: {}", message.getMessageID(), e);
         }

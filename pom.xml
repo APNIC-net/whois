@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.ripe.db</groupId>
     <artifactId>whois</artifactId>
-    <version>1.67.5-SNAPSHOT</version>
+    <version>1.68-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -400,6 +400,12 @@
                 <version>1.2.1</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.googlecode.ez-vcard</groupId>
+                <artifactId>ez-vcard</artifactId>
+                <version>0.8.2</version>
+            </dependency>
+
             <!-- Solr -->
             <dependency>
                 <groupId>org.apache.solr</groupId>
@@ -407,6 +413,7 @@
                 <version>1.4.1</version>
                 <scope>test</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
