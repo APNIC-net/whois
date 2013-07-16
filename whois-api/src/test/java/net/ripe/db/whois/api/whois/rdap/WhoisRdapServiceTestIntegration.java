@@ -233,6 +233,58 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getEndAddress(), is("192.255.255.255"));
         assertThat(response.getName(), is("TEST-NET-NAME"));
         assertThat(response.getLang(), is(nullValue()));
+        assertThat(response.getParentHandle(), is(nullValue()));
+
+    }
+
+    @Test
+    public void lookup_inetnum_with_parent() {
+        databaseHelper.addObject("" +
+                "inetnum:      192.0.0.0 - 192.0.0.0\n" +
+                "netname:      TEST-NET-NAME-32\n" +
+                "descr:        TEST network\n" +
+                "country:      NL\n" +
+                "language:     en\n" +
+                "tech-c:       TP1-TEST\n" +
+                "status:       OTHER\n" +
+                "mnt-by:       OWNER-MNT\n" +
+                "changed:      dbtest@ripe.net 20020101\n" +
+                "source:       TEST");
+        databaseHelper.addObject("" +
+                "inetnum:      192.0.0.0 - 192.0.0.255\n" +
+                "netname:      TEST-NET-NAME-24\n" +
+                "descr:        TEST network\n" +
+                "country:      NL\n" +
+                "language:     en\n" +
+                "tech-c:       TP1-TEST\n" +
+                "status:       OTHER\n" +
+                "mnt-by:       OWNER-MNT\n" +
+                "changed:      dbtest@ripe.net 20020101\n" +
+                "source:       TEST");
+        ipTreeUpdater.rebuild();
+
+        final Ip response = createResource(AUDIENCE, "ip/192.0.0.0")
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(Ip.class);
+
+        assertThat(response.getHandle(), is("192.0.0.0 - 192.0.0.0"));
+        assertThat(response.getIpVersion(), is("v4"));
+        assertThat(response.getLang(), is("en"));
+        assertThat(response.getCountry(), is("NL"));
+        assertThat(response.getStartAddress(), is("192.0.0.0"));
+        assertThat(response.getEndAddress(), is("192.0.0.0"));
+        assertThat(response.getName(), is("TEST-NET-NAME-32"));
+        assertThat(response.getParentHandle(), is("TEST-NET-NAME-24"));
+
+        final List<Link> links = response.getLinks();
+        assertThat(links, hasSize(2));
+        final Link upLink = links.get(0);
+        final String upUrl = createResource(AUDIENCE, "ip/192.0.0.0/24").toString();
+        assertThat(upLink.getRel(), equalTo("up"));
+        assertThat(upLink.getHref(), equalTo(upUrl));
+        
+        final Link selfLink = links.get(1);
+        assertThat(selfLink.getRel(), equalTo("self"));
     }
 
     @Test
@@ -584,7 +636,9 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(events, hasSize(1));
 
         assertThat(events.get(0).getEventAction(), is("last changed"));
-        assertThat(events.get(0).getEventDate(), is(RdapObjectMapper.convertToXMLGregorianCalendar(LocalDateTime.now().withMillisOfSecond(0))));
+        XMLGregorianCalendar now = RdapObjectMapper.convertToXMLGregorianCalendar(LocalDateTime.now().withMillisOfSecond(0));
+        long span = now.toGregorianCalendar().getTimeInMillis() - events.get(0).getEventDate().toGregorianCalendar().getTimeInMillis();
+        assertThat((int) span, is(lessThanOrEqualTo((int) 1000)));
     }
 
     @Test
