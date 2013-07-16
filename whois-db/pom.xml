@@ -126,7 +126,7 @@
                 <rpm.source.dir.schema>${project.basedir}/../whois-commons/src/main/resources</rpm.source.dir.schema>
 
                 <whois.init.variant>apnic</whois.init.variant>
-                <whois.init.operator>gary@apnic.net</whois.init.operator>
+                <whois.init.operator>unread@apnic.net</whois.init.operator>
                 <whois.init.sendlogs>0</whois.init.sendlogs>
                 <whois.init.user>whois</whois.init.user>
                 <whois.init.basedir>/opt/whois</whois.init.basedir>
