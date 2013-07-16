@@ -580,9 +580,8 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
     }
 
     private static void put(Map<AttributeSyntaxType, AttributeSyntax> map, AttributeSyntaxType attributeSyntaxType, AttributeSyntax syntax) {
-        if (map.get(attributeSyntaxType) == null) {
-            map.put(attributeSyntaxType, syntax);
-        } else {
+        // Test for duplicates
+        if (map.put(attributeSyntaxType, syntax) != null) {
             throw new BeanInitializationException("Attribute Syntax duplicate mapping exception: " + attributeSyntaxType);
         }
     }
