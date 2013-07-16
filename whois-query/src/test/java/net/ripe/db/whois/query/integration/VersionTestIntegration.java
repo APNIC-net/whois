@@ -8,6 +8,7 @@ import net.ripe.db.whois.common.rpsl.transform.FilterEmailFunction;
 import net.ripe.db.whois.common.support.DummyWhoisClient;
 import net.ripe.db.whois.query.QueryServer;
 import net.ripe.db.whois.query.domain.QueryMessages;
+import net.ripe.db.whois.common.domain.VersionDateTime;
 import net.ripe.db.whois.query.support.AbstractWhoisIntegrationTest;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -28,50 +29,6 @@ import static org.hamcrest.Matchers.not;
 @Category(IntegrationTest.class)
 public class VersionTestIntegration extends AbstractWhoisIntegrationTest {
 
-    public static class VersionMatcher extends BaseMatcher<String> {
-        private final String expected;
-
-        public VersionMatcher(String expected) {
-            this.expected = expected;
-        }
-
-        @Override
-        public boolean matches(Object item) {
-            return item instanceof String && ((String) item).contains(expected);
-        }
-
-        @Override
-        public void describeTo(Description description) {
-            description.appendText("Version object: ").appendValue(expected);
-        }
-
-        @Factory
-        public static Matcher<String> containsUnfilteredVersion(RpslObject object) {
-            return new VersionMatcher(makeMatcherString(object, false));
-        }
-
-        @Factory
-        public static Matcher<String> containsFilteredVersion(RpslObject object) {
-            return new VersionMatcher(makeMatcherString(object, true));
-        }
-
-        private static String makeMatcherString(RpslObject object, boolean filtered) {
-            StringBuilder expecting = new StringBuilder();
-
-            FilterAuthFunction authFilter = new FilterAuthFunction();
-            RpslObject filteredObject = authFilter.apply(object);
-
-            if (filtered) {
-                FilterEmailFunction emailFilter = new FilterEmailFunction();
-                filteredObject = emailFilter.apply(filteredObject);
-            }
-
-            expecting.append(filteredObject != null ? filteredObject.toString() : null);
-
-            return expecting.toString();
-        }
-    }
-
     @Before
     public void startup() {
         loadScripts(databaseHelper.getWhoisTemplate(), "broken.sql");
@@ -86,6 +43,10 @@ public class VersionTestIntegration extends AbstractWhoisIntegrationTest {
         queryServer.stop(true);
     }
 
+    protected String historyTimestampToString(long timestamp) {
+        return new VersionDateTime(timestamp).toString();
+    }
+
     @Test
     public void noObject() {
         final String response = stripHeader(DummyWhoisClient.query(QueryServer.port, "--list-versions AS-FOO"));
@@ -95,21 +56,21 @@ public class VersionTestIntegration extends AbstractWhoisIntegrationTest {
     @Test
     public void noHistory() {
         final String response = stripHeader(DummyWhoisClient.query(QueryServer.port, "--list-versions AS-TEST"));
-        assertThat(response, matchesPattern("1\\s+2002-09-1[78] \\d\\d:\\d\\d\\s+ADD/UPD"));
+        assertThat(response, matchesPattern("1\\s+" + historyTimestampToString(1032338056) + "\\s+ADD/UPD"));
     }
 
     @Test
     public void noHistoryOnDeletedObject() {
         final String response = stripHeader(DummyWhoisClient.query(QueryServer.port, "--list-versions test.sk"));
-        assertThat(response, matchesPattern("This object was deleted on 2003-08-1[23] \\d\\d:\\d\\d"));
+        assertThat(response, matchesPattern("This object was deleted on " + historyTimestampToString(1060699626)));
     }
 
     @Test
     public void simpleHistory() {
         final String response = stripHeader(DummyWhoisClient.query(QueryServer.port, "--list-versions AS20507"));
-        assertThat(response, matchesPattern("1\\s+2002-09-1[78] \\d\\d:\\d\\d\\s+ADD/UPD"));
-        assertThat(response, matchesPattern("2\\s+2002-09-2[34] \\d\\d:\\d\\d\\s+ADD/UPD"));
-        assertThat(response, matchesPattern("4\\s+2002-10-1[56] \\d\\d:\\d\\d\\s+ADD/UPD\n\n"));
+        assertThat(response, matchesPattern("1\\s+" + historyTimestampToString(1032341936) + "\\s+ADD/UPD"));
+        assertThat(response, matchesPattern("2\\s+" + historyTimestampToString(1032857323) + "\\s+ADD/UPD"));
+        assertThat(response, matchesPattern("4\\s+" + historyTimestampToString(1034685022) + "\\s+ADD/UPD\n\n"));
     }
 
     @Test
@@ -117,10 +78,10 @@ public class VersionTestIntegration extends AbstractWhoisIntegrationTest {
         final String response = stripHeader(DummyWhoisClient.query(QueryServer.port, "--list-versions AS20507"));
 
         String[] lines = new String[]{
-                "1\\s+2002-09-1[78] \\d\\d:\\d\\d\\s+ADD/UPD",
-                "2\\s+2002-09-2[34] \\d\\d:\\d\\d\\s+ADD/UPD",
-                "3\\s+2002-10-1[45] \\d\\d:\\d\\d\\s+ADD/UPD",
-                "4\\s+2002-10-1[56] \\d\\d:\\d\\d\\s+ADD/UPD"
+                "1\\s+" + historyTimestampToString(1032341936) + "\\s+ADD/UPD",
+                "2\\s+" + historyTimestampToString(1032857323) + "\\s+ADD/UPD",
+                "3\\s+" + historyTimestampToString(1034602217) + "\\s+ADD/UPD",
+                "4\\s+" + historyTimestampToString(1034685022) + "\\s+ADD/UPD"
         };
 
         for (String check : lines) {
@@ -255,5 +216,49 @@ public class VersionTestIntegration extends AbstractWhoisIntegrationTest {
         final String response = stripHeader(DummyWhoisClient.query(QueryServer.port, "--show-version 1 TEST-DBM"));
         assertThat(response, not(containsString("This object was deleted on")));
         assertThat(response, containsString("mntner:         TEST-DBM"));
+    }
+
+    public static class VersionMatcher extends BaseMatcher<String> {
+        private final String expected;
+
+        public VersionMatcher(String expected) {
+            this.expected = expected;
+        }
+
+        @Override
+        public boolean matches(Object item) {
+            return item instanceof String && ((String) item).contains(expected);
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("Version object: ").appendValue(expected);
+        }
+
+        @Factory
+        public static Matcher<String> containsUnfilteredVersion(RpslObject object) {
+            return new VersionMatcher(makeMatcherString(object, false));
+        }
+
+        @Factory
+        public static Matcher<String> containsFilteredVersion(RpslObject object) {
+            return new VersionMatcher(makeMatcherString(object, true));
+        }
+
+        private static String makeMatcherString(RpslObject object, boolean filtered) {
+            StringBuilder expecting = new StringBuilder();
+
+            FilterAuthFunction authFilter = new FilterAuthFunction();
+            RpslObject filteredObject = authFilter.apply(object);
+
+            if (filtered) {
+                FilterEmailFunction emailFilter = new FilterEmailFunction();
+                filteredObject = emailFilter.apply(filteredObject);
+            }
+
+            expecting.append(filteredObject != null ? filteredObject.toString() : null);
+
+            return expecting.toString();
+        }
     }
 }

@@ -9,6 +9,7 @@ import net.ripe.db.whois.common.Message;
 import net.ripe.db.whois.common.domain.Ipv4Resource;
 import net.ripe.db.whois.common.domain.Ipv6Resource;
 import net.ripe.db.whois.common.domain.attrs.Changed;
+import net.ripe.db.whois.common.domain.attrs.DsRdata;
 import net.ripe.db.whois.common.domain.attrs.NServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+// TODO: [AH] during syntax check/sanitization we parse all attributes into their domain object, we should keep a reference to that instead of reparsing all the time
 @Component
 public class AttributeSanitizer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AttributeSanitizer.class);
@@ -27,6 +29,7 @@ public class AttributeSanitizer {
 
     private final DateTimeProvider dateTimeProvider;
     private final Map<AttributeType, Sanitizer> SANITIZER_MAP;
+    private final Set<AttributeType> keyAttributes = Sets.newHashSet();
 
     @Autowired
     public AttributeSanitizer(DateTimeProvider dateTimeProvider) {
@@ -42,16 +45,16 @@ public class AttributeSanitizer {
         SANITIZER_MAP.put(AttributeType.ROUTE6, new Route6Sanitizer());
         SANITIZER_MAP.put(AttributeType.ALIAS, new AliasSanitizer());
         SANITIZER_MAP.put(AttributeType.CHANGED, new ChangedSanitizer());
+        SANITIZER_MAP.put(AttributeType.DS_RDATA, new DsRdataSanitizer());
 
         // add the default sanitizer for keys and primary attributes
-        final Set<AttributeType> alwaysSanitize = Sets.newHashSet();
         for (ObjectTemplate objectTemplate : ObjectTemplate.getTemplates()) {
-            alwaysSanitize.addAll(objectTemplate.getKeyAttributes());
-            alwaysSanitize.add(objectTemplate.getAttributeTemplates().get(0).getAttributeType());
+            keyAttributes.addAll(objectTemplate.getKeyAttributes());
+            keyAttributes.add(objectTemplate.getAttributeTemplates().get(0).getAttributeType());
         }
 
         Sanitizer defaultSanitizer = new DefaultSanitizer();
-        for (AttributeType attributeType : alwaysSanitize) {
+        for (AttributeType attributeType : keyAttributes) {
             if (!SANITIZER_MAP.containsKey(attributeType)) {
                 SANITIZER_MAP.put(attributeType, defaultSanitizer);
             }
@@ -83,11 +86,11 @@ public class AttributeSanitizer {
                 attributeMessages.add(ValidationMessages.attributeValueConverted(attribute.getCleanValue(), newValue));
             }
 
-            if (attribute.getValue().indexOf('\n') != -1) {
+            if (keyAttributes.contains(type) && attribute.getValue().indexOf('\n') != -1) {
                 attributeMessages.add(ValidationMessages.continuationLinesRemoved());
             }
 
-            if (attribute.getValue().indexOf('#') != -1) {
+            if (keyAttributes.contains(type) && attribute.getValue().indexOf('#') != -1) {
                 attributeMessages.add(ValidationMessages.remarksReformatted());
             }
 
@@ -163,6 +166,7 @@ public class AttributeSanitizer {
         }
 
         @Override
+        // this is expected behavior, don't spam users
         public boolean silent() {
             return true;
         }
@@ -191,6 +195,14 @@ public class AttributeSanitizer {
             return null;
         }
 
+    }
+
+    private class DsRdataSanitizer extends Sanitizer {
+        @Override
+        public String sanitize(final RpslObject object, final RpslAttribute attribute) {
+            final DsRdata dsRdata = DsRdata.parse(attribute.getCleanValue().toString());
+            return dsRdata.toString();
+        }
     }
 
     private class InetnumSanitizer extends Sanitizer {

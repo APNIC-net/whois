@@ -1,12 +1,13 @@
 package net.ripe.db.whois.common.domain.attrs;
 
 import net.ripe.db.whois.common.domain.CIString;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DsRdata {
-    private static final Pattern RDATA_PATTERN = Pattern.compile("^(\\d+) (\\d+) (\\d+) ([ 0-9a-fA-F]{1,128})$");
+    private static final Pattern RDATA_PATTERN = Pattern.compile("^(\\d+) (\\d+) (\\d+) \\(?([ 0-9a-fA-F]{1,128})\\)?$");
 
     private final int keytag;
     private final int algorithm;
@@ -18,6 +19,22 @@ public class DsRdata {
         this.algorithm = algorithm;
         this.digestType = digestType;
         this.digestHexString = digestHexString;
+    }
+
+    public int getKeytag() {
+        return keytag;
+    }
+
+    public int getAlgorithm() {
+        return algorithm;
+    }
+
+    public int getDigestType() {
+        return digestType;
+    }
+
+    public String getDigestHexString() {
+        return digestHexString;
     }
 
     @Override
@@ -38,7 +55,7 @@ public class DsRdata {
         final int keytag = Integer.parseInt(matcher.group(1));
         final int algorithm = Integer.parseInt(matcher.group(2));
         final int digestType = Integer.parseInt(matcher.group(3));
-        final String digestAsHex = matcher.group(4);
+        final String digestAsHex = StringUtils.deleteWhitespace(matcher.group(4));
 
         if (keytag < 0 || keytag > 65535) {
             throw new AttributeParseException("Invalid keytag: " + keytag, value);
