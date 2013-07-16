@@ -1,7 +1,8 @@
 package net.apnic.db.whois.spec.update
 
 import net.apnic.db.whois.spec.BaseSpec
-import spec.domain.Message;
+import spec.domain.Message
+import spock.lang.Ignore
 
 class DomainAuthSpec extends BaseSpec {
     @Override
@@ -23,7 +24,7 @@ class DomainAuthSpec extends BaseSpec {
         ]
     }
 
-
+    @Ignore
     def "create domain, without ds-rdata, via mail"() {
         given:
             syncUpdate(getTransient("INET4") + passwords("user", "irt"))

@@ -62,9 +62,10 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("The canonical DNS name for the router.")
                 .syntax(AttributeSyntax.ALIAS_SYNTAX));
 
-//        put(new AttributeTypeBuilderImpl("assignment-size", "ae", Enum.ASSIGNMENT_SIZE)
-//                .doc("Specifies the size of blocks assigned to end users from this aggregated inet6num assignment.")
-//                .syntax(AttributeSyntax.NUMBER_SYNTAX));
+        // Unused attribute - included to allow the code to function.
+        put(new AttributeTypeBuilderImpl("assignment-size", "ae", Enum.ASSIGNMENT_SIZE)
+                .doc("This attribute is not to be used.")
+                .syntax(AttributeSyntax.NUMBER_SYNTAX));
 
         put(new AttributeTypeBuilderImpl("as-block", "ak", Enum.AS_BLOCK)
                 .doc("Range of AS numbers.")
@@ -83,9 +84,9 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.AUTH_SCHEME_SYNTAX)
                 .references(ObjectType.KEY_CERT));
 
-        // Author is obsolete, removing this breaking. This should be removed later
+        // Unused attribute - included to allow the code to function.
         put(new AttributeTypeBuilderImpl("author", "ah", Enum.AUTHOR)
-                .doc("References a limerick author.")
+                .doc("This attribute is not to be used.")
                 .syntax(AttributeSyntax.NIC_HANDLE_SYNTAX)
                 .references(ObjectType.PERSON, ObjectType.ROLE));
 
@@ -176,19 +177,17 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                         "object.")
                 .syntax(AttributeSyntax.APNIC_FINGERPR_SYNTAX));
 
-        // Form is obsolete, removing this is breaking. This should be removed later
+        // Unused attribute - included to allow the code to function.
         put(new AttributeTypeBuilderImpl("form", "fr", Enum.FORM)
-                .doc("Specifies the identifier of a registered poem type.")
+                .doc("This attribute is not to be used.")
                 .syntax(AttributeSyntax.POETIC_FORM_SYNTAX)
                 .references(ObjectType.POETIC_FORM)
                 .listValue());
 
-        // Not in current attribute.xml
         put(new AttributeTypeBuilderImpl("geoloc", "gl", Enum.GEOLOC)
                 .doc("The location coordinates for the resource.")
                 .syntax(AttributeSyntax.GEOLOC_SYNTAX));
 
-        // Not in current attribute.xml
         put(new AttributeTypeBuilderImpl("holes", "ho", Enum.HOLES)
                 .doc("Lists the component address prefixes that are not reachable through the aggregate route" +
                         "(perhaps that part of the address space is unallocated).")
@@ -238,15 +237,9 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("Defines the public key stored in the database.")
                 .syntax(AttributeSyntax.KEY_CERT_SYNTAX));
 
-        // Not in current attribute.xml
         put(new AttributeTypeBuilderImpl("language", "ln", Enum.LANGUAGE)
                 .doc("Identifies the language.")
                 .syntax(AttributeSyntax.LANGUAGE_CODE_SYNTAX));
-
-//        put(new AttributeTypeBuilderImpl("limerick", "lr", Enum.LIMERICK)
-//                .doc("Text of the limerick. Must be humorous, but not malicious or\n" +
-//                     "insulting.\n")
-//                .syntax(AttributeSyntax.LIMERICK_SYNTAX));
 
         put(new AttributeTypeBuilderImpl("local-as", "la", Enum.LOCAL_AS)
                 .doc("Specifies the autonomous system that operates the router.")
@@ -269,11 +262,6 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 }}))
                 .syntax(AttributeSyntax.MEMBERS_SYNTAX)
                 .listValue()); // No reference checking should be performed for members!
-
-//        put(new AttributeTypeBuilderImpl("members-as", "mu", Enum.APNIC_MEMBERS_AS)
-//                .doc("Specifies the as-number or as-set-name")
-//                .syntax(AttributeSyntax.MEMBERS_AS_SYNTAX));
-
 
         // Supports member-of-ir, member-of-rt, member-of-an in attribute.xml
         // Changed .doc as per attribute.xml
@@ -465,7 +453,6 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.ORGANISATION_SYNTAX)
                 .references(ObjectType.ORGANISATION));
 
-        // Not in current attribute.xml
         put(new AttributeTypeBuilderImpl("org-name", "on", Enum.ORG_NAME)
                 .doc("Specifies the name of the organisation that this organisation object represents in the whois" +
                         "database. This is an ASCII-only text attribute. The restriction is because this attribute is" +
@@ -474,12 +461,10 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                         "the \"descr:\" attribute if required.")
                 .syntax(AttributeSyntax.ORG_NAME_SYNTAX));
 
-        // Not in current attribute.xml
         put(new AttributeTypeBuilderImpl("org-type", "ot", Enum.ORG_TYPE)
                 .doc("Specifies the type of the organisation.")
                 .syntax(AttributeSyntax.ORG_TYPE_SYNTAX));
 
-        // Not in current attribute.xml
         put(new AttributeTypeBuilderImpl("organisation", "oa", Enum.ORGANISATION)
                 .doc("Specifies the ID of an organisation object. When creating an object, one has to specify " +
                         "an \"AUTO\" ID by setting the value of the attribute to \"AUTO-1\" or \"AUTO-1<letterCombination>\", " +
@@ -511,15 +496,10 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("Specifies the name of the peering-set.")
                 .syntax(AttributeSyntax.PEERING_SET_SYNTAX));
 
-//        put(new AttributeTypeBuilderImpl("person", "pn", Enum.PERSON)
-//                .doc("The full name of an administrative, technical or zone contact person for " +
-//                        "other objects in the database.")
-//                .syntax(AttributeSyntax.PERSON_ROLE_NAME_SYNTAX));
-
         put(new AttributeTypeBuilderImpl("person", "pn", Enum.PERSON)
                 .doc("The full name of an administrative, technical or zone contact person for " +
                         "other objects in the database.")
-                .syntax(AttributeSyntax.APNIC_PERSON_NAME_SYNTAX));
+                .syntax(AttributeSyntax.PERSON_ROLE_NAME_SYNTAX));
 
         put(new AttributeTypeBuilderImpl("phone", "ph", Enum.PHONE)
                 .doc("A contact telephone number.")
@@ -540,13 +520,13 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.PINGABLE_SYNTAX));
 
         // Poem is obsolete in APNIC context. Removing this is beaking. It should be removed
-        put(new AttributeTypeBuilderImpl("A", "po", Enum.POEM)
-                .doc("Specifies the title of the poem.")
+        put(new AttributeTypeBuilderImpl("poem", "po", Enum.POEM)
+                .doc("This attribute is not to be used.")
                 .syntax(AttributeSyntax.POEM_SYNTAX));
 
         // POETIC_FORM is obsolete in APNIC context. Removing this is beaking. It should be removed
         put(new AttributeTypeBuilderImpl("poetic-form", "pf", Enum.POETIC_FORM)
-                .doc("Specifies the poem type.")
+                .doc("This attribute is not to be used.")
                 .syntax(AttributeSyntax.POETIC_FORM_SYNTAX));
 
 //        put(new AttributeTypeBuilderImpl("REFER", "rf", Enum.REFER)
@@ -640,9 +620,7 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
 
     private static void put(AttributeTypeBuilderImpl entry) {
         // Test for duplicates
-        if (localMap.get(entry.getEnumType()) == null) {
-            localMap.put(entry.getEnumType(), entry);
-        } else {
+        if (localMap.put(entry.getEnumType(), entry) != null) {
             throw new BeanInitializationException("Attribute Type duplicate mapping exception: " + entry.getEnumType());
         }
     }

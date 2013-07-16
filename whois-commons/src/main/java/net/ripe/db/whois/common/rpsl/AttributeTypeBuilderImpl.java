@@ -549,9 +549,7 @@ public class AttributeTypeBuilderImpl implements AttributeTypeBuilder {
 
     private static void put(AttributeTypeBuilderImpl entry) {
         // Test for duplicates
-        if (localMap.get(entry.getEnumType()) == null) {
-            localMap.put(entry.getEnumType(), entry);
-        } else {
+        if (localMap.put(entry.getEnumType(), entry) != null) {
             throw new BeanInitializationException("Attribute Type duplicate mapping exception: " + entry.getEnumType());
         }
     }

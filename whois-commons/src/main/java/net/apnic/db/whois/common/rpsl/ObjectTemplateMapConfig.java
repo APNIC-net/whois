@@ -391,9 +391,8 @@ public class ObjectTemplateMapConfig {
 
         final Map<ObjectType, ObjectTemplate> templateMap = Maps.newEnumMap(ObjectType.class);
         for (final ObjectTemplate objectTemplate : objectTemplates) {
-            if (templateMap.get(objectTemplate.getObjectType()) == null) {
-                templateMap.put(objectTemplate.getObjectType(), objectTemplate);
-            } else {
+            // Test for duplicates
+            if (templateMap.put(objectTemplate.getObjectType(), objectTemplate) != null) {
                 throw new BeanInitializationException("Object Template duplicate mapping exception: " + objectTemplate.getObjectType());
             }
         }
