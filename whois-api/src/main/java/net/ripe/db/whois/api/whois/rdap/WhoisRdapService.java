@@ -119,7 +119,7 @@ public class WhoisRdapService {
     }
 
     private String getKey(final Set<ObjectType> objectTypes, final String key) {
-        if (objectTypes.contains(AUT_NUM)) {
+        if (objectTypes.contains(AUT_NUM) || objectTypes.contains(AS_BLOCK)) {
             return String.format("AS%s", key);
         }
         return key;
@@ -176,7 +176,7 @@ public class WhoisRdapService {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
         }
 
-        return result.isEmpty();
+        return !result.isEmpty();
     }
 
     protected Response handleQuery(final Query query, final HttpServletRequest request) {
