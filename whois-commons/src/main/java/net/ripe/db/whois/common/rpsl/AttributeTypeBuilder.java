@@ -115,11 +115,10 @@ public interface AttributeTypeBuilder extends Documented {
         APNIC_OBJECT_NAME,
         APNIC_MEMBERS_AS,
         APNIC_PERSON_NAME,
-        // APNIC_REFER,
+        APNIC_REFER,
         APNIC_REGISTRY_NAME,
-        APNIC_SUBDOMAIN_NAME,
+        APNIC_SUB_DOM,
         // APNIC_LIMERICK,
-       // APNIC_NOT_IMPLEMENTED,
     }
 
     abstract String getName();
