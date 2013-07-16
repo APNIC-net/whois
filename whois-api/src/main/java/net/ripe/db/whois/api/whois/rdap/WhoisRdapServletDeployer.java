@@ -45,6 +45,7 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
                 // TODO find a non-deprecated one of these
 
                 jaxbJsonProvider.configure(SerializationConfig.Feature.WRITE_NULL_PROPERTIES,false);
+                jaxbJsonProvider.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS,false);
                 return Sets.newLinkedHashSet(Lists.<Object>newArrayList(
                         whoisRDAPService,
                         defaultExceptionMapper,

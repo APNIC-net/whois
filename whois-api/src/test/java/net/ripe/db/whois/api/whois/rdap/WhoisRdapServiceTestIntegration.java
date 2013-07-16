@@ -790,6 +790,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getValue(), equalTo(orgLink));
         assertThat(links.get(0).getHref(), equalTo(orgLink));
+
+        Thread.sleep(1500000);
     }
 
     @Override
