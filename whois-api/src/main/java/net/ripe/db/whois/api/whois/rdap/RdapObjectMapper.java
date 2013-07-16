@@ -4,16 +4,23 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.ripe.db.whois.api.whois.rdap.domain.*;
+import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
+import net.ripe.db.whois.api.whois.rdap.domain.Domain;
+import net.ripe.db.whois.api.whois.rdap.domain.Entity;
+import net.ripe.db.whois.api.whois.rdap.domain.Event;
+import net.ripe.db.whois.api.whois.rdap.domain.Ip;
+import net.ripe.db.whois.api.whois.rdap.domain.Link;
+import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
+import net.ripe.db.whois.api.whois.rdap.domain.RdapObject;
+import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.api.whois.rdap.domain.vcard.VCard;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.Ipv4Resource;
 import net.ripe.db.whois.common.domain.Ipv6Resource;
-import net.ripe.db.whois.common.domain.attrs.AutNum;
+import net.ripe.db.whois.common.domain.attrs.AsBlockRange;
 import net.ripe.db.whois.common.domain.attrs.DsRdata;
 import net.ripe.db.whois.common.domain.attrs.NServer;
-import net.ripe.db.whois.common.domain.attrs.AsBlockRange;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
@@ -26,7 +33,12 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
 
@@ -61,7 +73,8 @@ class RdapObjectMapper {
             final RpslObject rpslObject,
             final List<RpslObject> relatedObjects,
             final LocalDateTime lastChangedTimestamp,
-            final List<RpslObject> abuseContacts) {
+            final List<RpslObject> abuseContacts,
+            final RpslObject parentRpslObject) {
 
         RdapObject rdapResponse;
         final ObjectType rpslObjectType = rpslObject.getType();
@@ -76,7 +89,7 @@ class RdapObjectMapper {
                 break;
             case INETNUM:
             case INET6NUM:
-                rdapResponse = createIp(rpslObject);
+                rdapResponse = createIp(rpslObject, parentRpslObject, requestUrl, baseUrl);
                 break;
             case PERSON:
             case ROLE:
@@ -109,7 +122,7 @@ class RdapObjectMapper {
         return rdapResponse;
     }
 
-    private static Ip createIp(final RpslObject rpslObject) {
+    private static Ip createIp(final RpslObject rpslObject, final RpslObject parentRpslObject, final String requestUrl, final String baseUrl) {
         final Ip ip = new Ip();
         ip.setHandle(rpslObject.getKey().toString());
         IpInterval ipInterval;
@@ -132,7 +145,15 @@ class RdapObjectMapper {
         ip.setLang(rpslObject.getValuesForAttribute(AttributeType.LANGUAGE).isEmpty() ? null : Joiner.on(",").join(rpslObject.getValuesForAttribute(AttributeType.LANGUAGE)));
         ip.setType(rpslObject.getValueForAttribute(AttributeType.STATUS).toString());
 
-//        ip.getLinks().add(new Link().setRel("up")... //TODO parent (first less specific) - do parentHandle at the same time
+        if (parentRpslObject != null) {
+            ip.setParentHandle(parentRpslObject.getValueForAttribute(AttributeType.NETNAME).toString());
+
+            CIString parentKey = parentRpslObject.getKey();
+            IpInterval parentInterval = (parentRpslObject.getType() == INET6NUM) ? Ipv6Resource.parse(parentKey) : Ipv4Resource.parse(parentKey);
+            String prefix = IpInterval.asIpInterval(parentInterval.beginAsInetAddress()).toString().split("/")[0] + "/" + parentInterval.getPrefixLength();
+            ip.getLinks().add(createLink("up", requestUrl,
+                                         baseUrl + "/ip/" + prefix));
+        }
 
         return ip;
     }
@@ -166,7 +187,7 @@ class RdapObjectMapper {
     private static Event createEvent(final LocalDateTime lastChanged) {
         final Event lastChangedEvent = new Event();
         lastChangedEvent.setEventAction("last changed");
-        lastChangedEvent.setEventDate(convertToXMLGregorianCalendar(lastChanged));
+        lastChangedEvent.setEventDate(convertToXMLGregorianCalendar(lastChanged).toString());
         return lastChangedEvent;
     }
 

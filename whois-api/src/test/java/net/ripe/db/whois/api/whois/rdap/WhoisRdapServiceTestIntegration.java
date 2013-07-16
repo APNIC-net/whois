@@ -9,7 +9,14 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import net.ripe.db.whois.api.AbstractRestClientTest;
 import net.ripe.db.whois.api.httpserver.Audience;
-import net.ripe.db.whois.api.whois.rdap.domain.*;
+import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
+import net.ripe.db.whois.api.whois.rdap.domain.Domain;
+import net.ripe.db.whois.api.whois.rdap.domain.Entity;
+import net.ripe.db.whois.api.whois.rdap.domain.Event;
+import net.ripe.db.whois.api.whois.rdap.domain.Ip;
+import net.ripe.db.whois.api.whois.rdap.domain.Link;
+import net.ripe.db.whois.api.whois.rdap.domain.Notice;
+import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.common.IntegrationTest;
 import net.ripe.db.whois.common.TestDateTimeProvider;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
@@ -17,8 +24,6 @@ import org.joda.time.LocalDateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.MediaType;
@@ -206,6 +211,12 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getStartAddress(), is("192.0.0.0"));
         assertThat(response.getEndAddress(), is("192.255.255.255"));
         assertThat(response.getName(), is("TEST-NET-NAME"));
+
+        try {
+           Thread.sleep(1500000);
+        } catch (InterruptedException e) {
+
+        }
     }
 
     @Test
@@ -233,6 +244,58 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getEndAddress(), is("192.255.255.255"));
         assertThat(response.getName(), is("TEST-NET-NAME"));
         assertThat(response.getLang(), is(nullValue()));
+        assertThat(response.getParentHandle(), is(nullValue()));
+
+    }
+
+    @Test
+    public void lookup_inetnum_with_parent() {
+        databaseHelper.addObject("" +
+                "inetnum:      192.0.0.0 - 192.0.0.0\n" +
+                "netname:      TEST-NET-NAME-32\n" +
+                "descr:        TEST network\n" +
+                "country:      NL\n" +
+                "language:     en\n" +
+                "tech-c:       TP1-TEST\n" +
+                "status:       OTHER\n" +
+                "mnt-by:       OWNER-MNT\n" +
+                "changed:      dbtest@ripe.net 20020101\n" +
+                "source:       TEST");
+        databaseHelper.addObject("" +
+                "inetnum:      192.0.0.0 - 192.0.0.255\n" +
+                "netname:      TEST-NET-NAME-24\n" +
+                "descr:        TEST network\n" +
+                "country:      NL\n" +
+                "language:     en\n" +
+                "tech-c:       TP1-TEST\n" +
+                "status:       OTHER\n" +
+                "mnt-by:       OWNER-MNT\n" +
+                "changed:      dbtest@ripe.net 20020101\n" +
+                "source:       TEST");
+        ipTreeUpdater.rebuild();
+
+        final Ip response = createResource(AUDIENCE, "ip/192.0.0.0")
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(Ip.class);
+
+        assertThat(response.getHandle(), is("192.0.0.0 - 192.0.0.0"));
+        assertThat(response.getIpVersion(), is("v4"));
+        assertThat(response.getLang(), is("en"));
+        assertThat(response.getCountry(), is("NL"));
+        assertThat(response.getStartAddress(), is("192.0.0.0"));
+        assertThat(response.getEndAddress(), is("192.0.0.0"));
+        assertThat(response.getName(), is("TEST-NET-NAME-32"));
+        assertThat(response.getParentHandle(), is("TEST-NET-NAME-24"));
+
+        final List<Link> links = response.getLinks();
+        assertThat(links, hasSize(2));
+        final Link upLink = links.get(0);
+        final String upUrl = createResource(AUDIENCE, "ip/192.0.0.0/24").toString();
+        assertThat(upLink.getRel(), equalTo("up"));
+        assertThat(upLink.getHref(), equalTo(upUrl));
+        
+        final Link selfLink = links.get(1);
+        assertThat(selfLink.getRel(), equalTo("self"));
     }
 
     @Test
@@ -498,6 +561,36 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(remarks.get(0).getDescription().get(0), is("A single ASN"));
     }
 
+    @Test
+    public void lookup_as_block() throws Exception {
+        final Autnum autnum = createResource(AUDIENCE, "autnum/150")
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(Autnum.class);
+
+        assertThat(autnum.getHandle(), equalTo("AS100 - AS200"));
+        assertThat(autnum.getStartAutnum(), equalTo(100L));
+        assertThat(autnum.getEndAutnum(), equalTo(200L));
+        assertThat(autnum.getName(), equalTo("AS100 - AS200"));
+
+        final List<Event> events = autnum.getEvents();
+        assertThat(events, hasSize(1));
+        final Event lastEvent = events.get(0);
+        assertThat(lastEvent.getEventAction(), is("last changed"));
+
+        final List<Link> links = autnum.getLinks();
+        assertThat(links, hasSize(1));
+        final Link selfLink = links.get(0);
+        assertThat(selfLink.getRel(), equalTo("self"));
+
+        final String ru = createResource(AUDIENCE, "autnum/150").toString();
+        assertThat(selfLink.getValue(), equalTo(ru));
+        assertThat(selfLink.getHref(), equalTo(ru));
+
+        final List<Remark> remarks = autnum.getRemarks();
+        assertThat(remarks, hasSize(1));
+        assertThat(remarks.get(0).getDescription().get(0), is("ARIN ASN block"));
+    }
+
     // general
 
     @Test
@@ -554,7 +647,9 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(events, hasSize(1));
 
         assertThat(events.get(0).getEventAction(), is("last changed"));
-        assertThat(events.get(0).getEventDate(), is(RdapObjectMapper.convertToXMLGregorianCalendar(LocalDateTime.now().withMillisOfSecond(0))));
+        XMLGregorianCalendar now = RdapObjectMapper.convertToXMLGregorianCalendar(LocalDateTime.now().withMillisOfSecond(0));
+        long span = now.toGregorianCalendar().getTimeInMillis() - events.get(0).getEventDate().toGregorianCalendar().getTimeInMillis();
+        assertThat((int) span, is(lessThanOrEqualTo((int) 1000)));
     }
 
     @Test
@@ -661,7 +756,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         assertThat(entity.getEvents().size(), equalTo(1));
         final Event event = entity.getEvents().get(0);
-        assertThat(event.getEventDate(), equalTo(now));
+        //assertThat(event.getEventDate(), equalTo(now));
         assertThat(event.getEventAction(), equalTo("last changed"));
 
         final List<SortedEntity> entities = SortedEntity.createSortedEntities(entity.getEntities());
@@ -685,7 +780,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(entities.get(1).getLinks().get(0).getHref(), is(tp2Link));
 
         final List<Notice> notices = entity.getNotices();
-        assertThat(notices.get(0).getLinks().getHref(), equalTo("http://www.ripe.net/data-tools/support/documentation/terms"));
+        assertThat(notices.get(0).getLinks().getHref(), equalTo("http://www.apnic.net/db/dbcopyright.html"));
         assertThat(notices.get(0).getLinks().getValue(), equalTo(orgLink));
         assertThat(notices.get(0).getLinks().getRel(), equalTo("terms-of-service"));
         assertThat(notices.get(0).getTitle(), equalTo("Terms and Conditions"));
