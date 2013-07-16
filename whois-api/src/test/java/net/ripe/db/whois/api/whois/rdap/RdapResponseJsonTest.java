@@ -1,14 +1,8 @@
 package net.ripe.db.whois.api.whois.rdap;
 
+import com.Ostermiller.util.LineEnds;
 import com.google.common.collect.Lists;
-import net.ripe.db.whois.api.whois.rdap.domain.Domain;
-import net.ripe.db.whois.api.whois.rdap.domain.Entity;
-import net.ripe.db.whois.api.whois.rdap.domain.Event;
-import net.ripe.db.whois.api.whois.rdap.domain.Ip;
-import net.ripe.db.whois.api.whois.rdap.domain.Link;
-import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
-import net.ripe.db.whois.api.whois.rdap.domain.Notice;
-import net.ripe.db.whois.api.whois.rdap.domain.Remark;
+import net.ripe.db.whois.api.whois.rdap.domain.*;
 import net.ripe.db.whois.api.whois.rdap.domain.vcard.VCard;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -18,10 +12,11 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
+import org.codehaus.plexus.util.StringInputStream;
 import org.codehaus.plexus.util.StringOutputStream;
-import org.joda.time.LocalDateTime;
 import org.junit.Test;
 
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -35,7 +30,7 @@ import static org.junit.Assert.assertThat;
 public class RdapResponseJsonTest {
 
     private static final String DATE_TIME = "2013-06-26T04:48:44Z";
-    private static final LocalDateTime LOCAL_DATE_TIME = LocalDateTime.parse("2013-06-26T04:48:44");
+    private static final XMLGregorianCalendar LOCAL_DATE_TIME = RdapObjectMapper.dtf.newXMLGregorianCalendar(DATE_TIME);
 
     @Test
     public void entity() throws Exception {
@@ -50,7 +45,7 @@ public class RdapResponseJsonTest {
 
         Entity entity = new Entity();
         entity.setHandle("XXXX");
-        entity.setVCardArray(vcard);
+        RdapObjectMapper.setVCardArray(entity,vcard);
 
         entity.setPort43("whois.example.com");
 
@@ -142,15 +137,11 @@ public class RdapResponseJsonTest {
         ipAddresses.getIpv6().add("2001:db8::123");
         nameserver.setIpAddresses(ipAddresses);
 
-        final Remark remark = new Remark(Lists.newArrayList("She sells sea shells down by the sea shore.", "Originally written by Terry Sullivan."));
+        final Remark remark = new Remark();
+        remark.getDescription().addAll(Lists.newArrayList("She sells sea shells down by the sea shore.", "Originally written by Terry Sullivan."));
         nameserver.getRemarks().add(remark);
 
-        final Link link = new Link()
-                .setHref("http://example.net/nameserver/xxxx")
-                .setValue("http://example.net/nameserver/xxxx")
-                .setRel("self");
-        nameserver.getLinks().add(link);
-
+        nameserver.getLinks().add(RdapObjectMapper.createLink("self", "http://example.net/nameserver/xxxx","http://example.net/nameserver/xxxx"));
         nameserver.setPort43("whois.example.net");
 
         final Event registrationEvent = new Event();
@@ -173,7 +164,6 @@ public class RdapResponseJsonTest {
                 "    \"ipv4\" : [ \"192.0.2.1\", \"192.0.2.2\" ],\n" +
                 "    \"ipv6\" : [ \"2001:db8::123\" ]\n" +
                 "  },\n" +
-                "  \"port43\" : \"whois.example.net\",\n" +
                 "  \"status\" : [ \"active\" ],\n" +
                 "  \"remarks\" : [ {\n" +
                 "    \"description\" : [ \"She sells sea shells down by the sea shore.\", \"Originally written by Terry Sullivan.\" ]\n" +
@@ -185,12 +175,13 @@ public class RdapResponseJsonTest {
                 "  } ],\n" +
                 "  \"events\" : [ {\n" +
                 "    \"eventAction\" : \"registration\",\n" +
-                "    \"eventDate\" : \"" + DATE_TIME + "\"\n" +
+                "    \"eventDate\" : \"2013-06-26T04:48:44Z\"\n" +
                 "  }, {\n" +
                 "    \"eventAction\" : \"last changed\",\n" +
-                "    \"eventDate\" : \"" + DATE_TIME + "\",\n" +
+                "    \"eventDate\" : \"2013-06-26T04:48:44Z\",\n" +
                 "    \"eventActor\" : \"joe@example.com\"\n" +
-                "  } ]\n" +
+                "  } ],\n" +
+                "  \"port43\" : \"whois.example.net\"\n" +
                 "}"));
     }
 
@@ -203,13 +194,14 @@ public class RdapResponseJsonTest {
 
         final Nameserver nameserver1 = new Nameserver();
         nameserver1.setLdhName("ns1.rir.example");
-        domain.getNameservers().add(nameserver1);
+        domain.getNameServers().add(nameserver1);
 
         final Nameserver nameserver2 = new Nameserver();
         nameserver2.setLdhName("ns2.rir.example");
-        domain.getNameservers().add(nameserver2);
+        domain.getNameServers().add(nameserver2);
 
-        final Remark remark = new Remark(Lists.newArrayList("She sells sea shells down by the sea shore.", "Originally written by Terry Sullivan."));
+        final Remark remark = new Remark();
+        remark.getDescription().addAll(Lists.newArrayList("She sells sea shells down by the sea shore.", "Originally written by Terry Sullivan."));
         domain.getRemarks().add(remark);
 
         domain.setPort43("whois.example.com");
@@ -262,7 +254,7 @@ public class RdapResponseJsonTest {
                 .addTel("tel:+1-555-555-1234;ext=102")
                 .addEmail("joe.user@example.com");
 
-        entity.setVCardArray(builder.build());
+        RdapObjectMapper.setVCardArray(entity,builder.build());
 
         final Domain.SecureDNS secureDNS = new Domain.SecureDNS();
 
@@ -360,20 +352,13 @@ public class RdapResponseJsonTest {
         ip.setCountry("AU");
         ip.getStatus().add("allocated");
 
-        final Remark remark = new Remark(Lists.newArrayList("She sells sea shells down by the sea shore.", "Originally written by Terry Sullivan."));
+        final Remark remark = new Remark();
+        remark.getDescription().addAll(Lists.newArrayList("She sells sea shells down by the sea shore.", "Originally written by Terry Sullivan."));
         ip.getRemarks().add(remark);
 
-        final Link link = new Link()
-                .setHref("http://example.net/ip/2001:db8::/48")
-                .setValue("http://example.net/ip/2001:db8::/48")
-                .setRel("self");
-        ip.getLinks().add(link);
+        ip.getLinks().add(RdapObjectMapper.createLink("self", "http://example.net/ip/2001:db8::/48", "http://example.net/ip/2001:db8::/48"));
 
-        final Link uplink = new Link()
-                .setHref("http://example.net/ip/2001:C00::/23")
-                .setValue("http://example.net/ip/2001:db8::/48")
-                .setRel("up");
-        ip.getLinks().add(uplink);
+        ip.getLinks().add(RdapObjectMapper.createLink("up", "http://example.net/ip/2001:db8::/48", "http://example.net/ip/2001:C00::/23"));
 
         final Event registrationEvent = new Event();
         registrationEvent.setEventAction("registration");
@@ -401,17 +386,12 @@ public class RdapResponseJsonTest {
                 .addAdr(createAddress("", "Suite 1234", "4321 Rue Somewhere", "Quebec", "QC", "G1V 2M2", "Canada"))
                 .addTel("tel:+1-555-555-1234;ext=102")
                 .addEmail("joe.user@example.com");
-        entity.setVCardArray(builder.build());
+        RdapObjectMapper.setVCardArray(entity,builder.build());
         entity.getRoles().add("registrant");
         entity.getRemarks().add(remark);
         entity.getEvents().add(registrationEvent);
         entity.getEvents().add(lastChangedEvent);
-
-        final Link entityLink = new Link()
-                .setHref("http://example.net/entity/xxxx")
-                .setValue("http://example.net/entity/xxxx")
-                .setRel("self");
-        entity.getLinks().add(entityLink);
+        entity.getLinks().add(RdapObjectMapper.createLink("self", "http://example.net/entity/xxxx", "http://example.net/entity/xxxx"));
 
         entity.setPort43("whois.example.com");
 
@@ -490,10 +470,7 @@ public class RdapResponseJsonTest {
         notices.getDescription().add("Beverages with caffeine for keeping horses awake.");
         notices.getDescription().add("Very effective.");
 
-        final Link link = new Link()
-                .setValue("http://example.com/context_uri")
-                .setRel("self")
-                .setHref("http://example.com/target_uri_href");
+        final Link link = RdapObjectMapper.createLink("self", "http://example.com/context_uri", "http://example.com/target_uri_href");
         link.getHreflang().add("en");
         link.getHreflang().add("ch");
         link.getTitle().add("title1");
@@ -528,7 +505,8 @@ public class RdapResponseJsonTest {
         generator.writeObject(o);
         generator.close();
 
-        return outputStream.toString();
+        // So that the test can run on ALL platform (Curse you iScampi!!)
+        return convertEOLToUnix(outputStream);
     }
 
     private JsonFactory createJsonFactory() {
@@ -547,5 +525,11 @@ public class RdapResponseJsonTest {
         objectMapper.setDateFormat(df);
 
         return objectMapper.getJsonFactory();
+    }
+
+    private String convertEOLToUnix(StringOutputStream serializer) throws IOException {
+        StringOutputStream resultStream = new StringOutputStream();
+        LineEnds.convert(new StringInputStream(serializer.toString()), resultStream, LineEnds.STYLE_UNIX);
+        return resultStream.toString();
     }
 }

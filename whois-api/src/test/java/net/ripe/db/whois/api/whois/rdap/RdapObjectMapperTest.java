@@ -9,11 +9,16 @@ import net.ripe.db.whois.common.rpsl.RpslObject;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class RdapObjectMapperTest {
-    private static final LocalDateTime VERSION_TIMESTAMP = LocalDateTime.parse("2044-04-26T00:02:03.000");
+
+    private static String VERSION_DATETIME = "2044-04-26T00:02:03.000";
+    private static final LocalDateTime VERSION_TIMESTAMP = LocalDateTime.parse(VERSION_DATETIME);
+    private static final XMLGregorianCalendar XML_GC_VERSION_TIMESTAMP = RdapObjectMapper.dtf.newXMLGregorianCalendar(VERSION_DATETIME + "+10:00");
 
     @Test
     public void ip() {
@@ -38,7 +43,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getHandle(), is("10.0.0.0 - 10.255.255.255"));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(0).getEventDate(), is(VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
         assertThat(result.getCountry(), is("NL"));
         assertThat(result.getEndAddress(), is("10.255.255.255"));
         assertThat(result.getIpVersion(), is("v4"));
@@ -83,7 +88,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getEndAutnum(), is(102l));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(0).getEventDate(), is(VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
         assertThat(result.getName(), is("End-User-2"));
         assertThat(result.getType(), is("DIRECT ALLOCATION"));
         assertThat(result.getLinks(), hasSize(1));
@@ -110,11 +115,11 @@ public class RdapObjectMapperTest {
 
         assertThat(result.getHandle(), is("2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
         assertThat(result.getLdhName(), is("2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
-        assertThat(result.getNameservers(), hasSize(1));
-        assertThat(result.getNameservers().get(0).getLdhName(), is("ns.1.net"));
+        assertThat(result.getNameServers(), hasSize(1));
+        assertThat(result.getNameServers().get(0).getLdhName(), is("ns.1.net"));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(0).getEventDate(), is(VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));

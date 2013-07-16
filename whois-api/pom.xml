@@ -139,6 +139,13 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.4</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -254,7 +261,7 @@
                                 <arg>-Xdv</arg>
                             </extensionArgs>
                         </xsdOption>
-                        <xsdOption>
+                        <!--xsdOption>
                             <xsd>${basedir}/src/main/resources/rdap-docs/xsd/vcard/vcard.xsd</xsd>
                             <bindingFile>${basedir}/src/main/resources/rdap-docs/xsd/vcard/vcard.xjb</bindingFile>
                             <packagename>net.ripe.db.whois.api.whois.rdap.domain.vcard</packagename>
@@ -262,7 +269,7 @@
                             <extensionArgs>
                                 <arg>-Xdv</arg>
                             </extensionArgs>
-                        </xsdOption>
+                        </xsdOption-->
                     </xsdOptions>
                 </configuration>
             </plugin>

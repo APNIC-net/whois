@@ -4,15 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
-import net.ripe.db.whois.api.whois.rdap.domain.Domain;
-import net.ripe.db.whois.api.whois.rdap.domain.Entity;
-import net.ripe.db.whois.api.whois.rdap.domain.Event;
-import net.ripe.db.whois.api.whois.rdap.domain.Ip;
-import net.ripe.db.whois.api.whois.rdap.domain.Link;
-import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
-import net.ripe.db.whois.api.whois.rdap.domain.RdapObject;
-import net.ripe.db.whois.api.whois.rdap.domain.Remark;
+import net.ripe.db.whois.api.whois.rdap.domain.*;
 import net.ripe.db.whois.api.whois.rdap.domain.vcard.VCard;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
@@ -25,18 +17,30 @@ import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.*;
 
 import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
 
 class RdapObjectMapper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RdapObjectMapper.class);
+
     private static final List<String> RDAP_CONFORMANCE_LEVEL = Lists.newArrayList("rdap_level_0");
+
+    protected static DatatypeFactory dtf;
+    static {
+        try {
+            dtf = DatatypeFactory.newInstance();
+        } catch (DatatypeConfigurationException dtfe) {
+            LOGGER.error("Could not instanciate DatatypeFactory");
+        }
+    }
 
     private static final Set<AttributeType> CONTACT_ATTRIBUTES = Sets.newHashSet(AttributeType.ADMIN_C, AttributeType.TECH_C);
     private static final Map<AttributeType, String> CONTACT_ATTRIBUTE_TO_ROLE_NAME = Maps.newHashMap();
@@ -60,7 +64,7 @@ class RdapObjectMapper {
 
         switch (rpslObjectType) {
             case DOMAIN:
-                rdapResponse = createDomain(rpslObject, relatedObjects, requestUrl, baseUrl);
+                rdapResponse = createDomain(rpslObject, relatedObjects, requestUrl, baseUrl, port43);
                 break;
             case AUT_NUM:
                 rdapResponse = createAutnumResponse(rpslObject, relatedObjects, requestUrl, baseUrl);
@@ -82,19 +86,11 @@ class RdapObjectMapper {
         }
 
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
-        rdapResponse.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(requestUrl));
+        rdapResponse.getLinks().add(createLink("self", requestUrl, requestUrl));
         rdapResponse.setPort43(port43);
         rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, requestUrl));
-
-        List<Remark> remarks = createRemarks(rpslObject);
-        if (!remarks.isEmpty()) {
-            rdapResponse.getRemarks().addAll(remarks);
-        }
-
-        Event lastChangedEvent = createEvent(lastChangedTimestamp);
-        if (lastChangedEvent != null) {
-            rdapResponse.getEvents().add(lastChangedEvent);
-        }
+        setRemarks(rdapResponse, rpslObject);
+        rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
             rdapResponse.getEntities().add(createEntity(abuseContact, Lists.<RpslObject>newArrayList(), requestUrl, baseUrl));
@@ -143,7 +139,7 @@ class RdapObjectMapper {
         }
 
         if (!descriptions.isEmpty()) {
-            remarkList.add(new Remark(descriptions));
+            remarkList.add(createRemark(descriptions));
         }
 
         final List<String> remarks = Lists.newArrayList();
@@ -153,7 +149,7 @@ class RdapObjectMapper {
         }
 
         if (!remarks.isEmpty()) {
-            remarkList.add(new Remark(remarks));
+            remarkList.add(createRemark(remarks));
         }
 
         return remarkList;
@@ -162,7 +158,7 @@ class RdapObjectMapper {
     private static Event createEvent(final LocalDateTime lastChanged) {
         final Event lastChangedEvent = new Event();
         lastChangedEvent.setEventAction("last changed");
-        lastChangedEvent.setEventDate(lastChanged);
+        lastChangedEvent.setEventDate(convertToXMLGregorianCalendar(lastChanged));
         return lastChangedEvent;
     }
 
@@ -208,28 +204,21 @@ class RdapObjectMapper {
     private static Entity createEntity(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
         final Entity entity = new Entity();
         entity.setHandle(rpslObject.getKey().toString());
-        entity.setVCardArray(createVCard(rpslObject));
+        setVCardArray(entity,createVCard(rpslObject));
 
         final String selfUrl = baseUrl + "/entity/" + entity.getHandle();
 
         if (!selfUrl.equals(requestUrl)) {
-            List<Remark> remarks = createRemarks(rpslObject);
-            if (!remarks.isEmpty()) {
-                entity.getRemarks().addAll(remarks);
-            }
-            entity.getLinks().add(new Link()
-                    .setRel("self")
-                    .setValue(requestUrl)
-                   .setHref(baseUrl + "/entity/" + entity.getHandle()));
-
-            List<Entity> contactEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
-            if (!contactEntities.isEmpty()) {
-                entity.getEntities().addAll(contactEntities);
-            }
-
-            // TODO: [RL] Add abuse contact here?
+            setRemarks(entity, rpslObject);
+            entity.getLinks().add( createLink("self", requestUrl,baseUrl + "/entity/" + entity.getHandle()));
         }
 
+        List<Entity> contactEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
+        if (!contactEntities.isEmpty()) {
+            entity.getEntities().addAll(contactEntities);
+        }
+
+        // TODO: [RL] Add abuse contact here?
         return entity;
     }
 
@@ -253,10 +242,11 @@ class RdapObjectMapper {
         return autnum;
     }
 
-    private static Domain createDomain(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
+    private static Domain createDomain(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl, final String port43) {
         Domain domain = new Domain();
         domain.setHandle(rpslObject.getKey().toString());
         domain.setLdhName(rpslObject.getKey().toString());
+        domain.setPort43(port43);
 
         final HashMap<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
 
@@ -297,7 +287,7 @@ class RdapObjectMapper {
                 nameserver.setIpAddresses(ipAddresses);
             }
 
-            domain.getNameservers().add(nameserver);
+            domain.getNameServers().add(nameserver);
         }
 
         final Domain.SecureDNS secureDNS = new Domain.SecureDNS();
@@ -310,7 +300,7 @@ class RdapObjectMapper {
 
             final Domain.SecureDNS.DsData dsData = new Domain.SecureDNS.DsData();
             dsData.setKeyTag(dsRdata.getKeytag());
-            dsData.setAlgorithm(dsRdata.getAlgorithm());
+            dsData.setAlgorithm((short)dsRdata.getAlgorithm());
             dsData.setDigestType(dsRdata.getDigestType());
             dsData.setDigest(dsRdata.getDigestHexString());
 
@@ -363,7 +353,7 @@ class RdapObjectMapper {
         }
         if (!addrList.isEmpty()) {
             String addr = Joiner.on("\n").join(addrList.listIterator());
-            builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("type", "work"), Maps.immutableEntry("label", addr)),null);
+            builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("type", "work"), Maps.immutableEntry("label", addr)), null);
         }
 
         for (final CIString phone : rpslObject.getValuesForAttribute(AttributeType.PHONE)) {
@@ -388,5 +378,40 @@ class RdapObjectMapper {
         }
 
         return builder.build();
+    }
+
+    public static XMLGregorianCalendar convertToXMLGregorianCalendar(final LocalDateTime lastChanged) {
+        GregorianCalendar gc =  new GregorianCalendar();
+        gc.setTimeInMillis(lastChanged.toDateTime().getMillis());
+        return dtf.newXMLGregorianCalendar(gc);
+    }
+
+    private static void setRemarks(final RdapObject rdapObject, final RpslObject rpslObject) {
+        final List<Remark> remarks = createRemarks(rpslObject);
+        if (!remarks.isEmpty()) {
+            rdapObject.getRemarks().addAll(remarks);
+        }
+    }
+
+    public static Link createLink(String rel, String value, String href) {
+        Link link = new Link();
+        link.setRel(rel);
+        link.setValue(value);
+        link.setHref(href);
+        return link;
+    }
+
+    public static Remark createRemark(List<String> remarks) {
+        Remark remark = new Remark();
+        remark.getDescription().addAll(remarks);
+        return remark;
+    }
+
+    public static void setVCardArray(Entity entity, final VCard... vCards) {
+        List<Object> vcardArray = entity.getVcardArray();
+        vcardArray.add("vcard");
+        for (VCard next : vCards) {
+            vcardArray.add(next.getValues());
+        }
     }
 }
