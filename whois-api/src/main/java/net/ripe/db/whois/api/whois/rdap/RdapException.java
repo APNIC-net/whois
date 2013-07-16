@@ -13,23 +13,19 @@ public class RdapException {
 
         switch (status.getStatusCode()) {
             case 400:
-                exception.getDescription().add("These are not the droids you are looking for.");
+                exception.getDescription().add("The request could not be understood by the server due to malformed syntax.");
                 break;
             case 403:
-                exception.getDescription().add("You're a part of the Rebel Alliance and a traitor.");
-                exception.getDescription().add("Take her away!");
+                exception.getDescription().add("Authorization required.");
                 break;
             case 404:
-                exception.getDescription().add("What a desolate place this is.");
+                exception.getDescription().add("The server has not found anything matching the Request-URI.");
                 break;
             case 429:
-                exception.getDescription().add("I can't shake em!");
-                exception.getDescription().add("I can't shake em!");
+                exception.getDescription().add("Too many requests.");
                 break;
             case 500:
-                exception.getDescription().add("I felt a great disturbance in the Force...");
-                exception.getDescription().add("As if millions of voices cried out in terror and were suddenly silenced.");
-                exception.getDescription().add("I fear something terrible has happened.");
+                exception.getDescription().add("The server encountered an unexpected condition which prevented it from fulfilling the request.");
                 break;
 
         }
