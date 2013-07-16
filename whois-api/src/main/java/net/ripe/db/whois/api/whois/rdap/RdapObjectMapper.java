@@ -27,6 +27,7 @@ import net.ripe.db.whois.common.rpsl.RpslObject;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -356,8 +357,12 @@ class RdapObjectMapper {
                 break;
         }
 
+        List<CIString> addrList = new ArrayList<CIString>();
         for (final CIString address : rpslObject.getValuesForAttribute(AttributeType.ADDRESS)) {
-            builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("label", address)), null);
+            addrList.add(address);
+        }
+        if (!addrList.isEmpty()) {
+            builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("type", "work")), addrList);
         }
 
         for (final CIString phone : rpslObject.getValuesForAttribute(AttributeType.PHONE)) {
