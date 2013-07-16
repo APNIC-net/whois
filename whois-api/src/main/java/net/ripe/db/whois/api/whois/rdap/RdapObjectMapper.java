@@ -117,7 +117,10 @@ class RdapObjectMapper {
         for (final RpslObject abuseContact : abuseContacts) {
             rdapResponse.getEntities().add(createEntity(abuseContact));
         }
-        rdapResponse.getEntities().addAll(contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl));
+        List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
+        if (!ctcEntities.isEmpty()) {
+            rdapResponse.getEntities().addAll(ctcEntities);
+        }
 
         return rdapResponse;
     }
