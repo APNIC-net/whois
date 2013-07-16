@@ -211,12 +211,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getStartAddress(), is("192.0.0.0"));
         assertThat(response.getEndAddress(), is("192.255.255.255"));
         assertThat(response.getName(), is("TEST-NET-NAME"));
-
-        try {
-           Thread.sleep(1500000);
-        } catch (InterruptedException e) {
-
-        }
     }
 
     @Test
@@ -794,8 +788,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getValue(), equalTo(orgLink));
         assertThat(links.get(0).getHref(), equalTo(orgLink));
-
-        Thread.sleep(1500000);
     }
 
     @Override
