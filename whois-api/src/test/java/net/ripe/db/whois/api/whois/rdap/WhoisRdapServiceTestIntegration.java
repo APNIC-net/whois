@@ -726,7 +726,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(entities.get(1).getLinks().get(0).getHref(), is(tp2Link));
 
         final List<Notice> notices = entity.getNotices();
-        assertThat(notices.get(0).getLinks().getHref(), equalTo("http://www.ripe.net/data-tools/support/documentation/terms"));
+        assertThat(notices.get(0).getLinks().getHref(), equalTo("http://www.apnic.net/db/dbcopyright.html"));
         assertThat(notices.get(0).getLinks().getValue(), equalTo(orgLink));
         assertThat(notices.get(0).getLinks().getRel(), equalTo("terms-of-service"));
         assertThat(notices.get(0).getTitle(), equalTo("Terms and Conditions"));
