@@ -40,6 +40,7 @@ public class SourceContext {
 
     private final Set<CIString> grsSourceNames;
     private final Set<CIString> grsSourceNamesForDummification;
+    private final Set<CIString> mirrorSourceNames;
     private final Set<CIString> allSourceNames;
     private final Set<CIString> additionalSourceNames;
     private final Map<CIString, CIString> aliases;
@@ -52,11 +53,13 @@ public class SourceContext {
             @Value("${whois.additional.sources}") final String additionalSourceNames,
             @Value("${grs.sources}") final String grsSourceNames,
             @Value("${nrtm.import.sources}") final String nrtmSourceNames,
+            @Value("${mirror.sources}") final String mirrorSourceNames,
             @Value("${grs.sources.dummify}") final String grsSourceNamesForDummification,
             @Value("${whois.db.grs.master.baseurl}") final String grsMasterBaseUrl,
             @Value("${whois.db.master.username}") final String whoisMasterUsername,
             @Value("${whois.db.master.password}") final String whoisMasterPassword,
             @Value("${whois.db.grs.slave.baseurl}") final String grsSlaveBaseUrl,
+            @Value("${whois.db.mirror.slave.baseurl}") final String mirrorSlaveBaseUrl,
             @Value("${whois.db.slave.username}") final String whoisSlaveUsername,
             @Value("${whois.db.slave.password}") final String whoisSlavePassword,
             @Qualifier("whoisMasterDataSource") final DataSource whoisMasterDataSource,
@@ -69,6 +72,7 @@ public class SourceContext {
 
         final Set<CIString> additionalSources = Sets.newLinkedHashSet();
         final Set<CIString> grsSources = Sets.newLinkedHashSet();
+        final Set<CIString> mirrorSources = Sets.newLinkedHashSet();
         final Map<CIString, CIString> aliases = Maps.newLinkedHashMap();
 
         sourceConfigurations.put(mainMasterSource, new SourceConfiguration(mainMasterSource, whoisMasterDataSource));
@@ -81,6 +85,15 @@ public class SourceContext {
                 return ciString(input);
             }
         });
+
+        final Iterable<CIString> mirrorSourceNameIterable = Iterables.transform(COMMA_SPLITTER.split(mirrorSourceNames), new Function<String, CIString>() {
+            @Nullable
+            @Override
+            public CIString apply(final String input) {
+                return ciString(input);
+            }
+        });
+
 
         final Iterable<CIString> nrtmSourceNameIterable = Iterables.transform(COMMA_SPLITTER.split(nrtmSourceNames), new Function<String, CIString>() {
             @Nullable
@@ -110,20 +123,34 @@ public class SourceContext {
                 sourceConfigurations.put(grsMasterSource, new SourceConfiguration(grsMasterSource, whoisMasterDataSource));
                 sourceConfigurations.put(grsSlaveSource, new SourceConfiguration(grsSlaveSource, whoisSlaveDataSource));
             } else {
-                final String grsSlaveUrl = createGrsUrl(grsSlaveBaseUrl, grsSourceName);
+                final String grsSlaveUrl = createSourceUrl(grsSlaveBaseUrl, grsSourceName);
                 final DataSource grsSlaveDataSource = dataSourceFactory.createDataSource(grsSlaveUrl, whoisSlaveUsername, whoisSlavePassword);
                 sourceConfigurations.put(grsSlaveSource, new SourceConfiguration(grsSlaveSource, grsSlaveDataSource));
 
-                final String grsMasterUrl = createGrsUrl(grsMasterBaseUrl, grsSourceName);
+                final String grsMasterUrl = createSourceUrl(grsMasterBaseUrl, grsSourceName);
                 final DataSource grsMasterDataSource = dataSourceFactory.createDataSource(grsMasterUrl, whoisMasterUsername, whoisMasterPassword);
                 sourceConfigurations.put(grsMasterSource, new SourceConfiguration(grsMasterSource, grsMasterDataSource));
             }
+        }
+
+        for (final CIString mirrorSourceName : mirrorSourceNameIterable) {
+            if (!mirrorSources.add(mirrorSourceName)) {
+                LOGGER.warn("Mirror Source already configured: {}", mirrorSourceName);
+                continue;
+            }
+
+            final Source mirrorSlaveSource = Source.slave(mirrorSourceName);
+
+            final String mirrorSlaveUrl = createSourceUrl(mirrorSlaveBaseUrl, mirrorSourceName);
+            final DataSource mirrorSlaveDataSource = dataSourceFactory.createDataSource(mirrorSlaveUrl, whoisSlaveUsername, whoisSlavePassword);
+            sourceConfigurations.put(mirrorSlaveSource, new SourceConfiguration(mirrorSlaveSource, mirrorSlaveDataSource));
         }
 
         LOGGER.info("Using sources: {}", sourceConfigurations.keySet());
 
         this.grsSourceNames = Collections.unmodifiableSet(grsSources);
         this.grsSourceNamesForDummification = ciSet(COMMA_SPLITTER.split(grsSourceNamesForDummification));
+        this.mirrorSourceNames = Collections.unmodifiableSet(mirrorSources);
         this.aliases = Collections.unmodifiableMap(aliases);
         this.allSourceNames = Collections.unmodifiableSet(Sets.newLinkedHashSet(Iterables.transform(sourceConfigurations.keySet(), new Function<Source, CIString>() {
             @Nullable
@@ -150,7 +177,7 @@ public class SourceContext {
         }
     }
 
-    private String createGrsUrl(final String baseUrl, final CIString sourceName) {
+    private String createSourceUrl(final String baseUrl, final CIString sourceName) {
         return String.format("%s_%s", baseUrl, sourceName.toString().replace('-', '_'));
     }
 
@@ -193,6 +220,10 @@ public class SourceContext {
 
     public Set<CIString> getGrsSourceNames() {
         return grsSourceNames;
+    }
+
+    public Set<CIString> getMirrorSourceNames() {
+        return mirrorSourceNames;
     }
 
     public Set<CIString> getAdditionalSourceNames() {
