@@ -73,7 +73,8 @@ class RdapObjectMapper {
             final RpslObject rpslObject,
             final List<RpslObject> relatedObjects,
             final LocalDateTime lastChangedTimestamp,
-            final List<RpslObject> abuseContacts) {
+            final List<RpslObject> abuseContacts,
+            final RpslObject parentRpslObject) {
 
         RdapObject rdapResponse;
         final ObjectType rpslObjectType = rpslObject.getType();
@@ -88,7 +89,7 @@ class RdapObjectMapper {
                 break;
             case INETNUM:
             case INET6NUM:
-                rdapResponse = createIp(rpslObject);
+                rdapResponse = createIp(rpslObject, parentRpslObject, requestUrl, baseUrl);
                 break;
             case PERSON:
             case ROLE:
@@ -121,7 +122,7 @@ class RdapObjectMapper {
         return rdapResponse;
     }
 
-    private static Ip createIp(final RpslObject rpslObject) {
+    private static Ip createIp(final RpslObject rpslObject, final RpslObject parentRpslObject, final String requestUrl, final String baseUrl) {
         final Ip ip = new Ip();
         ip.setHandle(rpslObject.getKey().toString());
         IpInterval ipInterval;
@@ -144,7 +145,15 @@ class RdapObjectMapper {
         ip.setLang(rpslObject.getValuesForAttribute(AttributeType.LANGUAGE).isEmpty() ? null : Joiner.on(",").join(rpslObject.getValuesForAttribute(AttributeType.LANGUAGE)));
         ip.setType(rpslObject.getValueForAttribute(AttributeType.STATUS).toString());
 
-//        ip.getLinks().add(new Link().setRel("up")... //TODO parent (first less specific) - do parentHandle at the same time
+        if (parentRpslObject != null) {
+            ip.setParentHandle(parentRpslObject.getValueForAttribute(AttributeType.NETNAME).toString());
+
+            CIString parentKey = parentRpslObject.getKey();
+            IpInterval parentInterval = (parentRpslObject.getType() == INET6NUM) ? Ipv6Resource.parse(parentKey) : Ipv4Resource.parse(parentKey);
+            String prefix = IpInterval.asIpInterval(parentInterval.beginAsInetAddress()).toString().split("/")[0] + "/" + parentInterval.getPrefixLength();
+            ip.getLinks().add(createLink("up", requestUrl,
+                                         baseUrl + "/ip/" + prefix));
+        }
 
         return ip;
     }

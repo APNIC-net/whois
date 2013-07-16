@@ -132,79 +132,22 @@ public class WhoisRdapService {
                 return input.getName();
             }
         }));
-
-        final Query query = Query.parse(
-                String.format("%s %s %s %s %s",
-                        QueryFlag.NO_GROUPING.getLongFlag(),
-                        QueryFlag.SELECT_TYPES.getLongFlag(),
-                        objectTypesString,
-                        QueryFlag.NO_FILTERING.getLongFlag(),
-                        key));
-
-        return handleQuery(query, request);
+        return handleQuery(getLookupQuery(objectTypesString, key), request);
     }
 
-    protected boolean objectExists(final HttpServletRequest request, final ObjectType objectType, final String key) {
-        final int contextId = System.identityHashCode(Thread.currentThread());
-        final InetAddress localAddress;
-        try {
-            localAddress = InetAddress.getLocalHost();
-        } catch (Exception e) {
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
-        }
-
-        final List<RpslObject> result = Lists.newArrayList();
-
-        final Query query = Query.parse(
-                String.format("%s %s %s %s %s",
-                        QueryFlag.NO_GROUPING.getLongFlag(),
-                        QueryFlag.SELECT_TYPES.getLongFlag(),
-                        objectType.getName(),
-                        QueryFlag.NO_FILTERING.getLongFlag(),
-                        key));
-
-        try {
-            queryHandler.streamResults(query, localAddress, contextId, new ApiResponseHandler() {
-                @Override
-                public void handle(final ResponseObject responseObject) {
-                    if (responseObject instanceof RpslObject) {
-                        result.add((RpslObject) responseObject);
-                    }
-                }
-            });
-        } catch (Exception e) {
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
-        }
-
+    private boolean objectExists(final HttpServletRequest request, final ObjectType objectType, final String key) {
+        final Query query = getLookupQuery(objectType.getName(), key);
+        final List<RpslObject> result = runQuery(query, request, true);
         return !result.isEmpty();
     }
 
     protected Response handleQuery(final Query query, final HttpServletRequest request) {
-
-        final int contextId = System.identityHashCode(Thread.currentThread());
-        final InetAddress remoteAddress = InetAddresses.forString(request.getRemoteAddr());
-
-        final List<RpslObject> result = Lists.newArrayList();
-
         try {
-            queryHandler.streamResults(query, remoteAddress, contextId, new ApiResponseHandler() {
-                @Override
-                public void handle(final ResponseObject responseObject) {
-                    if (responseObject instanceof RpslObject) {
-                        result.add((RpslObject) responseObject);
-                    }
-                }
-            });
-
+            final List<RpslObject> result = runQuery(query, request, false);
             if (result.isEmpty()) {
                 throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
             }
-
-//            The result size will be > 1 when we allow related objects
-//            if (result.size() > 1) {
-//                throw new IllegalStateException("Unexpected result size: " + result.size());
-//            }
-
+            
             final RpslObject resultObject = result.remove(0);
 
             return Response.ok(
@@ -216,8 +159,44 @@ public class WhoisRdapService {
                             // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
                             objectDao.getLastUpdated(resultObject.getObjectId()),
                             // TODO: [RL] for the equivalent, APNIC needs to find the referenced IRT object
-                            getAbuseContacts(resultObject))).build();
+                            getAbuseContacts(resultObject),
+                            getParentObject(resultObject))).build();
 
+        } catch (final QueryException e) {
+            if (e.getCompletionInfo() == QueryCompletionInfo.BLOCKED) {
+                throw new WebApplicationException(Response.status(STATUS_TOO_MANY_REQUESTS).build());
+            } else {
+                System.out.println(e.toString());
+                LOGGER.error(e.getMessage(), e);
+                throw e;
+            }
+        }
+    }
+    
+    private List<RpslObject> runQuery(final Query query, final HttpServletRequest request, final boolean internalRequest) {
+        final int contextId = System.identityHashCode(Thread.currentThread());
+        final InetAddress queryAddress;
+        if (internalRequest) {
+            try {
+                queryAddress = InetAddress.getLocalHost();
+            } catch (Exception e) {
+                throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+            }
+        } else {
+            queryAddress = InetAddresses.forString(request.getRemoteAddr());
+        }
+
+        final List<RpslObject> result = Lists.newArrayList();
+
+        try {
+            queryHandler.streamResults(query, queryAddress, contextId, new ApiResponseHandler() {
+                @Override
+                public void handle(final ResponseObject responseObject) {
+                    if (responseObject instanceof RpslObject) {
+                        result.add((RpslObject) responseObject);
+                    }
+                }
+            });
         } catch (final QueryException e) {
             if (e.getCompletionInfo() == QueryCompletionInfo.BLOCKED) {
                 throw new WebApplicationException(Response.status(STATUS_TOO_MANY_REQUESTS).build());
@@ -226,6 +205,8 @@ public class WhoisRdapService {
                 throw e;
             }
         }
+
+        return result;
     }
 
     private String getBaseUrl(final HttpServletRequest request) {
@@ -237,6 +218,16 @@ public class WhoisRdapService {
         buffer.setLength(buffer.length() - request.getRequestURI().length() + request.getServletPath().length());
 
         return buffer.toString();
+    }
+
+    private Query getLookupQuery(final String objectType, final String key) {
+        return Query.parse(
+                String.format("%s %s %s %s %s",
+                        QueryFlag.NO_GROUPING.getLongFlag(),
+                        QueryFlag.SELECT_TYPES.getLongFlag(),
+                        objectType,
+                        QueryFlag.NO_FILTERING.getLongFlag(),
+                        key));
     }
 
     private String getRequestUrl(final HttpServletRequest request) {
@@ -254,5 +245,27 @@ public class WhoisRdapService {
             return abuseCFinder.findAbuseContacts(rpslObject);
         }
         return Collections.emptyList();
+    }
+
+    private RpslObject getParentObject(final RpslObject rpslObject) {
+        final ObjectType objectType = rpslObject.getType();
+        if ((objectType == INETNUM) || (objectType == INET6NUM)) {
+            final List<RpslObject> parents = runQuery(
+                Query.parse(
+                        String.format("%s %s %s %s %s %s",
+                                QueryFlag.NO_GROUPING.getLongFlag(),
+                                QueryFlag.SELECT_TYPES.getLongFlag(),
+                                objectType,
+                                QueryFlag.NO_FILTERING.getLongFlag(),
+                                QueryFlag.ONE_LESS.getLongFlag(),
+                                rpslObject.getKey().toString())),
+                null,
+                true
+            );
+            if (parents.size() > 0) {
+                return parents.get(0);
+            }
+        }
+        return null;
     }
 }
