@@ -362,7 +362,8 @@ class RdapObjectMapper {
             addrList.add(address);
         }
         if (!addrList.isEmpty()) {
-            builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("type", "work")), addrList);
+            String addr = Joiner.on("\n").join(addrList.listIterator());
+            builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("label", addr)),null);
         }
 
         for (final CIString phone : rpslObject.getValuesForAttribute(AttributeType.PHONE)) {
