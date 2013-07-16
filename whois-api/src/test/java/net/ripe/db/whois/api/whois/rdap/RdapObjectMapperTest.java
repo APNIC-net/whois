@@ -40,11 +40,11 @@ public class RdapObjectMapperTest {
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(VERSION_TIMESTAMP));
         assertThat(result.getCountry(), is("NL"));
-        assertThat(result.getEndAddress(), is("10.255.255.255/32"));
+        assertThat(result.getEndAddress(), is("10.255.255.255"));
         assertThat(result.getIpVersion(), is("v4"));
         assertThat(result.getName(), is("RIPE-NCC"));
         assertThat(result.getParentHandle(), is(nullValue()));
-        assertThat(result.getStartAddress(), is("10.0.0.0/32"));
+        assertThat(result.getStartAddress(), is("10.0.0.0"));
         assertThat(result.getType(), is("OTHER"));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
