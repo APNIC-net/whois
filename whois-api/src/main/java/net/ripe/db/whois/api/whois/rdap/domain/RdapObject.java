@@ -65,6 +65,16 @@ public class RdapObject implements Serializable {
         return this.links;
     }
 
+    public Link getSelfLink() {
+        for (Link link : this.getLinks()) {
+            if (link.getRel().equals("self")) {
+                return link;
+            }
+        }
+
+        return null;
+    }
+
     public List<Event> getEvents() {
         if (events == null) {
             events = Lists.newArrayList();
