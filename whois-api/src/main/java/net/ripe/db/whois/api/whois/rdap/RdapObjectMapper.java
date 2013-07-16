@@ -84,8 +84,16 @@ class RdapObjectMapper {
         rdapResponse.getLinks().add(new Link().setRel("self").setValue(requestUrl).setHref(requestUrl));
         rdapResponse.setPort43(port43);
         rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, requestUrl));
-        rdapResponse.getRemarks().addAll(createRemarks(rpslObject));
-        rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
+
+        List<Remark> remarks = createRemarks(rpslObject);
+        if (!remarks.isEmpty()) {
+            rdapResponse.getRemarks().addAll(remarks);
+        }
+
+        Event lastChangedEvent = createEvent(lastChangedTimestamp);
+        if (lastChangedEvent != null) {
+            rdapResponse.getEvents().add(lastChangedEvent);
+        }
 
         for (final RpslObject abuseContact : abuseContacts) {
             rdapResponse.getEntities().add(createEntity(abuseContact, Lists.<RpslObject>newArrayList(), requestUrl, baseUrl));
@@ -204,12 +212,19 @@ class RdapObjectMapper {
         final String selfUrl = baseUrl + "/entity/" + entity.getHandle();
 
         if (!selfUrl.equals(requestUrl)) {
-            entity.getRemarks().addAll(createRemarks(rpslObject));
+            List<Remark> remarks = createRemarks(rpslObject);
+            if (!remarks.isEmpty()) {
+                entity.getRemarks().addAll(remarks);
+            }
             entity.getLinks().add(new Link()
                     .setRel("self")
                     .setValue(requestUrl)
                    .setHref(baseUrl + "/entity/" + entity.getHandle()));
-            entity.getEntities().addAll(contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl));
+
+            List<Entity> contactEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
+            if (!contactEntities.isEmpty()) {
+                entity.getEntities().addAll(contactEntities);
+            }
 
             // TODO: [RL] Add abuse contact here?
         }
