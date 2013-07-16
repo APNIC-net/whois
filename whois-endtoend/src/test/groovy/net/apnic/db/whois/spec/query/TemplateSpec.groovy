@@ -358,6 +358,8 @@ class TemplateSpec extends BaseSpec {
         def template = new TemplateObject("route")
 
       then:
+//      #TODO debug
+        println template.toString()
         template.description =~ /route/
         template.basicTemplate == [
                 ["route",       "mandatory",    "single",   "primary/look-up key"],

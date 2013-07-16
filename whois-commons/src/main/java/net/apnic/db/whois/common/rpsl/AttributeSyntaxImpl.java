@@ -463,22 +463,6 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                     "components of a hierarchical peering-set name have to be \n" +
                     "peering-set names.\n"));
 
-            put(attributeSyntaxTypeMap, AttributeSyntaxType.APNIC_PERSON_NAME_SYNTAX, new AttributeSyntaxRegexp(80,
-                    Pattern.compile("(?i)^[A-Z]([A-Z0-9.`'_-]*[A-Z0-9`'_-])?([\\s]+[A-Z0-9.`'_-]+)*[\\s]+[A-Z]([A-Z0-9.`'_-]*[A-Z0-9`'_-])?$"), "" +
-                    "A list of at least 2 words composed of alphabetic characters\n" +
-                    "separated by white space. The first and the last word cannot end\n" +
-                    "with dot (\".\"). The following words are not allowed no matter\n" +
-                    "whether they end with dot (\".\") or not:\n" +
-                    "\n" +
-                    "Dr     Prof    Mv\n" +
-                    "Ms     Mr      Mrs\n" +
-                    "\n" +
-                    "A word is made up of letters, digits, and the underscore\"_\",\n" +
-                    "and hyphen \"-\" characters. The first character of a word must\n" +
-                    "be a letter, and the last character of a name must be a letter\n" +
-                    "or a digit.\n"));
-
-
             put(attributeSyntaxTypeMap, AttributeSyntaxType.PERSON_ROLE_NAME_SYNTAX, new PersonRoleSyntax());
 
 //        put(attributeSyntaxTypeMap, AttributeSyntaxType.POEM_SYNTAX, new AttributeSyntaxRegexp(80,

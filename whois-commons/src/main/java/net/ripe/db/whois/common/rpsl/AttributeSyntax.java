@@ -90,7 +90,6 @@ public interface AttributeSyntax extends Documented {
     // APNIC
     static AttributeSyntax APNIC_DOM_NET_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_DOM_NET_SYNTAX);
     static AttributeSyntax APNIC_FINGERPR_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_FINGERPR_SYNTAX);
-    static AttributeSyntax APNIC_PERSON_NAME_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_PERSON_NAME_SYNTAX);
     static AttributeSyntax APNIC_PUBLIC_KEY_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_PUBLIC_KEY_SYNTAX);
     static AttributeSyntax APNIC_REFERRAL_BY_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_REFERRAL_BY_SYNTAX);
     static AttributeSyntax APNIC_REGISTRY_NAME_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_REGISTRY_NAME_SYNTAX);
@@ -706,7 +705,6 @@ public interface AttributeSyntax extends Documented {
         // APNIC
         APNIC_DOM_NET_SYNTAX,
         APNIC_FINGERPR_SYNTAX,
-        APNIC_PERSON_NAME_SYNTAX,
         APNIC_PUBLIC_KEY_SYNTAX,
         APNIC_REFERRAL_BY_SYNTAX,
         APNIC_REGISTRY_NAME_SYNTAX,
