@@ -12,6 +12,7 @@ import net.ripe.db.whois.common.domain.Ipv4Resource;
 import net.ripe.db.whois.common.domain.Ipv6Resource;
 import net.ripe.db.whois.common.domain.attrs.DsRdata;
 import net.ripe.db.whois.common.domain.attrs.NServer;
+import net.ripe.db.whois.common.domain.attrs.AsBlockRange;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
@@ -67,6 +68,7 @@ class RdapObjectMapper {
                 rdapResponse = createDomain(rpslObject, relatedObjects, requestUrl, baseUrl, port43);
                 break;
             case AUT_NUM:
+            case AS_BLOCK:
                 rdapResponse = createAutnumResponse(rpslObject, relatedObjects, requestUrl, baseUrl);
                 break;
             case INETNUM:
@@ -224,20 +226,22 @@ class RdapObjectMapper {
 
     private static Autnum createAutnumResponse(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
         final Autnum autnum = new Autnum();
-        autnum.setHandle(rpslObject.getKey().toString());
+        final String keyValue = rpslObject.getKey().toString();
+        autnum.setHandle(keyValue);
 
-        final CIString autnumAttributeValue = rpslObject.getValueForAttribute(AttributeType.AUT_NUM);
-        final long startAndEnd = Long.valueOf(autnumAttributeValue.toString().replace("AS", "").replace(" ", ""));
-        autnum.setStartAutnum(startAndEnd);
-        autnum.setEndAutnum(startAndEnd);
-
-        if (rpslObject.containsAttribute(AttributeType.COUNTRY)) {
-            // TODO: no country attribute in autnum? remove?
-            autnum.setCountry(rpslObject.findAttribute(AttributeType.COUNTRY).getValue().replace(" ", ""));
+        if (rpslObject.getType() == ObjectType.AS_BLOCK) {
+            AsBlockRange asBlockRange = AsBlockRange.parse(keyValue);
+            autnum.setStartAutnum(asBlockRange.getBegin());
+            autnum.setEndAutnum(asBlockRange.getEnd());
+            autnum.setName(keyValue);
+        } else {
+            final CIString autnumAttributeValue = rpslObject.getValueForAttribute(AttributeType.AUT_NUM);
+            final long startAndEnd = Long.valueOf(autnumAttributeValue.toString().replace("AS", "").replace(" ", ""));
+            autnum.setStartAutnum(startAndEnd);
+            autnum.setEndAutnum(startAndEnd);
+            autnum.setName(rpslObject.getValueForAttribute(AttributeType.AS_NAME).toString().replace(" ", ""));
+            autnum.setType("DIRECT ALLOCATION");
         }
-
-        autnum.setName(rpslObject.getValueForAttribute(AttributeType.AS_NAME).toString().replace(" ", ""));
-        autnum.setType("DIRECT ALLOCATION");
 
         return autnum;
     }

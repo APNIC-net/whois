@@ -75,7 +75,11 @@ public class WhoisRdapService {
 
         switch (objectType) {
             case "autnum":
-                whoisObjectTypes.add(AUT_NUM);
+                whoisObjectTypes.add(
+                    objectExists(request, AUT_NUM, "AS" + key)
+                        ? AUT_NUM
+                        : AS_BLOCK
+                );
                 break;
 
             case "domain":
@@ -138,6 +142,41 @@ public class WhoisRdapService {
                         key));
 
         return handleQuery(query, request);
+    }
+
+    protected boolean objectExists(final HttpServletRequest request, final ObjectType objectType, final String key) {
+        final int contextId = System.identityHashCode(Thread.currentThread());
+        final InetAddress localAddress;
+        try {
+            localAddress = InetAddress.getLocalHost();
+        } catch (Exception e) {
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+        }
+
+        final List<RpslObject> result = Lists.newArrayList();
+
+        final Query query = Query.parse(
+                String.format("%s %s %s %s %s",
+                        QueryFlag.NO_GROUPING.getLongFlag(),
+                        QueryFlag.SELECT_TYPES.getLongFlag(),
+                        objectType.getName(),
+                        QueryFlag.NO_FILTERING.getLongFlag(),
+                        key));
+
+        try {
+            queryHandler.streamResults(query, localAddress, contextId, new ApiResponseHandler() {
+                @Override
+                public void handle(final ResponseObject responseObject) {
+                    if (responseObject instanceof RpslObject) {
+                        result.add((RpslObject) responseObject);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+        }
+
+        return result.isEmpty();
     }
 
     protected Response handleQuery(final Query query, final HttpServletRequest request) {
