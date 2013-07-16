@@ -10,6 +10,7 @@ import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.Ipv4Resource;
 import net.ripe.db.whois.common.domain.Ipv6Resource;
+import net.ripe.db.whois.common.domain.attrs.AutNum;
 import net.ripe.db.whois.common.domain.attrs.DsRdata;
 import net.ripe.db.whois.common.domain.attrs.NServer;
 import net.ripe.db.whois.common.domain.attrs.AsBlockRange;
@@ -39,7 +40,7 @@ class RdapObjectMapper {
         try {
             dtf = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException dtfe) {
-            LOGGER.error("Could not instanciate DatatypeFactory");
+            LOGGER.error("Could not instantiate DatatypeFactory");
         }
     }
 
@@ -51,25 +52,27 @@ class RdapObjectMapper {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(AttributeType.MNT_BY, "registrant");
     }
 
+    @Value("${rdap.public.port43:whois.ripe.net}")
+    private static String port43;
+
     public static Object map(
             final String requestUrl,
             final String baseUrl,
             final RpslObject rpslObject,
             final List<RpslObject> relatedObjects,
             final LocalDateTime lastChangedTimestamp,
-            final List<RpslObject> abuseContacts,
-            @Value("${rdap.public.port43:}") final String port43) {
+            final List<RpslObject> abuseContacts) {
 
         RdapObject rdapResponse;
         final ObjectType rpslObjectType = rpslObject.getType();
 
         switch (rpslObjectType) {
             case DOMAIN:
-                rdapResponse = createDomain(rpslObject, relatedObjects, requestUrl, baseUrl, port43);
+                rdapResponse = createDomain(rpslObject);
                 break;
             case AUT_NUM:
             case AS_BLOCK:
-                rdapResponse = createAutnumResponse(rpslObject, relatedObjects, requestUrl, baseUrl);
+                rdapResponse = createAutnumResponse(rpslObject);
                 break;
             case INETNUM:
             case INET6NUM:
@@ -81,7 +84,7 @@ class RdapObjectMapper {
             // TODO: [ES] Denis to review
             case ORGANISATION:
             case IRT:
-                rdapResponse = createEntity(rpslObject, relatedObjects, requestUrl, baseUrl);
+                rdapResponse = createEntity(rpslObject);
                 break;
             default:
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
@@ -91,13 +94,16 @@ class RdapObjectMapper {
         rdapResponse.getLinks().add(createLink("self", requestUrl, requestUrl));
         rdapResponse.setPort43(port43);
         rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, requestUrl));
-        setRemarks(rdapResponse, rpslObject);
+
+        final List<Remark> remarks = createRemarks(rpslObject);
+        if (!remarks.isEmpty()) {
+            rdapResponse.getRemarks().addAll(remarks);
+        }
         rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
-            rdapResponse.getEntities().add(createEntity(abuseContact, Lists.<RpslObject>newArrayList(), requestUrl, baseUrl));
+            rdapResponse.getEntities().add(createEntity(abuseContact));
         }
-
         rdapResponse.getEntities().addAll(contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl));
 
         return rdapResponse;
@@ -123,7 +129,7 @@ class RdapObjectMapper {
 
         ip.setName(rpslObject.getValueForAttribute(AttributeType.NETNAME).toString());
         ip.setCountry(rpslObject.getValueForAttribute(AttributeType.COUNTRY).toString());
-        ip.setLang(Joiner.on(",").join(rpslObject.getValuesForAttribute(AttributeType.LANGUAGE)));
+        ip.setLang(rpslObject.getValuesForAttribute(AttributeType.LANGUAGE).isEmpty() ? null : Joiner.on(",").join(rpslObject.getValuesForAttribute(AttributeType.LANGUAGE)));
         ip.setType(rpslObject.getValueForAttribute(AttributeType.STATUS).toString());
 
 //        ip.getLinks().add(new Link().setRel("up")... //TODO parent (first less specific) - do parentHandle at the same time
@@ -189,7 +195,7 @@ class RdapObjectMapper {
             Entity entity;
             final RpslObject object = relatedObjectMap.get(entry.getKey());
             if (object != null) {
-                entity = createEntity(object, Lists.<RpslObject>newArrayList(), requestUrl, baseUrl);
+                entity = createNestedEntity(object, Lists.<RpslObject>newArrayList(), requestUrl, baseUrl);
             } else {
                 entity = new Entity();
                 entity.setHandle(entry.getKey());
@@ -203,28 +209,35 @@ class RdapObjectMapper {
         return entities;
     }
 
-    private static Entity createEntity(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
+    private static Entity createEntity(final RpslObject rpslObject) {
         final Entity entity = new Entity();
         entity.setHandle(rpslObject.getKey().toString());
         setVCardArray(entity,createVCard(rpslObject));
 
-        final String selfUrl = baseUrl + "/entity/" + entity.getHandle();
+        return entity;
+    }
 
-        if (!selfUrl.equals(requestUrl)) {
-            setRemarks(entity, rpslObject);
-            entity.getLinks().add( createLink("self", requestUrl,baseUrl + "/entity/" + entity.getHandle()));
+    private static Entity createNestedEntity(final RpslObject rpslObject, final List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
+        final Entity entity = createEntity(rpslObject);
+
+        final List<Remark> remarks = createRemarks(rpslObject);
+        if (!remarks.isEmpty()) {
+            entity.getRemarks().addAll(remarks);
         }
+
+        final String selfUrl = baseUrl + "/entity/" + entity.getHandle();
+        entity.getLinks().add( createLink("self", requestUrl, selfUrl));
 
         List<Entity> contactEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
         if (!contactEntities.isEmpty()) {
             entity.getEntities().addAll(contactEntities);
         }
-
         // TODO: [RL] Add abuse contact here?
+
         return entity;
     }
 
-    private static Autnum createAutnumResponse(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
+    private static Autnum createAutnumResponse(final RpslObject rpslObject) {
         final Autnum autnum = new Autnum();
         final String keyValue = rpslObject.getKey().toString();
         autnum.setHandle(keyValue);
@@ -246,11 +259,10 @@ class RdapObjectMapper {
         return autnum;
     }
 
-    private static Domain createDomain(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl, final String port43) {
-        Domain domain = new Domain();
+    private static Domain createDomain(final RpslObject rpslObject) {
+        final Domain domain = new Domain();
         domain.setHandle(rpslObject.getKey().toString());
         domain.setLdhName(rpslObject.getKey().toString());
-        domain.setPort43(port43);
 
         final HashMap<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
 
@@ -388,13 +400,6 @@ class RdapObjectMapper {
         GregorianCalendar gc =  new GregorianCalendar();
         gc.setTimeInMillis(lastChanged.toDateTime().getMillis());
         return dtf.newXMLGregorianCalendar(gc);
-    }
-
-    private static void setRemarks(final RdapObject rdapObject, final RpslObject rpslObject) {
-        final List<Remark> remarks = createRemarks(rpslObject);
-        if (!remarks.isEmpty()) {
-            rdapObject.getRemarks().addAll(remarks);
-        }
     }
 
     public static Link createLink(String rel, String value, String href) {
