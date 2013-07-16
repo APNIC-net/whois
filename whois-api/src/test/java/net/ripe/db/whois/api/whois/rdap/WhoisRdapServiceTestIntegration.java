@@ -593,6 +593,12 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
     // general
 
+    private static void assertNow(XMLGregorianCalendar eventDate) {
+        XMLGregorianCalendar now = RdapObjectMapper.convertToXMLGregorianCalendar(LocalDateTime.now().withMillisOfSecond(0));
+        long span = now.toGregorianCalendar().getTimeInMillis() - eventDate.toGregorianCalendar().getTimeInMillis();
+        assertThat((int) span, is(lessThanOrEqualTo((int) 1000)));
+    }
+
     @Test
     public void multiple_modification_gives_correct_events() throws Exception {
         final String start = "" +
@@ -647,9 +653,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(events, hasSize(1));
 
         assertThat(events.get(0).getEventAction(), is("last changed"));
-        XMLGregorianCalendar now = RdapObjectMapper.convertToXMLGregorianCalendar(LocalDateTime.now().withMillisOfSecond(0));
-        long span = now.toGregorianCalendar().getTimeInMillis() - events.get(0).getEventDate().toGregorianCalendar().getTimeInMillis();
-        assertThat((int) span, is(lessThanOrEqualTo((int) 1000)));
+        assertNow(events.get(0).getEventDate());
     }
 
     @Test
