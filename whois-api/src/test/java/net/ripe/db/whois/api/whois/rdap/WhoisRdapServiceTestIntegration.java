@@ -504,18 +504,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(remarks.get(0).getDescription().get(0), is("A single ASN"));
     }
 
-    @Test
-    public void lookup_autnum_within_block() throws Exception {
-        try {
-            createResource(AUDIENCE, "autnum/1500")
-                    .accept(MediaType.APPLICATION_JSON_TYPE)
-                    .get(Autnum.class);
-            fail();
-        } catch (UniformInterfaceException e) {
-            assertThat(e.getResponse().getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
-        }
-    }
-
     // general
 
     @Test
