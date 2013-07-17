@@ -2,9 +2,12 @@ package net.ripe.db.whois.api.whois.rdap;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -13,6 +16,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 
 public class RdapHelperUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RdapHelperUtils.class);
     private static final XStream XSTREAM = new XStream();
     private static DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 
@@ -29,13 +33,19 @@ public class RdapHelperUtils {
         return XSTREAM.fromXML(xstreamXml);
     }
 
-    public static Document toDOM(Object src) throws Exception {
-        Document doc = docBuilderFactory.newDocumentBuilder().newDocument();
-        XSTREAM.marshal(src, new DomWriter(doc));
+    public static Document toDOM(Object src) {
+        Document doc = null;
+        try {
+            doc = docBuilderFactory.newDocumentBuilder().newDocument();
+            XSTREAM.marshal(src, new DomWriter(doc));
+        } catch (ParserConfigurationException pae) {
+            LOGGER.error("toDOM failed", pae);
+        }
         return doc;
     }
 
-    public static String DOMToString(Document doc) throws Exception {
+    public static String DOMToString(Document doc) {
+        String ret = null;
         try {
             DOMSource domSource = new DOMSource(doc);
             StringWriter writer = new StringWriter();
@@ -43,11 +53,11 @@ public class RdapHelperUtils {
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
             transformer.transform(domSource, result);
-            return writer.toString();
+            ret = writer.toString();
         } catch (TransformerException ex) {
-            ex.printStackTrace();
-            return null;
+            LOGGER.error("DOMToString failed", ex);
         }
+        return ret;
     }
 
 

@@ -158,7 +158,7 @@ public class RdapObjectMapperTest {
     }
 
     @Test
-    public void domain_31_12_202_in_addr_arpa() throws Exception {
+    public void domain_31_12_202_in_addr_arpa() {
         final Domain result = (Domain)map((RpslObject.parse("" +
                 "domain:   31.12.202.in-addr.arpa\n" +
                 "descr:    Test domain\n" +
@@ -238,7 +238,7 @@ public class RdapObjectMapperTest {
     }
 
     @Test
-    public void domain_102_130_in_addr_arpa() throws Exception {
+    public void domain_102_130_in_addr_arpa() {
         final Domain result = (Domain)map((RpslObject.parse("" +
                 "domain:         102.130.in-addr.arpa\n" +
                 "descr:          domain object for 130.102.0.0 - 130.102.255.255\n" +
@@ -289,7 +289,7 @@ public class RdapObjectMapperTest {
     }
 
     @Test
-    public void domain_29_12_202_in_addr_arpa() throws Exception {
+    public void domain_29_12_202_in_addr_arpa() {
         final Domain result = (Domain)map((RpslObject.parse("" +
                 "domain:         29.12.202.in-addr.arpa\n" +
                 "descr:          zone for 202.12.29.0/24\n" +
