@@ -664,7 +664,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         assertThat(events.get(0).getEventAction(), is("last changed"));
         assertNow(events.get(0).getEventDate());
-        assertThat(events.get(0).getEventDate(), is(dateTimeProvider.getCurrentDateTime()));
     }
 
     @Test
