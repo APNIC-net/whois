@@ -50,6 +50,7 @@ public class WhoisRdapService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WhoisRdapService.class);
     private static final int STATUS_TOO_MANY_REQUESTS = 429;
     private static final Set<ObjectType> ABUSE_CONTACT_TYPES = Sets.newHashSet(AUT_NUM, INETNUM, INET6NUM);
+    private static final String CONTENT_TYPE_RDAP_JSON = "application/rdap+json";
 
     private final QueryHandler queryHandler;
     private final RpslObjectDao objectDao;
@@ -65,7 +66,7 @@ public class WhoisRdapService {
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON, CONTENT_TYPE_RDAP_JSON})
     @Path("/{objectType}/{key:.*}")
     public Response lookup(@Context final HttpServletRequest request,
                            @PathParam("objectType") final String objectType,

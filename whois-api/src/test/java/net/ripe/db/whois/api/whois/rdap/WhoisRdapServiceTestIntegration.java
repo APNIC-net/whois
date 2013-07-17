@@ -603,6 +603,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
+<<<<<<< HEAD
     public void lookup_as_block() throws Exception {
         final Autnum autnum = createResource(AUDIENCE, "autnum/150")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
@@ -630,6 +631,16 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final List<Remark> remarks = autnum.getRemarks();
         assertThat(remarks, hasSize(1));
         assertThat(remarks.get(0).getDescription().get(0), is("ARIN ASN block"));
+    }
+
+    @Test
+    public void lookup_autnum_with_rdap_json_content_type() {
+        final ClientResponse response = createResource(AUDIENCE, "autnum/123")
+                .accept("application/rdap+json")
+                .get(ClientResponse.class);
+
+        assertThat(response.getType(), is(new MediaType("application", "rdap+json")));
+        assertThat(response.getEntity(String.class), containsString("\"handle\":\"AS123\""));
     }
 
     // general
