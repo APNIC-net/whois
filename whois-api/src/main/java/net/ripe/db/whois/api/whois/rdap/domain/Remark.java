@@ -26,7 +26,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
+ *         &lt;element name="title" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="links" type="{}link" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -37,13 +39,41 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "remark", propOrder = {
-    "description"
+    "title",
+    "description",
+    "links"
 })
 public class Remark
     implements Serializable
 {
 
+    protected String title;
     protected List<String> description;
+    protected Link links;
+
+    /**
+     * Gets the value of the title property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Sets the value of the title property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setTitle(String value) {
+        this.title = value;
+    }
 
     /**
      * Gets the value of the description property.
@@ -72,6 +102,30 @@ public class Remark
             description = new ArrayList<String>();
         }
         return this.description;
+    }
+
+    /**
+     * Gets the value of the links property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Link }
+     *     
+     */
+    public Link getLinks() {
+        return links;
+    }
+
+    /**
+     * Sets the value of the links property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Link }
+     *     
+     */
+    public void setLinks(Link value) {
+        this.links = value;
     }
 
 }

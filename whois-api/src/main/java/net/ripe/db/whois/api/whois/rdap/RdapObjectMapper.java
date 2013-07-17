@@ -175,7 +175,10 @@ class RdapObjectMapper {
         }
 
         if (!descriptions.isEmpty()) {
-            remarkList.add(createRemark(descriptions));
+            Remark remark = new Remark();
+            remark.setTitle("description");
+            remark.getDescription().addAll(descriptions);
+            remarkList.add(remark);
         }
 
         final List<String> remarks = Lists.newArrayList();
@@ -185,7 +188,10 @@ class RdapObjectMapper {
         }
 
         if (!remarks.isEmpty()) {
-            remarkList.add(createRemark(remarks));
+            Remark remark = new Remark();
+            remark.setTitle("remarks");
+            remark.getDescription().addAll(remarks);
+            remarkList.add(remark);
         }
 
         return remarkList;
@@ -437,12 +443,6 @@ class RdapObjectMapper {
         link.setValue(value);
         link.setHref(href);
         return link;
-    }
-
-    public static Remark createRemark(List<String> remarks) {
-        Remark remark = new Remark();
-        remark.getDescription().addAll(remarks);
-        return remark;
     }
 
     public static void setVCardArray(Entity entity, final VCard... vCards) {
