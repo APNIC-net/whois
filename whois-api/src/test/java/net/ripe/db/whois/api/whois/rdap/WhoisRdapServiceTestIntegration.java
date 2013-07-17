@@ -5,8 +5,6 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.DomDriver;
 import net.ripe.db.whois.api.AbstractRestClientTest;
 import net.ripe.db.whois.api.httpserver.Audience;
 import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
@@ -41,7 +39,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 //    private static final Logger LOGGER = LoggerFactory.getLogger(WhoisRdapServiceTestIntegration.class);
 
     private static final Audience AUDIENCE = Audience.PUBLIC;
-    private static final XStream XSTREAM = new XStream(new DomDriver());
 
     @Autowired TestDateTimeProvider dateTimeProvider;
 
@@ -211,6 +208,13 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getStartAddress(), is("192.0.0.0"));
         assertThat(response.getEndAddress(), is("192.255.255.255"));
         assertThat(response.getName(), is("TEST-NET-NAME"));
+
+        final List<Link> links = response.getLinks();
+        assertThat(links, hasSize(1));
+        final String selfUrl = createResource(AUDIENCE, "ip/192.0.0.0/8").toString();
+        assertThat(links.get(0).getRel(), equalTo("self"));
+        assertThat(links.get(0).getHref(), equalTo(selfUrl));
+        assertThat(links.get(0).getValue(), equalTo(selfUrl));
     }
 
     @Test
@@ -240,6 +244,13 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getLang(), is(nullValue()));
         assertThat(response.getParentHandle(), is(nullValue()));
 
+        final List<Link> links = response.getLinks();
+        assertThat(links, hasSize(1));
+        final String selfUrl = createResource(AUDIENCE, "ip/192.0.0.0/8").toString();
+        final String requestUrl = createResource(AUDIENCE, "ip/192.0.0.255").toString();
+        assertThat(links.get(0).getRel(), equalTo("self"));
+        assertThat(links.get(0).getHref(), equalTo(selfUrl));
+        assertThat(links.get(0).getValue(), equalTo(requestUrl));
     }
 
     @Test
@@ -287,7 +298,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final String upUrl = createResource(AUDIENCE, "ip/192.0.0.0/24").toString();
         assertThat(upLink.getRel(), equalTo("up"));
         assertThat(upLink.getHref(), equalTo(upUrl));
-        
+
         final Link selfLink = links.get(1);
         assertThat(selfLink.getRel(), equalTo("self"));
     }
@@ -355,6 +366,14 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getStartAddress(), is("2001:2002:2003::"));
         assertThat(response.getEndAddress(), is("2001:2002:2003:ffff:ffff:ffff:ffff:ffff"));
         assertThat(response.getName(), is("RIPE-NCC"));
+
+        final List<Link> links = response.getLinks();
+        assertThat(links, hasSize(1));
+        final String selfUrl = createResource(AUDIENCE, "ip/2001:2002:2003::/48").toString();
+        final String requestUrl = createResource(AUDIENCE, "ip/2001:2002:2003:2004::").toString();
+        assertThat(links.get(0).getRel(), equalTo("self"));
+        assertThat(links.get(0).getHref(), equalTo(selfUrl));
+        assertThat(links.get(0).getValue(), equalTo(requestUrl));
     }
 
     // person entity
@@ -373,7 +392,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "[[version, {}, text, 4.0], " +
                 "[fn, {}, text, Pauleth Palthen], " +
                 "[kind, {}, text, individual], " +
-                "[adr, {label=Singel 258, type=work}, text, null], " +
+                "[adr, {label=Singel 258, type=work}, text, [, , , , , , ]], " +
                 "[tel, {type=[work, voice]}, text, +31-1234567890], " +
                 "[email, {type=work}, text, noreply@ripe.net]]"));
         assertThat(response.getRdapConformance(), hasSize(1));
@@ -416,7 +435,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "[[version, {}, text, 4.0], " +
                 "[fn, {}, text, First Role], " +
                 "[kind, {}, text, group], " +
-                "[adr, {label=Singel 258, type=work}, text, null], " +
+                "[adr, {label=Singel 258, type=work}, text, [, , , , , , ]], " +
                 "[email, {type=work}, text, dbtest@ripe.net]]"));
 
         assertThat(response.getEntities(), hasSize(1));
@@ -505,7 +524,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final Link selfLink = links.get(0);
         assertThat(selfLink.getRel(), equalTo("self"));
 
-        final String ru = createResource(AUDIENCE, "autnum/123").toString();      // TODO: self link includes prefix
+        final String ru = createResource(AUDIENCE, "autnum/123").toString();
         assertThat(selfLink.getValue(), equalTo(ru));
         assertThat(selfLink.getHref(), equalTo(ru));
 
@@ -726,7 +745,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
             "[[version, {}, text, 4.0], " +
             "[fn, {}, text, Abuse Contact], " +
             "[kind, {}, text, group], " +
-            "[adr, {label=Singel 258, type=work}, text, null], " +
+            "[adr, {label=Singel 258, type=work}, text, [, , , , , , ]], " +
             "[tel, {type=[work, voice]}, text, +31 6 12345678]]"));
     }
 
@@ -813,11 +832,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
     private String getSyncupdatesUrl(final String instance, final String command) {
         return "http://localhost:" + getPort(Audience.PUBLIC) + String.format("/whois/syncupdates/%s?%s", instance, command);
-    }
-
-    public static <T> T cloneObject(T src, Class dest) {
-        String toXml = XSTREAM.toXML(src).replace(src.getClass().getName(), dest.getName());
-        return (T) XSTREAM.fromXML(toXml);
     }
 
 

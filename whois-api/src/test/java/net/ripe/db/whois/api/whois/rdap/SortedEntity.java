@@ -16,7 +16,7 @@ public class SortedEntity extends Entity implements Comparable<Entity> {
         try {
             // Deep clone entity to sortedEntity
             for (Entity entity : entities) {
-                SortedEntity sortedEntity = (SortedEntity) WhoisRdapServiceTestIntegration.cloneObject(entity, SortedEntity.class);
+                SortedEntity sortedEntity = (SortedEntity) RdapHelperUtils.cloneObject(entity, SortedEntity.class);
                 ret.add(sortedEntity);
             }
         } catch (Exception ex) {
