@@ -51,7 +51,7 @@ import static net.ripe.db.whois.common.rpsl.AttributeType.*;
 class RdapObjectMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapObjectMapper.class);
 
-    private static final List<String> RDAP_CONFORMANCE_LEVEL = Lists.newArrayList("rdap_level_0");
+    protected static final List<String> RDAP_CONFORMANCE_LEVEL = Lists.newArrayList("rdap_level_0");
 
     protected static DatatypeFactory dtf;
     static {
@@ -62,13 +62,14 @@ class RdapObjectMapper {
         }
     }
 
-    private static final Set<AttributeType> CONTACT_ATTRIBUTES = Sets.newHashSet(AttributeType.ADMIN_C, AttributeType.TECH_C);
+    private static final Set<AttributeType> CONTACT_ATTRIBUTES = Sets.newHashSet(AttributeType.ADMIN_C, AttributeType.TECH_C, AttributeType.ZONE_C);
     private static final Map<AttributeType, String> CONTACT_ATTRIBUTE_TO_ROLE_NAME = Maps.newHashMap();
 
     static {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ADMIN_C, "administrative");
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(TECH_C, "technical");
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(AttributeType.MNT_BY, "registrant");
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(AttributeType.ZONE_C, "zone");
     }
 
     @Value("${rdap.public.port43:whois.ripe.net}")

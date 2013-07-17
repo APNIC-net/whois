@@ -15,7 +15,7 @@ public class SortedLink extends Link implements Comparable<Link> {
         try {
             // Deep clone link to sortedLink
             for (Link link : links) {
-                SortedLink sortedLink = (SortedLink) WhoisRdapServiceTestIntegration.cloneObject(link, SortedLink.class);
+                SortedLink sortedLink = (SortedLink) RdapHelperUtils.cloneObject(link, SortedLink.class);
                 ret.add(sortedLink);
             }
         } catch (Exception ex) {
