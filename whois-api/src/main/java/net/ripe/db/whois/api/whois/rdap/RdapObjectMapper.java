@@ -42,11 +42,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static net.ripe.db.whois.common.rpsl.AttributeType.ADDRESS;
 import static net.ripe.db.whois.common.rpsl.AttributeType.ADMIN_C;
-import static net.ripe.db.whois.common.rpsl.AttributeType.TECH_C;
-import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
+import static net.ripe.db.whois.common.rpsl.AttributeType.AS_NAME;
+import static net.ripe.db.whois.common.rpsl.AttributeType.COUNTRY;
+import static net.ripe.db.whois.common.rpsl.AttributeType.DESCR;
+import static net.ripe.db.whois.common.rpsl.AttributeType.DS_RDATA;
+import static net.ripe.db.whois.common.rpsl.AttributeType.E_MAIL;
+import static net.ripe.db.whois.common.rpsl.AttributeType.FAX_NO;
+import static net.ripe.db.whois.common.rpsl.AttributeType.GEOLOC;
+import static net.ripe.db.whois.common.rpsl.AttributeType.IRT;
+import static net.ripe.db.whois.common.rpsl.AttributeType.LANGUAGE;
+import static net.ripe.db.whois.common.rpsl.AttributeType.MNT_BY;
 import static net.ripe.db.whois.common.rpsl.AttributeType.NETNAME;
-import static net.ripe.db.whois.common.rpsl.AttributeType.*;
+import static net.ripe.db.whois.common.rpsl.AttributeType.NSERVER;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ORG;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ORG_NAME;
+import static net.ripe.db.whois.common.rpsl.AttributeType.PERSON;
+import static net.ripe.db.whois.common.rpsl.AttributeType.PHONE;
+import static net.ripe.db.whois.common.rpsl.AttributeType.REMARKS;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ROLE;
+import static net.ripe.db.whois.common.rpsl.AttributeType.STATUS;
+import static net.ripe.db.whois.common.rpsl.AttributeType.TECH_C;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ZONE_C;
+import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
 
 class RdapObjectMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapObjectMapper.class);
@@ -62,14 +81,14 @@ class RdapObjectMapper {
         }
     }
 
-    private static final Set<AttributeType> CONTACT_ATTRIBUTES = Sets.newHashSet(AttributeType.ADMIN_C, AttributeType.TECH_C, AttributeType.ZONE_C);
+    private static final Set<AttributeType> CONTACT_ATTRIBUTES = Sets.newHashSet(ADMIN_C, TECH_C, ZONE_C);
     private static final Map<AttributeType, String> CONTACT_ATTRIBUTE_TO_ROLE_NAME = Maps.newHashMap();
 
     static {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ADMIN_C, "administrative");
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(TECH_C, "technical");
-        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(AttributeType.MNT_BY, "registrant");
-        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(AttributeType.ZONE_C, "zone");
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(MNT_BY, "registrant");
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, "zone");
     }
 
     @Value("${rdap.public.port43:whois.ripe.net}")
@@ -158,7 +177,7 @@ class RdapObjectMapper {
         ip.setType(rpslObject.getValueForAttribute(STATUS).toString());
 
         if (parentRpslObject != null) {
-            ip.setParentHandle(parentRpslObject.getValueForAttribute(AttributeType.NETNAME).toString());
+            ip.setParentHandle(parentRpslObject.getValueForAttribute(NETNAME).toString());
 
             CIString parentKey = parentRpslObject.getKey();
             IpInterval parentInterval = (parentRpslObject.getType() == INET6NUM) ? Ipv6Resource.parse(parentKey) : Ipv4Resource.parse(parentKey);
@@ -175,7 +194,7 @@ class RdapObjectMapper {
 
         final List<String> descriptions = Lists.newArrayList();
 
-        for (final CIString description : rpslObject.getValuesForAttribute(AttributeType.DESCR)) {
+        for (final CIString description : rpslObject.getValuesForAttribute(DESCR)) {
             descriptions.add(description.toString());
         }
 
@@ -188,7 +207,7 @@ class RdapObjectMapper {
 
         final List<String> remarks = Lists.newArrayList();
 
-        for (final CIString description : rpslObject.getValuesForAttribute(AttributeType.REMARKS)) {
+        for (final CIString description : rpslObject.getValuesForAttribute(REMARKS)) {
             remarks.add(description.toString());
         }
 
@@ -293,7 +312,7 @@ class RdapObjectMapper {
             final AutNum autNum = AutNum.parse(keyValue);
             autnum.setStartAutnum(autNum.getValue());
             autnum.setEndAutnum(autNum.getValue());
-            autnum.setName(rpslObject.getValueForAttribute(AttributeType.AS_NAME).toString().replace(" ", ""));
+            autnum.setName(rpslObject.getValueForAttribute(AS_NAME).toString().replace(" ", ""));
             autnum.setType("DIRECT ALLOCATION");
 
             final String selfUrl = baseUrl + "/autnum/" + autNum.getValue();
@@ -314,7 +333,7 @@ class RdapObjectMapper {
 
         final HashMap<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
 
-        for (final RpslAttribute rpslAttribute : rpslObject.findAttributes(AttributeType.NSERVER)) {
+        for (final RpslAttribute rpslAttribute : rpslObject.findAttributes(NSERVER)) {
             final NServer nserver = NServer.parse(rpslAttribute.getCleanValue().toString());
 
             final CIString hostname = nserver.getHostname();
@@ -357,7 +376,7 @@ class RdapObjectMapper {
         final Domain.SecureDNS secureDNS = new Domain.SecureDNS();
         secureDNS.setDelegationSigned(false);
 
-        for (final CIString rdata : rpslObject.getValuesForAttribute(AttributeType.DS_RDATA)) {
+        for (final CIString rdata : rpslObject.getValuesForAttribute(DS_RDATA)) {
             final DsRdata dsRdata = DsRdata.parse(rdata);
 
             secureDNS.setDelegationSigned(true);
@@ -384,25 +403,25 @@ class RdapObjectMapper {
 
         switch (rpslObject.getType()) {
             case PERSON:
-                for (final RpslAttribute attribute : rpslObject.findAttributes(AttributeType.PERSON)) {
+                for (final RpslAttribute attribute : rpslObject.findAttributes(PERSON)) {
                     builder.addFn(attribute.getCleanValue().toString());
                 }
                 builder.addKind("individual");
                 break;
             case ORGANISATION:
-                for (final RpslAttribute attribute : rpslObject.findAttributes(AttributeType.ORG_NAME)) {
+                for (final RpslAttribute attribute : rpslObject.findAttributes(ORG_NAME)) {
                     builder.addFn(attribute.getCleanValue().toString());
                 }
                 builder.addKind("org");
                 break;
             case ROLE:
-                for (final RpslAttribute attribute : rpslObject.findAttributes(AttributeType.ROLE)) {
+                for (final RpslAttribute attribute : rpslObject.findAttributes(ROLE)) {
                     builder.addFn(attribute.getCleanValue().toString());
                 }
                 builder.addKind("group");
                 break;
             case IRT:
-                for (final RpslAttribute attribute : rpslObject.findAttributes(AttributeType.IRT)) {
+                for (final RpslAttribute attribute : rpslObject.findAttributes(IRT)) {
                     builder.addFn(attribute.getCleanValue().toString());
                 }
                 builder.addKind("group");
@@ -412,7 +431,7 @@ class RdapObjectMapper {
         }
 
         List<CIString> addrList = new ArrayList<CIString>();
-        for (final CIString address : rpslObject.getValuesForAttribute(AttributeType.ADDRESS)) {
+        for (final CIString address : rpslObject.getValuesForAttribute(ADDRESS)) {
             addrList.add(address);
         }
         if (!addrList.isEmpty()) {
@@ -421,24 +440,24 @@ class RdapObjectMapper {
             builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("type", "work"), Maps.immutableEntry("label", addr)), emptyAddrList);
         }
 
-        for (final CIString phone : rpslObject.getValuesForAttribute(AttributeType.PHONE)) {
+        for (final CIString phone : rpslObject.getValuesForAttribute(PHONE)) {
             builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", Lists.newArrayList("work", "voice"))),phone.toString());
         }
 
-        for (final CIString fax : rpslObject.getValuesForAttribute(AttributeType.FAX_NO)) {
+        for (final CIString fax : rpslObject.getValuesForAttribute(FAX_NO)) {
             builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", "work")),fax.toString());
         }
 
-        for (final CIString email : rpslObject.getValuesForAttribute(AttributeType.E_MAIL)) {
+        for (final CIString email : rpslObject.getValuesForAttribute(E_MAIL)) {
             // TODO ?? Is it valid to have more than 1 email
             builder.addEmail(VCardHelper.createMap(Maps.immutableEntry("type", "work")),email.toString());
         }
 
-        for (final CIString org : rpslObject.getValuesForAttribute(AttributeType.ORG)) {
+        for (final CIString org : rpslObject.getValuesForAttribute(ORG)) {
             builder.addOrg(org.toString());
         }
 
-        for (final CIString geoloc : rpslObject.getValuesForAttribute(AttributeType.GEOLOC)) {
+        for (final CIString geoloc : rpslObject.getValuesForAttribute(GEOLOC)) {
             builder.addGeo(VCardHelper.createMap(Maps.immutableEntry("type", "work")), geoloc.toString());
         }
 
