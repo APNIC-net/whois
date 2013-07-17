@@ -34,6 +34,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -396,7 +397,8 @@ class RdapObjectMapper {
         }
         if (!addrList.isEmpty()) {
             String addr = Joiner.on("\n").join(addrList.listIterator());
-            builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("type", "work"), Maps.immutableEntry("label", addr)), null);
+            List<String> emptyAddrList = Arrays.asList("", "", "", "", "", "", "");
+            builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("type", "work"), Maps.immutableEntry("label", addr)), emptyAddrList);
         }
 
         for (final CIString phone : rpslObject.getValuesForAttribute(AttributeType.PHONE)) {
