@@ -207,10 +207,6 @@ public class WhoisRdapService {
                 }
             });
 
-            if (result.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
         } catch (final QueryException e) {
             if (e.getCompletionInfo() == QueryCompletionInfo.BLOCKED) {
                 throw new WebApplicationException(Response.status(STATUS_TOO_MANY_REQUESTS).build());

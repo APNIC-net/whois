@@ -119,6 +119,13 @@
         </dependency>
 
         <!-- JSON testing -->
+
+        <dependency>
+            <groupId>org.ostermiller</groupId>
+            <artifactId>utils</artifactId>
+            <version>1.07.00</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
