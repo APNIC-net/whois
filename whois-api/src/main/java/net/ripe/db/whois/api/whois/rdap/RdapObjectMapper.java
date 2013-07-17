@@ -19,6 +19,7 @@ import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.Ipv4Resource;
 import net.ripe.db.whois.common.domain.Ipv6Resource;
 import net.ripe.db.whois.common.domain.attrs.AsBlockRange;
+import net.ripe.db.whois.common.domain.attrs.AutNum;
 import net.ripe.db.whois.common.domain.attrs.DsRdata;
 import net.ripe.db.whois.common.domain.attrs.NServer;
 import net.ripe.db.whois.common.rpsl.AttributeType;
@@ -44,6 +45,8 @@ import java.util.Set;
 import static net.ripe.db.whois.common.rpsl.AttributeType.ADMIN_C;
 import static net.ripe.db.whois.common.rpsl.AttributeType.TECH_C;
 import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
+import static net.ripe.db.whois.common.rpsl.AttributeType.NETNAME;
+import static net.ripe.db.whois.common.rpsl.AttributeType.*;
 
 class RdapObjectMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapObjectMapper.class);
@@ -85,11 +88,11 @@ class RdapObjectMapper {
 
         switch (rpslObjectType) {
             case DOMAIN:
-                rdapResponse = createDomain(rpslObject);
+                rdapResponse = createDomain(rpslObject, requestUrl, baseUrl);
                 break;
             case AUT_NUM:
             case AS_BLOCK:
-                rdapResponse = createAutnumResponse(rpslObject);
+                rdapResponse = createAutnumResponse(rpslObject, requestUrl, baseUrl);
                 break;
             case INETNUM:
             case INET6NUM:
@@ -101,14 +104,13 @@ class RdapObjectMapper {
             // TODO: [ES] Denis to review
             case ORGANISATION:
             case IRT:
-                rdapResponse = createEntity(rpslObject);
+                rdapResponse = createEntity(rpslObject, requestUrl, baseUrl);
                 break;
             default:
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
         }
 
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
-        rdapResponse.getLinks().add(createLink("self", requestUrl, requestUrl));
         rdapResponse.setPort43(port43);
         rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, requestUrl));
 
@@ -119,7 +121,7 @@ class RdapObjectMapper {
         rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
-            rdapResponse.getEntities().add(createEntity(abuseContact));
+            rdapResponse.getEntities().add(createEntity(abuseContact, requestUrl, baseUrl));
         }
         List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
         if (!ctcEntities.isEmpty()) {
@@ -141,26 +143,28 @@ class RdapObjectMapper {
             ip.setIpVersion("v4");
         }
 
+        String selfUrl = baseUrl + "/ip/" + ipInterval.toString();
+
         // TODO: find a better way to remove the cidr notation
         String startAddr = IpInterval.asIpInterval(ipInterval.beginAsInetAddress()).toString();
         String endAddr = IpInterval.asIpInterval(ipInterval.endAsInetAddress()).toString();
         ip.setStartAddress(startAddr.split("/")[0]);
         ip.setEndAddress(endAddr.split("/")[0]);
 
-        ip.setName(rpslObject.getValueForAttribute(AttributeType.NETNAME).toString());
-        ip.setCountry(rpslObject.getValueForAttribute(AttributeType.COUNTRY).toString());
-        ip.setLang(rpslObject.getValuesForAttribute(AttributeType.LANGUAGE).isEmpty() ? null : Joiner.on(",").join(rpslObject.getValuesForAttribute(AttributeType.LANGUAGE)));
-        ip.setType(rpslObject.getValueForAttribute(AttributeType.STATUS).toString());
+        ip.setName(rpslObject.getValueForAttribute(NETNAME).toString());
+        ip.setCountry(rpslObject.getValueForAttribute(COUNTRY).toString());
+        ip.setLang(rpslObject.getValuesForAttribute(LANGUAGE).isEmpty() ? null : Joiner.on(",").join(rpslObject.getValuesForAttribute(LANGUAGE)));
+        ip.setType(rpslObject.getValueForAttribute(STATUS).toString());
 
         if (parentRpslObject != null) {
             ip.setParentHandle(parentRpslObject.getValueForAttribute(AttributeType.NETNAME).toString());
 
             CIString parentKey = parentRpslObject.getKey();
             IpInterval parentInterval = (parentRpslObject.getType() == INET6NUM) ? Ipv6Resource.parse(parentKey) : Ipv4Resource.parse(parentKey);
-            String prefix = IpInterval.asIpInterval(parentInterval.beginAsInetAddress()).toString().split("/")[0] + "/" + parentInterval.getPrefixLength();
-            ip.getLinks().add(createLink("up", requestUrl,
-                                         baseUrl + "/ip/" + prefix));
+            ip.getLinks().add(createLink("up", selfUrl, baseUrl + "/ip/" + parentInterval.toString()));
         }
+
+        ip.getLinks().add(createLink("self", requestUrl, selfUrl));
 
         return ip;
     }
@@ -243,24 +247,24 @@ class RdapObjectMapper {
         return entities;
     }
 
-    private static Entity createEntity(final RpslObject rpslObject) {
+    private static Entity createEntity(final RpslObject rpslObject, final String requestUrl, final String baseUrl) {
         final Entity entity = new Entity();
         entity.setHandle(rpslObject.getKey().toString());
         setVCardArray(entity,createVCard(rpslObject));
+
+        final String selfUrl = baseUrl + "/entity/" + entity.getHandle();
+        entity.getLinks().add( createLink("self", requestUrl, selfUrl));
 
         return entity;
     }
 
     private static Entity createNestedEntity(final RpslObject rpslObject, final List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
-        final Entity entity = createEntity(rpslObject);
+        final Entity entity = createEntity(rpslObject, requestUrl, baseUrl);
 
         final List<Remark> remarks = createRemarks(rpslObject);
         if (!remarks.isEmpty()) {
             entity.getRemarks().addAll(remarks);
         }
-
-        final String selfUrl = baseUrl + "/entity/" + entity.getHandle();
-        entity.getLinks().add( createLink("self", requestUrl, selfUrl));
 
         List<Entity> contactEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
         if (!contactEntities.isEmpty()) {
@@ -271,32 +275,41 @@ class RdapObjectMapper {
         return entity;
     }
 
-    private static Autnum createAutnumResponse(final RpslObject rpslObject) {
+    private static Autnum createAutnumResponse(final RpslObject rpslObject, String requestUrl, String baseUrl) {
         final Autnum autnum = new Autnum();
         final String keyValue = rpslObject.getKey().toString();
         autnum.setHandle(keyValue);
 
         if (rpslObject.getType() == ObjectType.AS_BLOCK) {
-            AsBlockRange asBlockRange = AsBlockRange.parse(keyValue);
+            final AsBlockRange asBlockRange = AsBlockRange.parse(keyValue);
             autnum.setStartAutnum(asBlockRange.getBegin());
             autnum.setEndAutnum(asBlockRange.getEnd());
             autnum.setName(keyValue);
+
+            // TODO: [RL] What's the canonical self url for a block? Punt for now and just use what they requested
+            autnum.getLinks().add( createLink("self", requestUrl, requestUrl));
         } else {
-            final CIString autnumAttributeValue = rpslObject.getValueForAttribute(AttributeType.AUT_NUM);
-            final long startAndEnd = Long.valueOf(autnumAttributeValue.toString().replace("AS", "").replace(" ", ""));
-            autnum.setStartAutnum(startAndEnd);
-            autnum.setEndAutnum(startAndEnd);
+            final AutNum autNum = AutNum.parse(keyValue);
+            autnum.setStartAutnum(autNum.getValue());
+            autnum.setEndAutnum(autNum.getValue());
             autnum.setName(rpslObject.getValueForAttribute(AttributeType.AS_NAME).toString().replace(" ", ""));
             autnum.setType("DIRECT ALLOCATION");
+
+            final String selfUrl = baseUrl + "/autnum/" + autNum.getValue();
+            autnum.getLinks().add( createLink("self", requestUrl, selfUrl));
         }
+
 
         return autnum;
     }
 
-    private static Domain createDomain(final RpslObject rpslObject) {
+    private static Domain createDomain(final RpslObject rpslObject, String requestUrl, String baseUrl) {
         final Domain domain = new Domain();
         domain.setHandle(rpslObject.getKey().toString());
         domain.setLdhName(rpslObject.getKey().toString());
+
+        final String selfUrl = baseUrl + "/domain/" + domain.getHandle();
+        domain.getLinks().add( createLink("self", requestUrl, selfUrl));
 
         final HashMap<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
 
