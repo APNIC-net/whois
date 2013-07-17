@@ -274,6 +274,5 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                 countDownLatch.countDown();
             }
         }
-
     }
 }
