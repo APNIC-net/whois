@@ -113,13 +113,7 @@ public enum AttributeType implements AttributeTypeBuilder {
     UPD_TO(AttributeTypeBuilder.implementationMap.get(Enum.UPD_TO)),
     ZONE_C(AttributeTypeBuilder.implementationMap.get(Enum.ZONE_C)),
     // APNIC
-    ADDRESS_PREFIX_RANGE(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_ADDRESS_PREFIX_RANGE)),
-    APNIC_DOM_NET(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_DOM_NET)),
-    APNIC_REFER(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_REFER)),
-    APNIC_REGISTRY_NAME(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_REGISTRY_NAME)),
-    APNIC_SUB_DOM(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_SUB_DOM));
-    // APNIC_LIMERICK(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_LIMERICK)),
-    // APNIC_MEMBERS_AS(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_MEMBERS_AS)),
+    APNIC_REFER(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_REFER)); // TODO
 
 
     private static final Map<CIString, AttributeType> TYPE_NAMES = Maps.newHashMapWithExpectedSize(AttributeType.values().length);

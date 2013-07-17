@@ -20,7 +20,6 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
     static Map<Enum, AttributeTypeBuilder> localMap = new HashMap<Enum, AttributeTypeBuilder>();
 
     static {
-        // Please check .doc description against attribute.xml
         put(new AttributeTypeBuilderImpl("abuse-mailbox", "am", Enum.ABUSE_MAILBOX)
                 .doc("Specifies the e-mail address to which abuse complaints should be sent.")
                 .syntax(AttributeSyntax.EMAIL_SYNTAX));
@@ -54,31 +53,11 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("The canonical DNS name for the router.")
                 .syntax(AttributeSyntax.ALIAS_SYNTAX));
 
-        put(new AttributeTypeBuilderImpl("address-prefix", "ap", Enum.APNIC_ADDRESS_PREFIX_RANGE)
-                .doc("Specifies a range of IPv4 that inetnum object presents. " +
-                        "The ending address should be greater than the starting one.")
-                .syntax(AttributeSyntax.ADDRESS_PREFIX_RANGE_SYNTAX));
-
-        put(new AttributeTypeBuilderImpl("dom-net", "di", Enum.APNIC_DOM_NET)
-                .doc("This attribute is not applicable to reverse domains. Do not use " +
-                        "this attribute.")
-                .syntax(AttributeSyntax.APNIC_DOM_NET_SYNTAX));
-
-        // Not in current attribute.xml
-        put(new AttributeTypeBuilderImpl("registry-name", "rg", Enum.APNIC_REGISTRY_NAME)
-                .doc("Specifies the registry name as 'APNIC'.")
-                .syntax(AttributeSyntax.APNIC_REGISTRY_NAME_SYNTAX));
-
         put(new AttributeTypeBuilderImpl("refer", "rf", Enum.APNIC_REFER)
                 .doc("The referral type, hostname and port that the server " +
                         "should use to redirect the query when using referral mechanism " +
                         "for lookups for domain objects.")
                 .syntax(AttributeSyntax.APNIC_REFER_SYNTAX));
-
-        // Not in current attribute.xml
-        put(new AttributeTypeBuilderImpl("sub-dom", "sb", Enum.APNIC_SUB_DOM)
-                .doc("Specifies Domain name as in RFC 1034 without trailing dot (\".\").")
-                .syntax(AttributeSyntax.APNIC_SUBDOMAIN_NAME_SYNTAX));
 
         // Unused attribute - included to allow the code to function.
         put(new AttributeTypeBuilderImpl("assignment-size", "ae", Enum.ASSIGNMENT_SIZE)
@@ -114,7 +93,7 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
 
         put(new AttributeTypeBuilderImpl("certif", "ce", Enum.CERTIF)
                 .doc("Contains the public key.")
-                .syntax(AttributeSyntax.APNIC_PUBLIC_KEY_SYNTAX));
+                .syntax(AttributeSyntax.CERTIF_SYNTAX));
 
         put(new AttributeTypeBuilderImpl("changed", "ch", Enum.CHANGED)
                 .doc("The email address of who last updated the object and the date it occurred.")
@@ -186,7 +165,7 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                         "This attribute is generated automatically by the database software " +
                         "and must be omitted from the template when creating a key-cert " +
                         "object.")
-                .syntax(AttributeSyntax.APNIC_FINGERPR_SYNTAX));
+                .syntax(AttributeSyntax.GENERATED_SYNTAX));
 
         // Unused attribute - included to allow the code to function.
         put(new AttributeTypeBuilderImpl("form", "fr", Enum.FORM)
@@ -225,8 +204,6 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("Fully qualified DNS name of the inet-rtr without trailing dot (\".\").")
                 .syntax(AttributeSyntax.INET_RTR_SYNTAX));
 
-        // supports inject-rt, inject-r6 in attribute.xml
-        // .doc is same as in attribute.xml
         put(new AttributeTypeBuilderImpl("inject", "ij", Enum.INJECT)
                 .doc("Specifies which routers perform the aggregation and when they perform it.")
                 .syntax(AttributeSyntax.INJECT_SYNTAX));
@@ -264,8 +241,6 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .references(ObjectType.MNTNER)
                 .listValue());
 
-        // Uses members for members-as and members-is hence left RIPE's .doc
-        // Change .doc as per attribute.xml
         put(new AttributeTypeBuilderImpl("members", "ms", Enum.MEMBERS)
                 .doc(new Multiple(new HashMap<ObjectType, String>() {{
                     put(ObjectType.RTR_SET, "Lists the members of the rtr_set.");
@@ -274,8 +249,6 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.MEMBERS_SYNTAX)
                 .listValue()); // No reference checking should be performed for members!
 
-        // Supports member-of-ir, member-of-rt, member-of-an in attribute.xml
-        // Changed .doc as per attribute.xml
         put(new AttributeTypeBuilderImpl("member-of", "mo", Enum.MEMBER_OF)
                 .doc("Identifies any rtr-set objects this router wants to be a member " +
                         "This claim, however, should be acknowledged by a respective " +
@@ -341,8 +314,6 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .references(ObjectType.MNTNER)
                 .listValue());
 
-        // Supports mnt-routes, mnt-routes6, mnt-routes-an in attribute.xml
-        // Need to review the .doc for each object and change as per APNIC context
         put(new AttributeTypeBuilderImpl("mnt-routes", "mu", Enum.MNT_ROUTES)
                 .doc(new Documented.Multiple(new HashMap<ObjectType, String>() {{
                     put(ObjectType.AUT_NUM, "" +
@@ -410,7 +381,6 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("The inbound multiprotocol (IPv4 or IPv6) routing policy of the AS.")
                 .syntax(AttributeSyntax.MP_IMPORT_SYNTAX));
 
-        // Supports mp-members-is and mep-members-as as in attribute.xml
         put(new AttributeTypeBuilderImpl("mp-members", "mm", Enum.MP_MEMBERS)
                 .doc(new Multiple(new HashMap<ObjectType, String>() {{
                     put(ObjectType.RTR_SET, "Lists the multiprotocol (IPv4 or IPv6) members of the rtr-set.");
@@ -461,7 +431,6 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("The nameservers of the domain. A minimum of two is mandatory.")
                 .syntax(AttributeSyntax.NSERVER_SYNTAX));
 
-        // No APNIC .doc
         put(new AttributeTypeBuilderImpl("org", "og", Enum.ORG)
                 .doc("Points to an existing organisation object representing the entity that holds the resource.")
                 .syntax(AttributeSyntax.ORGANISATION_SYNTAX)
@@ -519,26 +488,24 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("A contact telephone number.")
                 .syntax(AttributeSyntax.PHONE_SYNTAX));
 
-        // Not in current attribute.xml
         put(new AttributeTypeBuilderImpl("ping-hdl", "pc", Enum.PING_HDL)
                 .doc("References a person or role capable of responding to queries concerning the IP address(es) " +
                         "specified in the 'pingable' attribute.")
                 .syntax(AttributeSyntax.NIC_HANDLE_SYNTAX)
                 .references(ObjectType.PERSON, ObjectType.ROLE));
 
-        //Not in current attribute.xml
         put(new AttributeTypeBuilderImpl("pingable", "pa", Enum.PINGABLE)
                 .doc("Allows a network operator to advertise an IP address of a node that should be reachable from outside " +
                         "networks. This node can be used as a destination address for diagnostic tests. " +
                         "The IP address must be within the address range of the prefix containing this attribute.")
                 .syntax(AttributeSyntax.PINGABLE_SYNTAX));
 
-        // Poem is obsolete in APNIC context. Removing this is beaking. It should be removed
+        // Poem is obsolete in APNIC context.
         put(new AttributeTypeBuilderImpl("poem", "po", Enum.POEM)
                 .doc("This attribute is not to be used.")
                 .syntax(AttributeSyntax.POEM_SYNTAX));
 
-        // POETIC_FORM is obsolete in APNIC context. Removing this is beaking. It should be removed
+        // POETIC_FORM is obsolete in APNIC context.
         put(new AttributeTypeBuilderImpl("poetic-form", "pf", Enum.POETIC_FORM)
                 .doc("This attribute is not to be used.")
                 .syntax(AttributeSyntax.POETIC_FORM_SYNTAX));
@@ -597,7 +564,6 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("The database where the object is registered.")
                 .syntax(AttributeSyntax.SOURCE_SYNTAX));
 
-        // Working for both status-in and status-i6 xmlnames.
         put(new AttributeTypeBuilderImpl("status", "st", Enum.STATUS)
                 .doc("The status of the address range represented by inetnum or inet6num " +
                         "object.")
@@ -608,9 +574,9 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .syntax(AttributeSyntax.NIC_HANDLE_SYNTAX)
                 .references(ObjectType.PERSON, ObjectType.ROLE));
 
-        // Text is obsolete in APNIC context, removing this is breaking. This should be removed later
+        // Unused attribute - included to allow the code to function.
         put(new AttributeTypeBuilderImpl("text", "tx", Enum.TEXT)
-                .doc("Text of the limerick. Must be humorous, but not malicious or insulting.")
+                .doc("This attribute is not to be used.")
                 .syntax(AttributeSyntax.FREE_FORM_SYNTAX));
 
         put(new AttributeTypeBuilderImpl("upd-to", "dt", Enum.UPD_TO)

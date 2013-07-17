@@ -110,15 +110,7 @@ public interface AttributeTypeBuilder extends Documented {
         ZONE_C,
 
         // APNIC
-        APNIC_ADDRESS_PREFIX_RANGE,
-        APNIC_DOM_NET,
-        APNIC_OBJECT_NAME,
-        APNIC_MEMBERS_AS,
-        APNIC_PERSON_NAME,
         APNIC_REFER,
-        APNIC_REGISTRY_NAME,
-        APNIC_SUB_DOM,
-        // APNIC_LIMERICK,
     }
 
     abstract String getName();

@@ -94,11 +94,11 @@ public class ObjectDocumentationConfig {
                 "      attribute, please delete the existing person object and submit a\n" +
                 "      new one.");
 
-//        DOCUMENTATION.put(ObjectType.POEM, "" +
-//                "      A poem object contains poems that are submitted by users.\n");
-//
-//        DOCUMENTATION.put(ObjectType.POETIC_FORM, "" +
-//                "      A poetic-form object defines the supported poem types. \n");
+        DOCUMENTATION.put(ObjectType.POEM, "" +
+                "      This object is not allowed.\n");
+
+        DOCUMENTATION.put(ObjectType.POETIC_FORM, "" +
+                "      This object is not allowed. \n");
 
         DOCUMENTATION.put(ObjectType.ROLE, "" +
                 "      The role object is similar to a person object. However, instead \n" +
