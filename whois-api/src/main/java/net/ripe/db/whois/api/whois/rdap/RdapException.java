@@ -22,7 +22,7 @@ public class RdapException {
                 exception.getDescription().add("The server has not found anything matching the Request-URI.");
                 break;
             case 429:
-                exception.getDescription().add("Too many requests.");
+                exception.getDescription().add("Request limit exceeded for this resource. Please try again later.");
                 break;
             case 500:
                 exception.getDescription().add("The server encountered an unexpected condition which prevented it from fulfilling the request.");
