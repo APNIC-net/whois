@@ -5,8 +5,6 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.DomDriver;
 import net.ripe.db.whois.api.AbstractRestClientTest;
 import net.ripe.db.whois.api.httpserver.Audience;
 import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
@@ -41,7 +39,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 //    private static final Logger LOGGER = LoggerFactory.getLogger(WhoisRdapServiceTestIntegration.class);
 
     private static final Audience AUDIENCE = Audience.PUBLIC;
-    private static final XStream XSTREAM = new XStream(new DomDriver());
 
     @Autowired TestDateTimeProvider dateTimeProvider;
 
@@ -287,7 +284,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final String upUrl = createResource(AUDIENCE, "ip/192.0.0.0/24").toString();
         assertThat(upLink.getRel(), equalTo("up"));
         assertThat(upLink.getHref(), equalTo(upUrl));
-        
+
         final Link selfLink = links.get(1);
         assertThat(selfLink.getRel(), equalTo("self"));
     }
@@ -813,11 +810,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
     private String getSyncupdatesUrl(final String instance, final String command) {
         return "http://localhost:" + getPort(Audience.PUBLIC) + String.format("/whois/syncupdates/%s?%s", instance, command);
-    }
-
-    public static <T> T cloneObject(T src, Class dest) {
-        String toXml = XSTREAM.toXML(src).replace(src.getClass().getName(), dest.getName());
-        return (T) XSTREAM.fromXML(toXml);
     }
 
 

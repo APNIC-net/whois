@@ -5,16 +5,25 @@ import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
 import net.ripe.db.whois.api.whois.rdap.domain.Domain;
 import net.ripe.db.whois.api.whois.rdap.domain.Entity;
 import net.ripe.db.whois.api.whois.rdap.domain.Ip;
+import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.hasXPath;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class RdapObjectMapperTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RdapObjectMapperTest.class);
 
     private static String VERSION_DATETIME = "2044-04-26T00:02:03.000";
     private static final LocalDateTime VERSION_TIMESTAMP = LocalDateTime.parse(VERSION_DATETIME);
@@ -40,10 +49,11 @@ public class RdapObjectMapperTest {
                 "changed:        ripe@test.net 20120101\n" +
                 "source:         TEST")));
 
+        assertThat(result.getRdapConformance(), is(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL));
         assertThat(result.getHandle(), is("10.0.0.0 - 10.255.255.255"));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        //assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
         assertThat(result.getCountry(), is("NL"));
         assertThat(result.getEndAddress(), is("10.255.255.255"));
         assertThat(result.getIpVersion(), is("v4"));
@@ -55,7 +65,11 @@ public class RdapObjectMapperTest {
         assertThat(result.getLinks().get(0).getRel(), is("self"));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
+        assertThat(result.getRemarks(), hasSize(1));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("some descr"));
+        assertThat(result.getEntities(), hasSize(1));
+        assertThat(result.getEntities().get(0).getHandle(), is("TP1-TEST"));
+        assertThat(result.getEntities().get(0).getRoles().size(), is(2));
     }
 
     @Test
@@ -83,20 +97,28 @@ public class RdapObjectMapperTest {
                 "source:         TEST\n" +
                 "password:       update")));
 
+        assertThat(result.getRdapConformance(), is(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL));
         assertThat(result.getHandle(), is("AS102"));
         assertThat(result.getStartAutnum(), is(102l));
         assertThat(result.getEndAutnum(), is(102l));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        //assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
         assertThat(result.getName(), is("End-User-2"));
         assertThat(result.getType(), is("DIRECT ALLOCATION"));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
+        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
+        assertThat(result.getRemarks(), hasSize(2));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("description"));
         assertThat(result.getRemarks().get(1).getDescription().get(0), is("remarkable"));
+        assertThat(result.getEntities(), hasSize(1));
+        assertThat(result.getEntities().get(0).getHandle(), is("AP1-TEST"));
+        assertThat(result.getEntities().get(0).getRoles().size(), is(2));
+
     }
 
     @Test
@@ -113,23 +135,30 @@ public class RdapObjectMapperTest {
                 "source:          TEST\n" +
                 "password:        update")));
 
+        assertThat(result.getRdapConformance(), is(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL));
         assertThat(result.getHandle(), is("2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
         assertThat(result.getLdhName(), is("2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
         assertThat(result.getNameServers(), hasSize(1));
         assertThat(result.getNameServers().get(0).getLdhName(), is("ns.1.net"));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        //assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
+        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
+        assertThat(result.getRemarks(), hasSize(1));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("enum domain"));
+        assertThat(result.getEntities(), hasSize(1));
+        assertThat(result.getEntities().get(0).getHandle(), is("TEST-PN"));
+        assertThat(result.getEntities().get(0).getRoles().size(), is(3));
     }
 
     @Test
-    public void domain_31_12_202_in_addr_arpa() {
+    public void domain_31_12_202_in_addr_arpa() throws Exception {
         final Domain result = (Domain)map((RpslObject.parse("" +
                 "domain:   31.12.202.in-addr.arpa\n" +
                 "descr:    Test domain\n" +
@@ -150,11 +179,66 @@ public class RdapObjectMapperTest {
                 "mnt-by:   OWNER-MNT\n" +
                 "source:   TEST\n")));
 
+        assertThat(result.getRdapConformance(), is(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL));
         assertThat(result.getHandle(), is("31.12.202.in-addr.arpa"));
+        assertThat(result.getLdhName(), is("31.12.202.in-addr.arpa"));
+
+        assertThat(result.getNameServers(), hasSize(3));
+
+        // For easy testing of unordered List<Object> values using xpath
+        Document domResult = RdapHelperUtils.toDOM(result);
+        LOGGER.info(RdapHelperUtils.DOMToString(domResult));
+        String prefixpath = "/" + Domain.class.getName() + "/nameServers/" + Nameserver.class.getName();
+
+        // Use xpath to test for presence of bean values in unordered list
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'ns1.test.com.au']"));
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'ns1.test.com.au']/../ipAddresses/ipv4/string[text() = '10.0.0.1/32']"));
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'ns1.test.com.au']/../ipAddresses/ipv6/string[text() = '2001:10::1/128']"));
+
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'ns2.test.com.au']"));
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'ns2.test.com.au']/../ipAddresses/ipv4/string[text() = '10.0.0.2/32']"));
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'ns2.test.com.au']/../ipAddresses/ipv6/string[text() = '2001:10::2/128']"));
+
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'ns3.test.com.au']"));
+
+
+        assertThat(result.getEvents(), hasSize(1));
+        assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
+        assertThat(result.getLinks(), hasSize(1));
+        assertThat(result.getLinks().get(0).getRel(), is("self"));
+        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
+// TODO: [RL] test for copyright in notices
+//        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
+        assertThat(result.getRemarks(), hasSize(1));
+        assertThat(result.getRemarks().get(0).getDescription().get(0), is("Test domain"));
+        assertThat(result.getEntities(), hasSize(1));
+        assertThat(result.getEntities().get(0).getHandle(), is("TP1-TEST"));
+        assertThat(result.getEntities().get(0).getRoles().size(), is(3));
+        assertThat(result.getSecureDNS().isDelegationSigned(), is(true));
+
+        assertThat(result.getSecureDNS().getDsData(), hasSize(3));
+        assertThat(result.getSecureDNS().getDsData().get(0).getKeyTag(), is(52151L));
+        assertThat(result.getSecureDNS().getDsData().get(0).getAlgorithm(), is((short) 1));
+        assertThat(result.getSecureDNS().getDsData().get(0).getDigest(), is("13ee60f7499a70e5aadaf05828e7fc59e8e70bc1"));
+        assertThat(result.getSecureDNS().getDsData().get(0).getDigestType(), is(1L));
+
+        assertThat(result.getSecureDNS().getDsData().get(1).getKeyTag(), is(17881L));
+        assertThat(result.getSecureDNS().getDsData().get(1).getAlgorithm(), is((short)5));
+        assertThat(result.getSecureDNS().getDsData().get(1).getDigest(), is("2e58131e5fe28ec965a7b8e4efb52d0a028d7a78"));
+        assertThat(result.getSecureDNS().getDsData().get(1).getDigestType(), is(1L));
+
+        assertThat(result.getSecureDNS().getDsData().get(2).getKeyTag(), is(17881L));
+        assertThat(result.getSecureDNS().getDsData().get(2).getAlgorithm(), is((short)5));
+        assertThat(result.getSecureDNS().getDsData().get(2).getDigest(), is("8c6265733a73e5588bfac516a4fcfbe1103a544b95f254cb67a21e474079547e"));
+        assertThat(result.getSecureDNS().getDsData().get(2).getDigestType(), is(2L));
+
     }
 
     @Test
-    public void domain_102_130_in_addr_arpa() {
+    public void domain_102_130_in_addr_arpa() throws Exception {
         final Domain result = (Domain)map((RpslObject.parse("" +
                 "domain:         102.130.in-addr.arpa\n" +
                 "descr:          domain object for 130.102.0.0 - 130.102.255.255\n" +
@@ -173,11 +257,39 @@ public class RdapObjectMapperTest {
                 "changed:        d.thomas@its.uq.edu.au 20070226\n" +
                 "source:         APNIC\n")));
 
+        assertThat(result.getRdapConformance(), is(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL));
         assertThat(result.getHandle(), is("102.130.in-addr.arpa"));
+        assertThat(result.getLdhName(), is("102.130.in-addr.arpa"));
+        assertThat(result.getNameServers(), hasSize(4));
+
+        // For easy testing of unordered List<Object> values using xpath
+        Document domResult = RdapHelperUtils.toDOM(result);
+        //LOGGER.info(RdapHelperUtils.DOMToString(domResult));
+        String prefixpath = "/" + Domain.class.getName() + "/nameServers/" + Nameserver.class.getName();
+
+        // Use xpath to test for presence of bean values in unordered list
+        assertThat(domResult, hasXPath(prefixpath+ "/ldhName[text() = 'NS1.UQ.EDU.AU']"));
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'NS2.UQ.EDU.AU']"));
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'NS3.UQ.EDU.AU']"));
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'ns4.uqconnect.net']"));
+
+        assertThat(result.getEntities(), hasSize(1));
+        assertThat(result.getEntities().get(0).getHandle(), is("HM53-AP"));
+        assertThat(result.getEntities().get(0).getRoles().size(), is(3));
+
+        assertThat(result.getRemarks(), hasSize(1));
+        assertThat(result.getRemarks().get(0).getDescription().get(0), is("domain object for 130.102.0.0 - 130.102.255.255"));
+        assertThat(result.getLinks().get(0).getRel(), is("self"));
+        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
+
+        assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
     }
 
     @Test
-    public void domain_29_12_202_in_addr_arpa() {
+    public void domain_29_12_202_in_addr_arpa() throws Exception {
         final Domain result = (Domain)map((RpslObject.parse("" +
                 "domain:         29.12.202.in-addr.arpa\n" +
                 "descr:          zone for 202.12.29.0/24\n" +
@@ -194,7 +306,54 @@ public class RdapObjectMapperTest {
                 "changed:        hm-changed@apnic.net 20120508\n" +
                 "source:         APNIC\n")));
 
+        assertThat(result.getRdapConformance(), is(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL));
         assertThat(result.getHandle(), is("29.12.202.in-addr.arpa"));
+        assertThat(result.getLdhName(), is("29.12.202.in-addr.arpa"));
+
+        assertThat(result.getNameServers(), hasSize(3));
+
+        // For easy testing of unordered List<Object> values using xpath
+        Document domResult = RdapHelperUtils.toDOM(result);
+        //LOGGER.info(RdapHelperUtils.DOMToString(domResult));
+        String prefixpath = "/" + Domain.class.getName() + "/nameServers/" + Nameserver.class.getName();
+
+        // Use xpath to test for presence of bean values in unordered list
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'cumin.apnic.net']"));
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'tinnie.apnic.net']"));
+        assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'tinnie.arin.net']"));
+
+        assertThat(result.getSecureDNS().isDelegationSigned(), is(true));
+        assertThat(result.getSecureDNS().getDsData(), hasSize(2));
+        assertThat(result.getSecureDNS().getDsData().get(0).getKeyTag(), is(55264L));
+        assertThat(result.getSecureDNS().getDsData().get(0).getAlgorithm(), is((short) 5));
+        assertThat(result.getSecureDNS().getDsData().get(0).getDigest(), is("8bb4b233cbcf8593c6f153fccd4d805179b972a4"));
+        assertThat(result.getSecureDNS().getDsData().get(0).getDigestType(), is(1L));
+
+        assertThat(result.getSecureDNS().getDsData().get(1).getKeyTag(), is(55264L));
+        assertThat(result.getSecureDNS().getDsData().get(1).getAlgorithm(), is((short)5));
+        assertThat(result.getSecureDNS().getDsData().get(1).getDigest(), is("b44b18643775f9fdc76ee312667c2b350c1e02f3e43f8027f2c55777a429095a"));
+        assertThat(result.getSecureDNS().getDsData().get(1).getDigestType(), is(2L));
+
+        assertThat(result.getEntities(), hasSize(2));
+        assertThat(result.getEntities().get(0).getHandle(), is("AIC1-AP"));
+        assertThat(result.getEntities().get(0).getRoles().size(), is(1));
+
+        assertThat(result.getEntities().get(1).getHandle(), is("NO4-AP"));
+        assertThat(result.getEntities().get(1).getRoles(), containsInAnyOrder("administrative", "zone"));
+
+        assertThat(result.getRemarks(), hasSize(1));
+        assertThat(result.getRemarks().get(0).getTitle(), is("description"));
+        assertThat(result.getRemarks().get(0).getDescription().get(0), is("zone for 202.12.29.0/24"));
+
+        assertThat(result.getLinks(), hasSize(1));
+        assertThat(result.getLinks().get(0).getRel(), is("self"));
+        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
+
+        assertThat(result.getEvents(), hasSize(1));
+        assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
     }
 
     @Test
@@ -214,7 +373,19 @@ public class RdapObjectMapperTest {
                 "changed:       first@last.org 20120220\n" +
                 "source:        TEST"));
 
+        assertThat(result.getRdapConformance(), is(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL));
+        assertThat(result.getHandle(), is("FL1-TEST"));
+        assertThat(result.getRemarks(), hasSize(1));
+        assertThat(result.getRemarks().get(0).getDescription().get(0), is("remark"));
+        assertThat(result.getRemarks().get(0).getTitle(), is("remarks"));
+        assertThat(result.getLinks(), hasSize(1));
+        assertThat(result.getLinks().get(0).getRel(), is("self"));
+        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
         assertThat(result.getEvents(), hasSize(1));
+        assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
     }
 
     private Object map(final RpslObject rpslObject) {
