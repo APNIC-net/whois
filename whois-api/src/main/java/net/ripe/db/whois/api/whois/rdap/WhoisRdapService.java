@@ -9,6 +9,8 @@ import com.google.common.net.InetAddresses;
 import net.ripe.db.whois.api.whois.ApiResponseHandler;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
 import net.ripe.db.whois.common.domain.ResponseObject;
+import net.ripe.db.whois.common.domain.attrs.AttributeParseException;
+import net.ripe.db.whois.common.domain.attrs.Domain;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.common.source.SourceContext;
@@ -49,15 +51,13 @@ public class WhoisRdapService {
     private static final int STATUS_TOO_MANY_REQUESTS = 429;
     private static final Set<ObjectType> ABUSE_CONTACT_TYPES = Sets.newHashSet(AUT_NUM, INETNUM, INET6NUM);
 
-    private final SourceContext sourceContext;
     private final QueryHandler queryHandler;
     private final RpslObjectDao objectDao;
     private final AbuseCFinder abuseCFinder;
     private final String baseUrl;
 
     @Autowired
-    public WhoisRdapService(final SourceContext sourceContext, final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder, @Value("${rdap.public.baseUrl:}") final String baseUrl) {
-        this.sourceContext = sourceContext;
+    public WhoisRdapService(final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder, @Value("${rdap.public.baseUrl:}") final String baseUrl) {
         this.queryHandler = queryHandler;
         this.objectDao = objectDao;
         this.abuseCFinder = abuseCFinder;
@@ -83,6 +83,7 @@ public class WhoisRdapService {
                 break;
 
             case "domain":
+                validateDomain(key);
                 whoisObjectTypes.add(DOMAIN);
                 break;
 
@@ -116,6 +117,14 @@ public class WhoisRdapService {
         }
 
         return response;
+    }
+
+    private void validateDomain(final String key) {
+        try {
+            Domain.parse(key);
+        } catch (AttributeParseException e) {
+            throw new IllegalArgumentException("RIPE NCC does not support forward domain queries.");
+        }
     }
 
     private String getKey(final Set<ObjectType> objectTypes, final String key) {
@@ -197,6 +206,11 @@ public class WhoisRdapService {
                     }
                 }
             });
+
+            if (result.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+
         } catch (final QueryException e) {
             if (e.getCompletionInfo() == QueryCompletionInfo.BLOCKED) {
                 throw new WebApplicationException(Response.status(STATUS_TOO_MANY_REQUESTS).build());

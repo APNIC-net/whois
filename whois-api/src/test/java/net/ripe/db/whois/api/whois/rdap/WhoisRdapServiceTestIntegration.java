@@ -440,6 +440,19 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getRdapConformance().get(0), equalTo("rdap_level_0"));
     }
 
+    @Test
+    public void lookup_forward_domain() {
+        try {
+            createResource(AUDIENCE, "domain/ripe.net")
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .get(Domain.class);
+            fail();
+        } catch (UniformInterfaceException e) {
+            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getEntity(String.class), is("RIPE NCC does not support forward domain queries."));
+        }
+    }
+
     // autnum
 
     @Test
@@ -595,6 +608,9 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
     @Test
     public void multiple_modification_gives_correct_events() throws Exception {
+        final LocalDateTime now = LocalDateTime.now().withMillisOfSecond(0);
+        dateTimeProvider.setTime(now);
+
         final String start = "" +
                 "aut-num:   AS123\n" +
                 "as-name:   AS-TEST\n" +
@@ -648,6 +664,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         assertThat(events.get(0).getEventAction(), is("last changed"));
         assertNow(events.get(0).getEventDate());
+        assertThat(events.get(0).getEventDate(), is(dateTimeProvider.getCurrentDateTime()));
     }
 
     @Test
