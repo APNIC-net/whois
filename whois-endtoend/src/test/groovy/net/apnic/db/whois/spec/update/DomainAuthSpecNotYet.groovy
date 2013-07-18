@@ -4,7 +4,7 @@ import net.apnic.db.whois.spec.BaseSpec
 import spec.domain.Message
 import spock.lang.Ignore
 
-class DomainAuthSpec extends BaseSpec {
+class DomainAuthSpecNotYet extends BaseSpec {
     @Override
     Map<String,String> getTransients() {
         [

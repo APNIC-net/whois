@@ -91,7 +91,7 @@ class TemplateObject {
             while (true) {
                 def matcher = (line =~ tableRegexp);
                 if (matcher.getCount() == 1) {
-                    basicTemplate.add(matcher[0][1..4].each { it.toString().trim() });
+                    basicTemplate.add(matcher[0][1..4].collect { it.toString().trim() });
                 } else if (matcher.getCount() > 1) {
                     throw new TestTemplateParseException(this, "Too many matches while processing template table");
                 } else {

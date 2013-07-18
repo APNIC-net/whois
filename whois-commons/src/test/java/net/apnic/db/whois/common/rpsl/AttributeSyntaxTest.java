@@ -22,18 +22,6 @@ public class AttributeSyntaxTest {
     }
 
     @Test
-    public void addressPrefix() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "100.100.100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "300.300.300.300");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "0/100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.0.0 -");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.1.0 _ 192.168.1.255");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.1.0/24");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.0.0/22");
-    }
-
-    @Test
     public void aggrBndry() {
         verifySuccess(ObjectType.ROUTE, AttributeType.AGGR_BNDRY, "AS8764 or AS8689 or AS31006 or AS34037");
         verifySuccess(ObjectType.ROUTE, AttributeType.AGGR_BNDRY, "AS34403");
@@ -101,20 +89,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.AS_SET, AttributeType.AS_SET, "AS1:AS-FOO:AS-BAR");
         verifySuccess(ObjectType.AS_SET, AttributeType.AS_SET, "AS1:AS-EXPORT:AS2");
     }
-
-//    @Test
-//    public void assignmentSize() throws Exception {
-//        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "");
-//        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "A");
-//        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "A1");
-//        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "1A");
-//        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "-1");
-//
-//        verifySuccess(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "0");
-//        verifySuccess(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "00");
-//        verifySuccess(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "1234");
-//    }
-
 
     @Test
     public void auth() throws Exception {
@@ -197,20 +171,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.ROUTE, AttributeType.DESCR, builder.toString());
     }
 
-
-    @Test
-    public void domNet() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "100.100.100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "300.300.300.300");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "0/100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "::0/0");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.1.0/24");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.0.0/22");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.1.0");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.0.0");
-    }
-
     @Test
     public void domain() {
         verifyFailure(ObjectType.DOMAIN, AttributeType.DOMAIN, "-core.swip.net");
@@ -243,7 +203,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "12345 INDIRECT 246 e7c5e507b99fb86506AF5100ea7f4ce7a957fbdaa1");
         verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "12345 RSAMD5 234 e7c5e507b99fb865065100ea7f4ce7a957fbdaa1");
     }
-
 
     @Test
     public void defaultAttr() throws Exception {
@@ -371,20 +330,6 @@ public class AttributeSyntaxTest {
     }
 
     @Test
-    public void fingerpr() {
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "XX");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "10.10.10");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "300:300:300:300");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, ":::");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "::0:0");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0y:66:73:z8");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66;73;a8");
-
-        verifySuccess(ObjectType.KEY_CERT, AttributeType.FINGERPR, "43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8");
-        verifySuccess(ObjectType.KEY_CERT, AttributeType.FINGERPR, "43:51:43:A1:b5:FC:8B:b7:0A:3a:a9:b1:0f:66:73:a8");
-    }
-
-    @Test
     public void freeForm() throws Exception {
         verifySuccess(ObjectType.PERSON, AttributeType.REMARKS, "ABCD efgh ijkl mnop QRST uvw xyz");
         verifySuccess(ObjectType.PERSON, AttributeType.REMARKS, "~`!@$%^&*()<>?[]{}\\|/?-_=+., 1234567890");
@@ -495,7 +440,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.INET_RTR, AttributeType.INET_RTR, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz.abcdefghijklmnopqrstuvwxyz.abcdefghijklmnopqrstuvwxyz");
     }
 
-
     @Test
     public void inetnum() {
         verifyFailure(ObjectType.INETNUM, AttributeType.INETNUM, "");
@@ -585,36 +529,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.KEY_CERT, AttributeType.KEY_CERT, "AUTO-123");
     }
 
-//    @Test
-//    public void limerick() throws Exception {
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "");
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim.ASDf");
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim");
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "LIM -");
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "");
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim_1214");
-//
-//        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "lim-1231");
-//        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "LIM-1111_ASDF");
-//        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "LIM-AS12-PO23");
-//    }
-
-//    @Test
-//    public void membersAs() throws Exception {
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS00123");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-asdfsdf:asdfsd");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-1231;as-asfd");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS01234");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS102112341313131312312313");
-//
-//        verifySuccess(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS123424324");
-//        verifySuccess(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-123123:as-0123123");
-//
-//    }
-
     @Test
     public void mbrsByRef() throws Exception {
         verifyFailure(ObjectType.AS_SET, AttributeType.MBRS_BY_REF, "ASdf");
@@ -643,11 +557,13 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.KEY_CERT, AttributeType.METHOD, "X509");
     }
 
-
     @Test
     public void language() throws Exception {
+        verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "");
         verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "a");
         verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "aaa,");
+        verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "a1");
+        verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "@@");
 
         verifySuccess(ObjectType.INETNUM, AttributeType.LANGUAGE, "nl");
         verifySuccess(ObjectType.INETNUM, AttributeType.LANGUAGE, "Nl");
@@ -990,7 +906,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.ROLE, AttributeType.NIC_HDL, "AuTo-1");
         verifySuccess(ObjectType.ROLE, AttributeType.NIC_HDL, "auto-12345678901234567890aaaa");
         verifySuccess(ObjectType.ROLE, AttributeType.NIC_HDL, "auto-01");
-
     }
 
     @Test
@@ -1192,7 +1107,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.PERSON, AttributeType.PHONE, "+31610210776 EXT.123");
     }
 
-
     @Test
     public void pingable() {
         verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "");
@@ -1253,19 +1167,6 @@ public class AttributeSyntaxTest {
         verifyFailure(ObjectType.MNTNER, AttributeType.REFERRAL_BY, "APNIC");
         verifySuccess(ObjectType.MNTNER, AttributeType.REFERRAL_BY, "APNIC-DBM-MNT");
     }
-
-    @Test
-    public void registryName() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "registry-");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "registry APNIC");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Re4istry-A234");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Registry-Name-is-APNIC");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Registry-Name");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "REGISTRY-NAME");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "REGISTRY-NAME-APNIC");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Registry-Name-is-A1-B2-C3");
-    }
-
 
     @Test
     public void remarks() {
@@ -1377,34 +1278,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.INETNUM, AttributeType.STATUS, "ALLOCATED PORTABLE");
         verifySuccess(ObjectType.INETNUM, AttributeType.STATUS, "ASSIGNED PORTABLE");
     }
-
-    @Test
-    public void subdomainIn() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUB_DOM, "");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUB_DOM, ".");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUB_DOM, "..");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUB_DOM, "-.-.");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUB_DOM, "SOME-INVALID-STATUS.ALSO-");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUB_DOM, "SOME-INVALID-STATUS.-.");
-
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUB_DOM, "0000-1111.STATUS-2222.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUB_DOM, "STATUS-abcd.STATUS-2222.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUB_DOM, "subdomain-1111.sUbdomain-ABCD-2222.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUB_DOM, "0000-1111.");
-    }
-
-
-//    @Test
-//    public void text() {
-//        verifySuccess(ObjectType.POEM, AttributeType.TEXT, "");
-//
-//        StringBuilder builder = new StringBuilder();
-//        for (char i = 0; i < Character.MAX_VALUE; i++) {
-//            builder.append(i);
-//        }
-//
-//        verifySuccess(ObjectType.POEM, AttributeType.TEXT, builder.toString());
-//    }
 
     private void verifySuccess(final ObjectType objectType, final AttributeType attributeType, final String value) {
         verify(objectType, attributeType, value, false);
