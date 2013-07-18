@@ -184,7 +184,7 @@ class RdapObjectMapper {
             ip.getLinks().add(createLink("up", selfUrl, baseUrl + "/" + Ip.class.getSimpleName().toLowerCase() + "/" + parentInterval.toString()));
         }
 
-        ip.getLinks().add(createLink("self", requestUrl, selfUrl));
+        ip.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         return ip;
     }
@@ -279,7 +279,7 @@ class RdapObjectMapper {
         setVCardArray(entity,createVCard(rpslObject));
 
         final String selfUrl = baseUrl + "/" + Entity.class.getSimpleName().toLowerCase() + "/" + entity.getHandle();
-        entity.getLinks().add(createLink("self", requestUrl, selfUrl));
+        entity.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         return entity;
     }
@@ -305,7 +305,7 @@ class RdapObjectMapper {
             autnum.setType("DIRECT ALLOCATION");
 
             final String selfUrl = baseUrl +  "/" + AutNum.class.getSimpleName().toLowerCase() + "/" + autNum.getValue();
-            autnum.getLinks().add(createLink("self", requestUrl, selfUrl));
+            autnum.getLinks().add(createLink("self", selfUrl, selfUrl));
         }
 
 
@@ -318,7 +318,7 @@ class RdapObjectMapper {
         domain.setLdhName(rpslObject.getKey().toString());
 
         final String selfUrl = baseUrl + "/" + Domain.class.getSimpleName().toLowerCase() + "/" + domain.getHandle();
-        domain.getLinks().add(createLink("self", requestUrl, selfUrl));
+        domain.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         final Map<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
 
