@@ -603,7 +603,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
-<<<<<<< HEAD
     public void lookup_as_block() throws Exception {
         final Autnum autnum = createResource(AUDIENCE, "autnum/150")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
