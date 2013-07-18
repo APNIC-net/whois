@@ -100,8 +100,6 @@ class TransactionalSingleUpdateHandler implements SingleUpdateHandler {
 
         if ((pendingAuthentication && !businessRulesOk) || (!pendingAuthentication && updateContext.hasErrors(update))) {
             throw new UpdateFailedException();
-        } else {
-            updateObjectHandler.execute(preparedUpdate, updateContext);
         }
 
         updateContext.setPreparedUpdate(preparedUpdate);
