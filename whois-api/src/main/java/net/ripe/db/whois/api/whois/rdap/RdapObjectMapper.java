@@ -70,6 +70,8 @@ class RdapObjectMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapObjectMapper.class);
 
     protected static final List<String> RDAP_CONFORMANCE_LEVEL = Lists.newArrayList("rdap_level_0");
+    public static final Joiner NEWLINE_JOINER = Joiner.on("\n");
+    public static final Joiner COMMA_JOINER = Joiner.on(",");
 
     protected static DatatypeFactory dtf;
     static {
@@ -170,7 +172,7 @@ class RdapObjectMapper {
 
         ip.setName(rpslObject.getValueForAttribute(NETNAME).toString());
         ip.setCountry(rpslObject.getValueForAttribute(COUNTRY).toString());
-        ip.setLang(rpslObject.getValuesForAttribute(LANGUAGE).isEmpty() ? null : Joiner.on(",").join(rpslObject.getValuesForAttribute(LANGUAGE)));
+        ip.setLang(rpslObject.getValuesForAttribute(LANGUAGE).isEmpty() ? null : COMMA_JOINER.join(rpslObject.getValuesForAttribute(LANGUAGE)));
         ip.setType(rpslObject.getValueForAttribute(STATUS).toString());
 
         if (parentRpslObject != null) {
@@ -421,22 +423,21 @@ class RdapObjectMapper {
             addrList.add(address);
         }
         if (!addrList.isEmpty()) {
-            String addr = Joiner.on("\n").join(addrList.listIterator());
+            String addr = NEWLINE_JOINER.join(addrList.listIterator());
             List<String> emptyAddrList = Arrays.asList("", "", "", "", "", "", "");
-            builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("type", "work"), Maps.immutableEntry("label", addr)), emptyAddrList);
+            builder.addAdr(VCardHelper.createMap(Maps.immutableEntry("label", addr)), emptyAddrList);
         }
 
         for (final CIString phone : rpslObject.getValuesForAttribute(PHONE)) {
-            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", Lists.newArrayList("work", "voice"))),phone.toString());
+            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", "voice")),phone.toString());
         }
 
         for (final CIString fax : rpslObject.getValuesForAttribute(FAX_NO)) {
-            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", "work")),fax.toString());
+            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", "fax")),fax.toString());
         }
 
         for (final CIString email : rpslObject.getValuesForAttribute(E_MAIL)) {
-            // TODO ?? Is it valid to have more than 1 email
-            builder.addEmail(VCardHelper.createMap(Maps.immutableEntry("type", "work")),email.toString());
+            builder.addEmail(email.toString());
         }
 
         for (final CIString org : rpslObject.getValuesForAttribute(ORG)) {
@@ -444,7 +445,7 @@ class RdapObjectMapper {
         }
 
         for (final CIString geoloc : rpslObject.getValuesForAttribute(GEOLOC)) {
-            builder.addGeo(VCardHelper.createMap(Maps.immutableEntry("type", "work")), geoloc.toString());
+            builder.addGeo(geoloc.toString());
         }
 
         return builder.build();
