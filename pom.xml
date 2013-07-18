@@ -731,7 +731,7 @@
                 <test.groups>net.ripe.db.whois.common.IntegrationTest</test.groups>
                 <test.forkCount.integration>3</test.forkCount.integration>
                 <test.files.unit>None</test.files.unit>
-                <test.files.integration>**/*TestIntegration*.class,**/*Spec*.class</test.files.integration>
+                <test.files.integration>net/ripe/**/*TestIntegration*.class,net/ripe/**/*Spec*.class</test.files.integration>
             </properties>
         </profile>
         <profile>
@@ -760,7 +760,7 @@
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups>net.ripe.db.whois.common.IntegrationTest</test.groups>
                 <test.files.unit>net/ripe/**/*Test.class</test.files.unit>
-                <test.files.integration>**/*Test*.class,**/*Spec*.class</test.files.integration>
+                <test.files.integration>net/ripe/**/*Test*.class,net/ripe/**/*Spec*.class</test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
             </properties>
         </profile>
@@ -801,7 +801,7 @@
                 <test.groups>net.apnic.db.whois.common.IntegrationTest</test.groups>
                 <test.forkCount.integration>3</test.forkCount.integration>
                 <test.files.unit>None</test.files.unit>
-                <test.files.integration>**/*TestIntegration.class</test.files.integration>
+                <test.files.integration>net/apnic/**/*TestIntegration.class</test.files.integration>
             </properties>
         </profile>
         <profile>
