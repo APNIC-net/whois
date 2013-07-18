@@ -811,6 +811,7 @@
         <profile>
             <id>apnic-all</id>
             <properties>
+                <whois.variant>apnic</whois.variant>
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups>net.apnic.db.whois.common.IntegrationTest</test.groups>
                 <test.files.unit>net/apnic/**/*Test.class</test.files.unit>
