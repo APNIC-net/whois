@@ -412,6 +412,7 @@ public class RpslResponseDecoratorTest {
         }
     }
 
+    @Ignore
     @Test
     public void dummify_response() {
         when(sourceContext.getGrsSourceNames()).thenReturn(ciSet("GRS1", "GRS2"));
