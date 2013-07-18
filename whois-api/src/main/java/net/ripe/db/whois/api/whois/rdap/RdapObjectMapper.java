@@ -128,9 +128,11 @@ class RdapObjectMapper {
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
         }
 
+        final String selfUrl = getSelfUrl(rdapResponse, requestUrl);
+
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
         rdapResponse.setPort43(port43);
-        rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, requestUrl));
+        rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, selfUrl));
 
         final List<Remark> remarks = createRemarks(rpslObject);
         if (!remarks.isEmpty()) {
@@ -139,9 +141,9 @@ class RdapObjectMapper {
         rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
-            rdapResponse.getEntities().add(createEntity(abuseContact, requestUrl, baseUrl));
+            rdapResponse.getEntities().add(createEntity(abuseContact, selfUrl, baseUrl));
         }
-        List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
+        List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, selfUrl, baseUrl);
         if (!ctcEntities.isEmpty()) {
             rdapResponse.getEntities().addAll(ctcEntities);
         }
@@ -175,14 +177,14 @@ class RdapObjectMapper {
         ip.setType(rpslObject.getValueForAttribute(STATUS).toString());
 
         if (parentRpslObject != null) {
-            ip.setParentHandle(parentRpslObject.getValueForAttribute(NETNAME).toString());
+            ip.setParentHandle(parentRpslObject.getKey().toString());
 
             CIString parentKey = parentRpslObject.getKey();
             IpInterval parentInterval = (parentRpslObject.getType() == INET6NUM) ? Ipv6Resource.parse(parentKey) : Ipv4Resource.parse(parentKey);
             ip.getLinks().add(createLink("up", selfUrl, baseUrl + "/" + Ip.class.getSimpleName().toLowerCase() + "/" + parentInterval.toString()));
         }
 
-        ip.getLinks().add(createLink("self", requestUrl, selfUrl));
+        ip.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         return ip;
     }
@@ -277,7 +279,7 @@ class RdapObjectMapper {
         setVCardArray(entity,createVCard(rpslObject));
 
         final String selfUrl = baseUrl + "/" + Entity.class.getSimpleName().toLowerCase() + "/" + entity.getHandle();
-        entity.getLinks().add(createLink("self", requestUrl, selfUrl));
+        entity.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         return entity;
     }
@@ -303,7 +305,7 @@ class RdapObjectMapper {
             autnum.setType("DIRECT ALLOCATION");
 
             final String selfUrl = baseUrl +  "/" + AutNum.class.getSimpleName().toLowerCase() + "/" + autNum.getValue();
-            autnum.getLinks().add(createLink("self", requestUrl, selfUrl));
+            autnum.getLinks().add(createLink("self", selfUrl, selfUrl));
         }
 
 
@@ -316,7 +318,7 @@ class RdapObjectMapper {
         domain.setLdhName(rpslObject.getKey().toString());
 
         final String selfUrl = baseUrl + "/" + Domain.class.getSimpleName().toLowerCase() + "/" + domain.getHandle();
-        domain.getLinks().add(createLink("self", requestUrl, selfUrl));
+        domain.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         final Map<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
 
@@ -456,7 +458,7 @@ class RdapObjectMapper {
         return dtf.newXMLGregorianCalendar(gc);
     }
 
-    public static Link createLink(String rel, String value, String href) {
+    public static Link createLink(final String rel, final String value, final String href) {
         Link link = new Link();
         link.setRel(rel);
         link.setValue(value);
@@ -464,11 +466,22 @@ class RdapObjectMapper {
         return link;
     }
 
-    public static void setVCardArray(Entity entity, final VCard... vCards) {
+    public static void setVCardArray(final Entity entity, final VCard... vCards) {
         List<Object> vcardArray = entity.getVcardArray();
         vcardArray.add("vcard");
         for (VCard next : vCards) {
             vcardArray.add(next.getValues());
         }
+    }
+
+    public static String getSelfUrl(final RdapObject rdapObject, final String defaultUrl) {
+        List<Link> links = rdapObject.getLinks();
+        for (final Link link : links) {
+            if (link.getRel().equals("self")) {
+                return link.getHref();
+            }
+        }
+
+        return defaultUrl;
     }
 }
