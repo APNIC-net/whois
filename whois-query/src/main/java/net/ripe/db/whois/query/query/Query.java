@@ -218,7 +218,7 @@ public final class Query {
     }
 
     public boolean isFiltered() {
-        return !(hasOption(QueryFlag.NO_FILTERING) || isKeysOnly() || isHelp() || isTemplate() || isVerbose());
+        return hasOption(QueryFlag.FILTERING) && !(hasOption(QueryFlag.NO_FILTERING) || isKeysOnly() || isHelp() || isTemplate() || isVerbose());
     }
 
     public boolean isHelp() {

@@ -47,7 +47,9 @@ public class HelpQueryExecutorTest {
         assertThat(helpText, containsString("DESCRIPTION"));
 
         for (final QueryFlag queryFlag : QueryFlag.values()) {
-            if (!HelpQueryExecutor.SKIPPED.contains(queryFlag)) {
+            if (HelpQueryExecutor.SKIPPED.contains(queryFlag)) {
+                assertThat(helpText, not(containsString(queryFlag.toString())));
+            } else {
                 assertThat(helpText, containsString(queryFlag.toString()));
             }
         }
