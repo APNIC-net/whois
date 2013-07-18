@@ -53,7 +53,6 @@ import static net.ripe.db.whois.common.rpsl.AttributeType.FAX_NO;
 import static net.ripe.db.whois.common.rpsl.AttributeType.GEOLOC;
 import static net.ripe.db.whois.common.rpsl.AttributeType.IRT;
 import static net.ripe.db.whois.common.rpsl.AttributeType.LANGUAGE;
-import static net.ripe.db.whois.common.rpsl.AttributeType.MNT_BY;
 import static net.ripe.db.whois.common.rpsl.AttributeType.NETNAME;
 import static net.ripe.db.whois.common.rpsl.AttributeType.NSERVER;
 import static net.ripe.db.whois.common.rpsl.AttributeType.ORG;
@@ -81,13 +80,11 @@ class RdapObjectMapper {
         }
     }
 
-    private static final Set<AttributeType> CONTACT_ATTRIBUTES = Sets.newHashSet(ADMIN_C, TECH_C, ZONE_C);
     private static final Map<AttributeType, String> CONTACT_ATTRIBUTE_TO_ROLE_NAME = Maps.newHashMap();
 
     static {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ADMIN_C, "administrative");
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(TECH_C, "technical");
-        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(MNT_BY, "registrant");
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, "zone");
     }
 
@@ -231,34 +228,40 @@ class RdapObjectMapper {
     private static List<Entity> contactEntities(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
         final List<Entity> entities = Lists.newArrayList();
 
-        final Map<String, Set<AttributeType>> contacts = Maps.newHashMap();
+        final Map<CIString, RpslObject> relatedObjectMap = Maps.newHashMap();
 
-        final Map<String, RpslObject> relatedObjectMap = Maps.newHashMap();
         for (final RpslObject object : relatedObjects) {
-            relatedObjectMap.put(object.getKey().toString(), object);
+            relatedObjectMap.put(object.getKey(), object);
         }
 
-        for (final RpslAttribute attribute : rpslObject.findAttributes(CONTACT_ATTRIBUTES)) {
-            final String contactName = attribute.getCleanValue().toString();
-            if (contacts.containsKey(contactName)) {
-                contacts.get(contactName).add(attribute.getType());
-            } else {
-                final Set<AttributeType> attributeTypes = Sets.newHashSet();
-                attributeTypes.add(attribute.getType());
-                contacts.put(contactName, attributeTypes);
+        final Map<CIString, Set<AttributeType>> contacts = Maps.newTreeMap();
+
+        for (final AttributeType attributeType : CONTACT_ATTRIBUTE_TO_ROLE_NAME.keySet()) {
+            for (final RpslAttribute attribute : rpslObject.findAttributes(attributeType)) {
+                final CIString contactName = attribute.getCleanValue();
+                if (contacts.containsKey(contactName)) {
+                    contacts.get(contactName).add(attribute.getType());
+                } else {
+                    contacts.put(contactName, Sets.newHashSet(attribute.getType()));
+                }
             }
         }
 
-        for (Map.Entry<String, Set<AttributeType>> entry : contacts.entrySet()) {
-            Entity entity;
-            final RpslObject object = relatedObjectMap.get(entry.getKey());
-            if (object != null) {
-                entity = createNestedEntity(object, Lists.<RpslObject>newArrayList(), requestUrl, baseUrl);
+        for (final Map.Entry<CIString, Set<AttributeType>> entry : contacts.entrySet()) {
+            final Entity entity;
+            if (relatedObjectMap.containsKey(entry.getKey())) {
+                final RpslObject contactRpslObject = relatedObjectMap.get(entry.getKey());
+                entity = createEntity(contactRpslObject, requestUrl, baseUrl);
+
+                final List<Remark> remarks = createRemarks(contactRpslObject);
+                if (!remarks.isEmpty()) {
+                    entity.getRemarks().addAll(remarks);
+                }
             } else {
                 entity = new Entity();
-                entity.setHandle(entry.getKey());
+                entity.setHandle(entry.getKey().toString());
             }
-            for (AttributeType attributeType : entry.getValue()) {
+            for (final AttributeType attributeType : entry.getValue()) {
                 entity.getRoles().add(CONTACT_ATTRIBUTE_TO_ROLE_NAME.get(attributeType));
             }
             entities.add(entity);
@@ -273,24 +276,7 @@ class RdapObjectMapper {
         setVCardArray(entity,createVCard(rpslObject));
 
         final String selfUrl = baseUrl + "/entity/" + entity.getHandle();
-        entity.getLinks().add( createLink("self", requestUrl, selfUrl));
-
-        return entity;
-    }
-
-    private static Entity createNestedEntity(final RpslObject rpslObject, final List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
-        final Entity entity = createEntity(rpslObject, requestUrl, baseUrl);
-
-        final List<Remark> remarks = createRemarks(rpslObject);
-        if (!remarks.isEmpty()) {
-            entity.getRemarks().addAll(remarks);
-        }
-
-        List<Entity> contactEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
-        if (!contactEntities.isEmpty()) {
-            entity.getEntities().addAll(contactEntities);
-        }
-        // TODO: [RL] Add abuse contact here?
+        entity.getLinks().add(createLink("self", requestUrl, selfUrl));
 
         return entity;
     }
@@ -307,7 +293,7 @@ class RdapObjectMapper {
             autnum.setName(keyValue);
 
             // TODO: [RL] What's the canonical self url for a block? Punt for now and just use what they requested
-            autnum.getLinks().add( createLink("self", requestUrl, requestUrl));
+            autnum.getLinks().add(createLink("self", requestUrl, requestUrl));
         } else {
             final AutNum autNum = AutNum.parse(keyValue);
             autnum.setStartAutnum(autNum.getValue());
@@ -316,7 +302,7 @@ class RdapObjectMapper {
             autnum.setType("DIRECT ALLOCATION");
 
             final String selfUrl = baseUrl + "/autnum/" + autNum.getValue();
-            autnum.getLinks().add( createLink("self", requestUrl, selfUrl));
+            autnum.getLinks().add(createLink("self", requestUrl, selfUrl));
         }
 
 
@@ -329,12 +315,12 @@ class RdapObjectMapper {
         domain.setLdhName(rpslObject.getKey().toString());
 
         final String selfUrl = baseUrl + "/domain/" + domain.getHandle();
-        domain.getLinks().add( createLink("self", requestUrl, selfUrl));
+        domain.getLinks().add(createLink("self", requestUrl, selfUrl));
 
-        final HashMap<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
+        final Map<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
 
-        for (final RpslAttribute rpslAttribute : rpslObject.findAttributes(NSERVER)) {
-            final NServer nserver = NServer.parse(rpslAttribute.getCleanValue().toString());
+        for (final CIString nserverValue : rpslObject.getValuesForAttribute(AttributeType.NSERVER)) {
+            final NServer nserver = NServer.parse(nserverValue.toString());
 
             final CIString hostname = nserver.getHostname();
 
