@@ -6,7 +6,6 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
 import net.ripe.db.whois.api.DefaultExceptionMapper;
 import net.ripe.db.whois.api.httpserver.Audience;
 import net.ripe.db.whois.api.httpserver.ServletDeployer;
-import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -39,7 +38,7 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
         context.addServlet(new ServletHolder("Whois RDAP REST API", new ServletContainer(new Application() {
             @Override
             public Set<Object> getSingletons() {
-                final JacksonJaxbJsonProvider jaxbJsonProvider = new JacksonJaxbJsonProvider();
+                final RdapJsonProvider jaxbJsonProvider = new RdapJsonProvider();
                 jaxbJsonProvider.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
 
                 // TODO find a non-deprecated one of these

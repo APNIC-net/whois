@@ -13,7 +13,6 @@ import net.ripe.db.whois.common.domain.attrs.AttributeParseException;
 import net.ripe.db.whois.common.domain.attrs.Domain;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
-import net.ripe.db.whois.common.source.SourceContext;
 import net.ripe.db.whois.query.domain.QueryCompletionInfo;
 import net.ripe.db.whois.query.domain.QueryException;
 import net.ripe.db.whois.query.handler.QueryHandler;
@@ -41,7 +40,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static net.ripe.db.whois.common.rpsl.ObjectType.*;
+import static net.ripe.db.whois.common.rpsl.ObjectType.AS_BLOCK;
+import static net.ripe.db.whois.common.rpsl.ObjectType.AUT_NUM;
+import static net.ripe.db.whois.common.rpsl.ObjectType.DOMAIN;
+import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
+import static net.ripe.db.whois.common.rpsl.ObjectType.INETNUM;
+import static net.ripe.db.whois.common.rpsl.ObjectType.IRT;
+import static net.ripe.db.whois.common.rpsl.ObjectType.ORGANISATION;
+import static net.ripe.db.whois.common.rpsl.ObjectType.PERSON;
+import static net.ripe.db.whois.common.rpsl.ObjectType.ROLE;
 
 @ExternallyManagedLifecycle
 @Component
@@ -50,7 +57,7 @@ public class WhoisRdapService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WhoisRdapService.class);
     private static final int STATUS_TOO_MANY_REQUESTS = 429;
     private static final Set<ObjectType> ABUSE_CONTACT_TYPES = Sets.newHashSet(AUT_NUM, INETNUM, INET6NUM);
-    private static final String CONTENT_TYPE_RDAP_JSON = "application/rdap+json";
+
 
     private final QueryHandler queryHandler;
     private final RpslObjectDao objectDao;
@@ -66,7 +73,7 @@ public class WhoisRdapService {
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, CONTENT_TYPE_RDAP_JSON})
+    @Produces({MediaType.APPLICATION_JSON, RdapJsonProvider.CONTENT_TYPE_RDAP_JSON})
     @Path("/{objectType}/{key:.*}")
     public Response lookup(@Context final HttpServletRequest request,
                            @PathParam("objectType") final String objectType,
@@ -157,7 +164,7 @@ public class WhoisRdapService {
             if (result.isEmpty()) {
                 throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
             }
-            
+
             final RpslObject resultObject = result.remove(0);
 
             return Response.ok(
@@ -182,7 +189,7 @@ public class WhoisRdapService {
             }
         }
     }
-    
+
     private List<RpslObject> runQuery(final Query query, final HttpServletRequest request, final boolean internalRequest) {
         final int contextId = System.identityHashCode(Thread.currentThread());
         final InetAddress queryAddress;

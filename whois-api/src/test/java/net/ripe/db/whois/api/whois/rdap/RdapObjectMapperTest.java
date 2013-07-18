@@ -111,8 +111,9 @@ public class RdapObjectMapperTest {
         assertThat(result.getType(), is("DIRECT ALLOCATION"));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is(BASE_URL));
-        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL + "/" + Autnum.class.getSimpleName().toLowerCase() + "/102"));
+        final String selfUrl = BASE_URL + "/" + Autnum.class.getSimpleName().toLowerCase() + "/102";
+        assertThat(result.getLinks().get(0).getValue(), is(selfUrl));
+        assertThat(result.getLinks().get(0).getHref(), is(selfUrl));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(2));
@@ -149,8 +150,9 @@ public class RdapObjectMapperTest {
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is(REQUEST_URL));
-        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL  + "/" + Domain.class.getSimpleName().toLowerCase() + "/2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
+        final String selfUrl = BASE_URL + "/" + Domain.class.getSimpleName().toLowerCase() + "/2.1.2.1.5.5.5.2.0.2.1.e164.arpa";
+        assertThat(result.getLinks().get(0).getValue(), is(selfUrl));
+        assertThat(result.getLinks().get(0).getHref(), is(selfUrl));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(1));
@@ -211,8 +213,9 @@ public class RdapObjectMapperTest {
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is(REQUEST_URL));
-        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL  + "/" + Domain.class.getSimpleName().toLowerCase() + "/31.12.202.in-addr.arpa"));
+        final String selfUrl = BASE_URL + "/" + Domain.class.getSimpleName().toLowerCase() + "/31.12.202.in-addr.arpa";
+        assertThat(result.getLinks().get(0).getValue(), is(selfUrl));
+        assertThat(result.getLinks().get(0).getHref(), is(selfUrl));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(1));
@@ -283,8 +286,9 @@ public class RdapObjectMapperTest {
         assertThat(result.getRemarks(), hasSize(1));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("domain object for 130.102.0.0 - 130.102.255.255"));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is(REQUEST_URL));
-        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL + "/" + Domain.class.getSimpleName().toLowerCase() + "/102.130.in-addr.arpa"));
+        final String selfUrl = BASE_URL + "/" + Domain.class.getSimpleName().toLowerCase() + "/102.130.in-addr.arpa";
+        assertThat(result.getLinks().get(0).getValue(), is(selfUrl));
+        assertThat(result.getLinks().get(0).getHref(), is(selfUrl));
 
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
@@ -350,8 +354,9 @@ public class RdapObjectMapperTest {
 
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is(REQUEST_URL));
-        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL + "/" + Domain.class.getSimpleName().toLowerCase() + "/29.12.202.in-addr.arpa"));
+        final String selfUrl = BASE_URL + "/" + Domain.class.getSimpleName().toLowerCase() + "/29.12.202.in-addr.arpa";
+        assertThat(result.getLinks().get(0).getValue(), is(selfUrl));
+        assertThat(result.getLinks().get(0).getHref(), is(selfUrl));
 
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
@@ -383,8 +388,9 @@ public class RdapObjectMapperTest {
         assertThat(result.getRemarks().get(0).getTitle(), is("remarks"));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is(REQUEST_URL));
-        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL + "/" + Entity.class.getSimpleName().toLowerCase() + "/FL1-TEST"));
+        final String selfUrl = BASE_URL + "/" + Entity.class.getSimpleName().toLowerCase() + "/FL1-TEST";
+        assertThat(result.getLinks().get(0).getValue(), is(selfUrl));
+        assertThat(result.getLinks().get(0).getHref(), is(selfUrl));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
