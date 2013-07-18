@@ -38,8 +38,8 @@ public class NrtmQueryHandler extends SimpleChannelUpstreamHandler {
     private volatile ScheduledFuture<?> scheduledFuture;
 
     static final String TERMS_AND_CONDITIONS = "" +
-            "% The APNIC Whois Database is subject to Terms and Conditions.\n" +
-            "% See http://www.apnic.net/db/dbcopyright.html";
+            "% The RIPE Database is subject to Terms and Conditions.\n" +
+            "% See http://www.ripe.net/db/support/db-terms-conditions.pdf";
 
     public NrtmQueryHandler(final SerialDao serialDao, final Dummifier dummifier, final TaskScheduler clientSynchronisationScheduler, final NrtmLog nrtmLog, final String applicationVersion, final String source, final long updateInterval) {
         this.serialDao = serialDao;
