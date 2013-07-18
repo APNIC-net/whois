@@ -128,12 +128,6 @@ class RdapObjectMapper {
             rdapResponse.getEntities().addAll(ctcEntities);
         }
 
-        // sort out abuse-mailbox(s) here
-        final List<Entity> abuseMailboxes = createAbuseMailboxEntities(rpslObject, selfUrl, baseUrl);
-        if (!abuseMailboxes.isEmpty()) {
-            rdapResponse.getEntities().addAll(abuseMailboxes);
-        }
-
         return rdapResponse;
     }
 
@@ -173,16 +167,6 @@ class RdapObjectMapper {
         ip.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         return ip;
-    }
-
-    private static List<Entity> createAbuseMailboxEntities(final RpslObject rpslObject, final String requestUrl, final String baseUrl) {
-        List<Entity> abuseMailboxEntities = new ArrayList<Entity>();
-
-        for (final RpslAttribute abuseMailboxes : rpslObject.findAttributes(ABUSE_MAILBOX)) {
-            // TODO: implement
-        }
-
-        return abuseMailboxEntities;
     }
 
     private static List<Remark> createRemarks(final RpslObject rpslObject) {
