@@ -649,7 +649,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
     // general
 
-    //    @Ignore
     @Test
     public void lookup_autnum_with_rdap_json_content_type() {
         final ClientResponse response = createResource(AUDIENCE, "autnum/123")

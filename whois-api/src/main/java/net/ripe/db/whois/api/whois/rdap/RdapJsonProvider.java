@@ -20,7 +20,4 @@ public class RdapJsonProvider extends JacksonJaxbJsonProvider {
     public static final String CONTENT_TYPE_RDAP_JSON = "application/rdap+json";
     public static final MediaType CONTENT_TYPE_RDAP_JSON_TYPE = new MediaType(CONTENT_TYPE_RDAP_JSON.split("/")[0], CONTENT_TYPE_RDAP_JSON.split("/")[1]);
 
-    public RdapJsonProvider() {
-        super();
-    }
 }
