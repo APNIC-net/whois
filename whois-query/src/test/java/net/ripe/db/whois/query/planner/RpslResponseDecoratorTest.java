@@ -19,6 +19,7 @@ import net.ripe.db.whois.query.executor.decorators.FilterTagsDecorator;
 import net.ripe.db.whois.query.query.Query;
 import net.ripe.db.whois.query.support.Fixture;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -143,6 +144,7 @@ public class RpslResponseDecoratorTest {
         assertThat(response, is("mntner:         FOO-MNT\n\n"));
     }
 
+    @Ignore
     @Test
     public void shouldAddFilterNoticeOnce() {
         final String response = execute("-r -G -T organisation FOO-ORG",
@@ -410,6 +412,7 @@ public class RpslResponseDecoratorTest {
         }
     }
 
+    @Ignore
     @Test
     public void dummify_response() {
         when(sourceContext.getGrsSourceNames()).thenReturn(ciSet("GRS1", "GRS2"));
