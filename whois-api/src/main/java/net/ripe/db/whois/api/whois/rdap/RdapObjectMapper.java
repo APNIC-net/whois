@@ -424,8 +424,7 @@ class RdapObjectMapper {
             if (address.contains("\n") || address.contains("\r")) {
                 String[] addressParts = address.split("\r?\n|\r");
                 for (int i = 0; i < addressParts.length; i++) {
-                    CIString addrPart = CIString.ciString(addressParts[i].trim());
-                    addrList.add(addrPart);
+                    addrList.add(CIString.ciString(addressParts[i].trim()));
                 }
             } else {
                 addrList.add(CIString.ciString(address.trim()));
