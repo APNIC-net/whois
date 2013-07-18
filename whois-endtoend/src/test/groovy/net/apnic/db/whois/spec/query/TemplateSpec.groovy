@@ -117,7 +117,8 @@ class TemplateSpec extends BaseSpec {
                 ["notify",      "optional",     "multiple", "inverse key"],
                 ["mnt-by",      "mandatory",    "multiple", "inverse key"],
                 ["mnt-lower",   "optional",     "multiple", "inverse key"],
-                ["refer",       "optional",     "single",   ""],
+// TODO confirm the refer attribute removal
+//                ["refer",       "optional",     "single",   ""],
                 ["changed",     "mandatory",    "multiple", ""],
                 ["source",      "mandatory",    "single",   ""],
         ]

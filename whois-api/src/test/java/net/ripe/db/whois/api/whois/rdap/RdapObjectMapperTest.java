@@ -29,6 +29,9 @@ public class RdapObjectMapperTest {
     private static final LocalDateTime VERSION_TIMESTAMP = LocalDateTime.parse(VERSION_DATETIME);
     private static final XMLGregorianCalendar XML_GC_VERSION_TIMESTAMP = RdapObjectMapper.dtf.newXMLGregorianCalendar(VERSION_DATETIME + "+10:00");
 
+    private static final String REQUEST_URL =  "http://localhost";
+    private static final String BASE_URL =  "http://localhost";
+
     @Test
     public void ip() {
         final Ip result = (Ip) map((RpslObject.parse("" +
@@ -108,8 +111,8 @@ public class RdapObjectMapperTest {
         assertThat(result.getType(), is("DIRECT ALLOCATION"));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/autnum/102"));
+        assertThat(result.getLinks().get(0).getValue(), is(BASE_URL));
+        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL + "/" + Autnum.class.getSimpleName().toLowerCase() + "/102"));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(2));
@@ -146,8 +149,8 @@ public class RdapObjectMapperTest {
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/domain/2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
+        assertThat(result.getLinks().get(0).getValue(), is(REQUEST_URL));
+        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL  + "/" + Domain.class.getSimpleName().toLowerCase() + "/2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(1));
@@ -208,8 +211,8 @@ public class RdapObjectMapperTest {
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/domain/31.12.202.in-addr.arpa"));
+        assertThat(result.getLinks().get(0).getValue(), is(REQUEST_URL));
+        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL  + "/" + Domain.class.getSimpleName().toLowerCase() + "/31.12.202.in-addr.arpa"));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(1));
@@ -280,8 +283,8 @@ public class RdapObjectMapperTest {
         assertThat(result.getRemarks(), hasSize(1));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("domain object for 130.102.0.0 - 130.102.255.255"));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/domain/102.130.in-addr.arpa"));
+        assertThat(result.getLinks().get(0).getValue(), is(REQUEST_URL));
+        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL + "/" + Domain.class.getSimpleName().toLowerCase() + "/102.130.in-addr.arpa"));
 
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
@@ -347,8 +350,8 @@ public class RdapObjectMapperTest {
 
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/domain/29.12.202.in-addr.arpa"));
+        assertThat(result.getLinks().get(0).getValue(), is(REQUEST_URL));
+        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL + "/" + Domain.class.getSimpleName().toLowerCase() + "/29.12.202.in-addr.arpa"));
 
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
@@ -380,8 +383,8 @@ public class RdapObjectMapperTest {
         assertThat(result.getRemarks().get(0).getTitle(), is("remarks"));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
-        assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/entity/FL1-TEST"));
+        assertThat(result.getLinks().get(0).getValue(), is(REQUEST_URL));
+        assertThat(result.getLinks().get(0).getHref(), is(BASE_URL + "/" + Entity.class.getSimpleName().toLowerCase() + "/FL1-TEST"));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
@@ -389,6 +392,6 @@ public class RdapObjectMapperTest {
     }
 
     private Object map(final RpslObject rpslObject) {
-        return RdapObjectMapper.map("http://localhost/", "http://localhost", rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP, Lists.<RpslObject>newArrayList(), null);
+        return RdapObjectMapper.map(REQUEST_URL,BASE_URL, rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP, Lists.<RpslObject>newArrayList(), null);
     }
 }

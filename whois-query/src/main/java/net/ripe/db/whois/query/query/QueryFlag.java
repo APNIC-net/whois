@@ -79,6 +79,10 @@ public enum QueryFlag {
     NO_FILTERING(new Builder("B", "no-filtering")
             .describedAs("Disables the filtering of \"notify:\", \"changed:\" and \"e-mail:\" attributes.")),
 
+    FILTERING(new Builder("filtering")
+            .describedAs("Enable the filtering of \"notify:\", \"changed:\" and \"e-mail:\" attributes.")),
+
+
     /* -------------------------------------------------------------------------------------------------------------- */
 
     NO_TAG_INFO(new Builder("no-tag-info")
