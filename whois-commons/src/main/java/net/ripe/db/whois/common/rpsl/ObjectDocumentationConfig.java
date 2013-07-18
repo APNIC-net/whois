@@ -68,7 +68,7 @@ public class ObjectDocumentationConfig {
                 "      Currently only PGP/GnuPG keys are supported.\n");
 
         put(DOCUMENTATION, ObjectType.MNTNER, "" +
-                "      Objects in the RIPE Database may be protected using mntner\n" +
+                "      Objects in the APNIC Whois Database may be protected using mntner\n" +
                 "      (pronounced \"maintainer\") objects.  A mntner object specifies\n" +
                 "      authentication information required to authorise creation,\n" +
                 "      deletion or modification of the objects protected by the mntner.\n");
