@@ -128,9 +128,11 @@ class RdapObjectMapper {
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
         }
 
+        final String selfUrl = getSelfUrl(rdapResponse, requestUrl);
+
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
         rdapResponse.setPort43(port43);
-        rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, requestUrl));
+        rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, selfUrl));
 
         final List<Remark> remarks = createRemarks(rpslObject);
         if (!remarks.isEmpty()) {
@@ -139,9 +141,9 @@ class RdapObjectMapper {
         rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
-            rdapResponse.getEntities().add(createEntity(abuseContact, requestUrl, baseUrl));
+            rdapResponse.getEntities().add(createEntity(abuseContact, selfUrl, baseUrl));
         }
-        List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, requestUrl, baseUrl);
+        List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, selfUrl, baseUrl);
         if (!ctcEntities.isEmpty()) {
             rdapResponse.getEntities().addAll(ctcEntities);
         }
@@ -456,7 +458,7 @@ class RdapObjectMapper {
         return dtf.newXMLGregorianCalendar(gc);
     }
 
-    public static Link createLink(String rel, String value, String href) {
+    public static Link createLink(final String rel, final String value, final String href) {
         Link link = new Link();
         link.setRel(rel);
         link.setValue(value);
@@ -464,11 +466,22 @@ class RdapObjectMapper {
         return link;
     }
 
-    public static void setVCardArray(Entity entity, final VCard... vCards) {
+    public static void setVCardArray(final Entity entity, final VCard... vCards) {
         List<Object> vcardArray = entity.getVcardArray();
         vcardArray.add("vcard");
         for (VCard next : vCards) {
             vcardArray.add(next.getValues());
         }
+    }
+
+    public static String getSelfUrl(final RdapObject rdapObject, final String defaultUrl) {
+        List<Link> links = rdapObject.getLinks();
+        for (final Link link : links) {
+            if (link.getRel().equals("self")) {
+                return link.getHref();
+            }
+        }
+
+        return defaultUrl;
     }
 }

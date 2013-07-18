@@ -9,6 +9,7 @@ import net.ripe.db.whois.common.support.DummyWhoisClient;
 import net.ripe.db.whois.nrtm.NrtmServer;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,7 +29,9 @@ import java.util.concurrent.TimeUnit;
 
 import static net.ripe.db.whois.common.dao.jdbc.JdbcRpslObjectOperations.loadScripts;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @Category(IntegrationTest.class)
 public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase {
@@ -46,6 +49,11 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
     @BeforeClass
     public static void setInterval() {
         System.setProperty("nrtm.update.interval", "1");
+    }
+
+    @AfterClass
+    public static void resetInterval() {
+        System.clearProperty("nrtm.update.interval");
     }
 
     @Before
