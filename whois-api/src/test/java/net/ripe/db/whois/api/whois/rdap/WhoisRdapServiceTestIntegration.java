@@ -862,7 +862,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
     @Override
     protected WebResource createResource(final Audience audience, final String path) {
-        WebResource resource = client.resource(String.format("http://localhost:%s/rdap/%s", 9998, path));
+        WebResource resource = client.resource(String.format("http://localhost:%s/rdap/%s", getPort(audience), path));
         LOGGER.info("resource [" + resource.getURI().toASCIIString() + "]");
         return resource;
     }
