@@ -177,7 +177,7 @@ class RdapObjectMapper {
         ip.setType(rpslObject.getValueForAttribute(STATUS).toString());
 
         if (parentRpslObject != null) {
-            ip.setParentHandle(parentRpslObject.getValueForAttribute(NETNAME).toString());
+            ip.setParentHandle(parentRpslObject.getKey().toString());
 
             CIString parentKey = parentRpslObject.getKey();
             IpInterval parentInterval = (parentRpslObject.getType() == INET6NUM) ? Ipv6Resource.parse(parentKey) : Ipv4Resource.parse(parentKey);
