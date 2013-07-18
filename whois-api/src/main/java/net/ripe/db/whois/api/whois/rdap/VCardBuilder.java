@@ -55,6 +55,10 @@ public class VCardBuilder {
         return this;
     }
 
+    public VCardBuilder addGeo(final String value) {
+        return addGeo(Maps.newHashMap(), value);
+    }
+
     public VCardBuilder addKind(final String value) {
         properties.add(new VCardProperty("kind", Maps.newHashMap(), "text", value));
         return this;

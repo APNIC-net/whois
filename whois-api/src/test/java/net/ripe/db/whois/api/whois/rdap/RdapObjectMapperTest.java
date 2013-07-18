@@ -109,7 +109,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
         assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/autnum/102"));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(2));
@@ -147,7 +147,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
         assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/domain/2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(1));
@@ -209,7 +209,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
         assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/domain/31.12.202.in-addr.arpa"));
 // TODO: [RL] test for copyright in notices
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(1));
@@ -281,7 +281,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("domain object for 130.102.0.0 - 130.102.255.255"));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
         assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/domain/102.130.in-addr.arpa"));
 
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
@@ -348,7 +348,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
         assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/domain/29.12.202.in-addr.arpa"));
 
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
@@ -381,7 +381,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
         assertThat(result.getLinks().get(0).getValue(), is("http://localhost/"));
-        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/"));
+        assertThat(result.getLinks().get(0).getHref(), is("http://localhost/entity/FL1-TEST"));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
@@ -389,6 +389,6 @@ public class RdapObjectMapperTest {
     }
 
     private Object map(final RpslObject rpslObject) {
-        return RdapObjectMapper.map("http://localhost/", "http://localhost/", rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP, Lists.<RpslObject>newArrayList(), null);
+        return RdapObjectMapper.map("http://localhost/", "http://localhost", rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP, Lists.<RpslObject>newArrayList(), null);
     }
 }
