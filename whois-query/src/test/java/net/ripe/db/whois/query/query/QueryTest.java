@@ -38,14 +38,14 @@ public class QueryTest {
 
     @Test
     public void query_with_searchValue() {
-        parse("foo");
+        parse("--filtering foo");
 
         assertTrue(subject.isFiltered());
         assertTrue(subject.isGrouping());
         assertTrue(subject.isProxyValid());
         assertTrue(subject.isReturningReferencedObjects());
         assertThat(subject.getSearchValue(), is("foo"));
-        assertThat(subject.queryLength(), is(3));
+        assertThat(subject.queryLength(), is(15));
     }
 
     @Test
@@ -75,6 +75,13 @@ public class QueryTest {
     @Test
     public void non_filtered() {
         parse("-B foo");
+
+        assertFalse(subject.isFiltered());
+    }
+
+    @Test
+    public void default_is_non_filtered() {
+        parse("foo");
 
         assertFalse(subject.isFiltered());
     }
@@ -752,6 +759,16 @@ public class QueryTest {
             fail("Expected exception");
         } catch (QueryException e) {
             assertThat(e.getMessages(), contains(QueryMessages.invalidCombinationOfFlags("-b, --abuse-contact", "-F, --brief")));
+        }
+    }
+
+    @Test
+    public void invalid_combination_of_filtering() {
+        try {
+            Query.parse("-B --filtering 10.0.0.0");
+            fail("Expected exception");
+        } catch (QueryException e) {
+            assertThat(e.getMessages(), contains(QueryMessages.invalidCombinationOfFlags("--filtering", "-B, --no-filtering")));
         }
     }
 
