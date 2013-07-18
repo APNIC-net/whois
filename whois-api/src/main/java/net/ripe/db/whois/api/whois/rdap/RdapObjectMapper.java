@@ -420,8 +420,16 @@ class RdapObjectMapper {
         }
 
         List<CIString> addrList = new ArrayList<CIString>();
-        for (final CIString address : rpslObject.getValuesForAttribute(ADDRESS)) {
-            addrList.add(address);
+        for (final String address : rpslObject.getRawValuesForAttribute(ADDRESS)) {
+            if (address.contains("\n") || address.contains("\r")) {
+                String[] addressParts = address.split("\r?\n|\r");
+                for (int i = 0; i < addressParts.length; i++) {
+                    CIString addrPart = CIString.ciString(addressParts[i].trim());
+                    addrList.add(addrPart);
+                }
+            } else {
+                addrList.add(CIString.ciString(address.trim()));
+            }
         }
         if (!addrList.isEmpty()) {
             String addr = NEWLINE_JOINER.join(addrList.listIterator());
