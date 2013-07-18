@@ -42,27 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static net.ripe.db.whois.common.rpsl.AttributeType.ADDRESS;
-import static net.ripe.db.whois.common.rpsl.AttributeType.ADMIN_C;
-import static net.ripe.db.whois.common.rpsl.AttributeType.AS_NAME;
-import static net.ripe.db.whois.common.rpsl.AttributeType.COUNTRY;
-import static net.ripe.db.whois.common.rpsl.AttributeType.DESCR;
-import static net.ripe.db.whois.common.rpsl.AttributeType.DS_RDATA;
-import static net.ripe.db.whois.common.rpsl.AttributeType.E_MAIL;
-import static net.ripe.db.whois.common.rpsl.AttributeType.FAX_NO;
-import static net.ripe.db.whois.common.rpsl.AttributeType.GEOLOC;
-import static net.ripe.db.whois.common.rpsl.AttributeType.IRT;
-import static net.ripe.db.whois.common.rpsl.AttributeType.LANGUAGE;
-import static net.ripe.db.whois.common.rpsl.AttributeType.NETNAME;
-import static net.ripe.db.whois.common.rpsl.AttributeType.ORG;
-import static net.ripe.db.whois.common.rpsl.AttributeType.ORG_NAME;
-import static net.ripe.db.whois.common.rpsl.AttributeType.PERSON;
-import static net.ripe.db.whois.common.rpsl.AttributeType.PHONE;
-import static net.ripe.db.whois.common.rpsl.AttributeType.REMARKS;
-import static net.ripe.db.whois.common.rpsl.AttributeType.ROLE;
-import static net.ripe.db.whois.common.rpsl.AttributeType.STATUS;
-import static net.ripe.db.whois.common.rpsl.AttributeType.TECH_C;
-import static net.ripe.db.whois.common.rpsl.AttributeType.ZONE_C;
+import static net.ripe.db.whois.common.rpsl.AttributeType.*;
 import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
 
 class RdapObjectMapper {
@@ -148,6 +128,12 @@ class RdapObjectMapper {
             rdapResponse.getEntities().addAll(ctcEntities);
         }
 
+        // sort out abuse-mailbox(s) here
+        final List<Entity> abuseMailboxes = createAbuseMailboxEntities(rpslObject, selfUrl, baseUrl);
+        if (!abuseMailboxes.isEmpty()) {
+            rdapResponse.getEntities().addAll(abuseMailboxes);
+        }
+
         return rdapResponse;
     }
 
@@ -187,6 +173,16 @@ class RdapObjectMapper {
         ip.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         return ip;
+    }
+
+    private static List<Entity> createAbuseMailboxEntities(final RpslObject rpslObject, final String requestUrl, final String baseUrl) {
+        List<Entity> abuseMailboxEntities = new ArrayList<Entity>();
+
+        for (final RpslAttribute abuseMailboxes : rpslObject.findAttributes(ABUSE_MAILBOX)) {
+            // TODO: implement
+        }
+
+        return abuseMailboxEntities;
     }
 
     private static List<Remark> createRemarks(final RpslObject rpslObject) {
@@ -420,15 +416,8 @@ class RdapObjectMapper {
         }
 
         List<CIString> addrList = new ArrayList<CIString>();
-        for (final String address : rpslObject.getRawValuesForAttribute(ADDRESS)) {
-            if (address.contains("\n") || address.contains("\r")) {
-                String[] addressParts = address.split("\r?\n|\r");
-                for (int i = 0; i < addressParts.length; i++) {
-                    addrList.add(CIString.ciString(addressParts[i].trim()));
-                }
-            } else {
-                addrList.add(CIString.ciString(address.trim()));
-            }
+        for (final CIString address : rpslObject.getValuesForAttribute(ADDRESS)) {
+            addrList.add(address);
         }
         if (!addrList.isEmpty()) {
             String addr = NEWLINE_JOINER.join(addrList.listIterator());

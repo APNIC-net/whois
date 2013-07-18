@@ -277,20 +277,6 @@ public class RpslObject implements Identifiable, ResponseObject {
         return values;
     }
 
-    public Set<String> getRawValuesForAttribute(final AttributeType attributeType) {
-        final List<RpslAttribute> attributeList = findAttributes(attributeType);
-        if (attributeList.isEmpty()) {
-            return Collections.emptySet();
-        }
-
-        final Set<String> values = Sets.newLinkedHashSet();
-        for (final RpslAttribute attribute : attributeList) {
-            values.add(attribute.getValue());
-        }
-
-        return values;
-    }
-
     public void forAttributes(final AttributeType attributeType, final AttributeCallback attributeCallback) {
         for (final RpslAttribute rpslAttribute : findAttributes(attributeType)) {
             for (final CIString value : rpslAttribute.getCleanValues()) {
