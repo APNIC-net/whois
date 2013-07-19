@@ -50,6 +50,17 @@ public class NoticeFactory {
     @Value("${rdap.source.title:}")
     private String rdap_source_title;
 
+    @Value("${rdap.help.auth.title:}")
+    private String rdap_help_auth_title;
+    @Value("${rdap.help.auth.description:}")
+    private String rdap_help_auth_description;
+    @Value("${rdap.help.auth.link.rel:}")
+    private String rdap_help_auth_link_rel;
+    @Value("${rdap.help.auth.link.href:}")
+    private String rdap_help_auth_link_href;
+    @Value("${rdap.help.auth.link.type:}")
+    private String rdap_help_auth_link_type;
+
     private static NoticeFactory noticeFactory;
 
     public NoticeFactory () {
@@ -107,6 +118,27 @@ public class NoticeFactory {
 
             notices.add(source);
         }
+        return notices;
+    }
+
+    public static List<Notice> generateHelpNotices(String selfUrl) {
+        List<Notice> notices = new ArrayList<Notice>();
+
+        if (noticeFactory != null) {
+            Notice authNotice = new Notice();
+
+            authNotice.setTitle(noticeFactory.rdap_help_auth_title);
+            authNotice.getDescription().add(noticeFactory.rdap_help_auth_description);
+            Link link = new Link();
+            link.setRel(noticeFactory.rdap_help_auth_link_rel);
+            link.setHref(noticeFactory.rdap_help_auth_link_href);
+            link.setType(noticeFactory.rdap_help_auth_link_type);
+            link.setValue(selfUrl);
+            authNotice.setLinks(link);
+
+            notices.add(authNotice);
+        }
+
         return notices;
     }
 }
