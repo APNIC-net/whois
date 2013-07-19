@@ -92,7 +92,7 @@ public class NoticeFactory {
         return notices;
     }
 
-    public static List<Notice> generateNotices(RpslObject rpslObject, String selfLink) {
+    public static List<Notice> generateObjectNotices(RpslObject rpslObject, String selfLink) {
         List<Notice> notices = new ArrayList<Notice>();
 
         if (noticeFactory != null) {
