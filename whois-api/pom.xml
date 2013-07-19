@@ -211,7 +211,7 @@
                             <packageDir>${project.build.directory}/enunciate/package-int</packageDir>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!-- execution>
                         <id>RDAP</id>
                         <goals>
                             <goal>docs</goal>
@@ -225,7 +225,7 @@
                             <generateDir>${project.build.directory}/enunciate/generate-rdap</generateDir>
                             <packageDir>${project.build.directory}/enunciate/package-rdap</packageDir>
                         </configuration>
-                    </execution>
+                    </execution -->
                 </executions>
             </plugin>
             <plugin>
