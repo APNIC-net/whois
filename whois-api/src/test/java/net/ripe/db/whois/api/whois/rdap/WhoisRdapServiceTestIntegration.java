@@ -424,12 +424,53 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
     @Test
     public void lookup_entity_no_accept_header() {
-        final Entity response = createResource(AUDIENCE, "entity/PP1-TEST")
-                .get(Entity.class);
+        final WebResource webResource = createResource(AUDIENCE, "entity/PP1-TEST");
+        String response = new String(RdapHelperUtils.getHttpContent(webResource.getURI().toASCIIString()));
 
-        assertThat(response.getHandle(), equalTo("PP1-TEST"));
-        assertThat(response.getRdapConformance(), hasSize(1));
-        assertThat(response.getRdapConformance().get(0), equalTo("rdap_level_0"));
+        // Using convertEOLToUnix - test is now platform neutral
+        assertThat(RdapHelperUtils.convertEOLToUnix(response), containsString("" +
+                "{\n" +
+                "  \"handle\" : \"PP1-TEST\",\n" +
+                "  \"vcardArray\" : [ \"vcard\", [ [ \"version\", {\n" +
+                "  }, \"text\", \"4.0\" ], [ \"fn\", {\n" +
+                "  }, \"text\", \"Pauleth Palthen\" ], [ \"kind\", {\n" +
+                "  }, \"text\", \"individual\" ], [ \"adr\", {\n" +
+                "    \"label\" : \"Singel 258\"\n" +
+                "  }, \"text\", [ \"\", \"\", \"\", \"\", \"\", \"\", \"\" ] ], [ \"tel\", {\n" +
+                "    \"type\" : \"voice\"\n" +
+                "  }, \"text\", \"+31-1234567890\" ], [ \"email\", {\n" +
+                "  }, \"text\", \"noreply@ripe.net\" ] ] ],\n" +
+                "  \"remarks\" : [ {\n" +
+                "    \"title\" : \"remarks\",\n" +
+                "    \"description\" : [ \"remark\" ]\n" +
+                "  } ],\n" +
+                "  \"links\" : [ {\n" +
+                "    \"value\" : \"http://127.0.0.1/rdap/entity/PP1-TEST\",\n" +
+                "    \"rel\" : \"self\",\n" +
+                "    \"href\" : \"http://127.0.0.1/rdap/entity/PP1-TEST\"\n" +
+                "  } ],\n" +
+                "  \"events\" : [ {\n" +
+                "    \"eventAction\" : \"last changed\",\n"));
+
+        //  "eventDate" : "2013-07-19T02:36:52.000+0000"
+
+        assertThat(RdapHelperUtils.convertEOLToUnix(response), containsString("" +
+                "} ],\n" +
+                "  \"rdapConformance\" : [ \"rdap_level_0\" ],\n" +
+                "  \"notices\" : [ {\n" +
+                "    \"title\" : \"Terms and Conditions\",\n" +
+                "    \"description\" : [ \"This is the APNIC WHOIS Database query service. The objects are in RDAP format.\" ],\n" +
+                "    \"links\" : {\n" +
+                "      \"value\" : \"http://127.0.0.1/rdap/entity/PP1-TEST\",\n" +
+                "      \"rel\" : \"terms-of-service\",\n" +
+                "      \"href\" : \"http://www.apnic.net/db/dbcopyright.html\",\n" +
+                "      \"type\" : \"text/html\"\n" +
+                "    }\n" +
+                "  }, {\n" +
+                "    \"title\" : \"Source\",\n" +
+                "    \"description\" : [ \"Objects returned came from source\", \"TEST\" ]\n" +
+                "  } ]\n" +
+                "}"));
     }
 
     // domain

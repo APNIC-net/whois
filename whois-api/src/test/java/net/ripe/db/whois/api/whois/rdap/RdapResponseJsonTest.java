@@ -1,8 +1,14 @@
 package net.ripe.db.whois.api.whois.rdap;
 
-import com.Ostermiller.util.LineEnds;
 import com.google.common.collect.Lists;
-import net.ripe.db.whois.api.whois.rdap.domain.*;
+import net.ripe.db.whois.api.whois.rdap.domain.Domain;
+import net.ripe.db.whois.api.whois.rdap.domain.Entity;
+import net.ripe.db.whois.api.whois.rdap.domain.Event;
+import net.ripe.db.whois.api.whois.rdap.domain.Ip;
+import net.ripe.db.whois.api.whois.rdap.domain.Link;
+import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
+import net.ripe.db.whois.api.whois.rdap.domain.Notice;
+import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.api.whois.rdap.domain.vcard.VCard;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -12,7 +18,6 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
-import org.codehaus.plexus.util.StringInputStream;
 import org.codehaus.plexus.util.StringOutputStream;
 import org.junit.Test;
 
@@ -23,7 +28,10 @@ import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 import static com.google.common.collect.Maps.immutableEntry;
-import static net.ripe.db.whois.api.whois.rdap.VCardHelper.*;
+import static net.ripe.db.whois.api.whois.rdap.VCardHelper.createAddress;
+import static net.ripe.db.whois.api.whois.rdap.VCardHelper.createHonorifics;
+import static net.ripe.db.whois.api.whois.rdap.VCardHelper.createMap;
+import static net.ripe.db.whois.api.whois.rdap.VCardHelper.createName;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -506,7 +514,7 @@ public class RdapResponseJsonTest {
         generator.close();
 
         // So that the test can run on ALL platform (Curse you iScampi!!)
-        return convertEOLToUnix(outputStream);
+        return RdapHelperUtils.convertEOLToUnix(outputStream);
     }
 
     private JsonFactory createJsonFactory() {
@@ -527,9 +535,4 @@ public class RdapResponseJsonTest {
         return objectMapper.getJsonFactory();
     }
 
-    private String convertEOLToUnix(StringOutputStream serializer) throws IOException {
-        StringOutputStream resultStream = new StringOutputStream();
-        LineEnds.convert(new StringInputStream(serializer.toString()), resultStream, LineEnds.STYLE_UNIX);
-        return resultStream.toString();
-    }
 }
