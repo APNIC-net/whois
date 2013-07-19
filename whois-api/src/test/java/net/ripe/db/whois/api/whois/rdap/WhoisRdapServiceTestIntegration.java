@@ -788,10 +788,9 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(irt.getVcardArray().get(0).toString(), is("vcard"));
         assertThat(irt.getVcardArray().get(1).toString(), is("" +
                 "[[version, {}, text, 4.0], " +
-                "[fn, {}, text, Abuse Contact], " +
+                "[fn, {}, text, IRT-TEST1-MNT], " +
                 "[kind, {}, text, group], " +
-                "[adr, {label=Singel 258}, text, [, , , , , , ]], " +
-                "[tel, {type=voice}, text, +31 6 12345678]]"));
+                "[email, {}, text, info@test.net]]"));
 
         assertThat(abuseContact.getHandle(), is("AB-TEST"));
         assertThat(abuseContact.getVcardArray(), hasSize(2));
