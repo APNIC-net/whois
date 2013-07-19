@@ -101,7 +101,7 @@ class RdapObjectMapper {
             // TODO: [ES] Denis to review
             case ORGANISATION:
             case IRT:
-                rdapResponse = createEntity(rpslObject, baseUrl);
+                rdapResponse = createEntity(rpslObject, null, baseUrl);
                 break;
             default:
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
@@ -120,9 +120,9 @@ class RdapObjectMapper {
         rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
-            rdapResponse.getEntities().add(createEntity(abuseContact, baseUrl));
+            rdapResponse.getEntities().add(createEntity(abuseContact, selfUrl, baseUrl));
         }
-        List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, baseUrl);
+        List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, selfUrl, baseUrl);
         if (!ctcEntities.isEmpty()) {
             rdapResponse.getEntities().addAll(ctcEntities);
         }
@@ -206,7 +206,7 @@ class RdapObjectMapper {
         return lastChangedEvent;
     }
 
-    private static List<Entity> contactEntities(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String baseUrl) {
+    private static List<Entity> contactEntities(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String topUrl, final String baseUrl) {
         final List<Entity> entities = Lists.newArrayList();
 
         final Map<CIString, RpslObject> relatedObjectMap = Maps.newHashMap();
@@ -232,7 +232,7 @@ class RdapObjectMapper {
             final Entity entity;
             if (relatedObjectMap.containsKey(entry.getKey())) {
                 final RpslObject contactRpslObject = relatedObjectMap.get(entry.getKey());
-                entity = createEntity(contactRpslObject, baseUrl);
+                entity = createEntity(contactRpslObject, topUrl, baseUrl);
 
                 final List<Remark> remarks = createRemarks(contactRpslObject);
                 if (!remarks.isEmpty()) {
@@ -251,13 +251,13 @@ class RdapObjectMapper {
         return entities;
     }
 
-    private static Entity createEntity(final RpslObject rpslObject, final String baseUrl) {
+    private static Entity createEntity(final RpslObject rpslObject, final String topUrl, final String baseUrl) {
         final Entity entity = new Entity();
         entity.setHandle(rpslObject.getKey().toString());
         setVCardArray(entity,createVCard(rpslObject));
 
         final String selfUrl = baseUrl + "/" + Entity.class.getSimpleName().toLowerCase() + "/" + entity.getHandle();
-        entity.getLinks().add(createLink("self", selfUrl, selfUrl));
+        entity.getLinks().add(createLink("self", topUrl != null ? topUrl : selfUrl, selfUrl));
 
         return entity;
     }
