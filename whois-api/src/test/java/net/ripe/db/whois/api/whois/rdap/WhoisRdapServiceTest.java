@@ -9,7 +9,6 @@ import net.ripe.db.whois.query.handler.QueryHandler;
 import net.ripe.db.whois.update.handler.UpdateRequestHandler;
 import net.ripe.db.whois.update.log.LoggerContext;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,7 +20,6 @@ import javax.ws.rs.core.Response;
 
 import static org.mockito.Mockito.when;
 
-@Ignore("test throws npe")
 @RunWith(MockitoJUnitRunner.class)
 public class WhoisRdapServiceTest {
 
@@ -44,6 +42,7 @@ public class WhoisRdapServiceTest {
         when(sourceContext.getCurrentSource()).thenReturn(source);
         when(sourceContext.getAllSourceNames()).thenReturn(CIString.ciSet("TEST", "TEST-GRS"));
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(request.getRequestURL()).thenReturn(new StringBuffer().append("http://localhost/"));
     }
 
     @Test
