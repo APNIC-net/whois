@@ -66,6 +66,7 @@ class RdapObjectMapper {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ADMIN_C, "administrative");
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(TECH_C, "technical");
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, "zone");
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(MNT_IRT, "abuse");
     }
 
     @Value("${rdap.port43:whois.ripe.net}")
@@ -120,7 +121,9 @@ class RdapObjectMapper {
         rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
-            rdapResponse.getEntities().add(createEntity(abuseContact, selfUrl, baseUrl));
+            final Entity entity = createEntity(abuseContact, selfUrl, baseUrl);
+            entity.getRoles().add("abuse");
+            rdapResponse.getEntities().add(entity);
         }
         List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, selfUrl, baseUrl);
         if (!ctcEntities.isEmpty()) {

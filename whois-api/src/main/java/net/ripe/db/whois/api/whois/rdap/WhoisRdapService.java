@@ -11,6 +11,7 @@ import net.ripe.db.whois.common.dao.RpslObjectDao;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.domain.attrs.AttributeParseException;
 import net.ripe.db.whois.common.domain.attrs.Domain;
+import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.query.domain.QueryCompletionInfo;
@@ -189,7 +190,7 @@ public class WhoisRdapService {
                             // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
                             objectDao.getLastUpdated(resultObject.getObjectId()),
                             // TODO: [RL] for the equivalent, APNIC needs to find the referenced IRT object
-                            getAbuseContacts(resultObject),
+                            getMntIrt(resultObject),
                             getParentObject(resultObject))).build();
 
         } catch (final QueryException e) {
@@ -275,6 +276,26 @@ public class WhoisRdapService {
         if (ABUSE_CONTACT_TYPES.contains(objectType)) {
             return abuseCFinder.findAbuseContacts(rpslObject);
         }
+        return Collections.emptyList();
+    }
+
+    private List<RpslObject> getMntIrt(final RpslObject rpslObject) {
+        if (rpslObject.containsAttribute(AttributeType.MNT_IRT)) {
+            final String queryString = String.format("%s %s %s %s %s",
+                    QueryFlag.NO_GROUPING.getLongFlag(),
+                    QueryFlag.SELECT_TYPES.getLongFlag(),
+                    IRT,
+                    QueryFlag.NO_FILTERING.getLongFlag(),
+                    rpslObject.getValueForAttribute(AttributeType.MNT_IRT).toString());
+            final Query query = Query.parse(
+                    queryString);
+            return runQuery(
+                    query,
+                    null,
+                    true
+            );
+        }
+
         return Collections.emptyList();
     }
 
