@@ -172,8 +172,10 @@ class RdapObjectMapper {
 
         final List<String> descriptions = Lists.newArrayList();
 
-        for (final CIString description : rpslObject.getValuesForAttribute(DESCR)) {
-            descriptions.add(description.toString());
+        for (final RpslAttribute attribute : rpslObject.findAttributes(DESCR)) {
+            for (final CIString description : attribute.getCleanValues() ) {
+                descriptions.add(description.toString());
+            }
         }
 
         if (!descriptions.isEmpty()) {
@@ -185,8 +187,10 @@ class RdapObjectMapper {
 
         final List<String> remarks = Lists.newArrayList();
 
-        for (final CIString description : rpslObject.getValuesForAttribute(REMARKS)) {
-            remarks.add(description.toString());
+        for (final RpslAttribute attribute : rpslObject.findAttributes(REMARKS)) {
+            for (final CIString remark : attribute.getCleanValues() ) {
+                remarks.add(remark.toString());
+            }
         }
 
         if (!remarks.isEmpty()) {

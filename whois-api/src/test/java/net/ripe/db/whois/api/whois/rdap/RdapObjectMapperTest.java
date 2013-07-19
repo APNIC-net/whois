@@ -397,6 +397,40 @@ public class RdapObjectMapperTest {
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
     }
 
+    @Test
+    public void multiple_remarks() {
+        final Entity result = (Entity) map(RpslObject.parse("" +
+                "person:        First Last\n" +
+                "descr:         descr1\n" +
+                "descr:         descr2\n" +
+                "descr:         descr2\n" +
+                "descr:         descr1\n" +
+                "address:       Singel 258\n" +
+                "phone:         +31 20 123456\n" +
+                "nic-hdl:       FL1-TEST\n" +
+                "remarks:       remark1\n" +
+                "remarks:       remark2\n" +
+                "remarks:       remark2\n" +
+                "remarks:       remark1\n" +
+                "mnt-by:        TST-MNT\n" +
+                "changed:       first@last.org 20120220\n" +
+                "source:        TEST"));
+
+        assertThat(result.getRdapConformance(), is(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL));
+        assertThat(result.getHandle(), is("FL1-TEST"));
+        assertThat(result.getRemarks(), hasSize(2));
+        assertThat(result.getRemarks().get(0).getTitle(), is("description"));
+        assertThat(result.getRemarks().get(0).getDescription().get(0), is("descr1"));
+        assertThat(result.getRemarks().get(0).getDescription().get(1), is("descr2"));
+        assertThat(result.getRemarks().get(0).getDescription().get(2), is("descr2"));
+        assertThat(result.getRemarks().get(0).getDescription().get(3), is("descr1"));
+        assertThat(result.getRemarks().get(1).getTitle(), is("remarks"));
+        assertThat(result.getRemarks().get(1).getDescription().get(0), is("remark1"));
+        assertThat(result.getRemarks().get(1).getDescription().get(1), is("remark2"));
+        assertThat(result.getRemarks().get(1).getDescription().get(2), is("remark2"));
+        assertThat(result.getRemarks().get(1).getDescription().get(3), is("remark1"));
+    }
+
     private Object map(final RpslObject rpslObject) {
         return RdapObjectMapper.map(REQUEST_URL,BASE_URL, rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP, Lists.<RpslObject>newArrayList(), null);
     }
