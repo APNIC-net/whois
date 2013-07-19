@@ -16,6 +16,7 @@ import net.ripe.db.whois.api.whois.rdap.domain.Ip;
 import net.ripe.db.whois.api.whois.rdap.domain.Link;
 import net.ripe.db.whois.api.whois.rdap.domain.Notice;
 import net.ripe.db.whois.api.whois.rdap.domain.Remark;
+import net.ripe.db.whois.api.whois.rdap.domain.Error;
 import net.ripe.db.whois.common.IntegrationTest;
 import net.ripe.db.whois.common.TestDateTimeProvider;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
@@ -125,6 +126,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "aut-num:       AS123\n" +
                 "as-name:       AS-TEST\n" +
                 "descr:         A single ASN\n" +
+                "country:       AU\n" +
                 "admin-c:       TP1-TEST\n" +
                 "tech-c:        TP1-TEST\n" +
                 "changed:       test@test.net.au 20010816\n" +
@@ -472,6 +474,19 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
+    public void invalid_autnum() throws Exception {
+        try {
+            createResource(AUDIENCE, "autnum/as1")
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .get(Autnum.class);
+            fail();
+        } catch (UniformInterfaceException e) {
+            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getEntity(Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+        }
+    }
+
+    @Test
     public void autnum_not_found() throws Exception {
         try {
             createResource(AUDIENCE, "autnum/1")
@@ -508,6 +523,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(autnum.getEndAutnum(), equalTo(123L));
         assertThat(autnum.getName(), equalTo("AS-TEST"));
         assertThat(autnum.getType(), equalTo("DIRECT ALLOCATION"));
+        assertThat(autnum.getCountry(), equalTo("AU"));
 
         final List<Event> events = autnum.getEvents();
         assertThat(events, hasSize(1));
@@ -712,6 +728,16 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "changed:       dbtest@ripe.net 20120101\n" +
                 "source:        TEST\n");
         databaseHelper.addObject("" +
+                "irt:           IRT-TEST1-MNT\n" +
+                "descr:         Owner Maintainer\n" +
+                "admin-c:       TP1-TEST\n" +
+                "e-mail:        info@test.net\n" +
+                "abuse-mailbox: abuse@test.net\n" +
+                "mnt-by:        OWNER-MNT\n" +
+                "referral-by:   OWNER-MNT\n" +
+                "changed:       dbtest@ripe.net 20120101\n" +
+                "source:        TEST\n");
+        databaseHelper.addObject("" +
                 "organisation:  ORG-TO2-TEST\n" +
                 "org-name:      Test organisation\n" +
                 "org-type:      OTHER\n" +
@@ -744,6 +770,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "tech-c:       TP1-TEST\n" +
                 "status:       OTHER\n" +
                 "mnt-by:       OWNER-MNT\n" +
+                "mnt-irt:      IRT1-MNT\n" +
                 "changed:      dbtest@ripe.net 20020101\n" +
                 "source:       TEST");
         ipTreeUpdater.rebuild();
@@ -752,7 +779,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(Ip.class);
 
-        assertThat(ip.getEntities().get(0).getHandle(), is("AB-TEST"));
+        assertThat(ip.getEntities().get(0).getHandle(), is("IRT-TEST1-MNT"));
 
         assertThat(ip.getEntities().get(0).getVcardArray(), hasSize(2));
         assertThat(ip.getEntities().get(0).getVcardArray().get(0).toString(), is("vcard"));
