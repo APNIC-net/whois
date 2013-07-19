@@ -65,7 +65,7 @@ public class WhoisRdapService {
     private final String baseUrl;
 
     @Autowired
-    public WhoisRdapService(final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder, @Value("${rdap.public.baseUrl:}") final String baseUrl) {
+    public WhoisRdapService(final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder, @Value("${rdap.public.baseurl:}") final String baseUrl) {
         this.queryHandler = queryHandler;
         this.objectDao = objectDao;
         this.abuseCFinder = abuseCFinder;

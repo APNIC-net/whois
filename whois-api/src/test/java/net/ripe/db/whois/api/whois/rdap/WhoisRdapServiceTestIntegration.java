@@ -213,7 +213,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         assertThat(response.getHandle(), is("192.0.0.0 - 192.255.255.255"));
         assertThat(response.getIpVersion(), is("v4"));
-        assertThat(response.getLang(), is("en"));
         assertThat(response.getCountry(), is("NL"));
         assertThat(response.getStartAddress(), is("192.0.0.0"));
         assertThat(response.getEndAddress(), is("192.255.255.255"));
@@ -257,10 +256,9 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final List<Link> links = response.getLinks();
         assertThat(links, hasSize(1));
         final String selfUrl = createResource(AUDIENCE, "ip/192.0.0.0/8").toString();
-        final String requestUrl = createResource(AUDIENCE, "ip/192.0.0.255").toString();
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getHref(), equalTo(selfUrl));
-        assertThat(links.get(0).getValue(), equalTo(requestUrl));
+        assertThat(links.get(0).getValue(), equalTo(selfUrl));
     }
 
     @Test
@@ -295,12 +293,11 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         assertThat(response.getHandle(), is("192.0.0.0 - 192.0.0.0"));
         assertThat(response.getIpVersion(), is("v4"));
-        assertThat(response.getLang(), is("en"));
         assertThat(response.getCountry(), is("NL"));
         assertThat(response.getStartAddress(), is("192.0.0.0"));
         assertThat(response.getEndAddress(), is("192.0.0.0"));
         assertThat(response.getName(), is("TEST-NET-NAME-32"));
-        assertThat(response.getParentHandle(), is("TEST-NET-NAME-24"));
+        assertThat(response.getParentHandle(), is("192.0.0.0 - 192.0.0.255"));
 
         final List<Link> links = response.getLinks();
         assertThat(links, hasSize(2));
@@ -382,10 +379,9 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final List<Link> links = response.getLinks();
         assertThat(links, hasSize(1));
         final String selfUrl = createResource(AUDIENCE, "ip/2001:2002:2003::/48").toString();
-        final String requestUrl = createResource(AUDIENCE, "ip/2001:2002:2003:2004::").toString();
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getHref(), equalTo(selfUrl));
-        assertThat(links.get(0).getValue(), equalTo(requestUrl));
+        assertThat(links.get(0).getValue(), equalTo(selfUrl));
     }
 
     @Test
@@ -596,13 +592,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final List<Remark> remarks = autnum.getRemarks();
         assertThat(remarks, hasSize(1));
         assertThat(remarks.get(0).getDescription().get(0), is("A single ASN"));
-
-        try {
-            Thread.sleep(1000000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-
     }
 
     @Test
