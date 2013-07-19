@@ -292,7 +292,7 @@ public class WhoisRdapService {
 
     private List<RpslObject> getMntIrt(final RpslObject rpslObject) {
         List<RpslObject> mntIrtObjects = Lists.newArrayList();
-        List<RpslAttribute> mntIrtAttributes = rpslObject.findAttributes(MNT_IRT);
+        List<RpslAttribute> mntIrtAttributes = rpslObject.findAttributes(AttributeType.MNT_IRT);
         for (RpslAttribute mntIrtAttribute : mntIrtAttributes) {
             final String queryString = String.format("%s %s %s %s %s",
                     QueryFlag.NO_GROUPING.getLongFlag(),
