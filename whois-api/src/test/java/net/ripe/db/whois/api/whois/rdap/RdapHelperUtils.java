@@ -1,7 +1,13 @@
 package net.ripe.db.whois.api.whois.rdap;
 
+import com.Ostermiller.util.LineEnds;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomWriter;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.codehaus.plexus.util.StringInputStream;
+import org.codehaus.plexus.util.StringOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -60,5 +66,45 @@ public class RdapHelperUtils {
         return ret;
     }
 
+    public static String convertEOLToUnix(StringOutputStream serializer) {
+        StringOutputStream resultStream = new StringOutputStream();
+        try {
+            LineEnds.convert(new StringInputStream(serializer.toString()), resultStream, LineEnds.STYLE_UNIX);
+        } catch (Exception ex) {
+            LOGGER.error("convertEOLToUnix failed", ex);
+        }
+        return resultStream.toString();
+    }
 
+    public static String convertEOLToUnix(String str) {
+        StringOutputStream resultStream = new StringOutputStream();
+        try {
+            LineEnds.convert(new StringInputStream(str), resultStream, LineEnds.STYLE_UNIX);
+        } catch (Exception ex) {
+            LOGGER.error("convertEOLToUnix failed", ex);
+        }
+        return resultStream.toString();
+    }
+
+    public static byte[] getHttpContent(String url) {
+        // Create a method instance.
+        final HttpClient httpClient = new HttpClient();
+        GetMethod method = new GetMethod(url);
+        byte[] responseBody = new byte[0];
+        int statusCode = -1;
+        try {
+            statusCode = httpClient.executeMethod(method);
+            if (statusCode != HttpStatus.SC_OK) {
+                throw new ExceptionInInitializerError("Http error [" + statusCode + "][" + url + "]");
+            }
+            // Read the response body.
+            responseBody = method.getResponseBody();
+        } catch (Exception ex) {
+            LOGGER.error("Could not get url status=" + statusCode + ":" + url, ex);
+        } finally {
+            // Release the connection.
+            method.releaseConnection();
+        }
+        return responseBody;
+    }
 }
