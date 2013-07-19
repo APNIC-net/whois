@@ -50,16 +50,16 @@ public class NoticeFactory {
     @Value("${rdap.source.title:}")
     private String rdap_source_title;
 
-    @Value("${rdap.help.auth.title:}")
-    private String rdap_help_auth_title;
-    @Value("${rdap.help.auth.description:}")
-    private String rdap_help_auth_description;
-    @Value("${rdap.help.auth.link.rel:}")
-    private String rdap_help_auth_link_rel;
-    @Value("${rdap.help.auth.link.href:}")
-    private String rdap_help_auth_link_href;
-    @Value("${rdap.help.auth.link.type:}")
-    private String rdap_help_auth_link_type;
+    @Value("${rdap.help.title:}")
+    private String rdap_help_title;
+    @Value("${rdap.help.description:}")
+    private String rdap_help_description;
+    @Value("${rdap.help.link.rel:}")
+    private String rdap_help_link_rel;
+    @Value("${rdap.help.link.href:}")
+    private String rdap_help_link_href;
+    @Value("${rdap.help.link.type:}")
+    private String rdap_help_link_type;
 
     private static NoticeFactory noticeFactory;
 
@@ -127,12 +127,12 @@ public class NoticeFactory {
         if (noticeFactory != null) {
             Notice authNotice = new Notice();
 
-            authNotice.setTitle(noticeFactory.rdap_help_auth_title);
-            authNotice.getDescription().add(noticeFactory.rdap_help_auth_description);
+            authNotice.setTitle(noticeFactory.rdap_help_title);
+            authNotice.getDescription().add(noticeFactory.rdap_help_description);
             Link link = new Link();
-            link.setRel(noticeFactory.rdap_help_auth_link_rel);
-            link.setHref(noticeFactory.rdap_help_auth_link_href);
-            link.setType(noticeFactory.rdap_help_auth_link_type);
+            link.setRel(noticeFactory.rdap_help_link_rel);
+            link.setHref(noticeFactory.rdap_help_link_href);
+            link.setType(noticeFactory.rdap_help_link_type);
             link.setValue(selfUrl);
             authNotice.setLinks(link);
 
