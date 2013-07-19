@@ -6,7 +6,6 @@ whois.default.sources=
 port.query=-1
 port.api.internal=-1
 port.api.public=-1
-port.api.rdap=-1
 port.nrtm=-1
 port.nrtm.legacy=-1
 
@@ -117,8 +116,8 @@ rdap.tnc.linkrel=terms-of-service
 rdap.tnc.linkhref=http://www.apnic.net/db/dbcopyright.html
 rdap.tnc.linktype=text/html
 
-rdap.public.baseUrl=
-rdap.public.port43=whois.apnic.net
+rdap.public.baseurl=
+rdap.port43=whois.apnic.net
 
 rdap.filter.isfiltered=false
 rdap.filter.description=This output has been filtered.
