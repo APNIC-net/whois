@@ -44,6 +44,7 @@ public class WhoisRdapServiceTest {
         when(sourceContext.getCurrentSource()).thenReturn(source);
         when(sourceContext.getAllSourceNames()).thenReturn(CIString.ciSet("TEST", "TEST-GRS"));
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+        when(request.getRequestURL()).thenReturn(new StringBuffer().append("127.0.0.1"));
     }
 
     @Test
