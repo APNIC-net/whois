@@ -16,7 +16,7 @@ public class RdapException {
         exception.setTitle(status.getReasonPhrase());
 
         exception.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
-        exception.getNotices().addAll(NoticeFactory.generateGeneralNotices(selfUrl));
+        exception.getNotices().addAll(NoticeFactory.generateNotices(selfUrl));
 
         switch (status.getStatusCode()) {
             case 400:

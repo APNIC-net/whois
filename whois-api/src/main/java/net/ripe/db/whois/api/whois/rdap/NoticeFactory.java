@@ -62,7 +62,7 @@ public class NoticeFactory {
         }
     }
 
-    public static List<Notice> generateGeneralNotices(String selfLink) {
+    public static List<Notice> generateNotices(String selfLink) {
         List<Notice> notices = new ArrayList<Notice>();
 
         if (noticeFactory != null) {
@@ -96,7 +96,7 @@ public class NoticeFactory {
         List<Notice> notices = new ArrayList<Notice>();
 
         if (noticeFactory != null) {
-            notices.addAll(generateGeneralNotices(selfLink));
+            notices.addAll(generateNotices(selfLink));
 
             List<RpslAttribute> rpslAttributeList = rpslObject.findAttributes(AttributeType.SOURCE);
             CIString sourceName = rpslAttributeList.get(0).getCleanValue();
