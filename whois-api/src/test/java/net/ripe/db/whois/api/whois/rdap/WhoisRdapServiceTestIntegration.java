@@ -421,10 +421,12 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     @Test
     public void lookup_entity_no_accept_header() {
         final WebResource webResource = createResource(AUDIENCE, "entity/PP1-TEST");
-        String response = new String(RdapHelperUtils.getHttpContent(webResource.getURI().toASCIIString()));
+        String response = new String(RdapHelperUtils.getHttpContent(webResource.getURI().toASCIIString()))
+                .replaceAll("http://localhost:[0-9]+/","http://127.0.0.1/")
+                .replaceAll("\"eventDate\" : \"[^\"]+\"", "\"eventDate\" : \"NOW\"");
 
         // Using convertEOLToUnix - test is now platform neutral
-        assertThat(RdapHelperUtils.convertEOLToUnix(response), containsString("" +
+        assertThat(RdapHelperUtils.convertEOLToUnix(response), equalTo("" +
                 "{\n" +
                 "  \"handle\" : \"PP1-TEST\",\n" +
                 "  \"vcardArray\" : [ \"vcard\", [ [ \"version\", {\n" +
@@ -446,12 +448,9 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "    \"href\" : \"http://127.0.0.1/rdap/entity/PP1-TEST\"\n" +
                 "  } ],\n" +
                 "  \"events\" : [ {\n" +
-                "    \"eventAction\" : \"last changed\",\n"));
-
-        //  "eventDate" : "2013-07-19T02:36:52.000+0000"
-
-        assertThat(RdapHelperUtils.convertEOLToUnix(response), containsString("" +
-                "} ],\n" +
+                "    \"eventAction\" : \"last changed\",\n" +
+                "    \"eventDate\" : \"NOW\"\n" +
+                "  } ],\n" +
                 "  \"rdapConformance\" : [ \"rdap_level_0\" ],\n" +
                 "  \"notices\" : [ {\n" +
                 "    \"title\" : \"Terms and Conditions\",\n" +
