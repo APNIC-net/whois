@@ -181,6 +181,8 @@
             <xs:element name="errorCode" type="xs:int" maxOccurs="1" minOccurs="0"/>
             <xs:element name="title" type="xs:string" maxOccurs="1" minOccurs="0"/>
             <xs:element name="description" type="xs:string" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element name="rdapConformance" type="xs:string" maxOccurs="unbounded" minOccurs="1"/>
+            <xs:element name="notices" type="notice" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 

@@ -50,7 +50,6 @@ class RdapObjectMapper {
 
     protected static final List<String> RDAP_CONFORMANCE_LEVEL = Lists.newArrayList("rdap_level_0");
     public static final Joiner NEWLINE_JOINER = Joiner.on("\n");
-    public static final Joiner COMMA_JOINER = Joiner.on(",");
 
     protected static DatatypeFactory dtf;
     static {
@@ -69,7 +68,7 @@ class RdapObjectMapper {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, "zone");
     }
 
-    @Value("${rdap.public.port43:whois.ripe.net}")
+    @Value("${rdap.port43:whois.ripe.net}")
     private static String port43;
 
     public static Object map(
@@ -86,7 +85,7 @@ class RdapObjectMapper {
 
         switch (rpslObjectType) {
             case DOMAIN:
-                rdapResponse = createDomain(rpslObject, requestUrl, baseUrl);
+                rdapResponse = createDomain(rpslObject, baseUrl);
                 break;
             case AUT_NUM:
             case AS_BLOCK:
@@ -102,7 +101,7 @@ class RdapObjectMapper {
             // TODO: [ES] Denis to review
             case ORGANISATION:
             case IRT:
-                rdapResponse = createEntity(rpslObject, requestUrl, baseUrl);
+                rdapResponse = createEntity(rpslObject, null, baseUrl);
                 break;
             default:
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
@@ -112,7 +111,7 @@ class RdapObjectMapper {
 
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
         rdapResponse.setPort43(port43);
-        rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, selfUrl));
+        rdapResponse.getNotices().addAll(NoticeFactory.generateObjectNotices(rpslObject, selfUrl));
 
         final List<Remark> remarks = createRemarks(rpslObject);
         if (!remarks.isEmpty()) {
@@ -153,7 +152,6 @@ class RdapObjectMapper {
 
         ip.setName(rpslObject.getValueForAttribute(NETNAME).toString());
         ip.setCountry(rpslObject.getValueForAttribute(COUNTRY).toString());
-        ip.setLang(rpslObject.getValuesForAttribute(LANGUAGE).isEmpty() ? null : COMMA_JOINER.join(rpslObject.getValuesForAttribute(LANGUAGE)));
         ip.setType(rpslObject.getValueForAttribute(STATUS).toString());
 
         if (parentRpslObject != null) {
@@ -208,7 +206,7 @@ class RdapObjectMapper {
         return lastChangedEvent;
     }
 
-    private static List<Entity> contactEntities(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String requestUrl, final String baseUrl) {
+    private static List<Entity> contactEntities(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String topUrl, final String baseUrl) {
         final List<Entity> entities = Lists.newArrayList();
 
         final Map<CIString, RpslObject> relatedObjectMap = Maps.newHashMap();
@@ -234,7 +232,7 @@ class RdapObjectMapper {
             final Entity entity;
             if (relatedObjectMap.containsKey(entry.getKey())) {
                 final RpslObject contactRpslObject = relatedObjectMap.get(entry.getKey());
-                entity = createEntity(contactRpslObject, requestUrl, baseUrl);
+                entity = createEntity(contactRpslObject, topUrl, baseUrl);
 
                 final List<Remark> remarks = createRemarks(contactRpslObject);
                 if (!remarks.isEmpty()) {
@@ -253,13 +251,13 @@ class RdapObjectMapper {
         return entities;
     }
 
-    private static Entity createEntity(final RpslObject rpslObject, final String requestUrl, final String baseUrl) {
+    private static Entity createEntity(final RpslObject rpslObject, final String topUrl, final String baseUrl) {
         final Entity entity = new Entity();
         entity.setHandle(rpslObject.getKey().toString());
         setVCardArray(entity,createVCard(rpslObject));
 
         final String selfUrl = baseUrl + "/" + Entity.class.getSimpleName().toLowerCase() + "/" + entity.getHandle();
-        entity.getLinks().add(createLink("self", selfUrl, selfUrl));
+        entity.getLinks().add(createLink("self", topUrl != null ? topUrl : selfUrl, selfUrl));
 
         return entity;
     }
@@ -292,7 +290,7 @@ class RdapObjectMapper {
         return autnum;
     }
 
-    private static Domain createDomain(final RpslObject rpslObject, String requestUrl, String baseUrl) {
+    private static Domain createDomain(final RpslObject rpslObject, String baseUrl) {
         final Domain domain = new Domain();
         domain.setHandle(rpslObject.getKey().toString());
         domain.setLdhName(rpslObject.getKey().toString());

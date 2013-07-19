@@ -8,12 +8,13 @@
 
 package net.ripe.db.whois.api.whois.rdap.domain;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -39,6 +40,8 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "error", propOrder = {
+    "rdapConformance",
+    "notices",
     "errorCode",
     "title",
     "description"
@@ -46,10 +49,26 @@ import javax.xml.bind.annotation.XmlType;
 public class Error
     implements Serializable
 {
-
+    @XmlElement(required = true)
+    protected List<String> rdapConformance;
+    protected List<Notice> notices;
     protected Integer errorCode;
     protected String title;
     protected List<String> description;
+
+    public List<String> getRdapConformance() {
+        if (rdapConformance == null) {
+            rdapConformance = new ArrayList<String>();
+        }
+        return this.rdapConformance;
+    }
+
+    public List<Notice> getNotices() {
+        if (notices == null) {
+            notices = new ArrayList<Notice>();
+        }
+        return this.notices;
+    }
 
     /**
      * Gets the value of the errorCode property.
