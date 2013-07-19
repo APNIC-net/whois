@@ -73,7 +73,7 @@ public class WhoisRdapService {
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, RdapJsonProvider.CONTENT_TYPE_RDAP_JSON})
+    @Produces({RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.APPLICATION_JSON})
     @Path("/{objectType}/{key:.*}")
     public Response lookup(@Context final HttpServletRequest request,
                            @PathParam("objectType") final String objectType,
