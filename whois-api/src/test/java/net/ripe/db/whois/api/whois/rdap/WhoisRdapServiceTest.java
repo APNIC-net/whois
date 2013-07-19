@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response;
 
 import static org.mockito.Mockito.when;
 
-@Ignore("tets throws npe")
+@Ignore("test throws npe")
 @RunWith(MockitoJUnitRunner.class)
 public class WhoisRdapServiceTest {
 
