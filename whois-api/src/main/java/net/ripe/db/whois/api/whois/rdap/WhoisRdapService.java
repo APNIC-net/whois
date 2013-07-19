@@ -111,17 +111,19 @@ public class WhoisRdapService {
 
         Response response;
 
+        String selfUrl = request.getRequestURL().toString();
+
         if (!whoisObjectTypes.isEmpty()) {
             try {
                 response = lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key));
             } catch (WebApplicationException webEx) {
                 int statusCode = webEx.getResponse().getStatus();
-                response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode))).build();
+                response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode),selfUrl)).build();
             }
         } else if (objectType.equals("nameserver")) {
-            response = Response.status(Response.Status.NOT_FOUND).entity(RdapException.build(Response.Status.NOT_FOUND)).build();
+            response = Response.status(Response.Status.NOT_FOUND).entity(RdapException.build(Response.Status.NOT_FOUND,selfUrl)).build();
         } else {
-            response = Response.status(Response.Status.BAD_REQUEST).entity(RdapException.build(Response.Status.BAD_REQUEST)).build();
+            response = Response.status(Response.Status.BAD_REQUEST).entity(RdapException.build(Response.Status.BAD_REQUEST,selfUrl)).build();
         }
 
         return response;
