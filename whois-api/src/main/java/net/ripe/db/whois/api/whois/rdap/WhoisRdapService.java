@@ -83,11 +83,17 @@ public class WhoisRdapService {
 
         switch (objectType) {
             case "autnum":
-                whoisObjectTypes.add(
-                    objectExists(request, AUT_NUM, "AS" + key)
-                        ? AUT_NUM
-                        : AS_BLOCK
-                );
+                long autnum = -1;
+                try {
+                    autnum = Long.parseLong(key);
+                } catch (NumberFormatException e) {}
+                if ((autnum >= 0) && (autnum <= 4294967295L)) {
+                    whoisObjectTypes.add(
+                        objectExists(request, AUT_NUM, "AS" + key)
+                            ? AUT_NUM
+                            : AS_BLOCK
+                    );
+                }
                 break;
 
             case "domain":

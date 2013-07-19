@@ -16,6 +16,7 @@ import net.ripe.db.whois.api.whois.rdap.domain.Ip;
 import net.ripe.db.whois.api.whois.rdap.domain.Link;
 import net.ripe.db.whois.api.whois.rdap.domain.Notice;
 import net.ripe.db.whois.api.whois.rdap.domain.Remark;
+import net.ripe.db.whois.api.whois.rdap.domain.Error;
 import net.ripe.db.whois.common.IntegrationTest;
 import net.ripe.db.whois.common.TestDateTimeProvider;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
@@ -517,6 +518,19 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         } catch (UniformInterfaceException e) {
             assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
             assertThat(e.getResponse().getEntity(String.class), is("RIPE NCC does not support forward domain queries."));
+        }
+    }
+
+    @Test
+    public void invalid_autnum() throws Exception {
+        try {
+            createResource(AUDIENCE, "autnum/as1")
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .get(Autnum.class);
+            fail();
+        } catch (UniformInterfaceException e) {
+            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getEntity(Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
         }
     }
 
