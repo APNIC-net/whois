@@ -388,24 +388,25 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
     @Test
     public void lookup_person_entity() throws Exception {
-        final Entity response = createResource(AUDIENCE, "entity/PP1-TEST")
+        final Entity entity = createResource(AUDIENCE, "entity/PP1-TEST")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(Entity.class);
 
-        assertThat(response.getHandle(), equalTo("PP1-TEST"));
-        assertThat(response.getEntities(), hasSize(0));
-        assertThat(response.getVcardArray().size(), is(2));
-        assertThat(response.getVcardArray().get(0).toString(), is("vcard"));
-        assertThat(response.getVcardArray().get(1).toString(), equalTo("" +
-                "[[version, {}, text, 4.0], " +
-                "[fn, {}, text, Pauleth Palthen], " +
-                "[kind, {}, text, individual], " +
-                "[adr, {label=Singel 258}, text, [, , , , , , ]], " +
-                "[tel, {type=voice}, text, +31-1234567890], " +
-                "[email, {}, text, noreply@ripe.net]]"));
-        assertThat(response.getRdapConformance(), hasSize(1));
-        assertThat(response.getRdapConformance().get(0), equalTo("rdap_level_0"));
+        assertEntityPP1_TEST(entity);
     }
+
+    @Test
+    public void lookup_entity_no_accept_header() throws Exception {
+        final WebResource webResource = createResource(AUDIENCE, "entity/PP1-TEST");
+
+        // Get using HttpClient so there is no accept header
+        String response = new String(RdapHelperUtils.getHttpContent(webResource.getURI().toASCIIString()));
+        LOGGER.info("Response=" + response);
+        Entity entity = RdapHelperUtils.unmarshal(response, Entity.class);
+
+        assertEntityPP1_TEST(entity);
+    }
+
 
     @Test
     public void lookup_entity_not_found() throws Exception {
@@ -418,59 +419,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         }
     }
 
-    // role entity
-
-    @Test
-    public void lookup_entity_no_accept_header() {
-        final WebResource webResource = createResource(AUDIENCE, "entity/PP1-TEST");
-        String response = new String(RdapHelperUtils.getHttpContent(webResource.getURI().toASCIIString()))
-                .replaceAll("http://localhost:[0-9]+/","http://127.0.0.1/")
-                .replaceAll("\"eventDate\" : \"[^\"]+\"", "\"eventDate\" : \"NOW\"");
-
-        // Using convertEOLToUnix - test is now platform neutral
-        assertThat(RdapHelperUtils.convertEOLToUnix(response), equalTo("" +
-                "{\n" +
-                "  \"handle\" : \"PP1-TEST\",\n" +
-                "  \"vcardArray\" : [ \"vcard\", [ [ \"version\", {\n" +
-                "  }, \"text\", \"4.0\" ], [ \"fn\", {\n" +
-                "  }, \"text\", \"Pauleth Palthen\" ], [ \"kind\", {\n" +
-                "  }, \"text\", \"individual\" ], [ \"adr\", {\n" +
-                "    \"label\" : \"Singel 258\"\n" +
-                "  }, \"text\", [ \"\", \"\", \"\", \"\", \"\", \"\", \"\" ] ], [ \"tel\", {\n" +
-                "    \"type\" : \"voice\"\n" +
-                "  }, \"text\", \"+31-1234567890\" ], [ \"email\", {\n" +
-                "  }, \"text\", \"noreply@ripe.net\" ] ] ],\n" +
-                "  \"remarks\" : [ {\n" +
-                "    \"title\" : \"remarks\",\n" +
-                "    \"description\" : [ \"remark\" ]\n" +
-                "  } ],\n" +
-                "  \"links\" : [ {\n" +
-                "    \"value\" : \"http://127.0.0.1/rdap/entity/PP1-TEST\",\n" +
-                "    \"rel\" : \"self\",\n" +
-                "    \"href\" : \"http://127.0.0.1/rdap/entity/PP1-TEST\"\n" +
-                "  } ],\n" +
-                "  \"events\" : [ {\n" +
-                "    \"eventAction\" : \"last changed\",\n" +
-                "    \"eventDate\" : \"NOW\"\n" +
-                "  } ],\n" +
-                "  \"rdapConformance\" : [ \"rdap_level_0\" ],\n" +
-                "  \"notices\" : [ {\n" +
-                "    \"title\" : \"Terms and Conditions\",\n" +
-                "    \"description\" : [ \"This is the APNIC WHOIS Database query service. The objects are in RDAP format.\" ],\n" +
-                "    \"links\" : {\n" +
-                "      \"value\" : \"http://127.0.0.1/rdap/entity/PP1-TEST\",\n" +
-                "      \"rel\" : \"terms-of-service\",\n" +
-                "      \"href\" : \"http://www.apnic.net/db/dbcopyright.html\",\n" +
-                "      \"type\" : \"text/html\"\n" +
-                "    }\n" +
-                "  }, {\n" +
-                "    \"title\" : \"Source\",\n" +
-                "    \"description\" : [ \"Objects returned came from source\", \"TEST\" ]\n" +
-                "  } ]\n" +
-                "}"));
-    }
-
-    // domain
+    // role
 
     @Test
     public void lookup_role_entity() throws Exception {
@@ -494,6 +443,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getRdapConformance(), hasSize(1));
         assertThat(response.getRdapConformance().get(0), equalTo("rdap_level_0"));
     }
+
+    // domain
 
     @Test
     public void lookup_domain_object() throws Exception {
@@ -931,6 +882,24 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         XMLGregorianCalendar now = RdapObjectMapper.convertToXMLGregorianCalendar(LocalDateTime.now().withMillisOfSecond(0));
         long span = now.toGregorianCalendar().getTimeInMillis() - eventDate.toGregorianCalendar().getTimeInMillis();
         assertThat((int) span, is(lessThanOrEqualTo(1000)));
+    }
+
+    private void assertEntityPP1_TEST(Entity entity) {
+        assertThat(entity.getHandle(), equalTo("PP1-TEST"));
+        assertThat(entity.getEntities(), hasSize(0));
+        assertThat(entity.getVcardArray().size(), is(2));
+        assertThat(entity.getVcardArray().get(0).toString(), is("vcard"));
+        assertThat(entity.getVcardArray().get(1).toString(), equalTo("" +
+                "[[version, {}, text, 4.0], " +
+                "[fn, {}, text, Pauleth Palthen], " +
+                "[kind, {}, text, individual], " +
+                "[adr, {label=Singel 258}, text, [, , , , , , ]], " +
+                "[tel, {type=voice}, text, +31-1234567890], " +
+                "[email, {}, text, noreply@ripe.net]]"));
+        assertThat(entity.getRdapConformance(), hasSize(1));
+        assertThat(entity.getRdapConformance().get(0), equalTo("rdap_level_0"));
+
+        assertThat("Dates must be UTC", entity.getEvents().get(0).getEventDate().toString().endsWith("Z"));
     }
 
 }

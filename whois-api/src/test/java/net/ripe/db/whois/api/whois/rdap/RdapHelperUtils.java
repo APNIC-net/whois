@@ -6,6 +6,15 @@ import com.thoughtworks.xstream.io.xml.DomWriter;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.AnnotationIntrospector;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
+import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.codehaus.plexus.util.StringInputStream;
 import org.codehaus.plexus.util.StringOutputStream;
 import org.slf4j.Logger;
@@ -19,7 +28,11 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
 import java.io.StringWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 public class RdapHelperUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapHelperUtils.class);
@@ -107,4 +120,42 @@ public class RdapHelperUtils {
         }
         return responseBody;
     }
+
+    public static String marshal(final Object o) throws IOException {
+        final StringOutputStream outputStream = new StringOutputStream();
+
+        final JsonFactory jsonFactory = createJsonFactory();
+        final JsonGenerator generator = jsonFactory.createJsonGenerator(outputStream).useDefaultPrettyPrinter();
+        generator.writeObject(o);
+        generator.close();
+
+        // So that the test can run on ALL platform (Curse you iScampi!!)
+        return RdapHelperUtils.convertEOLToUnix(outputStream);
+    }
+
+    public static <T> T unmarshal(final String content,Class<T> valueType) throws IOException {
+        final JsonFactory jsonFactory = createJsonFactory();
+        final JsonParser parser = jsonFactory.createJsonParser(content);
+        return parser.readValueAs(valueType);
+    }
+
+    public static JsonFactory createJsonFactory() {
+        final ObjectMapper objectMapper = new ObjectMapper();
+
+        objectMapper.setAnnotationIntrospector(
+                new AnnotationIntrospector.Pair(
+                        new JacksonAnnotationIntrospector(),
+                        new JaxbAnnotationIntrospector()));
+
+        objectMapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
+        objectMapper.configure(SerializationConfig.Feature.WRITE_EMPTY_JSON_ARRAYS, true);
+
+        final DateFormat df = new SimpleDateFormat(RdapJsonProvider.RDAP_DATE_FORMAT);
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        objectMapper.setDateFormat(df);
+
+        return objectMapper.getJsonFactory();
+    }
+
+
 }

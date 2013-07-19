@@ -9,7 +9,6 @@ import net.ripe.db.whois.query.handler.QueryHandler;
 import net.ripe.db.whois.update.handler.UpdateRequestHandler;
 import net.ripe.db.whois.update.log.LoggerContext;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

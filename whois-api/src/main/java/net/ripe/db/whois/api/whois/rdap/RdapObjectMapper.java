@@ -110,7 +110,7 @@ class RdapObjectMapper {
 
         final String selfUrl = getSelfUrl(rdapResponse, requestUrl);
 
-        rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
+        rdapResponse.getRdapConformance().addAll(RdapHelp.RDAP_CONFORMANCE_LEVEL);
         rdapResponse.setPort43(port43);
         rdapResponse.getNotices().addAll(NoticeFactory.generateObjectNotices(rpslObject, selfUrl));
 
