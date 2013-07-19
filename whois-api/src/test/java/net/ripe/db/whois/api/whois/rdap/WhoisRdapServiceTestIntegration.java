@@ -19,6 +19,7 @@ import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.api.whois.rdap.domain.Error;
 import net.ripe.db.whois.common.IntegrationTest;
 import net.ripe.db.whois.common.TestDateTimeProvider;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.joda.time.LocalDateTime;
 import org.junit.Before;
@@ -403,8 +404,10 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         String response = new String(RdapHelperUtils.getHttpContent(webResource.getURI().toASCIIString()));
         LOGGER.info("Response=" + response);
         Entity entity = RdapHelperUtils.unmarshal(response, Entity.class);
-
         assertEntityPP1_TEST(entity);
+
+        String[] utcEventDates = StringUtils.substringsBetween(response, "\"eventDate\"", "Z");
+        assertThat("Event Dates must be UTC", utcEventDates.length == 1);
     }
 
 
@@ -898,8 +901,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "[email, {}, text, noreply@ripe.net]]"));
         assertThat(entity.getRdapConformance(), hasSize(1));
         assertThat(entity.getRdapConformance().get(0), equalTo("rdap_level_0"));
-
-        assertThat("Dates must be UTC", entity.getEvents().get(0).getEventDate().toString().endsWith("Z"));
     }
 
 }
