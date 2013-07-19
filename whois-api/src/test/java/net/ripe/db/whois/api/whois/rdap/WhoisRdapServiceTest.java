@@ -21,7 +21,6 @@ import javax.ws.rs.core.Response;
 
 import static org.mockito.Mockito.when;
 
-@Ignore("tets throws npe")
 @RunWith(MockitoJUnitRunner.class)
 public class WhoisRdapServiceTest {
 
@@ -44,7 +43,7 @@ public class WhoisRdapServiceTest {
         when(sourceContext.getCurrentSource()).thenReturn(source);
         when(sourceContext.getAllSourceNames()).thenReturn(CIString.ciSet("TEST", "TEST-GRS"));
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
-        when(request.getRequestURL()).thenReturn(new StringBuffer().append("127.0.0.1"));
+        when(request.getRequestURL()).thenReturn(new StringBuffer().append("http://localhost/"));
     }
 
     @Test
