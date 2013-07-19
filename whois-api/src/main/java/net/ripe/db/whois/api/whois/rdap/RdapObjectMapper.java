@@ -68,7 +68,7 @@ class RdapObjectMapper {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, "zone");
     }
 
-    @Value("${rdap.public.port43:whois.ripe.net}")
+    @Value("${rdap.port43:whois.ripe.net}")
     private static String port43;
 
     public static Object map(
