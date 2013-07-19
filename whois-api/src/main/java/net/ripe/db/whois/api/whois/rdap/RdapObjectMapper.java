@@ -111,7 +111,7 @@ class RdapObjectMapper {
 
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
         rdapResponse.setPort43(port43);
-        rdapResponse.getNotices().addAll(NoticeFactory.generateNotices(rpslObject, selfUrl));
+        rdapResponse.getNotices().addAll(NoticeFactory.generateObjectNotices(rpslObject, selfUrl));
 
         final List<Remark> remarks = createRemarks(rpslObject);
         if (!remarks.isEmpty()) {
