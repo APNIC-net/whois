@@ -19,6 +19,7 @@ import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.api.whois.rdap.domain.Error;
 import net.ripe.db.whois.common.IntegrationTest;
 import net.ripe.db.whois.common.TestDateTimeProvider;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.joda.time.LocalDateTime;
 import org.junit.Before;
@@ -126,6 +127,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "aut-num:       AS123\n" +
                 "as-name:       AS-TEST\n" +
                 "descr:         A single ASN\n" +
+                "country:       AU\n" +
                 "admin-c:       TP1-TEST\n" +
                 "tech-c:        TP1-TEST\n" +
                 "changed:       test@test.net.au 20010816\n" +
@@ -387,24 +389,27 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
     @Test
     public void lookup_person_entity() throws Exception {
-        final Entity response = createResource(AUDIENCE, "entity/PP1-TEST")
+        final Entity entity = createResource(AUDIENCE, "entity/PP1-TEST")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(Entity.class);
 
-        assertThat(response.getHandle(), equalTo("PP1-TEST"));
-        assertThat(response.getEntities(), hasSize(0));
-        assertThat(response.getVcardArray().size(), is(2));
-        assertThat(response.getVcardArray().get(0).toString(), is("vcard"));
-        assertThat(response.getVcardArray().get(1).toString(), equalTo("" +
-                "[[version, {}, text, 4.0], " +
-                "[fn, {}, text, Pauleth Palthen], " +
-                "[kind, {}, text, individual], " +
-                "[adr, {label=Singel 258}, text, [, , , , , , ]], " +
-                "[tel, {type=voice}, text, +31-1234567890], " +
-                "[email, {}, text, noreply@ripe.net]]"));
-        assertThat(response.getRdapConformance(), hasSize(1));
-        assertThat(response.getRdapConformance().get(0), equalTo("rdap_level_0"));
+        assertEntityPP1_TEST(entity);
     }
+
+    @Test
+    public void lookup_entity_no_accept_header() throws Exception {
+        final WebResource webResource = createResource(AUDIENCE, "entity/PP1-TEST");
+
+        // Get using HttpClient so there is no accept header
+        String response = new String(RdapHelperUtils.getHttpContent(webResource.getURI().toASCIIString()));
+        LOGGER.info("Response=" + response);
+        Entity entity = RdapHelperUtils.unmarshal(response, Entity.class);
+        assertEntityPP1_TEST(entity);
+
+        String[] utcEventDates = StringUtils.substringsBetween(response, "\"eventDate\"", "Z");
+        assertThat("Event Dates must be UTC", utcEventDates.length == 1);
+    }
+
 
     @Test
     public void lookup_entity_not_found() throws Exception {
@@ -417,59 +422,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         }
     }
 
-    // role entity
-
-    @Test
-    public void lookup_entity_no_accept_header() {
-        final WebResource webResource = createResource(AUDIENCE, "entity/PP1-TEST");
-        String response = new String(RdapHelperUtils.getHttpContent(webResource.getURI().toASCIIString()))
-                .replaceAll("http://localhost:[0-9]+/","http://127.0.0.1/")
-                .replaceAll("\"eventDate\" : \"[^\"]+\"", "\"eventDate\" : \"NOW\"");
-
-        // Using convertEOLToUnix - test is now platform neutral
-        assertThat(RdapHelperUtils.convertEOLToUnix(response), equalTo("" +
-                "{\n" +
-                "  \"handle\" : \"PP1-TEST\",\n" +
-                "  \"vcardArray\" : [ \"vcard\", [ [ \"version\", {\n" +
-                "  }, \"text\", \"4.0\" ], [ \"fn\", {\n" +
-                "  }, \"text\", \"Pauleth Palthen\" ], [ \"kind\", {\n" +
-                "  }, \"text\", \"individual\" ], [ \"adr\", {\n" +
-                "    \"label\" : \"Singel 258\"\n" +
-                "  }, \"text\", [ \"\", \"\", \"\", \"\", \"\", \"\", \"\" ] ], [ \"tel\", {\n" +
-                "    \"type\" : \"voice\"\n" +
-                "  }, \"text\", \"+31-1234567890\" ], [ \"email\", {\n" +
-                "  }, \"text\", \"noreply@ripe.net\" ] ] ],\n" +
-                "  \"remarks\" : [ {\n" +
-                "    \"title\" : \"remarks\",\n" +
-                "    \"description\" : [ \"remark\" ]\n" +
-                "  } ],\n" +
-                "  \"links\" : [ {\n" +
-                "    \"value\" : \"http://127.0.0.1/rdap/entity/PP1-TEST\",\n" +
-                "    \"rel\" : \"self\",\n" +
-                "    \"href\" : \"http://127.0.0.1/rdap/entity/PP1-TEST\"\n" +
-                "  } ],\n" +
-                "  \"events\" : [ {\n" +
-                "    \"eventAction\" : \"last changed\",\n" +
-                "    \"eventDate\" : \"NOW\"\n" +
-                "  } ],\n" +
-                "  \"rdapConformance\" : [ \"rdap_level_0\" ],\n" +
-                "  \"notices\" : [ {\n" +
-                "    \"title\" : \"Terms and Conditions\",\n" +
-                "    \"description\" : [ \"This is the APNIC WHOIS Database query service. The objects are in RDAP format.\" ],\n" +
-                "    \"links\" : {\n" +
-                "      \"value\" : \"http://127.0.0.1/rdap/entity/PP1-TEST\",\n" +
-                "      \"rel\" : \"terms-of-service\",\n" +
-                "      \"href\" : \"http://www.apnic.net/db/dbcopyright.html\",\n" +
-                "      \"type\" : \"text/html\"\n" +
-                "    }\n" +
-                "  }, {\n" +
-                "    \"title\" : \"Source\",\n" +
-                "    \"description\" : [ \"Objects returned came from source\", \"TEST\" ]\n" +
-                "  } ]\n" +
-                "}"));
-    }
-
-    // domain
+    // role
 
     @Test
     public void lookup_role_entity() throws Exception {
@@ -493,6 +446,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(response.getRdapConformance(), hasSize(1));
         assertThat(response.getRdapConformance().get(0), equalTo("rdap_level_0"));
     }
+
+    // domain
 
     @Test
     public void lookup_domain_object() throws Exception {
@@ -571,6 +526,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(autnum.getEndAutnum(), equalTo(123L));
         assertThat(autnum.getName(), equalTo("AS-TEST"));
         assertThat(autnum.getType(), equalTo("DIRECT ALLOCATION"));
+        assertThat(autnum.getCountry(), equalTo("AU"));
 
         final List<Event> events = autnum.getEvents();
         assertThat(events, hasSize(1));
@@ -775,6 +731,15 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "changed:       dbtest@ripe.net 20120101\n" +
                 "source:        TEST\n");
         databaseHelper.addObject("" +
+                "irt:           IRT-TEST1-MNT\n" +
+                "descr:         Owner Maintainer\n" +
+                "admin-c:       TP1-TEST\n" +
+                "e-mail:        info@test.net\n" +
+                "abuse-mailbox: abuse@test.net\n" +
+                "mnt-by:        OWNER-MNT\n" +
+                "changed:       dbtest@ripe.net 20120101\n" +
+                "source:        TEST\n");
+        databaseHelper.addObject("" +
                 "organisation:  ORG-TO2-TEST\n" +
                 "org-name:      Test organisation\n" +
                 "org-type:      OTHER\n" +
@@ -807,6 +772,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "tech-c:       TP1-TEST\n" +
                 "status:       OTHER\n" +
                 "mnt-by:       OWNER-MNT\n" +
+                "mnt-irt:      IRT-TEST1-MNT\n" +
                 "changed:      dbtest@ripe.net 20020101\n" +
                 "source:       TEST");
         ipTreeUpdater.rebuild();
@@ -815,11 +781,24 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(Ip.class);
 
-        assertThat(ip.getEntities().get(0).getHandle(), is("AB-TEST"));
+        Entity abuseContact = ip.getEntities().get(0);
+        Entity irt = ip.getEntities().get(1);
+        assertThat(abuseContact.getRoles().get(0), is("abuse"));
+        assertThat(irt.getRoles().get(0), is("abuse"));
 
-        assertThat(ip.getEntities().get(0).getVcardArray(), hasSize(2));
-        assertThat(ip.getEntities().get(0).getVcardArray().get(0).toString(), is("vcard"));
-        assertThat(ip.getEntities().get(0).getVcardArray().get(1).toString(), is("" +
+        assertThat(irt.getHandle(), is("IRT-TEST1-MNT"));
+        assertThat(irt.getVcardArray(), hasSize(2));
+        assertThat(irt.getVcardArray().get(0).toString(), is("vcard"));
+        assertThat(irt.getVcardArray().get(1).toString(), is("" +
+                "[[version, {}, text, 4.0], " +
+                "[fn, {}, text, IRT-TEST1-MNT], " +
+                "[kind, {}, text, group], " +
+                "[email, {}, text, info@test.net]]"));
+
+        assertThat(abuseContact.getHandle(), is("AB-TEST"));
+        assertThat(abuseContact.getVcardArray(), hasSize(2));
+        assertThat(abuseContact.getVcardArray().get(0).toString(), is("vcard"));
+        assertThat(abuseContact.getVcardArray().get(1).toString(), is("" +
                 "[[version, {}, text, 4.0], " +
                 "[fn, {}, text, Abuse Contact], " +
                 "[kind, {}, text, group], " +
@@ -918,6 +897,22 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         XMLGregorianCalendar now = RdapObjectMapper.convertToXMLGregorianCalendar(LocalDateTime.now().withMillisOfSecond(0));
         long span = now.toGregorianCalendar().getTimeInMillis() - eventDate.toGregorianCalendar().getTimeInMillis();
         assertThat((int) span, is(lessThanOrEqualTo(1000)));
+    }
+
+    private void assertEntityPP1_TEST(Entity entity) {
+        assertThat(entity.getHandle(), equalTo("PP1-TEST"));
+        assertThat(entity.getEntities(), hasSize(0));
+        assertThat(entity.getVcardArray().size(), is(2));
+        assertThat(entity.getVcardArray().get(0).toString(), is("vcard"));
+        assertThat(entity.getVcardArray().get(1).toString(), equalTo("" +
+                "[[version, {}, text, 4.0], " +
+                "[fn, {}, text, Pauleth Palthen], " +
+                "[kind, {}, text, individual], " +
+                "[adr, {label=Singel 258}, text, [, , , , , , ]], " +
+                "[tel, {type=voice}, text, +31-1234567890], " +
+                "[email, {}, text, noreply@ripe.net]]"));
+        assertThat(entity.getRdapConformance(), hasSize(1));
+        assertThat(entity.getRdapConformance().get(0), equalTo("rdap_level_0"));
     }
 
 }

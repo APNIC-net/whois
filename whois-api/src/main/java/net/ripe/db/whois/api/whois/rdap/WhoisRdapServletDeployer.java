@@ -6,7 +6,6 @@ import com.sun.jersey.spi.container.servlet.ServletContainer;
 import net.ripe.db.whois.api.DefaultExceptionMapper;
 import net.ripe.db.whois.api.httpserver.Audience;
 import net.ripe.db.whois.api.httpserver.ServletDeployer;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +38,6 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
             @Override
             public Set<Object> getSingletons() {
                 final RdapJsonProvider jaxbJsonProvider = new RdapJsonProvider();
-                jaxbJsonProvider.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
-
-                // TODO find a non-deprecated one of these
-
-                jaxbJsonProvider.configure(SerializationConfig.Feature.WRITE_NULL_PROPERTIES,false);
-                jaxbJsonProvider.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS,false);
                 return Sets.newLinkedHashSet(Lists.<Object>newArrayList(
                         whoisRDAPService,
                         defaultExceptionMapper,

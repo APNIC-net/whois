@@ -10,22 +10,9 @@ import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
 import net.ripe.db.whois.api.whois.rdap.domain.Notice;
 import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.api.whois.rdap.domain.vcard.VCard;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.AnnotationIntrospector;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
-import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
-import org.codehaus.plexus.util.StringOutputStream;
 import org.junit.Test;
 
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 
 import static com.google.common.collect.Maps.immutableEntry;
 import static net.ripe.db.whois.api.whois.rdap.VCardHelper.createAddress;
@@ -57,7 +44,7 @@ public class RdapResponseJsonTest {
 
         entity.setPort43("whois.example.com");
 
-        assertThat(marshal(entity), equalTo("" +
+        assertThat(RdapHelperUtils.marshal(entity), equalTo("" +
                 "{\n  \"handle\" : \"XXXX\",\n" +
                 "  \"vcardArray\" :" +
                 " [ \"vcard\", [" +
@@ -96,7 +83,7 @@ public class RdapResponseJsonTest {
                 .addTz("-05:00")
                 .addKey(createMap(immutableEntry("type", "work")), "http://example.org");
 
-        assertThat(marshal(builder.build()), equalTo("" +
+        assertThat(RdapHelperUtils.marshal(builder.build()), equalTo("" +
                 "{\n  \"vcard\" : [ [ \"version\", {\n" +
                 "  }, \"text\", \"4.0\" ], [ \"fn\", {\n" +
                 "  }, \"text\", \"Joe User\" ], [ \"n\", {\n" +
@@ -163,7 +150,7 @@ public class RdapResponseJsonTest {
         lastChangedEvent.setEventActor("joe@example.com");
         nameserver.getEvents().add(lastChangedEvent);
 
-        assertThat(marshal(nameserver), equalTo("" +
+        assertThat(RdapHelperUtils.marshal(nameserver), equalTo("" +
                 "{\n" +
                 "  \"handle\" : \"handle\",\n" +
                 "  \"ldhName\" : \"ns1.xn--fo-5ja.example\",\n" +
@@ -278,7 +265,7 @@ public class RdapResponseJsonTest {
 
         domain.setSecureDNS(secureDNS);
 
-        assertThat(marshal(domain), equalTo("" +
+        assertThat(RdapHelperUtils.marshal(domain), equalTo("" +
                 "{\n" +
                 "  \"handle\" : \"XXXX\",\n" +
                 "  \"ldhName\" : \"192.in-addr.arpa\",\n" +
@@ -405,7 +392,7 @@ public class RdapResponseJsonTest {
 
         ip.getEntities().add(entity);
 
-        assertThat(marshal(ip), equalTo("" +
+        assertThat(RdapHelperUtils.marshal(ip), equalTo("" +
                 "{\n" +
                 "  \"handle\" : \"XXXX-RIR\",\n" +
                 "  \"startAddress\" : \"2001:db8::0\",\n" +
@@ -487,7 +474,7 @@ public class RdapResponseJsonTest {
         link.setType("application/json");
         notices.setLinks(link);
 
-        assertThat(marshal(notices), equalTo("" +
+        assertThat(RdapHelperUtils.marshal(notices), equalTo("" +
                 "{\n" +
                 "  \"title\" : \"Beverage policy\",\n" +
                 "  \"description\" : [ \"Beverages with caffeine for keeping horses awake.\", \"Very effective.\" ],\n" +
@@ -501,38 +488,6 @@ public class RdapResponseJsonTest {
                 "    \"type\" : \"application/json\"\n" +
                 "  }\n" +
                 "}"));
-    }
-
-    // helper methods
-
-    private String marshal(final Object o) throws IOException {
-        final StringOutputStream outputStream = new StringOutputStream();
-
-        final JsonFactory jsonFactory = createJsonFactory();
-        final JsonGenerator generator = jsonFactory.createJsonGenerator(outputStream).useDefaultPrettyPrinter();
-        generator.writeObject(o);
-        generator.close();
-
-        // So that the test can run on ALL platform (Curse you iScampi!!)
-        return RdapHelperUtils.convertEOLToUnix(outputStream);
-    }
-
-    private JsonFactory createJsonFactory() {
-        final ObjectMapper objectMapper = new ObjectMapper();
-
-        objectMapper.setAnnotationIntrospector(
-                new AnnotationIntrospector.Pair(
-                        new JacksonAnnotationIntrospector(),
-                        new JaxbAnnotationIntrospector()));
-
-        objectMapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
-        objectMapper.configure(SerializationConfig.Feature.WRITE_EMPTY_JSON_ARRAYS, true);
-
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        df.setTimeZone(TimeZone.getTimeZone("GMT"));
-        objectMapper.setDateFormat(df);
-
-        return objectMapper.getJsonFactory();
     }
 
 }
