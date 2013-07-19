@@ -737,7 +737,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "e-mail:        info@test.net\n" +
                 "abuse-mailbox: abuse@test.net\n" +
                 "mnt-by:        OWNER-MNT\n" +
-                "referral-by:   OWNER-MNT\n" +
                 "changed:       dbtest@ripe.net 20120101\n" +
                 "source:        TEST\n");
         databaseHelper.addObject("" +
@@ -773,7 +772,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "tech-c:       TP1-TEST\n" +
                 "status:       OTHER\n" +
                 "mnt-by:       OWNER-MNT\n" +
-                "mnt-irt:      IRT1-MNT\n" +
+                "mnt-irt:      IRT-TEST1-MNT\n" +
                 "changed:      dbtest@ripe.net 20020101\n" +
                 "source:       TEST");
         ipTreeUpdater.rebuild();
@@ -782,11 +781,24 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(Ip.class);
 
-        assertThat(ip.getEntities().get(0).getHandle(), is("IRT-TEST1-MNT"));
+        Entity abuseContact = ip.getEntities().get(0);
+        Entity irt = ip.getEntities().get(1);
+        assertThat(abuseContact.getRoles().get(0), is("abuse"));
+        assertThat(irt.getRoles().get(0), is("abuse"));
 
-        assertThat(ip.getEntities().get(0).getVcardArray(), hasSize(2));
-        assertThat(ip.getEntities().get(0).getVcardArray().get(0).toString(), is("vcard"));
-        assertThat(ip.getEntities().get(0).getVcardArray().get(1).toString(), is("" +
+        assertThat(irt.getHandle(), is("IRT-TEST1-MNT"));
+        assertThat(irt.getVcardArray(), hasSize(2));
+        assertThat(irt.getVcardArray().get(0).toString(), is("vcard"));
+        assertThat(irt.getVcardArray().get(1).toString(), is("" +
+                "[[version, {}, text, 4.0], " +
+                "[fn, {}, text, IRT-TEST1-MNT], " +
+                "[kind, {}, text, group], " +
+                "[email, {}, text, info@test.net]]"));
+
+        assertThat(abuseContact.getHandle(), is("AB-TEST"));
+        assertThat(abuseContact.getVcardArray(), hasSize(2));
+        assertThat(abuseContact.getVcardArray().get(0).toString(), is("vcard"));
+        assertThat(abuseContact.getVcardArray().get(1).toString(), is("" +
                 "[[version, {}, text, 4.0], " +
                 "[fn, {}, text, Abuse Contact], " +
                 "[kind, {}, text, group], " +

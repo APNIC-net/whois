@@ -14,6 +14,7 @@ import net.ripe.db.whois.common.domain.attrs.Domain;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
+import net.ripe.db.whois.common.rpsl.RpslAttribute;
 import net.ripe.db.whois.query.domain.QueryCompletionInfo;
 import net.ripe.db.whois.query.domain.QueryException;
 import net.ripe.db.whois.query.handler.QueryHandler;
@@ -187,6 +188,10 @@ public class WhoisRdapService {
 
             final RpslObject resultObject = result.remove(0);
 
+            List<RpslObject> abuseContacts = Lists.newArrayList();
+            abuseContacts.addAll(getAbuseContacts(resultObject));
+            abuseContacts.addAll(getMntIrt(resultObject));
+
             return Response.ok(
                     RdapObjectMapper.map(
                             getRequestUrl(request),
@@ -196,7 +201,7 @@ public class WhoisRdapService {
                             // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
                             objectDao.getLastUpdated(resultObject.getObjectId()),
                             // TODO: [RL] for the equivalent, APNIC needs to find the referenced IRT object
-                            getMntIrt(resultObject),
+                            abuseContacts,
                             getParentObject(resultObject))).build();
 
         } catch (final QueryException e) {
@@ -286,23 +291,20 @@ public class WhoisRdapService {
     }
 
     private List<RpslObject> getMntIrt(final RpslObject rpslObject) {
-        if (rpslObject.containsAttribute(AttributeType.MNT_IRT)) {
+        List<RpslObject> mntIrtObjects = Lists.newArrayList();
+        List<RpslAttribute> mntIrtAttributes = rpslObject.findAttributes(AttributeType.MNT_IRT);
+        for (RpslAttribute mntIrtAttribute : mntIrtAttributes) {
             final String queryString = String.format("%s %s %s %s %s",
                     QueryFlag.NO_GROUPING.getLongFlag(),
                     QueryFlag.SELECT_TYPES.getLongFlag(),
                     IRT,
                     QueryFlag.NO_FILTERING.getLongFlag(),
-                    rpslObject.getValueForAttribute(AttributeType.MNT_IRT).toString());
-            final Query query = Query.parse(
-                    queryString);
-            return runQuery(
-                    query,
-                    null,
-                    true
-            );
+                    mntIrtAttribute.getCleanValue().toString());
+            final Query query = Query.parse(queryString);
+            mntIrtObjects.addAll(runQuery(query, null, true));
         }
 
-        return Collections.emptyList();
+        return mntIrtObjects;
     }
 
     private RpslObject getParentObject(final RpslObject rpslObject) {
