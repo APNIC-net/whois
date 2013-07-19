@@ -270,6 +270,9 @@ class RdapObjectMapper {
         final Autnum autnum = new Autnum();
         final String keyValue = rpslObject.getKey().toString();
         autnum.setHandle(keyValue);
+        if (rpslObject.containsAttribute(COUNTRY)) {
+            autnum.setCountry(rpslObject.getValueForAttribute(COUNTRY).toString());
+        }
 
         if (rpslObject.getType() == ObjectType.AS_BLOCK) {
             final AsBlockRange asBlockRange = AsBlockRange.parse(keyValue);
