@@ -6,6 +6,7 @@ import net.ripe.db.whois.query.QueryServer;
 import net.ripe.db.whois.query.support.AbstractWhoisIntegrationTest;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -58,6 +59,7 @@ public class NamedQueryTestIntegration extends AbstractWhoisIntegrationTest {
         assertThat(response, not(containsString("filtered")));
     }
 
+    @Ignore
     @Test
     public void findPersonByNicHdlIsFiltered() throws Exception {
         String response = DummyWhoisClient.query(QueryServer.port, "-r -T person DH3037-RIPE");
