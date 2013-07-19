@@ -107,6 +107,7 @@ public class WhoisRdapService {
                 whoisObjectTypes.add(ORGANISATION);
                 whoisObjectTypes.add(IRT);
                 break;
+
         }
 
         Response response;
@@ -126,6 +127,16 @@ public class WhoisRdapService {
             response = Response.status(Response.Status.BAD_REQUEST).entity(RdapException.build(Response.Status.BAD_REQUEST,selfUrl)).build();
         }
 
+        return response;
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, RdapJsonProvider.CONTENT_TYPE_RDAP_JSON})
+    @Path("/help")
+    public Response lookupHelp(@Context final HttpServletRequest request) {
+        Response response;
+        String selfUrl = request.getRequestURL().toString();
+        response = Response.ok().entity(RdapHelp.build(selfUrl)).build();
         return response;
     }
 

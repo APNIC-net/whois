@@ -186,6 +186,13 @@
         </xs:sequence>
     </xs:complexType>
 
+    <xs:complexType name="help">
+        <xs:sequence>
+            <xs:element name="rdapConformance" type="xs:string" maxOccurs="unbounded" minOccurs="1"/>
+            <xs:element name="notices" type="notice" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
     <xs:complexType name="hashMapType">
         <xs:annotation>
             <xs:appinfo>
