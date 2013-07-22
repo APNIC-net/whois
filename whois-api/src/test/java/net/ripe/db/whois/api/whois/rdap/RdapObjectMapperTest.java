@@ -70,11 +70,9 @@ public class RdapObjectMapperTest {
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(1));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("some descr"));
-        assertThat(result.getEntities(), hasSize(2));
-        assertThat(result.getEntities().get(0).getHandle(), is("irt-IRT1"));
-        assertThat(result.getEntities().get(0).getRoles().size(), is(1));
-        assertThat(result.getEntities().get(1).getHandle(), is("TP1-TEST"));
-        assertThat(result.getEntities().get(1).getRoles().size(), is(2));
+        assertThat(result.getEntities(), hasSize(1));
+        assertThat(result.getEntities().get(0).getHandle(), is("TP1-TEST"));
+        assertThat(result.getEntities().get(0).getRoles().size(), is(2));
     }
 
     @Test

@@ -226,7 +226,7 @@ public class WhoisRdapService {
             final RpslObject resultObject = result.remove(0);
 
             List<RpslObject> abuseContacts = Lists.newArrayList();
-            abuseContacts.addAll(getAbuseContacts(resultObject));
+//            abuseContacts.addAll(getAbuseContacts(resultObject));
             abuseContacts.addAll(getMntIrt(resultObject));
             return RdapObjectMapper.map(
                     getRequestUrl(request),
