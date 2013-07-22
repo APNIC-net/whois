@@ -193,6 +193,7 @@
                                 <exclude>net.ripe.db.whois.api.acl.**</exclude>
                                 <exclude>net.ripe.db.whois.api.freetext.**</exclude>
                                 <exclude>net.ripe.db.whois.api.wsearch.**</exclude>
+                                <exclude>net.ripe.db.whois.api.whois.rdap.**</exclude>
                             </excludes>
                         </configuration>
                     </execution>
@@ -209,6 +210,9 @@
                             <scratchDir>${project.build.directory}/enunciate-scratch-int</scratchDir>
                             <generateDir>${project.build.directory}/enunciate/generate-int</generateDir>
                             <packageDir>${project.build.directory}/enunciate/package-int</packageDir>
+                            <excludes>
+                                <exclude>net.ripe.db.whois.api.whois.rdap.**</exclude>
+                            </excludes>
                         </configuration>
                     </execution>
                     <!-- execution>
