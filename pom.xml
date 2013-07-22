@@ -576,13 +576,13 @@
                 <version>1.4</version>
                 <configuration>
                     <source />
-                    <providerSelection>2.0</providerSelection>
+                    <providerSelection>1.8</providerSelection>
                     <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
                 </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>org.codehaus.gmaven.runtime</groupId>
-                        <artifactId>gmaven-runtime-2.0</artifactId>
+                        <artifactId>gmaven-runtime-1.8</artifactId>
                         <version>1.5</version>
                         <exclusions>
                             <exclusion>
@@ -594,7 +594,7 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-all</artifactId>
-                        <version>2.1.6</version>
+                        <version>1.8.9</version>
                     </dependency>
                 </dependencies>
             </plugin>
