@@ -129,9 +129,9 @@ public final class QueryMessages {
     }
 
     public static Message versionPersonRole(final CharSequence type, final CharSequence key) {
-        return new Message(Type.INFO,
-                "%% Version history for %s object \"%s\"\n" +
-                "%% History not available for PERSON and ROLE objects.\n", type, key);
+        return new Message(Type.INFO, ""
+                + "%% Version history for %s object \"%s\"\n"
+                + "%% History not available for PERSON and ROLE objects.\n", type, key);
     }
 
     public static Message internalErrorOccured() {
