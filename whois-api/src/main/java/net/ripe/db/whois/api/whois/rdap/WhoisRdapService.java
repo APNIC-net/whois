@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import net.ripe.db.whois.api.whois.ApiResponseHandler;
+import net.ripe.db.whois.api.whois.rdap.domain.RdapObject;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
 import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.ResponseObject;
@@ -15,8 +16,8 @@ import net.ripe.db.whois.common.domain.attrs.AutNum;
 import net.ripe.db.whois.common.domain.attrs.Domain;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
-import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
+import net.ripe.db.whois.common.rpsl.RpslObject;
 import net.ripe.db.whois.query.domain.QueryCompletionInfo;
 import net.ripe.db.whois.query.domain.QueryException;
 import net.ripe.db.whois.query.handler.QueryHandler;
@@ -37,6 +38,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.InetAddress;
@@ -62,11 +64,13 @@ public class WhoisRdapService {
     private static final int STATUS_TOO_MANY_REQUESTS = 429;
     private static final Set<ObjectType> ABUSE_CONTACT_TYPES = Sets.newHashSet(AUT_NUM, INETNUM, INET6NUM);
 
-
     private final QueryHandler queryHandler;
     private final RpslObjectDao objectDao;
     private final AbuseCFinder abuseCFinder;
     private final String baseUrl;
+
+    @Value("${rdap.port43:whois.ripe.net}")
+    private String port43;
 
     @Autowired
     public WhoisRdapService(final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder, @Value("${rdap.public.baseurl:}") final String baseUrl) {
@@ -77,9 +81,10 @@ public class WhoisRdapService {
     }
 
     @GET
-    @Produces({RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.APPLICATION_JSON})
+    @Produces( { RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Path("/{objectType}/{key:.*}")
     public Response lookup(@Context final HttpServletRequest request,
+                           @Context HttpHeaders httpHeaders,
                            @PathParam("objectType") final String objectType,
                            @PathParam("key") final String key) {
 
@@ -120,34 +125,36 @@ public class WhoisRdapService {
 
         }
 
-        Response response;
+        Response.ResponseBuilder response;
 
         String selfUrl = request.getRequestURL().toString();
 
         if (!whoisObjectTypes.isEmpty()) {
             try {
-                response = lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key));
+                response = Response.ok(lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key)));
             } catch (WebApplicationException webEx) {
                 int statusCode = webEx.getResponse().getStatus();
-                response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode),selfUrl)).build();
+                response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl));
             }
         } else if (objectType.equals("nameserver")) {
-            response = Response.status(Response.Status.NOT_FOUND).entity(RdapException.build(Response.Status.NOT_FOUND,selfUrl)).build();
+            response = Response.status(Response.Status.NOT_FOUND).entity(RdapException.build(Response.Status.NOT_FOUND, selfUrl));
         } else {
-            response = Response.status(Response.Status.BAD_REQUEST).entity(RdapException.build(Response.Status.BAD_REQUEST,selfUrl)).build();
+            response = Response.status(Response.Status.BAD_REQUEST).entity(RdapException.build(Response.Status.BAD_REQUEST, selfUrl));
         }
 
-        return response;
+        mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
+        return response.build();
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, RdapJsonProvider.CONTENT_TYPE_RDAP_JSON})
+    @Produces( { RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Path("/help")
-    public Response lookupHelp(@Context final HttpServletRequest request) {
-        Response response;
+    public Response lookupHelp(@Context final HttpServletRequest request, @Context HttpHeaders httpHeaders) {
+        Response.ResponseBuilder response;
         String selfUrl = request.getRequestURL().toString();
-        response = Response.ok().entity(RdapHelp.build(selfUrl)).build();
-        return response;
+        response = Response.ok().entity(RdapHelp.build(selfUrl));
+        mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
+        return response.build();
     }
 
     private void validateDomain(final String key) {
@@ -193,7 +200,7 @@ public class WhoisRdapService {
         return key;
     }
 
-    protected Response lookupObject(final HttpServletRequest request, final Set<ObjectType> objectTypes, final String key) {
+    protected RdapObject lookupObject(final HttpServletRequest request, final Set<ObjectType> objectTypes, final String key) {
         final String objectTypesString = Joiner.on(",").join(Iterables.transform(objectTypes, new Function<ObjectType, String>() {
             @Override
             public String apply(final ObjectType input) {
@@ -209,7 +216,7 @@ public class WhoisRdapService {
         return !result.isEmpty();
     }
 
-    protected Response handleQuery(final Query query, final HttpServletRequest request) {
+    protected RdapObject handleQuery(final Query query, final HttpServletRequest request) {
         try {
             final List<RpslObject> result = runQuery(query, request, false);
             if (result.isEmpty()) {
@@ -221,18 +228,17 @@ public class WhoisRdapService {
             List<RpslObject> abuseContacts = Lists.newArrayList();
             abuseContacts.addAll(getAbuseContacts(resultObject));
             abuseContacts.addAll(getMntIrt(resultObject));
-
-            return Response.ok(
-                    RdapObjectMapper.map(
-                            getRequestUrl(request),
-                            getBaseUrl(request),
-                            resultObject,
-                            result,
-                            // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
-                            objectDao.getLastUpdated(resultObject.getObjectId()),
-                            // TODO: [RL] for the equivalent, APNIC needs to find the referenced IRT object
-                            abuseContacts,
-                            getParentObject(resultObject))).build();
+            return RdapObjectMapper.map(
+                    getRequestUrl(request),
+                    getBaseUrl(request),
+                    resultObject,
+                    result,
+                    // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
+                    objectDao.getLastUpdated(resultObject.getObjectId()),
+                    // TODO: [RL] for the equivalent, APNIC needs to find the referenced IRT object
+                    abuseContacts,
+                    getParentObject(resultObject),
+                    port43);
 
         } catch (final QueryException e) {
             if (e.getCompletionInfo() == QueryCompletionInfo.BLOCKED) {
@@ -361,5 +367,15 @@ public class WhoisRdapService {
             }
         }
         return null;
+    }
+
+    private void mapAcceptableMediaType(Response.ResponseBuilder response, List<MediaType> mediaTypes) {
+        if (mediaTypes != null) {
+            for (MediaType mediaType : mediaTypes) {
+                if (mediaType.equals(MediaType.TEXT_HTML_TYPE)) {
+                    response.type(MediaType.TEXT_PLAIN_TYPE);
+                }
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ package net.ripe.db.whois.api.whois.rdap;
 import com.Ostermiller.util.LineEnds;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomWriter;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
@@ -29,6 +30,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.ws.http.HTTPException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DateFormat;
@@ -101,25 +103,42 @@ public class RdapHelperUtils {
     }
 
     public static byte[] getHttpContent(String url) {
+        return getHttpHeaderAndContent(url).getKey();
+    }
+
+    public static byte[] getHttpContent(String url, boolean httpErrorsOk) {
+        return getHttpHeaderAndContent(url, httpErrorsOk).getKey();
+    }
+
+    public static Pair<byte[], Header[]> getHttpHeaderAndContent(String url) {
+        return getHttpHeaderAndContent(url, false);
+    }
+
+    public static Pair<byte[], Header[]> getHttpHeaderAndContent(String url, boolean httpErrorsOk, Header... headers) {
+        HttpClient httpClient = new HttpClient();
         // Create a method instance.
-        final HttpClient httpClient = new HttpClient();
         GetMethod method = new GetMethod(url);
+        for (Header header : headers) {
+            method.setRequestHeader(header);
+        }
         byte[] responseBody = new byte[0];
         int statusCode = -1;
         try {
             statusCode = httpClient.executeMethod(method);
-            if (statusCode != HttpStatus.SC_OK) {
+            if (statusCode != HttpStatus.SC_OK && !httpErrorsOk) {
                 throw new HttpException("Http error [" + statusCode + "][" + url + "]");
             }
             // Read the response body.
             responseBody = method.getResponseBody();
+            method.getResponseHeaders("Content-Type");
         } catch (Exception ex) {
             LOGGER.error("Could not get url status=" + statusCode + ":" + url, ex);
+            throw new HTTPException(statusCode);
         } finally {
             // Release the connection.
             method.releaseConnection();
         }
-        return responseBody;
+        return new Pair<>(responseBody, method.getResponseHeaders());
     }
 
     public static String marshal(final Object o) throws IOException {
@@ -134,7 +153,7 @@ public class RdapHelperUtils {
         return RdapHelperUtils.convertEOLToUnix(outputStream);
     }
 
-    public static <T> T unmarshal(final String content,Class<T> valueType) throws IOException {
+    public static <T> T unmarshal(final String content, Class<T> valueType) throws IOException {
         final JsonFactory jsonFactory = createJsonFactory();
         final JsonParser parser = jsonFactory.createJsonParser(content);
         return parser.readValueAs(valueType);

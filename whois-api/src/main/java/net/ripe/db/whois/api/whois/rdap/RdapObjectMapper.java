@@ -29,7 +29,6 @@ import net.ripe.db.whois.common.rpsl.RpslObject;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -68,17 +67,15 @@ class RdapObjectMapper {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(MNT_IRT, "abuse");
     }
 
-    @Value("${rdap.port43:whois.ripe.net}")
-    private static String port43;
-
-    public static Object map(
+    public static RdapObject map(
             final String requestUrl,
             final String baseUrl,
             final RpslObject rpslObject,
             final List<RpslObject> relatedObjects,
             final LocalDateTime lastChangedTimestamp,
             final List<RpslObject> abuseContacts,
-            final RpslObject parentRpslObject) {
+            final RpslObject parentRpslObject,
+            final String port43) {
 
         RdapObject rdapResponse;
         final ObjectType rpslObjectType = rpslObject.getType();
