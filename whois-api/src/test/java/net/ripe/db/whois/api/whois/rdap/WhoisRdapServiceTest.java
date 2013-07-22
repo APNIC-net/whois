@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import static org.mockito.Mockito.when;
@@ -29,6 +30,7 @@ public class WhoisRdapServiceTest {
     @Mock RpslObjectDao rpslObjectDao;
     @Mock QueryHandler queryHandler;
     @Mock HttpServletRequest request;
+    @Mock HttpHeaders httpHeaders;
 
     @Mock SourceContext sourceContext;
     @Mock Source source;
@@ -47,6 +49,6 @@ public class WhoisRdapServiceTest {
 
     @Test
     public void lookup_entity() {
-        Response response = subject.lookup(request, "entity", "TP1-TEST");
+        Response response = subject.lookup(request, httpHeaders, "entity", "TP1-TEST");
     }
 }

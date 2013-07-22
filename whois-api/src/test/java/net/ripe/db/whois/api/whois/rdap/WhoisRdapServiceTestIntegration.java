@@ -18,6 +18,8 @@ import net.ripe.db.whois.api.whois.rdap.domain.Link;
 import net.ripe.db.whois.api.whois.rdap.domain.Notice;
 import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.common.IntegrationTest;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.joda.time.LocalDateTime;
@@ -32,25 +34,27 @@ import javax.ws.rs.core.Response;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
+
 
 @Category(IntegrationTest.class)
 public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(WhoisRdapServiceTestIntegration.class);
     private static final Audience AUDIENCE = Audience.PUBLIC;
+
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
     @Before
     public void setup() throws Exception {
@@ -452,20 +456,70 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final WebResource webResource = createResource(AUDIENCE, "entity/PP1-TEST");
 
         // Get using HttpClient so there is no accept header
-        String response = new String(RdapHelperUtils.getHttpContent(webResource.getURI().toASCIIString()));
-        LOGGER.info("Response=" + response);
-        Entity entity = RdapHelperUtils.unmarshal(response, Entity.class);
+        Pair<byte[], Header[]> response = RdapHelperUtils.getHttpHeaderAndContent(webResource.getURI().toASCIIString());
+
+        // Get Response Body
+        String responseBody = new String(response.getKey());
+        LOGGER.info("Response=" + responseBody);
+
+        // Test content type
+        Header[] headers = response.getValue();
+        String contentType = checkHeaderPresent(CONTENT_TYPE_HEADER, headers);
+        assertEquals(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, contentType);
+
+
+        Entity entity = RdapHelperUtils.unmarshal(responseBody, Entity.class);
         assertEntityPP1_TEST(entity);
 
-        String[] utcEventDates = StringUtils.substringsBetween(response, "\"eventDate\"", "Z");
+        String[] utcEventDates = StringUtils.substringsBetween(responseBody, "\"eventDate\"", "Z");
         assertThat("Event Dates must be UTC", utcEventDates.length == 1);
-
-        final List<Event> events = entity.getEvents();
-        assertThat(events, hasSize(1));
-//        assertTrue(events.get(0).getEventDate().isBefore(LocalDateTime.now()));
-        assertThat(events.get(0).getEventAction(), is("last changed"));
     }
 
+    @Test
+    public void lookup_entity_with_firefox_browser() throws Exception {
+
+        final WebResource webResource = createResource(AUDIENCE, "entity/PP1-TEST");
+
+        // Get using HttpClient with content-type set like firefox
+        Header headerEntry = new Header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        Pair<byte[], Header[]> response = RdapHelperUtils.getHttpHeaderAndContent(webResource.getURI().toASCIIString(), false, headerEntry);
+        String responseBody = new String(response.getKey());
+        LOGGER.info("Response=" + responseBody);
+
+        // Test content type
+        Header[] headers = response.getValue();
+        String contentType = checkHeaderPresent(CONTENT_TYPE_HEADER, headers);
+        assertEquals(MediaType.TEXT_PLAIN, contentType);
+
+        Entity entity = RdapHelperUtils.unmarshal(responseBody, Entity.class);
+        assertEntityPP1_TEST(entity);
+
+        String[] utcEventDates = StringUtils.substringsBetween(responseBody, "\"eventDate\"", "Z");
+        assertThat("Event Dates must be UTC", utcEventDates.length == 1);
+    }
+
+
+    @Test
+    public void lookup_entity_with_application_json() throws Exception {
+        final WebResource webResource = createResource(AUDIENCE, "entity/PP1-TEST");
+
+        // Get using HttpClient with content-type set like firefox
+        Header headerEntry = new Header("Accept", MediaType.APPLICATION_JSON);
+        Pair<byte[], Header[]> response = RdapHelperUtils.getHttpHeaderAndContent(webResource.getURI().toASCIIString(), false, headerEntry);
+        String responseBody = new String(response.getKey());
+        LOGGER.info("Response=" + responseBody);
+
+        // Test content type
+        Header[] headers = response.getValue();
+        String contentType = checkHeaderPresent(CONTENT_TYPE_HEADER, headers);
+        assertEquals(MediaType.APPLICATION_JSON, contentType);
+
+        Entity entity = RdapHelperUtils.unmarshal(responseBody, Entity.class);
+        assertEntityPP1_TEST(entity);
+
+        String[] utcEventDates = StringUtils.substringsBetween(responseBody, "\"eventDate\"", "Z");
+        assertThat("Event Dates must be UTC", utcEventDates.length == 1);
+    }
 
     @Test
     public void lookup_entity_not_found() throws Exception {
@@ -1042,6 +1096,26 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "[email, {}, text, noreply@ripe.net]]"));
         assertThat(entity.getRdapConformance(), hasSize(1));
         assertThat(entity.getRdapConformance().get(0), equalTo("rdap_level_0"));
+
+        final List<Event> events = entity.getEvents();
+        assertThat(events, hasSize(1));
+//        assertTrue(events.get(0).getEventDate().isBefore(LocalDateTime.now()));
+        assertThat(events.get(0).getEventAction(), is("last changed"));
+    }
+
+
+    private String checkHeaderPresent(String contentTypeHeader, Header[] headers) {
+        String contentType = null;
+        for (Header header : headers) {
+            for (HeaderElement headerElement : header.getElements()) {
+                LOGGER.info("Response Header: " + header.getName() + ":" + headerElement.getName());
+                if (header.getName().equals(contentTypeHeader)) {
+                    contentType = headerElement.getName();
+                    break;
+                }
+            }
+        }
+        return contentType;
     }
 
 }
