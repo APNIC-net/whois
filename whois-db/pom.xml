@@ -12,6 +12,13 @@
     <version>1.68-SNAPSHOT</version>
     <packaging>jar</packaging>
 
+    <properties>
+        <build-helper-maven-plugin.version>1.8</build-helper-maven-plugin.version>
+        <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
+        <maven-rpm-plugin.version>2.1-alpha-2</maven-rpm-plugin.version>
+        <maven-deploy-plugin.version>2.7</maven-deploy-plugin.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>net.ripe.db</groupId>
@@ -99,11 +106,6 @@
                 <!-- START: RIPE Release Procedure -->
                 <whois.main>net.ripe.db.whois.WhoisServer</whois.main>
                 <!-- END: RIPE Release Procedure -->
-
-                <build-helper-maven-plugin.version>1.8</build-helper-maven-plugin.version>
-                <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
-                <maven-rpm-plugin.version>2.1-alpha-2</maven-rpm-plugin.version>
-                <maven-deploy-plugin.version>2.7</maven-deploy-plugin.version>
 
                 <maven.build.timestamp.format>yyyyMMdd.HHmmss</maven.build.timestamp.format>
 
