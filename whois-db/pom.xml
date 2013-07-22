@@ -197,7 +197,6 @@
                                                    else="${maven.build.timestamp}">
                                             <equals arg1="${parsedVersion.qualifier}" arg2="SNAPSHOT"/>
                                         </condition>
-
                                         <!-- Uncomment this for property dump during build -->
                                         <!--<echoproperties/>-->
                                     </target>
