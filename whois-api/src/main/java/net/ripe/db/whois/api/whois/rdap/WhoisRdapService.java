@@ -8,8 +8,10 @@ import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import net.ripe.db.whois.api.whois.ApiResponseHandler;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
+import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.domain.attrs.AttributeParseException;
+import net.ripe.db.whois.common.domain.attrs.AutNum;
 import net.ripe.db.whois.common.domain.attrs.Domain;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
@@ -83,19 +85,14 @@ public class WhoisRdapService {
 
         final Set<ObjectType> whoisObjectTypes = Sets.newHashSet();
 
-        switch (objectType) {
+        switch (objectType.toLowerCase()) {
             case "autnum":
-                long autnum = -1;
-                try {
-                    autnum = Long.parseLong(key);
-                } catch (NumberFormatException e) {}
-                if ((autnum >= 0) && (autnum <= 4294967295L)) {
-                    whoisObjectTypes.add(
-                        objectExists(request, AUT_NUM, "AS" + key)
-                            ? AUT_NUM
-                            : AS_BLOCK
-                    );
-                }
+                validateAutnum("AS" + key);
+		whoisObjectTypes.add(
+		    objectExists(request, AUT_NUM, "AS" + key)
+			? AUT_NUM
+			: AS_BLOCK
+		);
                 break;
 
             case "domain":
@@ -104,16 +101,21 @@ public class WhoisRdapService {
                 break;
 
             case "ip":
+                validateIp(key);
                 whoisObjectTypes.add(key.contains(":") ? INET6NUM : INETNUM);
                 break;
 
             case "entity":
-                whoisObjectTypes.add(PERSON);
-                whoisObjectTypes.add(ROLE);
+                validateEntity(key);
                 // TODO: [RL] Configuration (property?) for allowed RPSL object types for entity lookups
-                // TODO: [AS] Denis will look into if this should be used or not
-                whoisObjectTypes.add(ORGANISATION);
-                whoisObjectTypes.add(IRT);
+                if (key.toUpperCase().startsWith("IRT-")) {
+                    whoisObjectTypes.add(IRT);
+		} else if (key.toUpperCase().startsWith("ORG-")) {
+                    whoisObjectTypes.add(ORGANISATION);
+                } else {
+                    whoisObjectTypes.add(PERSON);
+                    whoisObjectTypes.add(ROLE);
+                }
                 break;
 
         }
@@ -153,6 +155,34 @@ public class WhoisRdapService {
             Domain.parse(key);
         } catch (AttributeParseException e) {
             throw new IllegalArgumentException("RIPE NCC does not support forward domain queries.");
+        }
+    }
+
+    private void validateIp(final String key) {
+        try {
+            IpInterval.parse(key);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid IP syntax.", e);
+        }
+    }
+
+    private void validateAutnum(final String key) {
+        try {
+            AutNum.parse(key);
+        } catch (AttributeParseException e) {
+            throw new IllegalArgumentException("Invalid syntax.");
+        }
+    }
+
+    private void validateEntity(final String key) {
+        if (key.toUpperCase().startsWith("ORG-")) {
+            if (!AttributeType.ORGANISATION.isValidValue(ORGANISATION, key)) {
+                throw new IllegalArgumentException("Invalid syntax.");
+            }
+        } else {
+            if (!AttributeType.NIC_HDL.isValidValue(ObjectType.PERSON, key)) {
+                throw new IllegalArgumentException("Invalid syntax");
+            }
         }
     }
 
@@ -301,7 +331,11 @@ public class WhoisRdapService {
                     QueryFlag.NO_FILTERING.getLongFlag(),
                     mntIrtAttribute.getCleanValue().toString());
             final Query query = Query.parse(queryString);
-            mntIrtObjects.addAll(runQuery(query, null, true));
+            for (final RpslObject resultObject : runQuery(query, null, true)) {
+                if (resultObject.getType().equals(IRT)) {
+                    mntIrtObjects.add(resultObject);
+                }
+            }
         }
 
         return mntIrtObjects;

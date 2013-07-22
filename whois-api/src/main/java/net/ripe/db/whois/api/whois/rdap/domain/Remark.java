@@ -11,6 +11,8 @@ package net.ripe.db.whois.api.whois.rdap.domain;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -43,10 +45,9 @@ import javax.xml.bind.annotation.XmlType;
     "description",
     "links"
 })
-public class Remark
-    implements Serializable
-{
 
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
+public class Remark implements Serializable {
     protected String title;
     protected List<String> description;
     protected Link links;

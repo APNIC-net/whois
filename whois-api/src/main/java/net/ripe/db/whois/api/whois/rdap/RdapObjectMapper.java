@@ -61,7 +61,6 @@ class RdapObjectMapper {
     }
 
     private static final Map<AttributeType, String> CONTACT_ATTRIBUTE_TO_ROLE_NAME = Maps.newHashMap();
-
     static {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ADMIN_C, "administrative");
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(TECH_C, "technical");
@@ -111,7 +110,6 @@ class RdapObjectMapper {
         final String selfUrl = getSelfUrl(rdapResponse, requestUrl);
 
         rdapResponse.getRdapConformance().addAll(RdapHelp.RDAP_CONFORMANCE_LEVEL);
-        rdapResponse.setPort43(port43);
         rdapResponse.getNotices().addAll(NoticeFactory.generateObjectNotices(rpslObject, selfUrl));
 
         final List<Remark> remarks = createRemarks(rpslObject);
@@ -130,20 +128,16 @@ class RdapObjectMapper {
             rdapResponse.getEntities().addAll(ctcEntities);
         }
 
+        rdapResponse.setPort43(port43);
+
         return rdapResponse;
     }
 
     private static Ip createIp(final RpslObject rpslObject, final RpslObject parentRpslObject, final String requestUrl, final String baseUrl) {
         final Ip ip = new Ip();
+        final IpInterval ipInterval = IpInterval.parse(rpslObject.getKey());
         ip.setHandle(rpslObject.getKey().toString());
-        IpInterval ipInterval;
-        if (rpslObject.getType() == INET6NUM) {
-            ipInterval = Ipv6Resource.parse(rpslObject.getKey());
-            ip.setIpVersion("v6");
-        } else {
-            ipInterval = Ipv4Resource.parse(rpslObject.getKey());
-            ip.setIpVersion("v4");
-        }
+        ip.setIpVersion(rpslObject.getType() == INET6NUM ? "v6" : "v4");
 
         String selfUrl = baseUrl + "/" + Ip.class.getSimpleName().toLowerCase() + "/" + ipInterval.toString();
 
@@ -215,14 +209,13 @@ class RdapObjectMapper {
 
     private static List<Entity> contactEntities(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String topUrl, final String baseUrl) {
         final List<Entity> entities = Lists.newArrayList();
+        final Map<CIString, Set<AttributeType>> contacts = Maps.newTreeMap();
 
         final Map<CIString, RpslObject> relatedObjectMap = Maps.newHashMap();
 
         for (final RpslObject object : relatedObjects) {
             relatedObjectMap.put(object.getKey(), object);
         }
-
-        final Map<CIString, Set<AttributeType>> contacts = Maps.newTreeMap();
 
         for (final AttributeType attributeType : CONTACT_ATTRIBUTE_TO_ROLE_NAME.keySet()) {
             for (final RpslAttribute attribute : rpslObject.findAttributes(attributeType)) {
@@ -380,28 +373,23 @@ class RdapObjectMapper {
 
         switch (rpslObject.getType()) {
             case PERSON:
-                for (final RpslAttribute attribute : rpslObject.findAttributes(PERSON)) {
-                    builder.addFn(attribute.getCleanValue().toString());
-                }
+                builder.addFn(rpslObject.getValueForAttribute(PERSON).toString());
                 builder.addKind("individual");
                 break;
             case ORGANISATION:
-                for (final RpslAttribute attribute : rpslObject.findAttributes(ORG_NAME)) {
-                    builder.addFn(attribute.getCleanValue().toString());
-                }
+                builder.addFn(rpslObject.getValueForAttribute(ORG_NAME).toString());
                 builder.addKind("org");
                 break;
             case ROLE:
-                for (final RpslAttribute attribute : rpslObject.findAttributes(ROLE)) {
-                    builder.addFn(attribute.getCleanValue().toString());
-                }
+                builder.addFn(rpslObject.getValueForAttribute(ROLE).toString());
                 builder.addKind("group");
                 break;
             case IRT:
-                for (final RpslAttribute attribute : rpslObject.findAttributes(IRT)) {
-                    builder.addFn(attribute.getCleanValue().toString());
-                }
+                builder.addFn(rpslObject.getValueForAttribute(IRT).toString());
                 builder.addKind("group");
+                for (final CIString email : rpslObject.getValuesForAttribute(ABUSE_MAILBOX)) {
+                    builder.addEmail(VCardHelper.createMap(Maps.immutableEntry("pref", "1")), email.toString());
+                }
                 break;
             default:
                 break;
