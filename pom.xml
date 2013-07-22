@@ -36,7 +36,6 @@
         <sonar.jdbc.username>dbint</sonar.jdbc.username>
         <sonar.jdbc.password />
 
-
         <!-- whois.variant is overridden by profile -->
         <whois.variant/>
     </properties>
@@ -576,7 +575,7 @@
                 <artifactId>gmaven-plugin</artifactId>
                 <version>1.4</version>
                 <configuration>
-                    <source/>
+                    <source />
                     <providerSelection>1.8</providerSelection>
                     <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
                 </configuration>
