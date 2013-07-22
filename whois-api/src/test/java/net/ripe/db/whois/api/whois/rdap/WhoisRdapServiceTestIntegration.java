@@ -793,6 +793,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "[[version, {}, text, 4.0], " +
                 "[fn, {}, text, IRT-TEST1-MNT], " +
                 "[kind, {}, text, group], " +
+                "[email, {pref=1}, text, abuse@test.net], " +
                 "[email, {}, text, info@test.net]]"));
 
         assertThat(abuseContact.getHandle(), is("AB-TEST"));

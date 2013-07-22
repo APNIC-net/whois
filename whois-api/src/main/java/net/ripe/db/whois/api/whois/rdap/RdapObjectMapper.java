@@ -402,6 +402,9 @@ class RdapObjectMapper {
                     builder.addFn(attribute.getCleanValue().toString());
                 }
                 builder.addKind("group");
+                for (final CIString email : rpslObject.getValuesForAttribute(ABUSE_MAILBOX)) {
+                    builder.addEmail(VCardHelper.createMap(Maps.immutableEntry("pref", "1")), email.toString());
+                }
                 break;
             default:
                 break;

@@ -301,7 +301,11 @@ public class WhoisRdapService {
                     QueryFlag.NO_FILTERING.getLongFlag(),
                     mntIrtAttribute.getCleanValue().toString());
             final Query query = Query.parse(queryString);
-            mntIrtObjects.addAll(runQuery(query, null, true));
+            for (final RpslObject resultObject : runQuery(query, null, true)) {
+                if (resultObject.getType().equals(IRT)) {
+                    mntIrtObjects.add(resultObject);
+                }
+            }
         }
 
         return mntIrtObjects;
