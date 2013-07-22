@@ -4,6 +4,7 @@ import com.Ostermiller.util.LineEnds;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomWriter;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.jackson.JsonFactory;
@@ -108,7 +109,7 @@ public class RdapHelperUtils {
         try {
             statusCode = httpClient.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
-                throw new ExceptionInInitializerError("Http error [" + statusCode + "][" + url + "]");
+                throw new HttpException("Http error [" + statusCode + "][" + url + "]");
             }
             // Read the response body.
             responseBody = method.getResponseBody();
