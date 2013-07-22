@@ -12,6 +12,10 @@ import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.google.common.collect.Lists;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 import java.util.List;
 
 
@@ -91,6 +95,7 @@ import java.util.List;
     "publicIds"
 })
 @XmlRootElement(name = "domain")
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class Domain
     extends RdapObject
     implements Serializable

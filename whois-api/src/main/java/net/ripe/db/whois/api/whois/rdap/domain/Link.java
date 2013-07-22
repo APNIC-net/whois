@@ -7,6 +7,8 @@
 
 
 package net.ripe.db.whois.api.whois.rdap.domain;
+import com.google.common.collect.Lists;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -51,6 +53,7 @@ import javax.xml.bind.annotation.XmlType;
     "media",
     "type"
 })
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class Link
     implements Serializable
 {

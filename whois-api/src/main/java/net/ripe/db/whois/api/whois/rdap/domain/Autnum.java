@@ -8,6 +8,8 @@
 
 package net.ripe.db.whois.api.whois.rdap.domain;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 
@@ -46,6 +48,7 @@ import java.io.Serializable;
     "country"
 })
 @XmlRootElement(name = "autnum")
+@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class Autnum
     extends RdapObject
     implements Serializable
