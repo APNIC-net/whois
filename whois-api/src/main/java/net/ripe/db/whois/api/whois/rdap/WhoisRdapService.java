@@ -46,21 +46,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static net.ripe.db.whois.common.rpsl.ObjectType.AS_BLOCK;
-import static net.ripe.db.whois.common.rpsl.ObjectType.AUT_NUM;
-import static net.ripe.db.whois.common.rpsl.ObjectType.DOMAIN;
-import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
-import static net.ripe.db.whois.common.rpsl.ObjectType.INETNUM;
-import static net.ripe.db.whois.common.rpsl.ObjectType.IRT;
-import static net.ripe.db.whois.common.rpsl.ObjectType.ORGANISATION;
-import static net.ripe.db.whois.common.rpsl.ObjectType.PERSON;
-import static net.ripe.db.whois.common.rpsl.ObjectType.ROLE;
+import static net.ripe.db.whois.common.rpsl.ObjectType.*;
 
 @ExternallyManagedLifecycle
 @Component
 @Path("/")
 public class WhoisRdapService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WhoisRdapService.class);
+
+    public static final String WHOIS_VARIANT = System.getProperty("whois.variant","");
+    public static final String RDAP_PROPERTIES = "classpath:rdap" + (WHOIS_VARIANT.isEmpty() ? "" : "." + WHOIS_VARIANT) + ".properties";
+
     private static final int STATUS_TOO_MANY_REQUESTS = 429;
     private static final Set<ObjectType> ABUSE_CONTACT_TYPES = Sets.newHashSet(AUT_NUM, INETNUM, INET6NUM);
 
@@ -92,12 +88,16 @@ public class WhoisRdapService {
 
         switch (objectType.toLowerCase()) {
             case "autnum":
-                validateAutnum("AS" + key);
-		whoisObjectTypes.add(
-		    objectExists(request, AUT_NUM, "AS" + key)
-			? AUT_NUM
-			: AS_BLOCK
-		);
+                try {
+                    validateAutnum("AS" + key);
+                    whoisObjectTypes.add(
+                            objectExists(request, AUT_NUM, "AS" + key)
+                                    ? AUT_NUM
+                                    : AS_BLOCK
+                    );
+                } catch (IllegalArgumentException iae) {
+                    // @TODO: Should we error log stuff like this or ignore?
+                }
                 break;
 
             case "domain":
