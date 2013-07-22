@@ -158,5 +158,4 @@ public class RdapHelperUtils {
         return objectMapper.getJsonFactory();
     }
 
-
 }
