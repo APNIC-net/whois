@@ -34,7 +34,7 @@ public class QueryMessagesTest {
 
     @Test
     public void headerShouldContainLinkToTermsAndConditions() {
-        assertThat(QueryMessages.termsAndConditions().toString(), containsString("http://www.apnic.net/db/dbcopyright.html"));
+        assertThat(QueryMessages.termsAndConditions().toString(), containsString("http://www.ripe.net/db/support/db-terms-conditions.pdf"));
     }
 
     @Test
