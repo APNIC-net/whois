@@ -14,6 +14,8 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
@@ -187,6 +189,7 @@ public class TagsTestIntegration extends AbstractWhoisIntegrationTest {
                 "phone:          +31324243\n" +
                 "nic-hdl:        TP1-TEST\n" +
                 "mnt-by:         RIPE-NCC-HM-MNT\n" +
+                "changed:        test@ripe.net " + new SimpleDateFormat("yyyyMMdd").format(new Date()) + "\n" +
                 "source:         TEST # Filtered\n" +
                 "\n" +
                 "% This query was served by the RIPE Database Query Service version 0.1-TEST (UNDEFINED)\n" +

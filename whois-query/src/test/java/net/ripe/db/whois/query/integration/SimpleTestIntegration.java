@@ -371,7 +371,7 @@ public class SimpleTestIntegration extends AbstractWhoisIntegrationTest {
                 "mnt-lower:    TEST-DBM-MNT\n" +
                 "mnt-routes:   TEST-DBM-MNT\n" +
                 "remarks:      This is an automatically created object.\n" +
-                "changed:      bitbucket@ripe.net 20051031\n" +
+//                "changed:      bitbucket@ripe.net 20051031\n" +
                 "source:       TEST\n");
 
         final JdbcTemplate jdbcTemplate = databaseHelper.getWhoisTemplate();
