@@ -15,6 +15,7 @@ import net.ripe.db.whois.common.Messages;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.attrs.AsBlockRange;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectTemplate;
 import net.ripe.db.whois.common.rpsl.ObjectType;
@@ -218,7 +219,17 @@ public final class Query {
     }
 
     public boolean isFiltered() {
-        return hasOption(QueryFlag.FILTERING) && !(hasOption(QueryFlag.NO_FILTERING) || isKeysOnly() || isHelp() || isTemplate() || isVerbose());
+        if (isKeysOnly() || isHelp() || isTemplate() || isVerbose()) {
+            return false;
+        } else if (hasOption(QueryFlag.FILTERING)) {
+            return true;
+        } else if (hasOption(QueryFlag.NO_FILTERING)) {
+            return false;
+        } else if (WhoisVariant.isAPNIC()) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public boolean isHelp() {
