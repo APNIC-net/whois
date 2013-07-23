@@ -80,10 +80,10 @@ public class QueryTest {
     }
 
     @Test
-    public void default_is_non_filtered() {
+    public void default_is_filtered() {
         parse("foo");
 
-        assertFalse(subject.isFiltered());
+        assertTrue(subject.isFiltered());
     }
 
     @Test
