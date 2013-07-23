@@ -6,11 +6,7 @@ import net.apnic.db.whois.common.domain.attrs.Inet6numStatus;
 import net.apnic.db.whois.common.domain.attrs.InetnumStatus;
 import net.ripe.db.whois.common.Message;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
-import net.ripe.db.whois.common.domain.CIString;
-import net.ripe.db.whois.common.domain.IpInterval;
-import net.ripe.db.whois.common.domain.Ipv4Resource;
-import net.ripe.db.whois.common.domain.Ipv6Resource;
-import net.ripe.db.whois.common.domain.Maintainers;
+import net.ripe.db.whois.common.domain.*;
 import net.ripe.db.whois.common.domain.attrs.InetStatus;
 import net.ripe.db.whois.common.iptree.IpEntry;
 import net.ripe.db.whois.common.iptree.IpTree;
@@ -35,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static net.apnic.db.whois.update.handler.validator.inetnum.InetStatusHelper.getStatus;
+import static net.ripe.db.whois.update.handler.validator.inetnum.InetStatusHelper.getStatus;
 
 @WhoisVariantContext(includeWhen = WhoisVariant.Type.APNIC)
 @Component
@@ -110,7 +106,7 @@ public class StatusValidator implements BusinessRuleValidator {
 //            return;
 //        }
 
-        final InetStatus currentStatus = InetStatusHelper.getStatus(update);
+        final InetStatus currentStatus = getStatus(update);
         if (currentStatus.requiresAllocMaintainer()) {
             checkAllocMaintainer(update, updateContext);
         } else {
@@ -144,7 +140,7 @@ public class StatusValidator implements BusinessRuleValidator {
         } else {
             for (IpEntry parent : parents) {
                 final RpslObject parentObject = objectDao.getById(parent.getObjectId());
-                InetStatus parentStatus = InetStatusHelper.getStatus(parentObject);
+                InetStatus parentStatus = getStatus(parentObject);
                 if (parentStatus instanceof InetnumStatus) {
                     if (!allowedParentInetStatuses.contains(parentStatus)) {
                         updateContext.addMessage(update, net.apnic.db.whois.update.domain.UpdateMessages.invalidParentStatus(parentObject.getKey(), allowedParentInetStatusMessage));
@@ -162,7 +158,7 @@ public class StatusValidator implements BusinessRuleValidator {
     private boolean allChildrenHaveCorrectStatus(final PreparedUpdate update, final UpdateContext updateContext, final IpTree ipTree, final IpInterval ipInterval) {
         final List<IpEntry> children = ipTree.findFirstMoreSpecific(ipInterval);
         final RpslAttribute updateStatusAttribute = update.getUpdatedObject().findAttribute(AttributeType.STATUS);
-        final InetStatus updatedStatus = InetStatusHelper.getStatus(update);
+        final InetStatus updatedStatus = getStatus(update);
 
         for (final IpEntry child : children) {
             final RpslObject childObject = objectDao.getById(child.getObjectId());
@@ -202,14 +198,14 @@ public class StatusValidator implements BusinessRuleValidator {
             }
 
             final CIString parentStatusValue = parentStatuses.get(0).getCleanValue();
-            final InetStatus parentStatus = net.apnic.db.whois.update.handler.validator.inetnum.InetStatusHelper.getStatus(parentStatusValue, update);
+            final InetStatus parentStatus = getStatus(parentStatusValue, update);
 
             if (parentStatus == null) {
                 updateContext.addMessage(update, UpdateMessages.objectHasInvalidStatus("Parent", parentInHierarchyMaintainedByRs.getKey(), parentStatusValue));
             } else {
                 final Set<CIString> mntLower = parentInHierarchyMaintainedByRs.getValuesForAttribute(AttributeType.MNT_LOWER);
                 final boolean parentHasRsMntLower = !Sets.intersection(maintainers.getRsMaintainers(), mntLower).isEmpty();
-                final InetStatus currentStatus = net.apnic.db.whois.update.handler.validator.inetnum.InetStatusHelper.getStatus(update);
+                final InetStatus currentStatus = getStatus(update);
 
                 if (!currentStatus.worksWithParentInHierarchy(parentStatus, parentHasRsMntLower)) {
                     updateContext.addMessage(update, errorMessage);
