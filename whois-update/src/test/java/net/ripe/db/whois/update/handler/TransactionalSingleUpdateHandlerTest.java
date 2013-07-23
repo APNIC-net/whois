@@ -89,7 +89,7 @@ public class TransactionalSingleUpdateHandlerTest {
 
         subject.handle(origin, Keyword.NONE, update, updateContext);
 
-        verify(updateObjectHandler, times(2)).execute(any(PreparedUpdate.class), any(UpdateContext.class));
+        verify(updateObjectHandler, times(1)).execute(any(PreparedUpdate.class), any(UpdateContext.class));
     }
 
     @Test(expected = IllegalStateException.class)

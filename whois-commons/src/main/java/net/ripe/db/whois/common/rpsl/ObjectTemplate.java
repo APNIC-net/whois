@@ -77,7 +77,6 @@ public class ObjectTemplate implements Comparable<ObjectTemplate> {
     }
 
     public static ObjectTemplate getTemplate(final ObjectType type) {
-        System.out.println("type" + type);
         final ObjectTemplate objectTemplate = TEMPLATE_MAP.get(type);
         if (objectTemplate == null) {
             throw new IllegalStateException("No template for " + type);
