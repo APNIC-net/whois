@@ -242,7 +242,7 @@
                                         <require>grep</require>         <!-- grep -->
                                         <require>gawk</require>         <!-- awk -->
                                         <require>mailx</require>        <!-- mail -->
-                                        <require>sendmail</require>     <!-- sendmail -->
+                                        <require>postfix</require>     <!-- sendmail -->
                                         <require>chkconfig</require>    <!-- chkconfig -->
                                         <require>logrotate</require>
                                         <require>initscripts</require>
