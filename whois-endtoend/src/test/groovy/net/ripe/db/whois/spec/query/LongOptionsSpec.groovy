@@ -452,6 +452,8 @@ class LongOptionsSpec extends BaseSpec {
     def "query specific ASSIGNED PA range, parent ALLOCATED PA, with --persistent-connection"() {
       given:
         syncUpdate(getTransient("ALLOC-PA") + "password: owner3\npassword: hm")
+        // Trying sleep
+        sleep(2000)
         syncUpdate(getTransient("ASS-END") + "password: lir\npassword: end\npassword: owner3")
 
       expect:
