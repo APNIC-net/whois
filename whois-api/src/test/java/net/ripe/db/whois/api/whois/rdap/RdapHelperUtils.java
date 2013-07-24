@@ -7,6 +7,7 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -41,6 +42,14 @@ public class RdapHelperUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapHelperUtils.class);
     private static final XStream XSTREAM = new XStream();
     private static DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+
+    protected static HttpClient httpClient = null;
+    static {
+        MultiThreadedHttpConnectionManager mgr = new MultiThreadedHttpConnectionManager();
+        mgr.getParams().setDefaultMaxConnectionsPerHost(1000);
+        mgr.getParams().setMaxTotalConnections(1000);
+        httpClient = new HttpClient(mgr);
+    }
 
     public static <T> T cloneObject(T src, Class dest) {
         String toXml = XSTREAM.toXML(src).replace(src.getClass().getName(), dest.getName());
@@ -103,19 +112,18 @@ public class RdapHelperUtils {
     }
 
     public static byte[] getHttpContent(String url) {
-        return getHttpHeaderAndContent(url).getKey();
+        return getHttpHeaderAndContent(url).body;
     }
 
-    public static byte[] getHttpContent(String url, boolean httpErrorsOk) {
-        return getHttpHeaderAndContent(url, httpErrorsOk).getKey();
+    public static HttpResponseElements getHttpContent(String url, boolean httpErrorsOk) {
+        return getHttpHeaderAndContent(url, httpErrorsOk);
     }
 
-    public static Pair<byte[], Header[]> getHttpHeaderAndContent(String url) {
+    public static HttpResponseElements getHttpHeaderAndContent(String url) {
         return getHttpHeaderAndContent(url, false);
     }
 
-    public static Pair<byte[], Header[]> getHttpHeaderAndContent(String url, boolean httpErrorsOk, Header... headers) {
-        HttpClient httpClient = new HttpClient();
+    public static HttpResponseElements getHttpHeaderAndContent(String url, boolean httpErrorsOk, Header... headers) {
         // Create a method instance.
         GetMethod method = new GetMethod(url);
         for (Header header : headers) {
@@ -129,7 +137,7 @@ public class RdapHelperUtils {
                 throw new HttpException("Http error [" + statusCode + "][" + url + "]");
             }
             // Read the response body.
-            responseBody = method.getResponseBody();
+            responseBody = method.getResponseBody(1024 * 1024);
             method.getResponseHeaders("Content-Type");
         } catch (Exception ex) {
             LOGGER.error("Could not get url status=" + statusCode + ":" + url, ex);
@@ -138,7 +146,7 @@ public class RdapHelperUtils {
             // Release the connection.
             method.releaseConnection();
         }
-        return new Pair<>(responseBody, method.getResponseHeaders());
+        return new HttpResponseElements( method.getResponseHeaders(), responseBody, statusCode);
     }
 
     public static String marshal(final Object o) throws IOException {
@@ -177,4 +185,16 @@ public class RdapHelperUtils {
         return objectMapper.getJsonFactory();
     }
 
+    public static class HttpResponseElements {
+        public Header[] headers;
+        public byte[] body;
+        public int statusCode;
+
+        public HttpResponseElements(Header[] headers, byte[] body, int statusCode) {
+            this.headers = headers;
+            this.body = body;
+            this.statusCode = statusCode;
+        }
+
+    }
 }
