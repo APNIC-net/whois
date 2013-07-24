@@ -152,7 +152,7 @@
         <xs:sequence>
             <xs:element name="title" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="links" type="link" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="links" type="link" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 
@@ -160,7 +160,7 @@
         <xs:sequence>
             <xs:element name="title" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="links" type="link" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="links" type="link" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 
