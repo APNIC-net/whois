@@ -7,16 +7,15 @@
 
 
 package net.ripe.db.whois.api.whois.rdap.domain;
-import com.google.common.collect.Lists;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -54,7 +53,7 @@ public class Notice
 
     protected String title;
     protected List<String> description;
-    protected Link links;
+    protected List<Link> links;
 
     /**
      * Gets the value of the title property.
@@ -117,20 +116,11 @@ public class Notice
      *     {@link Link }
      *     
      */
-    public Link getLinks() {
-        return links;
-    }
-
-    /**
-     * Sets the value of the links property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Link }
-     *     
-     */
-    public void setLinks(Link value) {
-        this.links = value;
+    public List<Link> getLinks() {
+        if (links == null) {
+            links = new ArrayList<Link>();
+        }
+        return this.links;
     }
 
 }
