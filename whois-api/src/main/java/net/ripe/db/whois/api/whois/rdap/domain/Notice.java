@@ -7,16 +7,13 @@
 
 
 package net.ripe.db.whois.api.whois.rdap.domain;
-import com.google.common.collect.Lists;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
@@ -31,7 +28,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="title" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="links" type="{}link" minOccurs="0"/>
+ *         &lt;element name="links" type="{}link" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -46,15 +43,13 @@ import javax.xml.bind.annotation.XmlType;
     "description",
     "links"
 })
-@XmlRootElement
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class Notice
     implements Serializable
 {
 
     protected String title;
     protected List<String> description;
-    protected Link links;
+    protected List<Link> links;
 
     /**
      * Gets the value of the title property.
@@ -112,25 +107,30 @@ public class Notice
     /**
      * Gets the value of the links property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Link }
-     *     
-     */
-    public Link getLinks() {
-        return links;
-    }
-
-    /**
-     * Sets the value of the links property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the links property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link Link }
-     *     
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getLinks().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Link }
+     * 
+     * 
      */
-    public void setLinks(Link value) {
-        this.links = value;
+    public List<Link> getLinks() {
+        if (links == null) {
+            links = new ArrayList<Link>();
+        }
+        return this.links;
     }
 
 }

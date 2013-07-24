@@ -472,7 +472,7 @@ public class RdapResponseJsonTest {
         link.getTitle().add("title2");
         link.setMedia("screen");
         link.setType("application/json");
-        notices.setLinks(link);
+        notices.getLinks().add(link);
 
         assertThat(RdapHelperUtils.marshal(notices), equalTo("" +
                 "{\n" +

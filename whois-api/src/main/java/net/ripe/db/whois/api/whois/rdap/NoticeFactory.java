@@ -87,7 +87,7 @@ public class NoticeFactory {
             link.setHref(noticeFactory.rdap_tnc_linkhref);
             link.setType(noticeFactory.rdap_tnc_linktype);
             link.setValue(selfLink);
-            tnc.setLinks(link);
+            tnc.getLinks().add(link);
 
             notices.add(tnc);
 
@@ -134,7 +134,7 @@ public class NoticeFactory {
             link.setHref(noticeFactory.rdap_help_link_href);
             link.setType(noticeFactory.rdap_help_link_type);
             link.setValue(selfUrl);
-            authNotice.setLinks(link);
+            authNotice.getLinks().add(link);
 
             notices.add(authNotice);
         }

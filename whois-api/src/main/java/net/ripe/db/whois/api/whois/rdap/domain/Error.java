@@ -8,13 +8,13 @@
 
 package net.ripe.db.whois.api.whois.rdap.domain;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -30,6 +30,8 @@ import java.util.List;
  *         &lt;element name="errorCode" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
  *         &lt;element name="title" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="rdapConformance" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
+ *         &lt;element name="notices" type="{}notice" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -40,35 +42,22 @@ import java.util.List;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "error", propOrder = {
-    "rdapConformance",
-    "notices",
     "errorCode",
     "title",
-    "description"
+    "description",
+    "rdapConformance",
+    "notices"
 })
 public class Error
     implements Serializable
 {
-    @XmlElement(required = true)
-    protected List<String> rdapConformance;
-    protected List<Notice> notices;
+
     protected Integer errorCode;
     protected String title;
     protected List<String> description;
-
-    public List<String> getRdapConformance() {
-        if (rdapConformance == null) {
-            rdapConformance = new ArrayList<String>();
-        }
-        return this.rdapConformance;
-    }
-
-    public List<Notice> getNotices() {
-        if (notices == null) {
-            notices = new ArrayList<Notice>();
-        }
-        return this.notices;
-    }
+    @XmlElement(required = true)
+    protected List<String> rdapConformance;
+    protected List<Notice> notices;
 
     /**
      * Gets the value of the errorCode property.
@@ -145,6 +134,64 @@ public class Error
             description = new ArrayList<String>();
         }
         return this.description;
+    }
+
+    /**
+     * Gets the value of the rdapConformance property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the rdapConformance property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getRdapConformance().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * 
+     * 
+     */
+    public List<String> getRdapConformance() {
+        if (rdapConformance == null) {
+            rdapConformance = new ArrayList<String>();
+        }
+        return this.rdapConformance;
+    }
+
+    /**
+     * Gets the value of the notices property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the notices property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getNotices().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Notice }
+     * 
+     * 
+     */
+    public List<Notice> getNotices() {
+        if (notices == null) {
+            notices = new ArrayList<Notice>();
+        }
+        return this.notices;
     }
 
 }
