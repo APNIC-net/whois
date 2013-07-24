@@ -478,7 +478,7 @@ public class RdapResponseJsonTest {
                 "{\n" +
                 "  \"title\" : \"Beverage policy\",\n" +
                 "  \"description\" : [ \"Beverages with caffeine for keeping horses awake.\", \"Very effective.\" ],\n" +
-                "  \"links\" : {\n" +
+                "  \"links\" : [ {\n" +
                 "    \"value\" : \"http://example.com/context_uri\",\n" +
                 "    \"rel\" : \"self\",\n" +
                 "    \"href\" : \"http://example.com/target_uri_href\",\n" +
@@ -486,7 +486,7 @@ public class RdapResponseJsonTest {
                 "    \"title\" : [ \"title1\", \"title2\" ],\n" +
                 "    \"media\" : \"screen\",\n" +
                 "    \"type\" : \"application/json\"\n" +
-                "  }\n" +
+                "  } ]\n" +
                 "}"));
     }
 

@@ -9,6 +9,8 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParser;
@@ -18,8 +20,6 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
-import org.codehaus.plexus.util.StringInputStream;
-import org.codehaus.plexus.util.StringOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -91,20 +91,10 @@ public class RdapHelperUtils {
         return ret;
     }
 
-    public static String convertEOLToUnix(StringOutputStream serializer) {
-        StringOutputStream resultStream = new StringOutputStream();
-        try {
-            LineEnds.convert(new StringInputStream(serializer.toString()), resultStream, LineEnds.STYLE_UNIX);
-        } catch (Exception ex) {
-            LOGGER.error("convertEOLToUnix failed", ex);
-        }
-        return resultStream.toString();
-    }
-
     public static String convertEOLToUnix(String str) {
-        StringOutputStream resultStream = new StringOutputStream();
+        ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
         try {
-            LineEnds.convert(new StringInputStream(str), resultStream, LineEnds.STYLE_UNIX);
+            LineEnds.convert(IOUtils.toInputStream(str), resultStream, LineEnds.STYLE_UNIX);
         } catch (Exception ex) {
             LOGGER.error("convertEOLToUnix failed", ex);
         }
@@ -150,7 +140,7 @@ public class RdapHelperUtils {
     }
 
     public static String marshal(final Object o) throws IOException {
-        final StringOutputStream outputStream = new StringOutputStream();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         final JsonFactory jsonFactory = createJsonFactory();
         final JsonGenerator generator = jsonFactory.createJsonGenerator(outputStream).useDefaultPrettyPrinter();
@@ -158,7 +148,7 @@ public class RdapHelperUtils {
         generator.close();
 
         // So that the test can run on ALL platform (Curse you iScampi!!)
-        return RdapHelperUtils.convertEOLToUnix(outputStream);
+        return RdapHelperUtils.convertEOLToUnix(outputStream.toString());
     }
 
     public static <T> T unmarshal(final String content, Class<T> valueType) throws IOException {
