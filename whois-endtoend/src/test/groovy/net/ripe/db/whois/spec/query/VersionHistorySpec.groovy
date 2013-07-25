@@ -1431,6 +1431,7 @@ class VersionHistorySpec extends BaseSpec {
     def "query --list-versions and -k, 2 versions"() {
       given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
+        sleep(2000)
 
       expect:
         // "RIR-ALLOC-20"
