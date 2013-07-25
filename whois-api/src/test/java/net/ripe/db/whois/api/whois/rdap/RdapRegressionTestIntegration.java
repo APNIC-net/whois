@@ -6,12 +6,10 @@ import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
 import net.ripe.db.whois.api.whois.rdap.domain.Domain;
 import net.ripe.db.whois.api.whois.rdap.domain.Entity;
 import net.ripe.db.whois.api.whois.rdap.domain.Ip;
-import net.ripe.db.whois.common.ManualTest;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +24,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 
-@Category(ManualTest.class)
 public class RdapRegressionTestIntegration {
     private static Class clazz = RdapRegressionTestIntegration.class;
     private static final Logger LOGGER = LoggerFactory.getLogger(clazz);
