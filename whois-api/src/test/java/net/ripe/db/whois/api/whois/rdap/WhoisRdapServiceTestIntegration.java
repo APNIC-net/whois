@@ -660,20 +660,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         }
     }
 
-
-    @Test
-    public void invalid_entity() throws Exception {
-        try {
-            createResource(AUDIENCE, "entity/IRT-XXXX")
-                    .accept(MediaType.APPLICATION_JSON_TYPE)
-                    .get(Entity.class);
-            fail();
-        } catch (UniformInterfaceException e) {
-            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-        }
-    }
-
     @Test
     public void invalid_autnum() throws Exception {
         try {
