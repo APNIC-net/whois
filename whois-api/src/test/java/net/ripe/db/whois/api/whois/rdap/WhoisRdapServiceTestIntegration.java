@@ -469,14 +469,14 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final WebResource webResource = createResource(AUDIENCE, "entity/PP1-TEST");
 
         // Get using HttpClient so there is no accept header
-        Pair<byte[], Header[]> response = RdapHelperUtils.getHttpHeaderAndContent(webResource.getURI().toASCIIString());
+        RdapHelperUtils.HttpResponseElements response = RdapHelperUtils.getHttpHeaderAndContent(webResource.getURI().toASCIIString());
 
         // Get Response Body
-        String responseBody = new String(response.getKey());
+        String responseBody = new String(response.body);
         LOGGER.info("Response=" + responseBody);
 
         // Test content type
-        Header[] headers = response.getValue();
+        Header[] headers = response.headers;
         String contentType = checkHeaderPresent(CONTENT_TYPE_HEADER, headers);
         assertEquals(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, contentType);
 
@@ -495,12 +495,12 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         // Get using HttpClient with content-type set like firefox
         Header headerEntry = new Header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-        Pair<byte[], Header[]> response = RdapHelperUtils.getHttpHeaderAndContent(webResource.getURI().toASCIIString(), false, headerEntry);
-        String responseBody = new String(response.getKey());
+        RdapHelperUtils.HttpResponseElements response = RdapHelperUtils.getHttpHeaderAndContent(webResource.getURI().toASCIIString(), false, headerEntry);
+        String responseBody = new String(response.body);
         LOGGER.info("Response=" + responseBody);
 
         // Test content type
-        Header[] headers = response.getValue();
+        Header[] headers = response.headers;
         String contentType = checkHeaderPresent(CONTENT_TYPE_HEADER, headers);
         assertEquals(MediaType.TEXT_PLAIN, contentType);
 
@@ -518,12 +518,12 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         // Get using HttpClient with content-type set like firefox
         Header headerEntry = new Header("Accept", MediaType.APPLICATION_JSON);
-        Pair<byte[], Header[]> response = RdapHelperUtils.getHttpHeaderAndContent(webResource.getURI().toASCIIString(), false, headerEntry);
-        String responseBody = new String(response.getKey());
+        RdapHelperUtils.HttpResponseElements response = RdapHelperUtils.getHttpHeaderAndContent(webResource.getURI().toASCIIString(), false, headerEntry);
+        String responseBody = new String(response.body);
         LOGGER.info("Response=" + responseBody);
 
         // Test content type
-        Header[] headers = response.getValue();
+        Header[] headers = response.headers;
         String contentType = checkHeaderPresent(CONTENT_TYPE_HEADER, headers);
         assertEquals(MediaType.APPLICATION_JSON, contentType);
 
@@ -620,7 +620,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         }
     }
 
-    // autnum
 
     @Test
     public void lookup_forward_domain() {
@@ -631,7 +630,33 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
             fail();
         } catch (UniformInterfaceException e) {
             assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-            assertThat(e.getResponse().getEntity(String.class), is("RIPE NCC does not support forward domain queries."));
+            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+        }
+    }
+
+    @Test
+    public void invalid_domain() throws Exception {
+        try {
+            createResource(AUDIENCE, "domain/shazzbot")
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .get(Domain.class);
+            fail();
+        } catch (UniformInterfaceException e) {
+            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+        }
+    }
+
+    @Test
+    public void invalid_ip() throws Exception {
+        try {
+            createResource(AUDIENCE, "ip/eyepee")
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .get(Ip.class);
+            fail();
+        } catch (UniformInterfaceException e) {
+            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
         }
     }
 

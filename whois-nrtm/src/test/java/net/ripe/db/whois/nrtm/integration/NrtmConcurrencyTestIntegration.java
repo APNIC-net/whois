@@ -68,14 +68,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         nrtmServer.stop(true);
     }
 
-    @Test
-    public void dontHangOnHugeAutNumObject() throws Exception {
-        String response = DummyWhoisClient.query(NrtmServer.port, String.format("-g TEST:3:%d-%d", MIN_RANGE, MAX_RANGE), 5 * 1000);
-
-        assertTrue(response, response.contains(String.format("ADD %d", MIN_RANGE)));  // serial 21486000 is a huge aut-num
-        assertTrue(response, response.contains(String.format("DEL %d", MIN_RANGE + 1)));
-    }
-
+    // Try running this test first to solve weird junit threading issue
     @Test
     public void dontHangOnHugeAutNumObjectKeepalive() throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -103,6 +96,15 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         assertThat(thread.delCount, is(3));
 
         thread.stop = true;
+    }
+
+
+    @Test
+    public void dontHangOnHugeAutNumObject() throws Exception {
+        String response = DummyWhoisClient.query(NrtmServer.port, String.format("-g TEST:3:%d-%d", MIN_RANGE, MAX_RANGE), 5 * 1000);
+
+        assertTrue(response, response.contains(String.format("ADD %d", MIN_RANGE)));  // serial 21486000 is a huge aut-num
+        assertTrue(response, response.contains(String.format("DEL %d", MIN_RANGE + 1)));
     }
 
     @Test
@@ -167,6 +169,9 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
         LOGGER.info("ADD: {}, DEL: {}", addResult, delResult);
     }
+
+
+
 
     private void setSerial(int min, int max) {
         truncateTables();

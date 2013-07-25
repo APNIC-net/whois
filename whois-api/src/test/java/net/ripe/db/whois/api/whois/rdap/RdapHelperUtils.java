@@ -7,7 +7,10 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParser;
@@ -17,8 +20,6 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
-import org.codehaus.plexus.util.StringInputStream;
-import org.codehaus.plexus.util.StringOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -41,6 +42,14 @@ public class RdapHelperUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapHelperUtils.class);
     private static final XStream XSTREAM = new XStream();
     private static DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+
+    protected static HttpClient httpClient = null;
+    static {
+        MultiThreadedHttpConnectionManager mgr = new MultiThreadedHttpConnectionManager();
+        mgr.getParams().setDefaultMaxConnectionsPerHost(1000);
+        mgr.getParams().setMaxTotalConnections(1000);
+        httpClient = new HttpClient(mgr);
+    }
 
     public static <T> T cloneObject(T src, Class dest) {
         String toXml = XSTREAM.toXML(src).replace(src.getClass().getName(), dest.getName());
@@ -82,20 +91,10 @@ public class RdapHelperUtils {
         return ret;
     }
 
-    public static String convertEOLToUnix(StringOutputStream serializer) {
-        StringOutputStream resultStream = new StringOutputStream();
-        try {
-            LineEnds.convert(new StringInputStream(serializer.toString()), resultStream, LineEnds.STYLE_UNIX);
-        } catch (Exception ex) {
-            LOGGER.error("convertEOLToUnix failed", ex);
-        }
-        return resultStream.toString();
-    }
-
     public static String convertEOLToUnix(String str) {
-        StringOutputStream resultStream = new StringOutputStream();
+        ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
         try {
-            LineEnds.convert(new StringInputStream(str), resultStream, LineEnds.STYLE_UNIX);
+            LineEnds.convert(IOUtils.toInputStream(str), resultStream, LineEnds.STYLE_UNIX);
         } catch (Exception ex) {
             LOGGER.error("convertEOLToUnix failed", ex);
         }
@@ -103,19 +102,18 @@ public class RdapHelperUtils {
     }
 
     public static byte[] getHttpContent(String url) {
-        return getHttpHeaderAndContent(url).getKey();
+        return getHttpHeaderAndContent(url).body;
     }
 
-    public static byte[] getHttpContent(String url, boolean httpErrorsOk) {
-        return getHttpHeaderAndContent(url, httpErrorsOk).getKey();
+    public static HttpResponseElements getHttpContent(String url, boolean httpErrorsOk) {
+        return getHttpHeaderAndContent(url, httpErrorsOk);
     }
 
-    public static Pair<byte[], Header[]> getHttpHeaderAndContent(String url) {
+    public static HttpResponseElements getHttpHeaderAndContent(String url) {
         return getHttpHeaderAndContent(url, false);
     }
 
-    public static Pair<byte[], Header[]> getHttpHeaderAndContent(String url, boolean httpErrorsOk, Header... headers) {
-        HttpClient httpClient = new HttpClient();
+    public static HttpResponseElements getHttpHeaderAndContent(String url, boolean httpErrorsOk, Header... headers) {
         // Create a method instance.
         GetMethod method = new GetMethod(url);
         for (Header header : headers) {
@@ -129,7 +127,7 @@ public class RdapHelperUtils {
                 throw new HttpException("Http error [" + statusCode + "][" + url + "]");
             }
             // Read the response body.
-            responseBody = method.getResponseBody();
+            responseBody = method.getResponseBody(1024 * 1024);
             method.getResponseHeaders("Content-Type");
         } catch (Exception ex) {
             LOGGER.error("Could not get url status=" + statusCode + ":" + url, ex);
@@ -138,11 +136,11 @@ public class RdapHelperUtils {
             // Release the connection.
             method.releaseConnection();
         }
-        return new Pair<>(responseBody, method.getResponseHeaders());
+        return new HttpResponseElements( method.getResponseHeaders(), responseBody, statusCode);
     }
 
     public static String marshal(final Object o) throws IOException {
-        final StringOutputStream outputStream = new StringOutputStream();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         final JsonFactory jsonFactory = createJsonFactory();
         final JsonGenerator generator = jsonFactory.createJsonGenerator(outputStream).useDefaultPrettyPrinter();
@@ -150,7 +148,7 @@ public class RdapHelperUtils {
         generator.close();
 
         // So that the test can run on ALL platform (Curse you iScampi!!)
-        return RdapHelperUtils.convertEOLToUnix(outputStream);
+        return RdapHelperUtils.convertEOLToUnix(outputStream.toString());
     }
 
     public static <T> T unmarshal(final String content, Class<T> valueType) throws IOException {
@@ -177,4 +175,16 @@ public class RdapHelperUtils {
         return objectMapper.getJsonFactory();
     }
 
+    public static class HttpResponseElements {
+        public Header[] headers;
+        public byte[] body;
+        public int statusCode;
+
+        public HttpResponseElements(Header[] headers, byte[] body, int statusCode) {
+            this.headers = headers;
+            this.body = body;
+            this.statusCode = statusCode;
+        }
+
+    }
 }
