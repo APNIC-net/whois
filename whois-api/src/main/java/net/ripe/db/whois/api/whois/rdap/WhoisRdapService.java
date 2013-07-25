@@ -84,64 +84,60 @@ public class WhoisRdapService {
                            @PathParam("objectType") final String objectType,
                            @PathParam("key") final String key) {
 
-        final Set<ObjectType> whoisObjectTypes = Sets.newHashSet();
-
-        switch (objectType.toLowerCase()) {
-            case "autnum":
-                try {
-                    validateAutnum("AS" + key);
-                    whoisObjectTypes.add(
-                            objectExists(request, AUT_NUM, "AS" + key)
-                                    ? AUT_NUM
-                                    : AS_BLOCK
-                    );
-                } catch (IllegalArgumentException iae) {
-                    // @TODO: Should we error log stuff like this or ignore?
-                }
-                break;
-
-            case "domain":
-                validateDomain(key);
-                whoisObjectTypes.add(DOMAIN);
-                break;
-
-            case "ip":
-                validateIp(key);
-                whoisObjectTypes.add(key.contains(":") ? INET6NUM : INETNUM);
-                break;
-
-            case "entity":
-                validateEntity(key);
-                // TODO: [RL] Configuration (property?) for allowed RPSL object types for entity lookups
-                if (key.toUpperCase().startsWith("IRT-")) {
-                    whoisObjectTypes.add(IRT);
-		} else if (key.toUpperCase().startsWith("ORG-")) {
-                    whoisObjectTypes.add(ORGANISATION);
-                } else {
-                    whoisObjectTypes.add(PERSON);
-                    whoisObjectTypes.add(ROLE);
-                }
-                break;
-
-        }
-
         Response.ResponseBuilder response;
-
         String selfUrl = request.getRequestURL().toString();
 
-        if (!whoisObjectTypes.isEmpty()) {
-            try {
-                response = Response.ok(lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key)));
-            } catch (WebApplicationException webEx) {
-                int statusCode = webEx.getResponse().getStatus();
-                response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl));
-            }
-        } else if (objectType.equals("nameserver")) {
-            response = Response.status(Response.Status.NOT_FOUND).entity(RdapException.build(Response.Status.NOT_FOUND, selfUrl));
-        } else {
-            response = Response.status(Response.Status.BAD_REQUEST).entity(RdapException.build(Response.Status.BAD_REQUEST, selfUrl));
-        }
+        final Set<ObjectType> whoisObjectTypes = Sets.newHashSet();
+        try {
+            switch (objectType.toLowerCase()) {
+                case "autnum":
+                    validateAutnum("AS" + key);
+                    whoisObjectTypes.add(objectExists(request, AUT_NUM, "AS" + key) ? AUT_NUM : AS_BLOCK);
+                    break;
 
+                case "domain":
+                    validateDomain(key);
+                    whoisObjectTypes.add(DOMAIN);
+                    break;
+
+                case "ip":
+                    validateIp(key);
+                    whoisObjectTypes.add(key.contains(":") ? INET6NUM : INETNUM);
+                    break;
+
+                case "entity":
+                    validateEntity(key);
+                    // TODO: [RL] Configuration (property?) for allowed RPSL object types for entity lookups
+                    if (key.toUpperCase().startsWith("IRT-")) {
+                        whoisObjectTypes.add(IRT);
+                    } else if (key.toUpperCase().startsWith("ORG-")) {
+                        whoisObjectTypes.add(ORGANISATION);
+                    } else {
+                        whoisObjectTypes.add(PERSON);
+                        whoisObjectTypes.add(ROLE);
+                    }
+                    break;
+
+                case "nameserver" : break; // Not yet supported
+            }
+
+            if (whoisObjectTypes.isEmpty()) {
+                throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            }
+
+            response = Response.ok(lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key)));
+
+        } catch (WebApplicationException webex) {
+            LOGGER.error("RDAP error", webex);
+            int statusCode = webex.getResponse().getStatus();
+            response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl));
+        } catch (IllegalArgumentException iae) {
+            response = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, selfUrl));
+        } catch (Throwable t) {
+            LOGGER.error("RDAP Internal Server error", t);
+            // catch Everything
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(RdapException.build(Response.Status.INTERNAL_SERVER_ERROR, selfUrl));
+        }
         mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
         return response.build();
     }
@@ -161,7 +157,7 @@ public class WhoisRdapService {
         try {
             Domain.parse(key);
         } catch (AttributeParseException e) {
-            throw new IllegalArgumentException("RIPE NCC does not support forward domain queries.");
+            throw new IllegalArgumentException("Invalid syntax.");
         }
     }
 
@@ -169,7 +165,7 @@ public class WhoisRdapService {
         try {
             IpInterval.parse(key);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid IP syntax.", e);
+            throw new IllegalArgumentException("Invalid syntax.", e);
         }
     }
 
@@ -177,13 +173,17 @@ public class WhoisRdapService {
         try {
             AutNum.parse(key);
         } catch (AttributeParseException e) {
-            throw new IllegalArgumentException("Invalid syntax.");
+            throw new IllegalArgumentException("Invalid syntax.", e);
         }
     }
 
     private void validateEntity(final String key) {
         if (key.toUpperCase().startsWith("ORG-")) {
             if (!AttributeType.ORGANISATION.isValidValue(ORGANISATION, key)) {
+                throw new IllegalArgumentException("Invalid syntax.");
+            }
+        } else if (key.toUpperCase().startsWith("IRT-")) {
+            if (!AttributeType.IRT.isValidValue(IRT, key)) {
                 throw new IllegalArgumentException("Invalid syntax.");
             }
         } else {

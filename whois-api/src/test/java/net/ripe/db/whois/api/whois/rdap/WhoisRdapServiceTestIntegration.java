@@ -620,7 +620,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         }
     }
 
-    // autnum
 
     @Test
     public void lookup_forward_domain() {
@@ -631,7 +630,47 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
             fail();
         } catch (UniformInterfaceException e) {
             assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-            assertThat(e.getResponse().getEntity(String.class), is("RIPE NCC does not support forward domain queries."));
+            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+        }
+    }
+
+    @Test
+    public void invalid_domain() throws Exception {
+        try {
+            createResource(AUDIENCE, "domain/shazzbot")
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .get(Domain.class);
+            fail();
+        } catch (UniformInterfaceException e) {
+            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+        }
+    }
+
+    @Test
+    public void invalid_ip() throws Exception {
+        try {
+            createResource(AUDIENCE, "ip/eyepee")
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .get(Ip.class);
+            fail();
+        } catch (UniformInterfaceException e) {
+            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+        }
+    }
+
+
+    @Test
+    public void invalid_entity() throws Exception {
+        try {
+            createResource(AUDIENCE, "entity/IRT-XXXX")
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .get(Entity.class);
+            fail();
+        } catch (UniformInterfaceException e) {
+            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
         }
     }
 

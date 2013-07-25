@@ -97,6 +97,16 @@
         <dependency>
             <groupId>de.jflex</groupId>
             <artifactId>maven-jflex-plugin</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>junit</artifactId>
+                    <groupId>junit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>plexus-utils</artifactId>
+                    <groupId>org.codehaus.plexus</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.googlecode.java-diff-utils</groupId>

@@ -279,8 +279,24 @@ public class RdapRegressionTestIntegration {
                 break;
             }
         }
-
-
-
     }
+
+
+    //@Test
+    public void validate_rdap_manual_test() throws Exception {
+        try {
+            RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent("http://newwhois.tst.apnic.net/rdap/entity/IRT-ADVENTONE-AU", true);
+            String response = new String(result.body);
+            int statusCode = result.statusCode;
+            LOGGER.info("Response="+ response);
+            if (statusCode == HttpStatus.SC_OK) {
+                Entity entity = RdapHelperUtils.unmarshal(response, Entity.class);
+            } else {
+                net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
+            }
+        } catch (Throwable ex) {
+            LOGGER.error("Failed to unmarshal rdap response [http://newwhois.tst.apnic.net/rdap/entity/IRT-ADVENTONE-AU]", ex);
+        }
+    }
+
 }
