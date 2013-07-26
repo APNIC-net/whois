@@ -104,9 +104,15 @@ class RdapObjectMapper {
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
         }
 
+        addInformational(baseUrl, rpslObject, relatedObjects, lastChangedTimestamp, abuseContacts, port43, rdapResponse, requestUrl);
+
+        return rdapResponse;
+    }
+
+    private static void addInformational(String baseUrl, RpslObject rpslObject, List<RpslObject> relatedObjects, LocalDateTime lastChangedTimestamp, List<RpslObject> abuseContacts, String port43, RdapObject rdapResponse, String requestUrl) {
+        rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
         final String selfUrl = getSelfUrl(rdapResponse, requestUrl);
 
-        rdapResponse.getRdapConformance().addAll(RdapHelp.RDAP_CONFORMANCE_LEVEL);
         rdapResponse.getNotices().addAll(NoticeFactory.generateObjectNotices(rpslObject, selfUrl));
 
         final List<Remark> remarks = createRemarks(rpslObject);
@@ -126,8 +132,6 @@ class RdapObjectMapper {
         }
 
         rdapResponse.setPort43(port43);
-
-        return rdapResponse;
     }
 
     private static Ip createIp(final RpslObject rpslObject, final RpslObject parentRpslObject, final String requestUrl, final String baseUrl) {
@@ -432,10 +436,15 @@ class RdapObjectMapper {
     }
 
     public static Link createLink(final String rel, final String value, final String href) {
+        return createLink(rel, value, href, null);
+    }
+
+    public static Link createLink(final String rel, final String value, final String href, final String type) {
         Link link = new Link();
         link.setRel(rel);
         link.setValue(value);
         link.setHref(href);
+        link.setType(type);
         return link;
     }
 

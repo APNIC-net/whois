@@ -1,23 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                         http://www.springframework.org/schema/beans/spring-beans.xsd
-                        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-
-    <!-- This is a total ugly hack but whois variant stuff has not been accepted by RIPE yet :( -->
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
-        <property name="locations">
-            <list>
-                <value>classpath:version.properties</value>
-                <value>classpath:whois.properties</value>
-                <util:constant static-field="net.ripe.db.whois.api.whois.rdap.WhoisRdapService.RDAP_PROPERTIES"/>
-            </list>
-        </property>
-    </bean>
+    <context:property-placeholder
+            location="classpath:version.properties,classpath:whois.properties"
+            system-properties-mode="OVERRIDE"/>
 
     <import resource="applicationContext-api.xml"/>
 </beans>
