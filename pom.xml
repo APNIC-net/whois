@@ -759,9 +759,9 @@
             <id>endtoend</id>
             <properties>
                 <test.redirectOutput>true</test.redirectOutput>
-                <test.groups/>
+                <test.groups />
                 <test.files.unit>None</test.files.unit>
-                <test.files.integration>net/ripe/**/whois/spec/query/*Spec*.java,net/ripe/**/whois/spec/update/*Spec*.java
+                <test.files.integration>net/ripe/**/whois/spec/query/*Spec*.java,**/whois/spec/update/*Spec*.java
                 </test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
             </properties>
