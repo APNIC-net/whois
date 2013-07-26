@@ -120,7 +120,8 @@
                 <rpm.install.dir.freetext>${rpm.install.dir.var}/freetext</rpm.install.dir.freetext>
                 <rpm.install.dir.wsearch>${rpm.install.dir.var}/wsearch</rpm.install.dir.wsearch>
 
-                <rpm.install.dir.log>${rpm.install.dir.var}/log</rpm.install.dir.log>
+                <!-- Whois logging directory (the "/" at the end is important -->
+                <rpm.install.dir.log>${rpm.install.dir.var}/log/</rpm.install.dir.log>
                 <rpm.install.dir.log.audit>${rpm.install.dir.log}/audit</rpm.install.dir.log.audit>
 
                 <rpm.install.dir.grs.import>${rpm.install.dir.var}/grs</rpm.install.dir.grs.import>

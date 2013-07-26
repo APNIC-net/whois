@@ -752,7 +752,7 @@
                 <test.redirectOutput>false</test.redirectOutput>
                 <test.groups>net.ripe.db.whois.common.ManualTest</test.groups>
                 <test.files.unit>None</test.files.unit>
-                <test.files.integration>**/*CompareTwoQueryInstances*</test.files.integration>
+                <test.files.integration>net/ripe/**/*CompareTwoQueryInstances*</test.files.integration>
             </properties>
         </profile>
         <profile>

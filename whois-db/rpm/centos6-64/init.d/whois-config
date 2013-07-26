@@ -28,3 +28,6 @@ BINJAR=$BASEDIR/bin/whois.jar
 
 # Console log location
 LOG=$BASEDIR/var/console.log
+
+# Console log location
+LOGBASEDIR=${rpm.install.dir.log}

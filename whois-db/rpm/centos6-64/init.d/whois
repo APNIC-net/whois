@@ -45,7 +45,7 @@ CONFIGARGS=("-Dwhois.config=$PROPERTIES"
 JARARGS=("-jar" "$BINJAR")
 
 ### Final assembled command line
-COMMAND=("$JAVA" "-D$SERVICE" "-Dwhois.variant=$VARIANT"
+COMMAND=("$JAVA" "-D$SERVICE" "-Dwhois.variant=$VARIANT" "-Dlog.dir=$LOGBASEDIR"
          "${MEMARGS[@]}" "${JMXARGS[@]}" "${SNMPARGS[@]}"
          "${HAZELCASTARGS[@]}" "${CONFIGARGS[@]}" "${JARARGS[@]}")
 
