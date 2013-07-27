@@ -154,6 +154,7 @@ public class WhoisRdapService {
         final String selfUrl =  getBaseUrl(request) + "/help";
         final Response.ResponseBuilder response = Response.ok().entity(RdapHelp.build(selfUrl));
         mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
+        response.header("Access-Control-Allow-Origin", "*");
         return response.build();
     }
 
