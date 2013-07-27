@@ -11,10 +11,6 @@ public interface StreamingMarshal {
 
     <T> void write(String name, T t);
 
-    void writeRaw(String str);
-
-    <T> void writeObject(T t);
-
     void close();
 
 }
