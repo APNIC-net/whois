@@ -160,7 +160,7 @@ public class WhoisRdapService {
     @GET
     @Path("/")
     public Response redirectToDocumentation(@Context final HttpServletRequest request) {
-        return Response.status(Response.Status.MOVED_PERMANENTLY).contentLocation(URI.create(getBaseUrl(request) + "/help")).build();
+        return Response.status(Response.Status.MOVED_PERMANENTLY).location(URI.create(getBaseUrl(request) + "/help")).build();
     }
 
 
