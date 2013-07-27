@@ -35,7 +35,8 @@ public class WhoisRdapServiceTest {
     @Mock SourceContext sourceContext;
     @Mock Source source;
 
-    @InjectMocks WhoisRdapService subject;
+    //@InjectMocks
+    WhoisRdapService subject;
 
     @Before
     public void setup() {
@@ -45,6 +46,8 @@ public class WhoisRdapServiceTest {
         when(sourceContext.getAllSourceNames()).thenReturn(CIString.ciSet("TEST", "TEST-GRS"));
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
         when(request.getRequestURL()).thenReturn(new StringBuffer().append("http://localhost/"));
+
+        subject = new WhoisRdapService(queryHandler,rpslObjectDao,null,"http://localhost/");
     }
 
     @Test
