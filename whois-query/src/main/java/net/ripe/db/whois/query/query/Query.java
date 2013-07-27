@@ -221,8 +221,6 @@ public final class Query {
     public boolean isFiltered() {
         if (isKeysOnly() || isHelp() || isTemplate() || isVerbose()) {
             return false;
-        } else if (hasOption(QueryFlag.FILTERING)) {
-            return true;
         } else if (hasOption(QueryFlag.NO_FILTERING)) {
             return false;
         } else if (WhoisVariant.isAPNIC()) {

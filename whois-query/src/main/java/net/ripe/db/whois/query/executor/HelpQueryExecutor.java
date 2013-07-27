@@ -19,7 +19,7 @@ public class HelpQueryExecutor implements QueryExecutor {
 
     private static final MessageObject HELP_RESPONSE;
 
-    static final Set<QueryFlag> SKIPPED = Sets.newHashSet(QueryFlag.FILTERING, QueryFlag.NO_FILTERING);
+    static final Set<QueryFlag> SKIPPED = Sets.newHashSet(QueryFlag.NO_FILTERING);
 
     static {
         final StringBuilder help = new StringBuilder();
