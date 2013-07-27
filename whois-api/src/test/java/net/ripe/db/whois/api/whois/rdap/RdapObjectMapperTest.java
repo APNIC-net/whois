@@ -6,6 +6,7 @@ import net.ripe.db.whois.api.whois.rdap.domain.Domain;
 import net.ripe.db.whois.api.whois.rdap.domain.Entity;
 import net.ripe.db.whois.api.whois.rdap.domain.Ip;
 import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
+import net.ripe.db.whois.api.whois.rdap.domain.Role;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
@@ -281,7 +282,7 @@ public class RdapObjectMapperTest {
 
         assertThat(result.getEntities(), hasSize(1));
         assertThat(result.getEntities().get(0).getHandle(), is("HM53-AP"));
-        assertThat(result.getEntities().get(0).getRoles().size(), is(3));
+        assertThat(result.getEntities().get(0).getRoles(), hasSize(2));
 
         assertThat(result.getRemarks(), hasSize(1));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("domain object for 130.102.0.0 - 130.102.255.255"));
@@ -346,7 +347,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getEntities().get(0).getRoles().size(), is(1));
 
         assertThat(result.getEntities().get(1).getHandle(), is("NO4-AP"));
-        assertThat(result.getEntities().get(1).getRoles(), containsInAnyOrder("administrative", "zone"));
+        assertThat(result.getEntities().get(1).getRoles(), containsInAnyOrder(Role.ADMINISTRATIVE));
 
         assertThat(result.getRemarks(), hasSize(1));
         assertThat(result.getRemarks().get(0).getTitle(), is("description"));

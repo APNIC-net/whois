@@ -16,6 +16,7 @@ import net.ripe.db.whois.api.whois.rdap.domain.Ip;
 import net.ripe.db.whois.api.whois.rdap.domain.Link;
 import net.ripe.db.whois.api.whois.rdap.domain.Notice;
 import net.ripe.db.whois.api.whois.rdap.domain.Remark;
+import net.ripe.db.whois.api.whois.rdap.domain.Role;
 import net.ripe.db.whois.common.IntegrationTest;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderElement;
@@ -24,6 +25,7 @@ import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
@@ -456,6 +458,21 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
+    public void lookup_inet6num_invalid_syntax() {
+        try {
+            createResource(AUDIENCE, "ip/%5B::%5D")
+                    .accept(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON)
+                    .get(Ip.class);
+        } catch (final UniformInterfaceException e) {
+            final ClientResponse response = e.getResponse();
+            assertThat(response.getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+
+            // Test content type
+            assertThat(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, equalTo(response.getType().toString()));
+        }
+    }
+
+    @Test
     public void lookup_person_entity() throws Exception {
         final Entity entity = createResource(AUDIENCE, "entity/PP1-TEST")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
@@ -479,7 +496,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         Header[] headers = response.headers;
         String contentType = checkHeaderPresent(CONTENT_TYPE_HEADER, headers);
         assertEquals(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, contentType);
-
 
         Entity entity = RdapHelperUtils.unmarshal(responseBody, Entity.class);
         assertEntityPP1_TEST(entity);
@@ -578,7 +594,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         assertThat(entity.getEntities(), hasSize(1));
         assertThat(entity.getEntities().get(0).getHandle(), is("PP1-TEST"));
-        assertThat(entity.getEntities().get(0).getRoles(), containsInAnyOrder("administrative", "technical"));
+        assertThat(entity.getEntities().get(0).getRoles(), containsInAnyOrder(Role.ADMINISTRATIVE, Role.TECHNICAL));
         assertThat(entity.getRdapConformance(), hasSize(1));
         assertThat(entity.getRdapConformance().get(0), equalTo("rdap_level_0"));
 
@@ -746,7 +762,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(entities, hasSize(1));
         assertThat(entities.get(0).getHandle(), is("TP1-TEST"));
         assertThat(entities.get(0).getRoles(), hasSize(2));
-        assertThat(entities.get(0).getRoles(), containsInAnyOrder("administrative", "technical"));
+        assertThat(entities.get(0).getRoles(), containsInAnyOrder(Role.ADMINISTRATIVE, Role.TECHNICAL));
 
         final List<Link> links = autnum.getLinks();
         assertThat(links, hasSize(1));
@@ -784,11 +800,11 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         assertThat(entities.get(0).getHandle(), is("TP1-TEST"));
         assertThat(entities.get(0).getRoles(), hasSize(1));
-        assertThat(entities.get(0).getRoles(), contains("administrative"));
+        assertThat(entities.get(0).getRoles(), contains(Role.ADMINISTRATIVE));
 
         assertThat(entities.get(1).getHandle(), is("TP2-TEST"));
         assertThat(entities.get(1).getRoles(), hasSize(1));
-        assertThat(entities.get(1).getRoles(), contains("technical"));
+        assertThat(entities.get(1).getRoles(), contains(Role.TECHNICAL));
 
         final List<Link> links = autnum.getLinks();
         assertThat(links, hasSize(1));
@@ -914,7 +930,9 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 //        assertTrue(events.get(0).getEventDate().isBefore(LocalDateTime.now()));
     }
 
-    //@TODO Think this test is foobar'd @Test
+    // TODO Think this test is foobar'd
+    @Ignore
+    @Test
     public void lookup_inetnum_abuse_contact_as_vcard() {
         databaseHelper.addObject("" +
                 "role:          Abuse Contact\n" +
@@ -978,8 +996,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         Entity abuseContact = ip.getEntities().get(0);
         Entity irt = ip.getEntities().get(1);
-        assertThat(abuseContact.getRoles().get(0), is("abuse"));
-        assertThat(irt.getRoles().get(0), is("abuse"));
+        assertThat(abuseContact.getRoles().get(0), is(Role.ABUSE));
+        assertThat(irt.getRoles().get(0), is(Role.ABUSE));
 
         assertThat(irt.getHandle(), is("IRT-TEST1-MNT"));
         assertThat(irt.getVcardArray(), hasSize(2));
@@ -1003,6 +1021,16 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     // organisation entity
+
+    @Ignore("need to get Jetty to compact paths")
+    @Test
+    public void lookup_org_double_slash_entity_handle() throws Exception {
+        final Entity response = createResource(AUDIENCE, "/entity/ORG-TEST1-TEST")
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .get(Entity.class);
+
+        assertThat(response.getHandle(), equalTo("ORG-TEST1-TEST"));
+    }
 
     @Test
     public void lookup_org_entity_handle() throws Exception {
@@ -1077,9 +1105,9 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final List<SortedEntity> entities = SortedEntity.createSortedEntities(entity.getEntities());
         assertThat(entity.getEntities(), hasSize(2));
         assertThat(entities.get(0).getHandle(), is("TP1-TEST"));
-        assertThat(entities.get(0).getRoles(), contains("technical"));
+        assertThat(entities.get(0).getRoles(), contains(Role.TECHNICAL));
         assertThat(entities.get(1).getHandle(), is("TP2-TEST"));
-        assertThat(entities.get(1).getRoles(), containsInAnyOrder("administrative", "technical"));
+        assertThat(entities.get(1).getRoles(), containsInAnyOrder(Role.ADMINISTRATIVE, Role.TECHNICAL));
 
         final String orgLink = createResource(AUDIENCE, "entity/ORG-ONE-TEST").toString();
         final String tp1Link = createResource(AUDIENCE, "entity/TP1-TEST").toString();

@@ -1,6 +1,6 @@
 package net.ripe.db.whois.api.whois;
 
-import net.ripe.db.whois.api.whois.domain.*;
+import net.ripe.db.whois.api.whois.domain.WhoisResources;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -13,49 +13,12 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.OutputStream;
 
 class StreamingMarshalXml implements StreamingMarshal {
-    private static Marshaller marshaller;                           // TODO: [ES] jaxb marshaller isn't thread safe
+    private static JAXBContext context;
     private static XMLOutputFactory xmlOutputFactory;
 
-    public StreamingMarshalXml() {
+    static {
         try {
-            final JAXBContext context = JAXBContext.newInstance(
-                    Attribute.class,
-                    Attributes.class,
-                    DirectLookup.class,
-                    Flag.class,
-                    Flags.class,
-                    GeolocationAttributes.class,
-                    GrsMirror.class,
-                    GrsSource.class,
-                    GrsSources.class,
-                    InverseAttribute.class,
-                    InverseAttributes.class,
-                    Language.class,
-                    Link.class,
-                    Location.class,
-                    Parameters.class,
-                    PrimaryKey.class,
-                    QueryStrings.class,
-                    Source.class,
-                    Sources.class,
-                    Template.class,
-                    TemplateAttribute.class,
-                    TemplateAttributes.class,
-                    TemplateResources.class,
-                    Templates.class,
-                    TypeFilter.class,
-                    TypeFilters.class,
-                    WhoisModify.class,
-                    WhoisObject.class,
-                    WhoisObjects.class,
-                    WhoisResources.class,
-                    WhoisTag.class,
-                    WhoisTags.class,
-                    WhoisVersion.class,
-                    WhoisVersions.class);
-            marshaller = context.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-
+            context = JAXBContext.newInstance(WhoisResources.class.getPackage().getName());
             xmlOutputFactory = XMLOutputFactory.newFactory();
         } catch (JAXBException e) {
             throw new IllegalStateException(e);
@@ -90,14 +53,6 @@ class StreamingMarshalXml implements StreamingMarshal {
         } catch (XMLStreamException e) {
             throw new StreamingException(e);
         }
-    }
-
-    @Override
-    public void writeRaw(final String str) {
-    }
-
-    @Override
-    public void writeObject(final Object o) {
     }
 
     @Override

@@ -113,7 +113,7 @@
                 <xs:sequence>
                     <xs:element name="handle" type="xs:string" maxOccurs="1" minOccurs="1"/>
                     <xs:element name="vcardArray" type="xs:anySimpleType" maxOccurs="unbounded" minOccurs="0"/>
-                    <xs:element name="roles" type="xs:string" maxOccurs="unbounded" minOccurs="0"/>
+                    <xs:element name="roles" type="role" maxOccurs="unbounded" minOccurs="0"/>
                     <xs:element name="publicIds" type="hashMapType" maxOccurs="1" minOccurs="0"/>
                 </xs:sequence>
             </xs:extension>
@@ -192,6 +192,20 @@
             <xs:element name="notices" type="notice" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
+
+    <xs:simpleType name="role">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="technical"/>
+            <xs:enumeration value="administrative"/>
+            <xs:enumeration value="registrant"/>
+            <xs:enumeration value="abuse"/>
+            <xs:enumeration value="billing"/>
+            <xs:enumeration value="registrar"/>
+            <xs:enumeration value="reseller"/>
+            <xs:enumeration value="sponsor"/>
+            <xs:enumeration value="proxy"/>
+        </xs:restriction>
+    </xs:simpleType>
 
     <xs:complexType name="hashMapType">
         <xs:annotation>

@@ -42,6 +42,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.InetAddress;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -149,12 +150,22 @@ public class WhoisRdapService {
     @Produces( { RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Path("/help")
     public Response lookupHelp(@Context final HttpServletRequest request, @Context HttpHeaders httpHeaders) {
-        Response.ResponseBuilder response;
-        String selfUrl = request.getRequestURL().toString();
-        response = Response.ok().entity(RdapHelp.build(selfUrl));
+        final String selfUrl =  getBaseUrl(request) + "/help";
+        final Response.ResponseBuilder response = Response.ok().entity(RdapHelp.build(selfUrl));
         mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
         return response.build();
     }
+
+    @GET
+    @Produces( { RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Path("/")
+    public Response redirectToDocumentation(@Context final HttpServletRequest request, @Context HttpHeaders httpHeaders) {
+        final String selfUrl =  getBaseUrl(request);
+        final Response.ResponseBuilder response = Response.status(Response.Status.MOVED_PERMANENTLY).contentLocation(URI.create(getBaseUrl(request) + "/help")).entity(RdapException.build(Response.Status.MOVED_PERMANENTLY,selfUrl));
+        mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
+        return response.build();
+    }
+
 
     private void validateDomain(final String key) {
         try {
