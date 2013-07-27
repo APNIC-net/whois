@@ -20,11 +20,6 @@ public class RdapException {
         exception.getNotices().addAll(NoticeFactory.generateNotices(selfUrl));
 
         switch (status.getStatusCode()) {
-            case 301:
-            case 303:
-            case 307:
-                exception.getDescription().add(status.getReasonPhrase());
-                break;
             case 400:
                 exception.getDescription().add("The request could not be understood by the server due to malformed syntax.");
                 break;
