@@ -160,7 +160,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("enum domain"));
         assertThat(result.getEntities(), hasSize(1));
         assertThat(result.getEntities().get(0).getHandle(), is("TEST-PN"));
-        assertThat(result.getEntities().get(0).getRoles().size(), is(3));
+        assertThat(result.getEntities().get(0).getRoles().size(), is(2));
     }
 
     @Test
@@ -223,7 +223,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("Test domain"));
         assertThat(result.getEntities(), hasSize(1));
         assertThat(result.getEntities().get(0).getHandle(), is("TP1-TEST"));
-        assertThat(result.getEntities().get(0).getRoles().size(), is(3));
+        assertThat(result.getEntities().get(0).getRoles().size(), is(2));
         assertThat(result.getSecureDNS().isDelegationSigned(), is(true));
 
         assertThat(result.getSecureDNS().getDsData(), hasSize(3));
