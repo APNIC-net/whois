@@ -1,144 +1,115 @@
 package net.ripe.db.whois.api.whois.rdap;
 
-import net.ripe.db.whois.api.whois.rdap.domain.Link;
+import com.google.common.collect.Lists;
 import net.ripe.db.whois.api.whois.rdap.domain.Notice;
-import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.rpsl.AttributeType;
-import net.ripe.db.whois.common.rpsl.RpslAttribute;
 import net.ripe.db.whois.common.rpsl.RpslObject;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.Resource;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
-
-@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-@Component
 public class NoticeFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NoticeFactory.class);
 
-    @Value("${rdap.tnc.title:}")
-    private String rdap_tnc_title;
+    private static String tncTitle;
+    private static String tncDescription;
+    private static String tncLinkRel;
+    private static String tncLinkHref;
+    private static String tncLinkType;
+    private static String filterIsFiltered;
+    private static String filterDescription;
+    private static String filterTitle;
+    private static String sourceDescription;
+    private static String sourceTitle;
+    private static String helpTitle;
+    private static String helpDescription;
+    private static String helpLinkRel;
+    private static String helpLinkHref;
+    private static String helpLinkType;
 
-    @Value("${rdap.tnc.description:}")
-    private String rdap_tnc_description;
+    static {
+        try {
 
-    @Value("${rdap.tnc.linkrel:}")
-    private String rdap_tnc_linkrel;
+            Properties properties = new Properties();
+            ApplicationContext appContext = new ClassPathXmlApplicationContext();
+            Resource resource = appContext.getResource(WhoisRdapService.RDAP_PROPERTIES);
+            properties.load(resource.getInputStream());
 
-    @Value("${rdap.tnc.linkhref:}")
-    private String rdap_tnc_linkhref;
-
-    @Value("${rdap.tnc.linktype:}")
-    private String rdap_tnc_linktype;
-
-    @Value("${rdap.filter.isfiltered:}")
-    private String rdap_filter_is_filtered;
-
-    @Value("${rdap.filter.description:}")
-    private String rdap_filter_description;
-
-    @Value("${rdap.filter.title:}")
-    private String rdap_filter_title;
-
-    @Value("${rdap.source.description:}")
-    private String rdap_source_description;
-
-    @Value("${rdap.source.title:}")
-    private String rdap_source_title;
-
-    @Value("${rdap.help.title:}")
-    private String rdap_help_title;
-    @Value("${rdap.help.description:}")
-    private String rdap_help_description;
-    @Value("${rdap.help.link.rel:}")
-    private String rdap_help_link_rel;
-    @Value("${rdap.help.link.href:}")
-    private String rdap_help_link_href;
-    @Value("${rdap.help.link.type:}")
-    private String rdap_help_link_type;
-
-    private static NoticeFactory noticeFactory;
-
-    public NoticeFactory () {
+            tncTitle = propertyCheck(properties,"rdap.tnc.title");
+            tncDescription = propertyCheck(properties,"rdap.tnc.description");
+            tncLinkRel = propertyCheck(properties,"rdap.tnc.linkrel");
+            tncLinkHref = propertyCheck(properties,"rdap.tnc.linkhref");
+            tncLinkType = propertyCheck(properties,"rdap.tnc.linktype");
+            filterIsFiltered = propertyCheck(properties,"rdap.filter.isfiltered");
+            filterDescription = propertyCheck(properties,"rdap.filter.description");
+            filterTitle = propertyCheck(properties,"rdap.filter.title");
+            sourceDescription = propertyCheck(properties,"rdap.source.description");
+            sourceTitle = propertyCheck(properties,"rdap.source.title");
+            helpTitle = propertyCheck(properties,"rdap.help.title");
+            helpDescription = propertyCheck(properties,"rdap.help.description");
+            helpLinkRel = propertyCheck(properties,"rdap.help.link.rel");
+            helpLinkHref = propertyCheck(properties,"rdap.help.link.href");
+            helpLinkType = propertyCheck(properties,"rdap.help.link.type");
+        } catch (IOException ioex) {
+            String error = String.format("Failed to load properties file [%s]", WhoisRdapService.RDAP_PROPERTIES);
+            LOGGER.error(error);
+            throw new ExceptionInInitializerError(error);
+        }
     }
 
-    @PostConstruct
-    public void init() {
-        if (noticeFactory == null) {
-            noticeFactory = this;
-        }
+    private NoticeFactory() {
     }
 
     public static List<Notice> generateNotices(String selfLink) {
-        List<Notice> notices = new ArrayList<Notice>();
+        List<Notice> notices = Lists.newArrayList();
+        Notice tnc = new Notice();
+        tnc.setTitle(tncTitle);
+        tnc.getDescription().add(tncDescription);
+        tnc.getLinks().add(RdapObjectMapper.createLink(tncLinkRel, selfLink, tncLinkHref, tncLinkType));
+        notices.add(tnc);
 
-        if (noticeFactory != null) {
-            // setup the tnc once
-            Notice tnc = new Notice();
-            tnc.setTitle(noticeFactory.rdap_tnc_title);
-            tnc.getDescription().add(noticeFactory.rdap_tnc_description);
-
-            Link link = new Link();
-            link.setRel(noticeFactory.rdap_tnc_linkrel);
-            link.setHref(noticeFactory.rdap_tnc_linkhref);
-            link.setType(noticeFactory.rdap_tnc_linktype);
-            link.setValue(selfLink);
-            tnc.getLinks().add(link);
-
-            notices.add(tnc);
-
-            if (noticeFactory.rdap_filter_is_filtered.equals("true")) {
-                Notice filtered = new Notice();
-                filtered.setTitle(noticeFactory.rdap_filter_title);
-                filtered.getDescription().add(noticeFactory.rdap_filter_description);
-
-                notices.add(filtered);
-            }
+        if (Boolean.parseBoolean(filterIsFiltered)) {
+            Notice filtered = new Notice();
+            filtered.setTitle(filterTitle);
+            filtered.getDescription().add(filterDescription);
+            notices.add(filtered);
         }
-
         return notices;
     }
 
     public static List<Notice> generateObjectNotices(RpslObject rpslObject, String selfLink) {
-        List<Notice> notices = new ArrayList<Notice>();
-
-        if (noticeFactory != null) {
-            notices.addAll(generateNotices(selfLink));
-
-            List<RpslAttribute> rpslAttributeList = rpslObject.findAttributes(AttributeType.SOURCE);
-            CIString sourceName = rpslAttributeList.get(0).getCleanValue();
-            Notice source = new Notice();
-            source.setTitle(noticeFactory.rdap_source_title);
-            source.getDescription().add(noticeFactory.rdap_source_description);
-            source.getDescription().add(sourceName.toString());
-
-            notices.add(source);
-        }
+        List<Notice> notices = generateNotices(selfLink);
+        Notice source = new Notice();
+        source.setTitle(sourceTitle);
+        source.getDescription().add(sourceDescription);
+        source.getDescription().add(rpslObject.getValueForAttribute(AttributeType.SOURCE).toString());
+        notices.add(source);
         return notices;
     }
 
     public static List<Notice> generateHelpNotices(String selfUrl) {
-        List<Notice> notices = new ArrayList<Notice>();
-
-        if (noticeFactory != null) {
-            Notice authNotice = new Notice();
-
-            authNotice.setTitle(noticeFactory.rdap_help_title);
-            authNotice.getDescription().add(noticeFactory.rdap_help_description);
-            Link link = new Link();
-            link.setRel(noticeFactory.rdap_help_link_rel);
-            link.setHref(noticeFactory.rdap_help_link_href);
-            link.setType(noticeFactory.rdap_help_link_type);
-            link.setValue(selfUrl);
-            authNotice.getLinks().add(link);
-
-            notices.add(authNotice);
-        }
-
+        List<Notice> notices = Lists.newArrayList();
+        Notice authNotice = new Notice();
+        authNotice.setTitle(helpTitle);
+        authNotice.getDescription().add(helpDescription);
+        authNotice.getLinks().add(RdapObjectMapper.createLink(helpLinkRel, selfUrl, helpLinkHref, helpLinkType));
+        notices.add(authNotice);
         return notices;
+    }
+
+    private static String propertyCheck(Properties properties, String key) {
+        String value = properties.getProperty(key);
+        if (value == null) {
+            String error = String.format("Missing property [%s] from [%s]", key, WhoisRdapService.RDAP_PROPERTIES);
+            LOGGER.error(error);
+            throw new ExceptionInInitializerError(error);
+        }
+        return value;
     }
 }

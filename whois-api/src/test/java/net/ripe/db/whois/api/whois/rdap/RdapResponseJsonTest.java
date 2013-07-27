@@ -465,13 +465,12 @@ public class RdapResponseJsonTest {
         notices.getDescription().add("Beverages with caffeine for keeping horses awake.");
         notices.getDescription().add("Very effective.");
 
-        final Link link = RdapObjectMapper.createLink("self", "http://example.com/context_uri", "http://example.com/target_uri_href");
+        final Link link = RdapObjectMapper.createLink("self", "http://example.com/context_uri", "http://example.com/target_uri_href", "application/json");
         link.getHreflang().add("en");
         link.getHreflang().add("ch");
         link.getTitle().add("title1");
         link.getTitle().add("title2");
         link.setMedia("screen");
-        link.setType("application/json");
         notices.getLinks().add(link);
 
         assertThat(RdapHelperUtils.marshal(notices), equalTo("" +

@@ -6,12 +6,10 @@ import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
 import net.ripe.db.whois.api.whois.rdap.domain.Domain;
 import net.ripe.db.whois.api.whois.rdap.domain.Entity;
 import net.ripe.db.whois.api.whois.rdap.domain.Ip;
-import net.ripe.db.whois.common.ManualTest;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +24,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 
-@Category(ManualTest.class)
 public class RdapRegressionTestIntegration {
     private static Class clazz = RdapRegressionTestIntegration.class;
     private static final Logger LOGGER = LoggerFactory.getLogger(clazz);
@@ -284,8 +281,9 @@ public class RdapRegressionTestIntegration {
 
     //@Test
     public void validate_rdap_manual_test() throws Exception {
+        String url = "http://newwhois.tst.apnic.net/rdap/entity/HM20-AP";
         try {
-            RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent("http://newwhois.tst.apnic.net/rdap/entity/IRT-ADVENTONE-AU", true);
+            RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(url, true);
             String response = new String(result.body);
             int statusCode = result.statusCode;
             LOGGER.info("Response="+ response);
@@ -295,7 +293,7 @@ public class RdapRegressionTestIntegration {
                 net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
             }
         } catch (Throwable ex) {
-            LOGGER.error("Failed to unmarshal rdap response [http://newwhois.tst.apnic.net/rdap/entity/IRT-ADVENTONE-AU]", ex);
+            LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
         }
     }
 
