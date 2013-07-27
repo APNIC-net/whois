@@ -735,7 +735,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(autnum.getStartAutnum(), equalTo(123L));
         assertThat(autnum.getEndAutnum(), equalTo(123L));
         assertThat(autnum.getName(), equalTo("AS-TEST"));
-        assertThat(autnum.getType(), equalTo("DIRECT ALLOCATION"));
         assertThat(autnum.getCountry(), equalTo("AU"));
 
         final List<Event> events = autnum.getEvents();
@@ -773,7 +772,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         assertThat(autnum.getStartAutnum(), equalTo(1234L));
         assertThat(autnum.getEndAutnum(), equalTo(1234L));
         assertThat(autnum.getName(), equalTo("AS-TEST"));
-        assertThat(autnum.getType(), equalTo("DIRECT ALLOCATION"));
 
         final List<Event> events = autnum.getEvents();
         assertThat(events, hasSize(1));
