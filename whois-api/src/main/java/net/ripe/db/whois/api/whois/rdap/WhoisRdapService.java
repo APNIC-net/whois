@@ -143,6 +143,7 @@ public class WhoisRdapService {
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(RdapException.build(Response.Status.INTERNAL_SERVER_ERROR, selfUrl));
         }
         mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
+        response.header("Access-Control-Allow-Origin", "*");
         return response.build();
     }
 
@@ -157,13 +158,9 @@ public class WhoisRdapService {
     }
 
     @GET
-    @Produces( { RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Path("/")
-    public Response redirectToDocumentation(@Context final HttpServletRequest request, @Context HttpHeaders httpHeaders) {
-        final String selfUrl =  getBaseUrl(request);
-        final Response.ResponseBuilder response = Response.status(Response.Status.MOVED_PERMANENTLY).contentLocation(URI.create(getBaseUrl(request) + "/help")).entity(RdapException.build(Response.Status.MOVED_PERMANENTLY,selfUrl));
-        mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
-        return response.build();
+    public Response redirectToDocumentation(@Context final HttpServletRequest request) {
+        return Response.status(Response.Status.MOVED_PERMANENTLY).contentLocation(URI.create(getBaseUrl(request) + "/help")).build();
     }
 
 
