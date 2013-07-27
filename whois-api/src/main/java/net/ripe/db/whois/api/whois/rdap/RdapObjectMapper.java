@@ -284,7 +284,6 @@ class RdapObjectMapper {
             autnum.setStartAutnum(autNum.getValue());
             autnum.setEndAutnum(autNum.getValue());
             autnum.setName(rpslObject.getValueForAttribute(AS_NAME).toString().replace(" ", ""));
-            autnum.setType("DIRECT ALLOCATION");
 
             final String selfUrl = baseUrl +  "/" + AutNum.class.getSimpleName().toLowerCase() + "/" + autNum.getValue();
             autnum.getLinks().add(createLink("self", selfUrl, selfUrl));
