@@ -61,6 +61,9 @@ public class WhoisRdapService {
     private static final int STATUS_TOO_MANY_REQUESTS = 429;
     private static final Set<ObjectType> ABUSE_CONTACT_TYPES = Sets.newHashSet(AUT_NUM, INETNUM, INET6NUM);
 
+    private static final Joiner SLASH_JOINER = Joiner.on("/");
+    public static final Joiner COMMA_JOINER = Joiner.on(",");
+
     private final QueryHandler queryHandler;
     private final RpslObjectDao objectDao;
     private final AbuseCFinder abuseCFinder;
@@ -86,7 +89,7 @@ public class WhoisRdapService {
                            @PathParam("key") final String key) {
 
         Response.ResponseBuilder response;
-        String selfUrl = request.getRequestURL().toString();
+        String selfUrl = SLASH_JOINER.join(getBaseUrl(request), objectType, key);
 
         final Set<ObjectType> whoisObjectTypes = Sets.newHashSet();
         try {
@@ -212,7 +215,7 @@ public class WhoisRdapService {
     }
 
     protected RdapObject lookupObject(final HttpServletRequest request, final Set<ObjectType> objectTypes, final String key) {
-        final String objectTypesString = Joiner.on(",").join(Iterables.transform(objectTypes, new Function<ObjectType, String>() {
+        final String objectTypesString = COMMA_JOINER.join(Iterables.transform(objectTypes, new Function<ObjectType, String>() {
             @Override
             public String apply(final ObjectType input) {
                 return input.getName();
