@@ -63,16 +63,6 @@ class StreamingMarshalJson implements StreamingMarshal {
     }
 
     @Override
-    public void writeRaw(final String str) {
-        return;
-    }
-
-    @Override
-    public void writeObject(final Object o) {
-        return;
-    }
-
-    @Override
     public void close() {
         try {
             generator.close();
