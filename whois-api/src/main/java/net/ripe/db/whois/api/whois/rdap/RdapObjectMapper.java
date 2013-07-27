@@ -13,6 +13,7 @@ import net.ripe.db.whois.api.whois.rdap.domain.Link;
 import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
 import net.ripe.db.whois.api.whois.rdap.domain.RdapObject;
 import net.ripe.db.whois.api.whois.rdap.domain.Remark;
+import net.ripe.db.whois.api.whois.rdap.domain.Role;
 import net.ripe.db.whois.api.whois.rdap.domain.vcard.VCard;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
@@ -48,7 +49,7 @@ class RdapObjectMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapObjectMapper.class);
 
     protected static final List<String> RDAP_CONFORMANCE_LEVEL = Lists.newArrayList("rdap_level_0");
-    public static final Joiner NEWLINE_JOINER = Joiner.on("\n");
+    private static final Joiner NEWLINE_JOINER = Joiner.on("\n");
 
     protected static DatatypeFactory dtf;
     static {
@@ -59,12 +60,11 @@ class RdapObjectMapper {
         }
     }
 
-    private static final Map<AttributeType, String> CONTACT_ATTRIBUTE_TO_ROLE_NAME = Maps.newHashMap();
+    private static final Map<AttributeType, Role> CONTACT_ATTRIBUTE_TO_ROLE_NAME = Maps.newHashMap();
     static {
-        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ADMIN_C, "administrative");
-        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(TECH_C, "technical");
-        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, "zone");
-//        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(MNT_IRT, "abuse");
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ADMIN_C, Role.ADMINISTRATIVE);
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(TECH_C, Role.TECHNICAL);
+//        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, "zone");
     }
 
     public static RdapObject map(
@@ -123,7 +123,7 @@ class RdapObjectMapper {
 
         for (final RpslObject abuseContact : abuseContacts) {
             final Entity entity = createEntity(abuseContact, selfUrl, baseUrl);
-            entity.getRoles().add("abuse");
+            entity.getRoles().add(Role.ABUSE);
             rdapResponse.getEntities().add(entity);
         }
         List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, selfUrl, baseUrl);

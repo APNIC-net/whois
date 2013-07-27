@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="handle" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="vcardArray" type="{http://www.w3.org/2001/XMLSchema}anySimpleType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="roles" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="roles" type="{}role" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="publicIds" type="{}hashMapType" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/extension>
@@ -57,7 +57,7 @@ public class Entity
     protected String handle;
     @XmlSchemaType(name = "anySimpleType")
     protected List<Object> vcardArray;
-    protected List<String> roles;
+    protected List<Role> roles;
     protected HashMap publicIds;
 
     /**
@@ -131,13 +131,13 @@ public class Entity
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link String }
+     * {@link Role }
      * 
      * 
      */
-    public List<String> getRoles() {
+    public List<Role> getRoles() {
         if (roles == null) {
-            roles = new ArrayList<String>();
+            roles = new ArrayList<Role>();
         }
         return this.roles;
     }
