@@ -109,7 +109,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
         assertThat(result.getName(), is("End-User-2"));
-        assertThat(result.getType(), is(null));
+        assertThat(result.getType(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
         final String selfUrl = BASE_URL + "/" + Autnum.class.getSimpleName().toLowerCase() + "/102";
