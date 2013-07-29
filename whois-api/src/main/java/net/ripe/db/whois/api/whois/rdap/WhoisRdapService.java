@@ -380,12 +380,17 @@ public class WhoisRdapService {
     }
 
     private void mapAcceptableMediaType(Response.ResponseBuilder response, List<MediaType> mediaTypes) {
-        // Cant hardcode as client may "Accept" different media types, e.g. application/json or text/plain
-        //response.type(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON);
         if (mediaTypes != null) {
             for (MediaType mediaType : mediaTypes) {
                 if (mediaType.equals(MediaType.TEXT_HTML_TYPE)) {
                     response.type(MediaType.TEXT_PLAIN_TYPE);
+                    return;
+                } else if (mediaType.equals(MediaType.APPLICATION_JSON) || mediaType.equals(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON)) {
+                    /* The response type must be
+                     * application/rdap+json when the Accept header is
+                     * application/json. See 'using-http', [4.7]. */
+                    response.type(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON);
+                    return;
                 }
             }
         }
