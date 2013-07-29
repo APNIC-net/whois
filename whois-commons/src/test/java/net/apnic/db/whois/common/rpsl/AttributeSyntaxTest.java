@@ -190,18 +190,9 @@ public class AttributeSyntaxTest {
 
     @Test
     public void dsRdata() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DS_RDATA, "ASDF 5:1");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DS_RDATA, "42307:5:1 ");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DS_RDATA, "24234232");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.DS_RDATA, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz");
-
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "1233 RSAMD5 12 abcdef23423423");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "42307 DSA 56 e7c5e507b99fb865065100ea7f4ce7a957fbdaa1");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "42307 RSASha1 123 e7c5e507b99fb865065100ea7f4ce7a957fbdaa1");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "6123  12 245 e7c5e507b99fb865065100ea7f4ce7a957fbdaa1");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "12345 privateDNS 12 ( e7c5e507b99fb865065100ea7f4ce7a957fbdaa1)");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "12345 INDIRECT 246 e7c5e507b99fb86506AF5100ea7f4ce7a957fbdaa1");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "12345 RSAMD5 234 e7c5e507b99fb865065100ea7f4ce7a957fbdaa1");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "26954 8 4 502BDAEFD8944CC0B47A100425FE1D3CE44235E5B6EA3E7C884D28C581D868E5DCEDD21EDF8CB45CDAE3F05B947BDED5");
+        verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "1 1 1 1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890");
+        verifyFailure(ObjectType.DOMAIN, AttributeType.DS_RDATA, "1 1 1 1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF12345678901");
     }
 
     @Test
