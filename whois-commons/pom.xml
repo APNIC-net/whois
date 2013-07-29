@@ -153,7 +153,8 @@
                 <configuration>
                     <!-- @TODO This needs to be converted to an ant script -->
                     <!-- If running build on *nix x64 -->
-                    <!-- sudo apt-get install ia32-libs-multiarch -->
+                    <!-- UBUNTU: sudo apt-get install ia32-libs-multiarch -->
+                    <!-- CENTOS: yum install xulrunner.i686 -->
                     <executable>src/main/resources/bin/generateByaccs</executable>
                 </configuration>
             </plugin>
