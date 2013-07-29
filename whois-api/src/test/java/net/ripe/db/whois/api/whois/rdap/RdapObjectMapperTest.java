@@ -8,6 +8,7 @@ import net.ripe.db.whois.api.whois.rdap.domain.Ip;
 import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
 import net.ripe.db.whois.api.whois.rdap.domain.Role;
 import net.ripe.db.whois.common.rpsl.RpslObject;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.GregorianCalendar;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
@@ -26,9 +28,8 @@ import static org.junit.Assert.assertThat;
 public class RdapObjectMapperTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapObjectMapperTest.class);
 
-    private static String VERSION_DATETIME = "2044-04-26T00:02:03.000";
-    private static final LocalDateTime VERSION_TIMESTAMP = LocalDateTime.parse(VERSION_DATETIME);
-    private static final XMLGregorianCalendar XML_GC_VERSION_TIMESTAMP = RdapObjectMapper.dtf.newXMLGregorianCalendar(VERSION_DATETIME + "+10:00");
+    private static final XMLGregorianCalendar XML_GC_VERSION_TIMESTAMP_LOCAL = RdapObjectMapper.dtf.newXMLGregorianCalendar(new GregorianCalendar());
+    private static final LocalDateTime VERSION_TIMESTAMP_LOCAL = DateTime.parse(XML_GC_VERSION_TIMESTAMP_LOCAL.toXMLFormat()).toLocalDateTime();
 
     private static final String REQUEST_URL =  "http://localhost";
     private static final String BASE_URL =  "http://localhost";
@@ -57,7 +58,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getHandle(), is("10.0.0.0 - 10.255.255.255"));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP_LOCAL));
         assertThat(result.getCountry(), is("NL"));
         assertThat(result.getEndAddress(), is("10.255.255.255"));
         assertThat(result.getIpVersion(), is("v4"));
@@ -107,7 +108,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getEndAutnum(), is(102l));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP_LOCAL));
         assertThat(result.getName(), is("End-User-2"));
         assertThat(result.getType(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(1));
@@ -147,7 +148,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getNameServers().get(0).getLdhName(), is("ns.1.net"));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP_LOCAL));
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
@@ -210,7 +211,7 @@ public class RdapObjectMapperTest {
 
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP_LOCAL));
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
         assertThat(result.getLinks(), hasSize(1));
         assertThat(result.getLinks().get(0).getRel(), is("self"));
@@ -292,7 +293,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getLinks().get(0).getHref(), is(selfUrl));
 
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP_LOCAL));
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
     }
 
@@ -361,7 +362,7 @@ public class RdapObjectMapperTest {
 
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP_LOCAL));
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
     }
 
@@ -394,7 +395,7 @@ public class RdapObjectMapperTest {
         assertThat(result.getLinks().get(0).getHref(), is(selfUrl));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
-        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP));
+        assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP_LOCAL));
         assertThat(result.getEvents().get(0).getEventActor(), is(nullValue()));
     }
 
@@ -433,6 +434,6 @@ public class RdapObjectMapperTest {
     }
 
     private Object map(final RpslObject rpslObject) {
-        return RdapObjectMapper.map(REQUEST_URL,BASE_URL, rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP, Lists.<RpslObject>newArrayList(), null, null);
+        return RdapObjectMapper.map(REQUEST_URL,BASE_URL, rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP_LOCAL, Lists.<RpslObject>newArrayList(), null, null);
     }
 }
