@@ -14,136 +14,22 @@
         </layout>
     </appender>
 
-    <appender name="WHOIS_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
-        <param name="Append" value="true" />
-        <param name="Threshold" value="INFO" />
-        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="${log.dir}./whois/whois.%d{yyyyMMdd}" />
-        </rollingPolicy>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss} %m%n" />
-        </layout>
-    </appender>
-
-    <appender name="API_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
-        <param name="Append" value="true" />
-        <param name="Threshold" value="INFO" />
-        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="${log.dir}./api/api.%d{yyyyMMdd}" />
-        </rollingPolicy>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss} %m%n" />
-        </layout>
-    </appender>
-
-    <appender name="NRTM_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
-        <param name="Append" value="true" />
-        <param name="Threshold" value="INFO" />
-        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="${log.dir}./nrtm/nrtm.%d{yyyyMMdd}" />
-        </rollingPolicy>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss} %m%n" />
-        </layout>
-    </appender>
-
-    <appender name="QUERY_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
-        <param name="Append" value="true" />
-        <param name="Threshold" value="INFO" />
-        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="${log.dir}./query/query.%d{yyyyMMdd}" />
-        </rollingPolicy>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss} %m%n" />
-        </layout>
-    </appender>
-
-    <appender name="UPDATE_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
-        <param name="Append" value="true" />
-        <param name="Threshold" value="INFO" />
-        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="${log.dir}./update/update.%d{yyyyMMdd}" />
-        </rollingPolicy>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss} %m%n" />
-        </layout>
-    </appender>
-
-    <appender name="SCHEDULER_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
-        <param name="Append" value="true" />
-        <param name="Threshold" value="INFO" />
-        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="${log.dir}./scheduler/scheduler.%d{yyyyMMdd}" />
-        </rollingPolicy>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{yyyyMMdd HH:mm:ss} %m%n" />
-        </layout>
-    </appender>
-
-
     <!-- Loggers -->
-    <category name="net.ripe.db.whois.api">
-        <appender-ref ref="API_LOG"/>
-        <priority value="INFO"/>
+    <category name="net.ripe">
+        <priority value="DEBUG"/>
     </category>
-
-    <category name="net.apnic.db.whois.api">
-        <appender-ref ref="API_LOG"/>
-        <priority value="INFO"/>
-    </category>
-
-    <category name="net.ripe.db.whois.ntrm">
-        <appender-ref ref="NRTM_LOG"/>
-        <priority value="INFO"/>
-    </category>
-
-    <category name="net.apnic.db.whois.ntrm">
-        <appender-ref ref="NRTM_LOG"/>
-        <priority value="INFO"/>
-    </category>
-
-    <category name="net.ripe.db.whois.query">
-        <appender-ref ref="QUERY_LOG"/>
-        <priority value="INFO"/>
-    </category>
-
-    <category name="net.apnic.db.whois.query">
-        <appender-ref ref="QUERY_LOG"/>
-        <priority value="INFO"/>
-    </category>
-
-    <category name="net.ripe.db.whois.update">
-        <appender-ref ref="UPDATE_LOG"/>
-        <priority value="INFO"/>
-    </category>
-
-    <category name="net.apnic.db.whois.update">
-        <appender-ref ref="UPDATE_LOG"/>
-        <priority value="INFO"/>
-    </category>
-
-    <category name="net.ripe.db.whois.scheduler">
-        <appender-ref ref="SCHEDULER_LOG"/>
-        <priority value="INFO"/>
-    </category>
-
-    <category name="net.apnic.db.whois.scheduler">
-        <appender-ref ref="SCHEDULER_LOG"/>
-        <priority value="INFO"/>
-    </category>
-
 
     <!--<category name="net.ripe.db.whois.common.pipeline.EventLogger">-->
-        <!--<priority value="DEBUG"/>-->
+    <!--<priority value="DEBUG"/>-->
     <!--</category>-->
 
     <!--<category name="net.ripe.db.whois.common.pipeline.ExceptionHandler">-->
-        <!--<priority value="DEBUG"/>-->
+    <!--<priority value="DEBUG"/>-->
     <!--</category>-->
 
     <!-- For debugging resourcehandler -->
     <!--<category name="org.eclipse.jetty">-->
-        <!--<priority value="DEBUG"/>-->
+    <!--<priority value="DEBUG"/>-->
     <!--</category>-->
 
     <!-- C3PO does A LOT of surplus logging in DEBUG -->
@@ -154,12 +40,6 @@
     <root>
         <level value="INFO"/>
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="WHOIS_LOG"/>
-        <appender-ref ref="API_LOG"/>
-        <appender-ref ref="NRTM_LOG"/>
-        <appender-ref ref="QUERY_LOG"/>
-        <appender-ref ref="UPDATE_LOG"/>
-        <appender-ref ref="SCHEDULER_LOG"/>
     </root>
 
 </log4j:configuration>
