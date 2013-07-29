@@ -384,6 +384,13 @@ public class WhoisRdapService {
             for (MediaType mediaType : mediaTypes) {
                 if (mediaType.equals(MediaType.TEXT_HTML_TYPE)) {
                     response.type(MediaType.TEXT_PLAIN_TYPE);
+                    return;
+                } else if (mediaType.equals(MediaType.APPLICATION_JSON) || mediaType.equals(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON)) {
+                    /* The response type must be
+                     * application/rdap+json when the Accept header is
+                     * application/json. See 'using-http', [4.7]. */
+                    response.type(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON);
+                    return;
                 }
             }
         }
