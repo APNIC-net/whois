@@ -54,9 +54,7 @@ import static net.ripe.db.whois.common.rpsl.ObjectType.*;
 @Path("/")
 public class WhoisRdapService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WhoisRdapService.class);
-
-    public static final String WHOIS_VARIANT = System.getProperty("whois.variant","");
-    public static final String RDAP_PROPERTIES = "classpath:rdap" + (WHOIS_VARIANT.isEmpty() ? "" : "." + WHOIS_VARIANT) + ".properties";
+    public static final String RDAP_PROPERTIES = "classpath:rdap.properties";
 
     private static final int STATUS_TOO_MANY_REQUESTS = 429;
     private static final Set<ObjectType> ABUSE_CONTACT_TYPES = Sets.newHashSet(AUT_NUM, INETNUM, INET6NUM);
