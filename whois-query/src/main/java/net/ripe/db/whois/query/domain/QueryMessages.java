@@ -6,6 +6,7 @@ import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.Hosts;
 import net.ripe.db.whois.common.domain.VersionDateTime;
 import net.ripe.db.whois.common.domain.serials.Operation;
+import net.ripe.db.whois.query.profiles.WhoisVariantHelperFactory;
 import net.ripe.db.whois.query.query.QueryFlag;
 
 import java.net.InetAddress;
@@ -15,30 +16,19 @@ import java.util.Set;
 import static net.ripe.db.whois.common.Messages.Type;
 
 public final class QueryMessages {
+
+    private static final Map<QueryMessageType, String> queryMessages =  WhoisVariantHelperFactory.getQueryMessagesMap();
     private static final Joiner JOINER = Joiner.on(", ");
 
     private QueryMessages() {
     }
 
     public static Message termsAndConditions() {
-        String content = ""
-                + "% This is the RIPE Database query service.\n"
-                + "% The objects are in RPSL format.\n"
-                + "%\n"
-                + "% The RIPE Database is subject to Terms and Conditions.\n"
-                + "% See http://www.ripe.net/db/support/db-terms-conditions.pdf\n";
-        return new Message(Type.INFO, content);
+        return new Message(Type.INFO, queryMessages.get(QueryMessageType.TERMS_AND_CONDITIONS));
     }
 
     public static Message termsAndConditionsDump() {
-        String content = ""
-                + "#\n"
-                + "# The contents of this file are subject to \n"
-                + "# RIPE Database Terms and Conditions\n"
-                + "#\n"
-                + "# http://www.ripe.net/db/support/db-terms-conditions.pdf\n"
-                + "#\n";
-        return new Message(Type.INFO, content);
+        return new Message(Type.INFO, queryMessages.get(QueryMessageType.TERMS_AND_CONDITIONS_DUMP));
     }
 
     public static Message relatedTo(final CharSequence key) {
@@ -68,10 +58,7 @@ public final class QueryMessages {
     }
 
     public static Message servedByNotice(final CharSequence version) {
-        String content = ""
-                + "%% This query was served by the RIPE Database Query Service version %s (%s)\n";
-        return new Message(Type.INFO, content, version, Hosts.getLocalHost());
-
+        return new Message(Type.INFO, queryMessages.get(QueryMessageType.SERVED_BY_NOTICE), version, Hosts.getLocalHost());
     }
 
     public static Message versionListHeader(final CharSequence type, final CharSequence key) {
@@ -107,19 +94,13 @@ public final class QueryMessages {
     }
 
     public static Message versionPersonRole(final CharSequence type, final CharSequence key) {
-        return new Message(Type.INFO, ""
-                + "%% Version history for %s object \"%s\"\n"
-                + "%% History not available for PERSON and ROLE objects.\n", type, key);
+        return new Message(Type.INFO,
+                "%% Version history for %s object \"%s\"\n" +
+                "%% History not available for PERSON and ROLE objects.\n", type, key);
     }
 
     public static Message internalErrorOccured() {
-        String content = ""
-                + "%ERROR:100: internal software error\n"
-                + "%\n"
-                + "% Please contact ripe-dbm@ripe.net if the problem persists.\n";
-
-        return new Message(Type.ERROR, content);
-
+        return new Message(Type.ERROR, queryMessages.get(QueryMessageType.INTERNAL_ERROR_OCCURED));
     }
 
     public static Message noResults(final CharSequence source) {
@@ -211,13 +192,7 @@ public final class QueryMessages {
     }
 
     public static Message illegalRange() {
-        String content = ""
-                + "%ERROR:112: unsupported query\n"
-                + "%\n"
-                + "% '-mM' query options are not allowed on very large ranges/prefixes.\n"
-                + "% This data is available from the daily object split files:\n"
-                + "% ftp://ftp.ripe.net/ripe/dbase/split/\n";
-        return new Message(Type.ERROR, content);
+        return new Message(Type.ERROR, queryMessages.get(QueryMessageType.ILLEGAL_RANGE));
     }
 
     public static Message unsupportedQuery() {
@@ -251,25 +226,11 @@ public final class QueryMessages {
     }
 
     public static Message accessDeniedPermanently(final InetAddress remoteAddress) {
-        String content = ""
-                + "%%ERROR:201: access denied for %s\n"
-                + "%%\n"
-                + "%% Sorry, access from your host has been permanently\n"
-                + "%% denied because of a repeated excessive querying.\n"
-                + "%% For more information, see\n"
-                + "%% http://www.ripe.net/data-tools/db/faq/faq-db/why-did-you-receive-the-error-201-access-denied\n";
-        return new Message(Type.ERROR, content, remoteAddress.getHostAddress());
+        return new Message(Type.ERROR, queryMessages.get(QueryMessageType.ACCESS_DENIED_PERMANENTLY), remoteAddress.getHostAddress());
     }
 
     public static Message accessDeniedTemporarily(final InetAddress remoteAddress) {
-        String content = ""
-                + "%%ERROR:201: access denied for %s\n"
-                + "%%\n"
-                + "%% Queries from your IP address have passed the daily limit of controlled objects.\n"
-                + "%% Access from your host has been temporarily denied.\n"
-                + "%% For more information, see\n"
-                + "%% http://www.ripe.net/data-tools/db/faq/faq-db/why-did-you-receive-the-error-201-access-denied\n";
-        return new Message(Type.ERROR, content, remoteAddress.getHostAddress());
+        return new Message(Type.ERROR, queryMessages.get(QueryMessageType.ACCESS_DENIED_TEMPORARILY), remoteAddress.getHostAddress());
     }
 
     public static Message notAllowedToProxy() {
@@ -278,12 +239,7 @@ public final class QueryMessages {
     }
 
     public static Message timeout() {
-        String content = ""
-                + "%ERROR:305: connection has been closed\n"
-                + "%\n"
-                + "% The connection to the RIPE Database query server\n"
-                + "% has been closed after a period of inactivity.\n";
-        return new Message(Type.ERROR, content);
+        return new Message(Type.ERROR, queryMessages.get(QueryMessageType.TIMEOUT));
     }
 
     public static Message connectionsExceeded(final int connectionLimit) {
@@ -338,5 +294,16 @@ public final class QueryMessages {
         }
 
         return new Message(Type.INFO, message.toString());
+    }
+
+    public enum QueryMessageType {
+        TERMS_AND_CONDITIONS,
+        TERMS_AND_CONDITIONS_DUMP,
+        SERVED_BY_NOTICE,
+        INTERNAL_ERROR_OCCURED,
+        ILLEGAL_RANGE,
+        ACCESS_DENIED_PERMANENTLY,
+        ACCESS_DENIED_TEMPORARILY,
+        TIMEOUT,
     }
 }
