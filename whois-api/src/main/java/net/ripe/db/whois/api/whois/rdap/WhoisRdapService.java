@@ -380,7 +380,8 @@ public class WhoisRdapService {
     }
 
     private void mapAcceptableMediaType(Response.ResponseBuilder response, List<MediaType> mediaTypes) {
-        response.type(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON);
+        // Cant hardcode as client may "Accept" different media types, e.g. application/json or text/plain
+        //response.type(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON);
         if (mediaTypes != null) {
             for (MediaType mediaType : mediaTypes) {
                 if (mediaType.equals(MediaType.TEXT_HTML_TYPE)) {
