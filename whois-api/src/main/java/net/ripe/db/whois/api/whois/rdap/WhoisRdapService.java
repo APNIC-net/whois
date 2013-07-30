@@ -66,24 +66,32 @@ public class WhoisRdapService {
     private static final Joiner SLASH_JOINER = Joiner.on("/");
     public static final Joiner COMMA_JOINER = Joiner.on(",");
 
-    protected static Properties properties = new Properties();
+    protected static Properties properties;
     protected static String rdapPropertiesPath = System.getProperty("rdap.config","");
 
     static {
-        if (rdapPropertiesPath.equals("")) {
-            rdapPropertiesPath = "classpath:rdap.properties";
-        } else {
-            rdapPropertiesPath = "file:" + rdapPropertiesPath;
-        }
-        try {
-            ApplicationContext appContext = new ClassPathXmlApplicationContext();
-            Resource resource = appContext.getResource(rdapPropertiesPath);
-            LOGGER.info(String.format("Loading [%s] from [%s]",rdapPropertiesPath, resource.getURL().toExternalForm()));
-            properties.load(resource.getInputStream());
-        } catch (IOException ioex) {
-            String error = String.format("Failed to load properties file [%s]", rdapPropertiesPath);
-            LOGGER.error(error);
-            throw new ExceptionInInitializerError(error);
+        initProperties();
+    }
+
+    private static void initProperties() {
+        if (properties == null) {
+            if (rdapPropertiesPath.equals("")) {
+                rdapPropertiesPath = "classpath:rdap.properties";
+            } else {
+                rdapPropertiesPath = "file:" + rdapPropertiesPath;
+            }
+            try {
+                ApplicationContext appContext = new ClassPathXmlApplicationContext();
+                Resource resource = appContext.getResource(rdapPropertiesPath);
+                LOGGER.info(String.format("Loading [%s] from [%s]",rdapPropertiesPath, resource.getURL().toExternalForm()));
+                Properties loadProperties = new Properties();
+                loadProperties.load(resource.getInputStream());
+                properties = loadProperties;
+            } catch (IOException ioex) {
+                String error = String.format("Failed to load properties file [%s]", rdapPropertiesPath);
+                LOGGER.error(error);
+                throw new ExceptionInInitializerError(error);
+            }
         }
     }
 
@@ -294,6 +302,7 @@ public class WhoisRdapService {
     }
 
     protected static Properties getProperties() {
+        initProperties();
         return properties;
     }
 
@@ -335,7 +344,7 @@ public class WhoisRdapService {
     }
 
     private String getBaseUrl(final HttpServletRequest request) {
-        if (!this.baseUrl.isEmpty()) {
+        if (StringUtils.isNotEmpty(this.baseUrl)) {
             return this.baseUrl;
         }
 
