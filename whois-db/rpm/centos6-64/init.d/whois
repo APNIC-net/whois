@@ -39,6 +39,7 @@ HAZELCASTARGS=("-Dhazelcast.jmx=true"
 
 ### Other Config Options
 CONFIGARGS=("-Dwhois.config=$PROPERTIES"
+            "-Drdap.config=$RDAP_PROPERTIES"
             "-Dlog4j.configuration=file:$CONFDIR/log4j.xml")
 
 ### JAR Options

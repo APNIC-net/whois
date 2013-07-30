@@ -23,6 +23,9 @@ CONFDIR=$BASEDIR/conf
 # Whois Properties file
 PROPERTIES=$CONFDIR/whois.properties
 
+# RDAP Properties file
+RDAP_PROPERTIES=$CONFDIR/rdap.properties
+
 # Binary location
 BINJAR=$BASEDIR/bin/whois.jar
 

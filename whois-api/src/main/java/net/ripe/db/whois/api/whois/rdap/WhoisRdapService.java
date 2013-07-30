@@ -24,11 +24,14 @@ import net.ripe.db.whois.query.handler.QueryHandler;
 import net.ripe.db.whois.query.planner.AbuseCFinder;
 import net.ripe.db.whois.query.query.Query;
 import net.ripe.db.whois.query.query.QueryFlag;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.enunciate.modules.jersey.ExternallyManagedLifecycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,10 +44,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import static net.ripe.db.whois.common.rpsl.ObjectType.*;
@@ -54,7 +59,6 @@ import static net.ripe.db.whois.common.rpsl.ObjectType.*;
 @Path("/")
 public class WhoisRdapService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WhoisRdapService.class);
-    public static final String RDAP_PROPERTIES = "classpath:rdap.properties";
 
     private static final int STATUS_TOO_MANY_REQUESTS = 429;
     private static final Set<ObjectType> ABUSE_CONTACT_TYPES = Sets.newHashSet(AUT_NUM, INETNUM, INET6NUM);
@@ -62,20 +66,48 @@ public class WhoisRdapService {
     private static final Joiner SLASH_JOINER = Joiner.on("/");
     public static final Joiner COMMA_JOINER = Joiner.on(",");
 
+    protected static Properties properties = new Properties();
+    protected static String rdapPropertiesPath = System.getProperty("rdap.config","");
+
+    static {
+        if (rdapPropertiesPath.equals("")) {
+            rdapPropertiesPath = "classpath:rdap.properties";
+        } else {
+            rdapPropertiesPath = "file:" + rdapPropertiesPath;
+        }
+        try {
+            ApplicationContext appContext = new ClassPathXmlApplicationContext();
+            Resource resource = appContext.getResource(rdapPropertiesPath);
+            LOGGER.info(String.format("Loading [%s] from [%s]",rdapPropertiesPath, resource.getURL().toExternalForm()));
+            properties.load(resource.getInputStream());
+        } catch (IOException ioex) {
+            String error = String.format("Failed to load properties file [%s]", rdapPropertiesPath);
+            LOGGER.error(error);
+            throw new ExceptionInInitializerError(error);
+        }
+    }
+
     private final QueryHandler queryHandler;
     private final RpslObjectDao objectDao;
     private final AbuseCFinder abuseCFinder;
     private final String baseUrl;
 
-    @Value("${rdap.port43:whois.ripe.net}")
-    private String port43;
+    private String port43 = (String)properties.get("rdap.port43");
 
     @Autowired
-    public WhoisRdapService(final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder, @Value("${rdap.public.baseurl:}") final String baseUrl) {
+    public WhoisRdapService(final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder) {
+       this(queryHandler,objectDao, abuseCFinder, null);
+    }
+
+    public WhoisRdapService(final QueryHandler queryHandler, final RpslObjectDao objectDao, final AbuseCFinder abuseCFinder, final String baseUrl) {
         this.queryHandler = queryHandler;
         this.objectDao = objectDao;
         this.abuseCFinder = abuseCFinder;
-        this.baseUrl = baseUrl;
+        if (StringUtils.isEmpty(baseUrl)) {
+            this.baseUrl = (String)properties.get("rdap.public.baseurl");
+        } else {
+            this.baseUrl = baseUrl;
+        }
     }
 
     @GET
@@ -261,6 +293,10 @@ public class WhoisRdapService {
         }
     }
 
+    protected static Properties getProperties() {
+        return properties;
+    }
+
     private List<RpslObject> runQuery(final Query query, final HttpServletRequest request, final boolean internalRequest) {
         final int contextId = System.identityHashCode(Thread.currentThread());
         final InetAddress queryAddress;
@@ -395,4 +431,5 @@ public class WhoisRdapService {
             }
         }
     }
+
 }
