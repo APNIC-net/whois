@@ -248,6 +248,7 @@ class InetnumStatusBetweenSpec extends BaseSpec {
       given:
         syncUpdate(getTransient("ALLOC-UNS") + "password: owner3\npassword: hm")
         queryObject("-r -T inetnum 192.0.0.0 - 192.255.255.255", "inetnum", "192.0.0.0 - 192.255.255.255")
+        sleep(2000)
         syncUpdate(getTransient("ALLOC-UNS2") + "password: owner3\npassword: hm")
         queryObject("-r -T inetnum 192.168.0.0 - 192.169.255.255", "inetnum", "192.168.0.0 - 192.169.255.255")
 
