@@ -14,7 +14,7 @@ class VersionHistorySpec extends BaseSpec {
     @Override
     Map<String, String> getFixtures() {
         [
-            "ORG-FO1": """\
+                "ORG-FO1": """\
                 organisation:    ORG-FO1-TEST
                 org-type:        other
                 org-name:        First Org
@@ -29,7 +29,7 @@ class VersionHistorySpec extends BaseSpec {
                 changed:         denis@ripe.net 20121016
                 source:          TEST
                 """,
-            "OLDMNTNER": """\
+                "OLDMNTNER": """\
                 mntner:         OLD-MNT
                 descr:          description
                 admin-c:        TP1-TEST
@@ -47,7 +47,7 @@ class VersionHistorySpec extends BaseSpec {
     @Override
     Map<String, String> getTransients() {
         [
-            "RIR-ALLOC-20": """\
+                "RIR-ALLOC-20": """\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
                 descr:        European Regional Registry
@@ -61,7 +61,7 @@ class VersionHistorySpec extends BaseSpec {
                 changed:      dbtest@ripe.net 20130101
                 source:       TEST
                 """,
-            "ALLOC-PA": """\
+                "ALLOC-PA": """\
                 inetnum:      192.168.0.0 - 192.169.255.255
                 netname:      TEST-NET-NAME
                 descr:        TEST network
@@ -75,7 +75,7 @@ class VersionHistorySpec extends BaseSpec {
                 changed:      dbtest@ripe.net 20020101
                 source:       TEST
                 """,
-            "ASS-END": """\
+                "ASS-END": """\
                 inetnum:      192.168.200.0 - 192.168.200.255
                 netname:      RIPE-NET1
                 descr:        /24 assigned
@@ -87,7 +87,7 @@ class VersionHistorySpec extends BaseSpec {
                 changed:      dbtest@ripe.net 20020101
                 source:       TEST
                 """,
-            "PN-FF": """\
+                "PN-FF": """\
                 person:  fred fred
                 address: St James Street
                 address: Burnley
@@ -98,7 +98,7 @@ class VersionHistorySpec extends BaseSpec {
                 changed: dbtest@ripe.net 20120101
                 source:  TEST
                 """,
-            "RL-FR": """\
+                "RL-FR": """\
                 role:    First Role
                 address: St James Street
                 address: Burnley
@@ -109,7 +109,7 @@ class VersionHistorySpec extends BaseSpec {
                 changed: dbtest@ripe.net 20121016
                 source:  TEST
                 """,
-            "SELF-MNT": """\
+                "SELF-MNT": """\
                 mntner:  SELF-MNT
                 descr:   description
                 admin-c: TP1-TEST
@@ -120,7 +120,7 @@ class VersionHistorySpec extends BaseSpec {
                 changed: dbtest@ripe.net 20120707
                 source:  TEST
                 """,
-            "PAUL": """\
+                "PAUL": """\
                 mntner:  PAUL
                 descr:   description
                 admin-c: TP1-TEST
@@ -131,7 +131,7 @@ class VersionHistorySpec extends BaseSpec {
                 changed: dbtest@ripe.net 20120707
                 source:  TEST
                 """,
-            "AS1000": """\
+                "AS1000": """\
                 aut-num:     AS1000
                 as-name:     TEST-AS
                 descr:       Testing Authorisation code
@@ -141,7 +141,7 @@ class VersionHistorySpec extends BaseSpec {
                 changed:     dbtest@ripe.net
                 source:      TEST
                 """,
-            "AS2000": """\
+                "AS2000": """\
                 aut-num:     AS2000
                 as-name:     TEST-AS
                 descr:       Testing Authorisation code
@@ -154,12 +154,23 @@ class VersionHistorySpec extends BaseSpec {
         ]
     }
 
-    // Test fails randomly, try putting this at the top as the first test
-    def "query --list-versions and -k, 2 versions"() {
+    def "query --list-versions"() {
         given:
-        sleep(5000)
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
-        sleep(5000)
+
+        expect:
+        // "RIR-ALLOC-20"
+        queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
+
+        and:
+        queryLineMatches("--list-versions 2001::/20", "^% Version history for INET6NUM object \"2001::/20\"")
+        queryLineMatches("--list-versions 2001::/20", "^1\\s*[0-9-]+\\s*[0-9:]+\\s*ADD/UPD")
+        ! queryLineMatches("--list-versions 2001::/20", "^2\\s*[0-9-]+\\s*[0-9:]+\\s*ADD/UPD")
+    }
+
+    def "query --list-versions, 2 versions"() {
+        given:
+        syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
         expect:
         // "RIR-ALLOC-20"
@@ -195,63 +206,6 @@ class VersionHistorySpec extends BaseSpec {
         ack.countErrorWarnInfo(0, 0, 1)
         ack.successes.any { it.operation == "Modify" && it.key == "[inet6num] 2001::/20" }
 
-        queryLineMatches("-k --show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 1 of object \"2001::/20\"")
-        queryLineMatches("-k --show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 2 \\(current version\\) of object \"2001::/20\"")
-//        queryLineMatches("-k -rBG 2001::/20\n\n--show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 1 of object \"2001::/20\"")
-    }
-
-    def "query --list-versions"() {
-      given:
-        syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
-
-      expect:
-        // "RIR-ALLOC-20"
-        queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
-
-      and:
-        queryLineMatches("--list-versions 2001::/20", "^% Version history for INET6NUM object \"2001::/20\"")
-        queryLineMatches("--list-versions 2001::/20", "^1\\s*[0-9-]+\\s*[0-9:]+\\s*ADD/UPD")
-        ! queryLineMatches("--list-versions 2001::/20", "^2\\s*[0-9-]+\\s*[0-9:]+\\s*ADD/UPD")
-    }
-
-    def "query --list-versions, 2 versions"() {
-      given:
-        syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
-
-      expect:
-        // "RIR-ALLOC-20"
-        queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
-
-      when:
-        def message = syncUpdate("""\
-                inet6num:     2001::/20
-                netname:      EU-ZZ-2001-0600
-                descr:        European Regional Registry
-                country:      EU
-                org:          ORG-LIR1-TEST
-                admin-c:      TP1-TEST
-                tech-c:       TP1-TEST
-                mnt-by:       RIPE-NCC-HM-MNT
-                mnt-lower:    RIPE-NCC-HM-MNT
-                status:       ALLOCATED-BY-RIR
-                remarks:      version 2
-                changed:      dbtest@ripe.net 20130101
-                source:       TEST
-                override:  override1
-
-                """.stripIndent()
-        )
-
-      then:
-        def ack = new AckResponse("", message)
-
-        ack.summary.nrFound == 1
-        ack.summary.assertSuccess(1, 0, 1, 0, 0)
-        ack.summary.assertErrors(0, 0, 0, 0)
-
-        ack.countErrorWarnInfo(0, 0, 1)
-        ack.successes.any { it.operation == "Modify" && it.key == "[inet6num] 2001::/20" }
-
         queryLineMatches("--list-versions 2001::/20", "^% Version history for INET6NUM object \"2001::/20\"")
         queryLineMatches("--list-versions 2001::/20", "^1\\s*[0-9-]+\\s*[0-9:]+\\s*ADD/UPD")
         queryLineMatches("--list-versions 2001::/20", "^2\\s*[0-9-]+\\s*[0-9:]+\\s*ADD/UPD")
@@ -259,14 +213,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 2, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -286,7 +240,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -302,14 +256,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --list-versions, 3 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("ALLOC-PA") + "override: override1")
 
-      expect:
+        expect:
         // "ALLOC-PA"
         queryObject("-rBG -T inetnum 192.168.0.0 - 192.169.255.255", "inetnum", "192.168.0.0 - 192.169.255.255")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inetnum:      192.168.0.0 - 192.169.255.255
                 netname:      TEST-NET-NAME
@@ -344,7 +298,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 2
@@ -362,14 +316,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 3, 3 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("ALLOC-PA") + "override: override1")
 
-      expect:
+        expect:
         // "ALLOC-PA"
         queryObject("-rBG -T inetnum 192.168.0.0 - 192.169.255.255", "inetnum", "192.168.0.0 - 192.169.255.255")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inetnum:      192.168.0.0 - 192.169.255.255
                 netname:      TEST-NET-NAME
@@ -404,7 +358,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 2
@@ -420,14 +374,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 2, 3 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("ALLOC-PA") + "override: override1")
 
-      expect:
+        expect:
         // "ALLOC-PA"
         queryObject("-rBG -T inetnum 192.168.0.0 - 192.169.255.255", "inetnum", "192.168.0.0 - 192.169.255.255")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inetnum:      192.168.0.0 - 192.169.255.255
                 netname:      TEST-NET-NAME
@@ -462,7 +416,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 2
@@ -478,14 +432,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 1, 3 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("ALLOC-PA") + "override: override1")
 
-      expect:
+        expect:
         // "ALLOC-PA"
         queryObject("-rBG -T inetnum 192.168.0.0 - 192.169.255.255", "inetnum", "192.168.0.0 - 192.169.255.255")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inetnum:      192.168.0.0 - 192.169.255.255
                 netname:      TEST-NET-NAME
@@ -520,7 +474,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 2
@@ -535,14 +489,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --list-versions, 4 versions, deleted"() {
-      given:
+        given:
         syncUpdate(getTransient("ALLOC-PA") + "override: override1")
 
-      expect:
+        expect:
         // "ALLOC-PA"
         queryObject("-rBG -T inetnum 192.168.0.0 - 192.169.255.255", "inetnum", "192.168.0.0 - 192.169.255.255")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inetnum:      192.168.0.0 - 192.169.255.255
                 netname:      TEST-NET-NAME
@@ -593,7 +547,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 3
@@ -612,14 +566,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --list-versions, 4 versions, deleted, re-created with only 1 version of new object"() {
-      given:
+        given:
         syncUpdate(getTransient("ALLOC-PA") + "override: override1")
 
-      expect:
+        expect:
         // "ALLOC-PA"
         queryObject("-rBG -T inetnum 192.168.0.0 - 192.169.255.255", "inetnum", "192.168.0.0 - 192.169.255.255")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inetnum:      192.168.0.0 - 192.169.255.255
                 netname:      TEST-NET-NAME
@@ -670,7 +624,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 3
@@ -690,14 +644,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --list-versions, 2 versions, person object"() {
-      given:
+        given:
         syncUpdate(getTransient("PN-FF") + "override: override1")
 
-      expect:
+        expect:
         // "PN-FF"
         queryObject("-rBG -T person ff1-test", "person", "fred fred")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 person:  fred fred
                 address: St James Street
@@ -713,7 +667,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -731,14 +685,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --list-versions, 2 versions, role object"() {
-      given:
+        given:
         syncUpdate(getTransient("RL-FR") + "override: override1")
 
-      expect:
+        expect:
         // "RL-FR"
         queryObject("-rBG -T role FR1-TEST", "role", "First Role")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 role:    First Role
                 address: St James Street
@@ -755,7 +709,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -773,7 +727,7 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --list-versions, 2 versions, organisation object"() {
-      when:
+        when:
         def message = syncUpdate("""\
                 organisation:    auto-1
                 org-type:        other
@@ -809,7 +763,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 2
@@ -827,14 +781,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --list-versions, 2 versions, mntner object"() {
-      given:
+        given:
         syncUpdate(getTransient("SELF-MNT") + "override: override1")
 
-      expect:
+        expect:
         // "SELF-MNT"
         queryObject("-rBG -T mntner SELF-MNT", "mntner", "SELF-MNT")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 mntner:  SELF-MNT
                 descr:   description
@@ -851,7 +805,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -869,14 +823,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --list-versions, 2 versions, mntner object with name PAUL"() {
-      given:
+        given:
         syncUpdate(getTransient("PAUL") + "override: override1")
 
-      expect:
+        expect:
         // "SELF-MNT"
         queryObject("-rBG -T mntner PAUL", "mntner", "PAUL")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 mntner:  PAUL
                 descr:   description
@@ -893,7 +847,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -911,20 +865,20 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query help"() {
-      when:
+        when:
         def qqq = query("help")
 
-      then:
+        then:
         qqq =~ /(?m)^%\s*--list-versions/
     }
 
     def "query --list-versions, 2 exact matching route, 2 versions of each"() {
-      given:
+        given:
         syncUpdate(getTransient("ASS-END") + "override: override1")
         syncUpdate(getTransient("AS1000") + "override: override1")
         syncUpdate(getTransient("AS2000") + "override: override1")
 
-      expect:
+        expect:
         // "ASS-END"
         queryObject("-rBG -T inetnum 192.168.200.0 - 192.168.200.255", "inetnum", "192.168.200.0 - 192.168.200.255")
         // "AS1000"
@@ -932,7 +886,7 @@ class VersionHistorySpec extends BaseSpec {
         // "AS2000"
         queryObject("-rBG -T aut-num AS2000", "aut-num", "AS2000")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 route:          192.168.200.0/24
                 descr:          Route
@@ -971,7 +925,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 4
@@ -994,12 +948,12 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version for 2 exact matching route, 2 & 3 versions exist"() {
-      given:
+        given:
         syncUpdate(getTransient("ASS-END") + "override: override1")
         syncUpdate(getTransient("AS1000") + "override: override1")
         syncUpdate(getTransient("AS2000") + "override: override1")
 
-      expect:
+        expect:
         // "ASS-END"
         queryObject("-rBG -T inetnum 192.168.200.0 - 192.168.200.255", "inetnum", "192.168.200.0 - 192.168.200.255")
         // "AS1000"
@@ -1007,7 +961,7 @@ class VersionHistorySpec extends BaseSpec {
         // "AS2000"
         queryObject("-rBG -T aut-num AS2000", "aut-num", "AS2000")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 route:          192.168.200.0/24
                 descr:          Route
@@ -1055,7 +1009,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 5
@@ -1079,14 +1033,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --version-list, 3 versions, no space in range"() {
-      given:
+        given:
         syncUpdate(getTransient("ALLOC-PA") + "override: override1")
 
-      expect:
+        expect:
         // "ALLOC-PA"
         queryObject("-rBG -T inetnum 192.168.0.0 - 192.169.255.255", "inetnum", "192.168.0.0 - 192.169.255.255")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inetnum:      192.168.0.0 - 192.169.255.255
                 netname:      TEST-NET-NAME
@@ -1121,7 +1075,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 2
@@ -1139,14 +1093,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 5, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1166,7 +1120,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1181,14 +1135,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 0, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1208,7 +1162,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1224,14 +1178,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version -2, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1251,7 +1205,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1267,14 +1221,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 1.5, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1294,7 +1248,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1309,14 +1263,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version fred, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1336,7 +1290,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1350,14 +1304,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 2 and --list-versions, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1377,7 +1331,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1389,18 +1343,18 @@ class VersionHistorySpec extends BaseSpec {
 
         queryLineMatches("--list-versions --show-version 2 2001::/20", "^%ERROR:109: invalid combination of flags passed")
         queryLineMatches("--list-versions --show-version 2 2001::/20", "^% The flags \"--list-versions\" and \"--show-version\" cannot be used together.") ||
-        queryLineMatches("--list-versions --show-version 2 2001::/20", "^% The flags \"--show-version\" and \"--list-versions\" cannot be used together.")
+                queryLineMatches("--list-versions --show-version 2 2001::/20", "^% The flags \"--show-version\" and \"--list-versions\" cannot be used together.")
     }
 
     def "query --show-version 2 and -b, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1420,7 +1374,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1434,14 +1388,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --list-versions and -m, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1461,7 +1415,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1474,15 +1428,15 @@ class VersionHistorySpec extends BaseSpec {
         queryLineMatches("-m --list-versions 2001::/20", "^%ERROR:109: invalid combination of flags passed")
     }
 
-    def "query --show-version 2 and -F, 2 versions"() {
-      given:
+    def "query --list-versions and -k, 2 versions"() {
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1502,7 +1456,50 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
+        def ack = new AckResponse("", message)
+
+        ack.summary.nrFound == 1
+        ack.summary.assertSuccess(1, 0, 1, 0, 0)
+        ack.summary.assertErrors(0, 0, 0, 0)
+
+        ack.countErrorWarnInfo(0, 0, 1)
+        ack.successes.any { it.operation == "Modify" && it.key == "[inet6num] 2001::/20" }
+
+        queryLineMatches("-k --show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 1 of object \"2001::/20\"")
+        queryLineMatches("-k --show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 2 \\(current version\\) of object \"2001::/20\"")
+//        queryLineMatches("-k -rBG 2001::/20\n\n--show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 1 of object \"2001::/20\"")
+    }
+
+    def "query --show-version 2 and -F, 2 versions"() {
+        given:
+        syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
+
+        expect:
+        // "RIR-ALLOC-20"
+        queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
+
+        when:
+        def message = syncUpdate("""\
+                inet6num:     2001::/20
+                netname:      EU-ZZ-2001-0600
+                descr:        European Regional Registry
+                country:      EU
+                org:          ORG-LIR1-TEST
+                admin-c:      TP1-TEST
+                tech-c:       TP1-TEST
+                mnt-by:       RIPE-NCC-HM-MNT
+                mnt-lower:    RIPE-NCC-HM-MNT
+                status:       ALLOCATED-BY-RIR
+                remarks:      version 2
+                changed:      dbtest@ripe.net 20130101
+                source:       TEST
+                override:  override1
+
+                """.stripIndent()
+        )
+
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1516,14 +1513,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 2 and -K, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1543,7 +1540,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1557,14 +1554,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 2 and -T route6, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1584,7 +1581,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1598,14 +1595,14 @@ class VersionHistorySpec extends BaseSpec {
     }
 
     def "query --show-version 2 and -V client-tag, 2 versions"() {
-      given:
+        given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
 
-      expect:
+        expect:
         // "RIR-ALLOC-20"
         queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
 
-      when:
+        when:
         def message = syncUpdate("""\
                 inet6num:     2001::/20
                 netname:      EU-ZZ-2001-0600
@@ -1625,7 +1622,7 @@ class VersionHistorySpec extends BaseSpec {
                 """.stripIndent()
         )
 
-      then:
+        then:
         def ack = new AckResponse("", message)
 
         ack.summary.nrFound == 1
@@ -1642,7 +1639,7 @@ class VersionHistorySpec extends BaseSpec {
 
     def "query --show-version 2, crypt-pw should be hidden (extra version 1 created by loader)"() {
         when:
-            def message = syncUpdate("""\
+        def message = syncUpdate("""\
                 mntner:         OLD-MNT
                 descr:          description
                 admin-c:        TP1-TEST
@@ -1655,21 +1652,21 @@ class VersionHistorySpec extends BaseSpec {
                 override: override1
 
                 """.stripIndent()
-            )
+        )
 
         then:
-            def ack = new AckResponse("", message)
+        def ack = new AckResponse("", message)
 
-            ack.summary.nrFound == 1
-            ack.summary.assertSuccess(1, 0, 1, 0, 0)
-            ack.summary.assertErrors(0, 0, 0, 0)
+        ack.summary.nrFound == 1
+        ack.summary.assertSuccess(1, 0, 1, 0, 0)
+        ack.summary.assertErrors(0, 0, 0, 0)
 
-            ack.countErrorWarnInfo(0, 0, 1)
-            ack.successes.any { it.operation == "Modify" && it.key == "[mntner] OLD-MNT" }
+        ack.countErrorWarnInfo(0, 0, 1)
+        ack.successes.any { it.operation == "Modify" && it.key == "[mntner] OLD-MNT" }
 
-            queryLineMatches("--show-version 2 OLD-MNT", "^% Version 2 of object \"OLD-MNT\"")
-            queryLineMatches("--show-version 2 OLD-MNT", "^auth:\\s+CRYPT-PW # Filtered")
-            queryLineMatches("--show-version 2 OLD-MNT", "^auth:\\s+MD5-PW # Filtered")
+        queryLineMatches("--show-version 2 OLD-MNT", "^% Version 2 of object \"OLD-MNT\"")
+        queryLineMatches("--show-version 2 OLD-MNT", "^auth:\\s+CRYPT-PW # Filtered")
+        queryLineMatches("--show-version 2 OLD-MNT", "^auth:\\s+MD5-PW # Filtered")
     }
 
     def "query --dif-versions 2:3, 3 versions"() {
