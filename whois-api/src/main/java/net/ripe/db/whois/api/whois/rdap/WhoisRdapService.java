@@ -162,7 +162,7 @@ public class WhoisRdapService {
             response = Response.ok(lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key)));
 
         } catch (WebApplicationException webex) {
-            LOGGER.error("RDAP error", webex);
+            LOGGER.error(String.format("RDAP http error status [%s] caused by request [%s]", webex.getResponse().getStatus(), request.getRequestURL().toString()));
             int statusCode = webex.getResponse().getStatus();
             response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl));
         } catch (IllegalArgumentException iae) {
