@@ -14,9 +14,90 @@
         </layout>
     </appender>
 
+    <appender name="API_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
+        <param name="Append" value="true" />
+        <param name="Threshold" value="INFO" />
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="${log.dir}./api/api.%d{yyyyMMdd}.log" />
+        </rollingPolicy>
+        <layout class="org.apache.log4j.PatternLayout">
+            <!-- The default pattern: Date Priority [Category] Message\n -->
+            <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="NRTM_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
+        <param name="Append" value="true" />
+        <param name="Threshold" value="INFO" />
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="${log.dir}./nrtm/nrtm.%d{yyyyMMdd}.log" />
+        </rollingPolicy>
+        <layout class="org.apache.log4j.PatternLayout">
+            <!-- The default pattern: Date Priority [Category] Message\n -->
+            <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="QUERY_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
+        <param name="Append" value="true" />
+        <param name="Threshold" value="INFO" />
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="${log.dir}./query/query.%d{yyyyMMdd}.log" />
+        </rollingPolicy>
+        <layout class="org.apache.log4j.PatternLayout">
+            <!-- The default pattern: Date Priority [Category] Message\n -->
+            <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="UPDATE_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
+        <param name="Append" value="true" />
+        <param name="Threshold" value="INFO" />
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="${log.dir}./update/update.%d{yyyyMMdd}.log" />
+        </rollingPolicy>
+        <layout class="org.apache.log4j.PatternLayout">
+            <!-- The default pattern: Date Priority [Category] Message\n -->
+            <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="SCHEDULER_LOG" class="org.apache.log4j.rolling.RollingFileAppender">
+        <param name="Append" value="true" />
+        <param name="Threshold" value="INFO" />
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="${log.dir}./scheduler/scheduler.%d{yyyyMMdd}.log" />
+        </rollingPolicy>
+        <layout class="org.apache.log4j.PatternLayout">
+            <!-- The default pattern: Date Priority [Category] Message\n -->
+            <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
+        </layout>
+    </appender>
+
     <!-- Loggers -->
-    <category name="net.ripe">
-        <priority value="DEBUG"/>
+    <category name="net.ripe.db.whois.api">
+        <priority value="INFO"/>
+        <appender-ref ref="API_LOG"/>
+    </category>
+
+    <category name="net.ripe.db.whois.ntrm">
+        <priority value="INFO"/>
+        <appender-ref ref="NRTM_LOG"/>
+    </category>
+
+    <category name="net.apnic.db.whois.query">
+        <priority value="INFO"/>
+        <appender-ref ref="QUERY_LOG"/>
+    </category>
+
+    <category name="net.ripe.db.whois.update">
+        <priority value="INFO"/>
+        <appender-ref ref="UPDATE_LOG"/>
+    </category>
+
+    <category name="net.ripe.db.whois.scheduler">
+        <priority value="INFO"/>
+        <appender-ref ref="SCHEDULER_LOG"/>
     </category>
 
     <!--<category name="net.ripe.db.whois.common.pipeline.EventLogger">-->
