@@ -6,6 +6,8 @@ import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
 import net.ripe.db.whois.api.whois.rdap.domain.Domain;
 import net.ripe.db.whois.api.whois.rdap.domain.Entity;
 import net.ripe.db.whois.api.whois.rdap.domain.Ip;
+import net.ripe.db.whois.common.domain.Ipv4Resource;
+import net.ripe.db.whois.common.domain.Ipv6Resource;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.junit.BeforeClass;
@@ -244,13 +246,16 @@ public class RdapRegressionTestIntegration {
     @Test
     public void validate_all_rdap_ips_test() throws Exception {
         String type = ips.getKey();
-        List<String> queries = runRdapQuery("select concat('" + rdap_server_url_base.toString() + "/" + type + "/' , pkey) from last where object_type in (" +
-                Joiner.on(",").join(ips.getValue()) + ");");
+        List<String> queries = runRdapQuery("select pkey from last where object_type in (" + Joiner.on(",").join(ips.getValue()) + ");");
         LOGGER.info(type + " query size=" + queries.size());
+
+        String prefix = rdap_server_url_base.toString() + "/" + type + "/";
 
         int cnt = 0;
         // For each url : call each url
-        for (String rdapQuery : queries) {
+        for (String pkey : queries) {
+            // ip query result needs to be converted
+            String rdapQuery = prefix + (pkey.indexOf(":") > 0 ? Ipv6Resource.parse(pkey).toString() : Ipv4Resource.parse(pkey).toString());
             try {
                 RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(rdapQuery, true);
                 String response = new String(result.body);
