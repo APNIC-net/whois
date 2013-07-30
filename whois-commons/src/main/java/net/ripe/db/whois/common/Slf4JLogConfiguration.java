@@ -13,9 +13,11 @@ public class Slf4JLogConfiguration {
     }
 
     public static void init() {
-        // If log.dir not configured assume workstation/maven project config config
-        // This should be set on the command line invocation e.g. "-Dlog.dir=/opt/var/log"
-        System.setProperty("log.dir", "target/");
+        // If log.dir not configured assume running from workstation/maven project config
+        // This should be set on the command line invocation e.g. "-Dlog.dir=/opt/var/log" for deployed builds
+        if (System.getProperty("log.dir","").equals("")) {
+            System.setProperty("log.dir","target/");
+        }
 
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
