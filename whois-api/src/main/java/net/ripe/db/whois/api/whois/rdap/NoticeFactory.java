@@ -6,62 +6,30 @@ import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+@Component
 public class NoticeFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(NoticeFactory.class);
 
-    private static String tncTitle;
-    private static String tncDescription;
-    private static String tncLinkRel;
-    private static String tncLinkHref;
-    private static String tncLinkType;
-    private static String filterIsFiltered;
-    private static String filterDescription;
-    private static String filterTitle;
-    private static String sourceDescription;
-    private static String sourceTitle;
-    private static String helpTitle;
-    private static String helpDescription;
-    private static String helpLinkRel;
-    private static String helpLinkHref;
-    private static String helpLinkType;
-
-    static {
-        try {
-
-            Properties properties = new Properties();
-            ApplicationContext appContext = new ClassPathXmlApplicationContext();
-            Resource resource = appContext.getResource(WhoisRdapService.RDAP_PROPERTIES);
-            properties.load(resource.getInputStream());
-
-            tncTitle = propertyCheck(properties,"rdap.tnc.title");
-            tncDescription = propertyCheck(properties,"rdap.tnc.description");
-            tncLinkRel = propertyCheck(properties,"rdap.tnc.linkrel");
-            tncLinkHref = propertyCheck(properties,"rdap.tnc.linkhref");
-            tncLinkType = propertyCheck(properties,"rdap.tnc.linktype");
-            filterIsFiltered = propertyCheck(properties,"rdap.filter.isfiltered");
-            filterDescription = propertyCheck(properties,"rdap.filter.description");
-            filterTitle = propertyCheck(properties,"rdap.filter.title");
-            sourceDescription = propertyCheck(properties,"rdap.source.description");
-            sourceTitle = propertyCheck(properties,"rdap.source.title");
-            helpTitle = propertyCheck(properties,"rdap.help.title");
-            helpDescription = propertyCheck(properties,"rdap.help.description");
-            helpLinkRel = propertyCheck(properties,"rdap.help.link.rel");
-            helpLinkHref = propertyCheck(properties,"rdap.help.link.href");
-            helpLinkType = propertyCheck(properties,"rdap.help.link.type");
-        } catch (IOException ioex) {
-            String error = String.format("Failed to load properties file [%s]", WhoisRdapService.RDAP_PROPERTIES);
-            LOGGER.error(error);
-            throw new ExceptionInInitializerError(error);
-        }
-    }
+    private static final String tncTitle  = propertyCheck(WhoisRdapService.getProperties(),"rdap.tnc.title");
+    private static String tncDescription = propertyCheck(WhoisRdapService.getProperties(),"rdap.tnc.description");
+    private static String tncLinkRel = propertyCheck(WhoisRdapService.getProperties(),"rdap.tnc.linkrel");
+    private static String tncLinkHref = propertyCheck(WhoisRdapService.getProperties(),"rdap.tnc.linkhref");
+    private static String tncLinkType = propertyCheck(WhoisRdapService.getProperties(),"rdap.tnc.linktype");
+    private static String filterIsFiltered = propertyCheck(WhoisRdapService.getProperties(),"rdap.filter.isfiltered");
+    private static String filterDescription = propertyCheck(WhoisRdapService.getProperties(),"rdap.filter.description");
+    private static String filterTitle = propertyCheck(WhoisRdapService.getProperties(),"rdap.filter.title");
+    private static String sourceDescription = propertyCheck(WhoisRdapService.getProperties(),"rdap.source.description");
+    private static String sourceTitle = propertyCheck(WhoisRdapService.getProperties(),"rdap.source.title");
+    private static String helpTitle = propertyCheck(WhoisRdapService.getProperties(),"rdap.help.title");
+    private static String helpDescription = propertyCheck(WhoisRdapService.getProperties(),"rdap.help.description");
+    private static String helpLinkRel = propertyCheck(WhoisRdapService.getProperties(),"rdap.help.link.rel");
+    private static String helpLinkHref = propertyCheck(WhoisRdapService.getProperties(),"rdap.help.link.href");
+    private static String helpLinkType = propertyCheck(WhoisRdapService.getProperties(),"rdap.help.link.type");
 
     private NoticeFactory() {
     }
@@ -106,7 +74,7 @@ public class NoticeFactory {
     private static String propertyCheck(Properties properties, String key) {
         String value = properties.getProperty(key);
         if (value == null) {
-            String error = String.format("Missing property [%s] from [%s]", key, WhoisRdapService.RDAP_PROPERTIES);
+            String error = String.format("Missing property [%s] from [%s]", key, WhoisRdapService.rdapPropertiesPath);
             LOGGER.error(error);
             throw new ExceptionInInitializerError(error);
         }
