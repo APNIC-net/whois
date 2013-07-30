@@ -104,6 +104,25 @@ class LongOptionsSpec extends BaseSpec {
         ]
     }
 
+    // Test fails randomly, try putting it as the first test to run
+    def "query specific ASSIGNED PA range, parent ALLOCATED PA, with --persistent-connection"() {
+        given:
+        syncUpdate(getTransient("ALLOC-PA") + "password: owner3\npassword: hm")
+        // Trying sleep
+        sleep(2000)
+        syncUpdate(getTransient("ASS-END") + "password: lir\npassword: end\npassword: owner3")
+
+        expect:
+        // "ALLOC-PA"
+        queryObject("-rBG -T inetnum 192.168.0.0 - 192.169.255.255", "inetnum", "192.168.0.0 - 192.169.255.255")
+        // "ASS-END"
+        queryObject("-rBG -T inetnum 192.168.200.0 - 192.168.200.255", "inetnum", "192.168.200.0 - 192.168.200.255")
+
+        and:
+        queryObject("-rBG -T inetnum -k 192.168.200.0 - 192.168.200.255\n\n-rBG -T inetnum 192.168.0.0 - 192.169.255.255\n\n-k", "inetnum", "192.168.0.0 - 192.169.255.255")
+        queryObject("-rBG -T inetnum --persistent-connection 192.168.200.0 - 192.168.200.255\n\n-rBG -T inetnum 192.168.0.0 - 192.169.255.255\n\n--persistent-connection", "inetnum", "192.168.0.0 - 192.169.255.255")
+    }
+
     def "query specific ASSIGNED PA range, parent ALLOCATED PA, with --exact"() {
       given:
         syncUpdate(getTransient("ALLOC-PA") + "password: owner3\npassword: hm")
@@ -447,24 +466,6 @@ class LongOptionsSpec extends BaseSpec {
 
       and:
         queryObject("-rBG -T inetnum --brief 192.168.200.0 - 192.168.200.255", "in", "192.168.200.0 - 192.168.200.255")
-    }
-
-    def "query specific ASSIGNED PA range, parent ALLOCATED PA, with --persistent-connection"() {
-      given:
-        syncUpdate(getTransient("ALLOC-PA") + "password: owner3\npassword: hm")
-        // Trying sleep
-        sleep(2000)
-        syncUpdate(getTransient("ASS-END") + "password: lir\npassword: end\npassword: owner3")
-
-      expect:
-        // "ALLOC-PA"
-        queryObject("-rBG -T inetnum 192.168.0.0 - 192.169.255.255", "inetnum", "192.168.0.0 - 192.169.255.255")
-        // "ASS-END"
-        queryObject("-rBG -T inetnum 192.168.200.0 - 192.168.200.255", "inetnum", "192.168.200.0 - 192.168.200.255")
-
-      and:
-        queryObject("-rBG -T inetnum -k 192.168.200.0 - 192.168.200.255\n\n-rBG -T inetnum 192.168.0.0 - 192.169.255.255\n\n-k", "inetnum", "192.168.0.0 - 192.169.255.255")
-        queryObject("-rBG -T inetnum --persistent-connection 192.168.200.0 - 192.168.200.255\n\n-rBG -T inetnum 192.168.0.0 - 192.169.255.255\n\n--persistent-connection", "inetnum", "192.168.0.0 - 192.169.255.255")
     }
 
     def "query specific ASSIGNED PA range, parent ALLOCATED PA, with --no-grouping --no-filtering --no-referenced"() {

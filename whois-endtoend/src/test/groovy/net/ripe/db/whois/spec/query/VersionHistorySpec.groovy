@@ -154,6 +154,52 @@ class VersionHistorySpec extends BaseSpec {
         ]
     }
 
+    // Test fails randomly, try putting this at the top as the first test
+    def "query --list-versions and -k, 2 versions"() {
+        given:
+        sleep(5000)
+        syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
+        sleep(5000)
+
+        expect:
+        // "RIR-ALLOC-20"
+        queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
+
+        when:
+        def message = syncUpdate("""\
+                inet6num:     2001::/20
+                netname:      EU-ZZ-2001-0600
+                descr:        European Regional Registry
+                country:      EU
+                org:          ORG-LIR1-TEST
+                admin-c:      TP1-TEST
+                tech-c:       TP1-TEST
+                mnt-by:       RIPE-NCC-HM-MNT
+                mnt-lower:    RIPE-NCC-HM-MNT
+                status:       ALLOCATED-BY-RIR
+                remarks:      version 2
+                changed:      dbtest@ripe.net 20130101
+                source:       TEST
+                override:  override1
+
+                """.stripIndent()
+        )
+
+        then:
+        def ack = new AckResponse("", message)
+
+        ack.summary.nrFound == 1
+        ack.summary.assertSuccess(1, 0, 1, 0, 0)
+        ack.summary.assertErrors(0, 0, 0, 0)
+
+        ack.countErrorWarnInfo(0, 0, 1)
+        ack.successes.any { it.operation == "Modify" && it.key == "[inet6num] 2001::/20" }
+
+        queryLineMatches("-k --show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 1 of object \"2001::/20\"")
+        queryLineMatches("-k --show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 2 \\(current version\\) of object \"2001::/20\"")
+//        queryLineMatches("-k -rBG 2001::/20\n\n--show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 1 of object \"2001::/20\"")
+    }
+
     def "query --list-versions"() {
       given:
         syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
@@ -1426,52 +1472,6 @@ class VersionHistorySpec extends BaseSpec {
         ack.successes.any { it.operation == "Modify" && it.key == "[inet6num] 2001::/20" }
 
         queryLineMatches("-m --list-versions 2001::/20", "^%ERROR:109: invalid combination of flags passed")
-    }
-
-    def "query --list-versions and -k, 2 versions"() {
-      given:
-        // Why does this test fail randomly?
-        sleep(5000)
-        syncUpdate(getTransient("RIR-ALLOC-20") + "override: override1")
-        sleep(5000)
-
-      expect:
-        // "RIR-ALLOC-20"
-        queryObject("-rBG -T inet6num 2001::/20", "inet6num", "2001::/20")
-
-      when:
-        def message = syncUpdate("""\
-                inet6num:     2001::/20
-                netname:      EU-ZZ-2001-0600
-                descr:        European Regional Registry
-                country:      EU
-                org:          ORG-LIR1-TEST
-                admin-c:      TP1-TEST
-                tech-c:       TP1-TEST
-                mnt-by:       RIPE-NCC-HM-MNT
-                mnt-lower:    RIPE-NCC-HM-MNT
-                status:       ALLOCATED-BY-RIR
-                remarks:      version 2
-                changed:      dbtest@ripe.net 20130101
-                source:       TEST
-                override:  override1
-
-                """.stripIndent()
-        )
-
-      then:
-        def ack = new AckResponse("", message)
-
-        ack.summary.nrFound == 1
-        ack.summary.assertSuccess(1, 0, 1, 0, 0)
-        ack.summary.assertErrors(0, 0, 0, 0)
-
-        ack.countErrorWarnInfo(0, 0, 1)
-        ack.successes.any { it.operation == "Modify" && it.key == "[inet6num] 2001::/20" }
-
-        queryLineMatches("-k --show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 1 of object \"2001::/20\"")
-        queryLineMatches("-k --show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 2 \\(current version\\) of object \"2001::/20\"")
-//        queryLineMatches("-k -rBG 2001::/20\n\n--show-version 1 2001::/20\n\n--show-version 2 2001::/20\n\n-k", "^% Version 1 of object \"2001::/20\"")
     }
 
     def "query --show-version 2 and -F, 2 versions"() {
