@@ -255,7 +255,12 @@ public class RdapRegressionTestIntegration {
         // For each url : call each url
         for (String pkey : queries) {
             // ip query result needs to be converted
-            String rdapQuery = prefix + (pkey.indexOf(":") > 0 ? Ipv6Resource.parse(pkey).toString() : Ipv4Resource.parse(pkey).toString());
+            String postfix = pkey.indexOf(":") > 0 ? Ipv6Resource.parse(pkey).toString() : Ipv4Resource.parse(pkey).toString();
+            if (postfix.indexOf("-") >= 0) {
+                LOGGER.warn("Cannot query ip range:" + postfix);
+                continue;
+            }
+            String rdapQuery = prefix + postfix;
             try {
                 RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(rdapQuery, true);
                 String response = new String(result.body);
