@@ -62,7 +62,6 @@ public class DummyWhoisClient {
     @RetryFor(IOException.class)
     public String sendQuery(final String query, final Charset charset, final int timeout) throws IOException {
         final Socket socket = new Socket(host, port);
-        socket.setTcpNoDelay(true);
         if (timeout > 0) {
             socket.setSoTimeout(timeout);
         }
