@@ -31,6 +31,8 @@ import net.ripe.db.whois.update.dns.DnsGatewayStub;
 import net.ripe.db.whois.update.mail.MailGateway;
 import net.ripe.db.whois.update.mail.MailSenderStub;
 import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.FileCopyUtils;
@@ -56,6 +58,8 @@ import static org.junit.Assert.assertThat;
 
 // TODO [AK] Integrate in BaseSpec
 public class WhoisFixture {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WhoisFixture.class);
+
     private static final Pattern CHARSET_PATTERN = Pattern.compile(".*;charset=(.*)");
 
     private ClassPathXmlApplicationContext applicationContext;
@@ -186,10 +190,27 @@ public class WhoisFixture {
     }
 
     public static String syncupdate(final JettyConfig jettyConfig, final String data, final boolean isHelp, final boolean isDiff, final boolean isNew, final boolean isRedirect, final boolean doPost, final int responseCode) throws IOException {
-        if (doPost) {
-            return doPostRequest(getSyncupdatesUrl(jettyConfig, null), getQuery(data, isHelp, isDiff, isNew, isRedirect), responseCode);
-        } else {
-            return doGetRequest(getSyncupdatesUrl(jettyConfig, getQuery(data, isHelp, isDiff, isNew, isRedirect)), responseCode);
+        try {
+            String ret;
+            String query = getQuery(data, isHelp, isDiff, isNew, isRedirect);
+            LOGGER.info("syncupdate request:" + query);
+            if (doPost) {
+                ret = doPostRequest(getSyncupdatesUrl(jettyConfig, null), query, responseCode);
+            } else {
+                ret = doGetRequest(getSyncupdatesUrl(jettyConfig, query), responseCode);
+            }
+            LOGGER.info("syncupdate response:" + ret);
+            return ret;
+        } catch (IOException ioex) {
+            LOGGER.error("IOException occured in syncupdate",ioex);
+            System.err.println("IOException occured in syncupdate:");
+            ioex.printStackTrace(System.err);
+            throw ioex;
+        } catch (Throwable t) {
+            LOGGER.error("Unexpected exception occured in syncupdate",t);
+            System.err.println("Unexpected exception occured in syncupdate:");
+            t.printStackTrace(System.err);
+            throw new IOException(t);
         }
     }
 
