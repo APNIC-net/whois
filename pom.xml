@@ -712,7 +712,7 @@
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups>None</test.groups>
                 <test.forkCount.integration>1</test.forkCount.integration>
-                <test.files.unit>net/ripe/**/*Test.class</test.files.unit>
+                <test.files.unit>net/ripe/**/*Test.class, spec/**/*Test.class</test.files.unit>
                 <test.files.integration>None</test.files.integration>
             </properties>
         </profile>
@@ -723,7 +723,7 @@
                 <test.groups>net.ripe.db.whois.common.IntegrationTest</test.groups>
                 <test.forkCount.integration>3</test.forkCount.integration>
                 <test.files.unit>None</test.files.unit>
-                <test.files.integration>**/*TestIntegration*.class,**/*Spec*.class</test.files.integration>
+                <test.files.integration>net/ripe/**/*Test*.class,**/*Spec*.class</test.files.integration>
             </properties>
         </profile>
         <profile>
@@ -739,7 +739,7 @@
             <id>endtoend</id>
             <properties>
                 <test.redirectOutput>true</test.redirectOutput>
-                <test.groups/>
+                <test.groups />
                 <test.files.unit>None</test.files.unit>
                 <test.files.integration>net/ripe/**/whois/spec/query/*Spec*.java,net/ripe/**/whois/spec/update/*Spec*.java
                 </test.files.integration>
@@ -751,8 +751,8 @@
             <properties>
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups>net.ripe.db.whois.common.IntegrationTest</test.groups>
-                <test.files.unit>net/ripe/**/*Test.class</test.files.unit>
-                <test.files.integration>**/*Test*.class,**/*Spec*.class</test.files.integration>
+                <test.files.unit>net/ripe/**/*Test.class, spec/**/*Test.class</test.files.unit>
+                <test.files.integration>net/ripe/**/*Test*.class,spec/**/*Spec*.class</test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
             </properties>
         </profile>
@@ -793,7 +793,7 @@
                 <test.groups>net.apnic.db.whois.common.IntegrationTest</test.groups>
                 <test.forkCount.integration>3</test.forkCount.integration>
                 <test.files.unit>None</test.files.unit>
-                <test.files.integration>net/apnic/**/*TestIntegration.class</test.files.integration>
+                <test.files.integration>net/apnic/**/*Test*.class</test.files.integration>
             </properties>
         </profile>
         <profile>
@@ -815,7 +815,7 @@
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups>net.apnic.db.whois.common.IntegrationTest</test.groups>
                 <test.files.unit>net/apnic/**/*Test.class</test.files.unit>
-                <test.files.integration>net/apnic/**/*Test*.class,net/apnic/**/*Spec.class</test.files.integration>
+                <test.files.integration>net/apnic/**/*Test*.class</test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
             </properties>
         </profile>
