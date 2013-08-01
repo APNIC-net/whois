@@ -20,9 +20,9 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
     public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) {
         final Query query = (Query) e.getMessage();
         String queryString = "["+ query.toString() + "]";
-        LOGGER.info("!start messageReceived: " + queryString);
+        LOGGER.info("!start ConnectionStateHandler.messageReceived: " + queryString);
         if (closed) {
-            LOGGER.info("!end messageReceived: closed " + queryString);
+            LOGGER.info("!end ConnectionStateHandler.messageReceived: closed " + queryString);
             return;
         }
 
@@ -31,7 +31,7 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
         if (keepAlive && query.hasOnlyKeepAlive()) {
             channel.close();
-            LOGGER.info("!end messageReceived:  channel.close() " + queryString);
+            LOGGER.info("!end ConnectionStateHandler.messageReceived: channel.close() " + queryString);
             return;
         }
 
@@ -40,10 +40,10 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
         }
 
         if (query.hasOnlyKeepAlive()) {
-            LOGGER.info("!end messageReceived: channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel)) " +queryString);
+            LOGGER.info("!end ConnectionStateHandler.messageReceived: channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel)) " +queryString);
             channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
         } else {
-            LOGGER.info("!end messageReceived: ctx.sendUpstream(e) " + queryString);
+            LOGGER.info("!end ConnectionStateHandler.messageReceived: ctx.sendUpstream(e) " + queryString);
             ctx.sendUpstream(e);
         }
 
