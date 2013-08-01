@@ -30,11 +30,11 @@ public class ExceptionHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void exceptionCaught(final ChannelHandlerContext ctx, final ExceptionEvent event) {
         final Throwable cause = event.getCause();
-        LOGGER.debug("Caught exception", cause);
+        LOGGER.error("Caught exception", cause);
 
         final Channel channel = event.getChannel();
         if (cause instanceof ClosedChannelException) {
-            LOGGER.debug("Channel closed", cause);
+            LOGGER.error("Channel closed", cause);
         } else if (cause instanceof QueryException) {
             handleException(channel, ((QueryException) cause).getMessages(), ((QueryException) cause).getCompletionInfo());
         } else if (cause instanceof TimeoutException) {
