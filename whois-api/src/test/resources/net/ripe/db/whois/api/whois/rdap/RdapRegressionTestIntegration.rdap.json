@@ -1,48 +1,72 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "/etc/fstab",
-    "description": "JSON representation of /etc/fstab",
+    "title": "RDAP JSON",
+    "description": "JSON representation of rdap entities",
     "type": "object",
-    "properties": {
-        "swap": {
-            "$ref": "#/definitions/mntent"
-        }
-    },
-    "patternProperties": {
-        "^/([^/]+(/[^/]+)*)?$": {
-            "$ref": "#/definitions/mntent"
-        }
-    },
-    "required": [ "/", "swap" ],
+    "required": [ "rdapConformance" ],
     "additionalProperties": false,
+
+    "properties": {
+        "rdapConformance": {
+            "$ref": "#/definitions/rdapConformance"
+        },
+
+        "notices": {
+            "$ref": "#/definitions/notices"
+        },
+
+        "port43": {
+            "type": "string"
+        }
+    },
+
     "definitions": {
-        "mntent": {
-            "title": "mntent",
-            "description": "An fstab entry",
-            "type": "object",
-            "properties": {
-                "device": {
-                    "type": "string"
-                },
-                "fstype": {
-                    "type": "string"
-                },
-                "options": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": { "type": "string" }
-                },
-                "dump": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "fsck": {
-                    "type": "integer",
-                    "minimum": 0
-                }
+        "rdapConformance": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "enum": [ "rdap_level_0"  ]
             },
-            "required": [ "device", "fstype" ],
-            "additionalItems": false
+            "uniqueItems": true
+        },
+        "notices": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "array"
+                    },
+                    "links": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "value": {
+                                    "type": "string"
+                                },
+                                "rel": {
+                                    "type": "string"
+                                },
+                                "href": {
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "additionalProperties": false
+            }
         }
     }
 }
