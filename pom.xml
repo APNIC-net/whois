@@ -751,7 +751,7 @@
                 <test.files.unit>None</test.files.unit>
                 <test.files.integration>net/ripe/**/whois/spec/query/*Spec*.java,net/ripe/**/whois/spec/update/*Spec*.java
                 </test.files.integration>
-                <test.forkCount.integration>10</test.forkCount.integration>
+                <test.forkCount.integration>2</test.forkCount.integration>
             </properties>
         </profile>
         <profile>
