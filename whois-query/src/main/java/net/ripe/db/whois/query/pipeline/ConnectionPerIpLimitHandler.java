@@ -29,7 +29,7 @@ public class ConnectionPerIpLimitHandler extends SimpleChannelUpstreamHandler {
     private final WhoisLog whoisLog;
     private final ConcurrentHashMap<InetAddress, Integer> connections = new ConcurrentHashMap<>();
 
-    @Value("${whois.limit.connectionsPerIp:10}") private volatile int maxConnectionsPerIp;
+    @Value("${whois.limit.connectionsPerIp:3}") private volatile int maxConnectionsPerIp;
     @Value("${application.version}") private volatile String version;
 
     @Autowired
