@@ -102,9 +102,9 @@ public class WhoisServerPipelineFactory implements ChannelPipelineFactory {
 
         pipeline.addLast("exception", new ExceptionHandler());
         pipeline.addLast("query-decoder", queryDecoder);
+        pipeline.addLast("connection-state", new ConnectionStateHandler());
 
         pipeline.addLast("served-by", new ServedByHandler(version));
-        pipeline.addLast("connection-state", new ConnectionStateHandler());
         pipeline.addLast("whois", new WhoisServerHandler(queryHandler));
 
         return pipeline;
