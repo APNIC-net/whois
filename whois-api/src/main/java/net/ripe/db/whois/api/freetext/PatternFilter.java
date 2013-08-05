@@ -31,7 +31,7 @@ public class PatternFilter extends TokenFilter {
 
     private final CharTermAttribute termAttribute = addAttribute(CharTermAttribute.class);
 
-    private final List<String> tokens = Lists.newArrayList();
+    protected final List<String> tokens = Lists.newArrayList();
     private int index = 0;
 
     protected PatternFilter(TokenStream input) {
@@ -39,7 +39,7 @@ public class PatternFilter extends TokenFilter {
     }
 
     @Override
-    public boolean incrementToken() throws IOException {
+    public final boolean incrementToken() throws IOException {
         if (!tokens.isEmpty()) {
             if (index < tokens.size()) {
                 // iterate next token
