@@ -70,6 +70,7 @@ public class DummyWhoisClient {
         BufferedReader serverReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), charset));
         StringWriter responseWriter = new StringWriter();
 
+        LOGGER.info("sendQuery request:" + query);
         serverWriter.println(query);
 
         try {
@@ -80,8 +81,8 @@ public class DummyWhoisClient {
             IOUtils.closeQuietly(serverWriter);
             IOUtils.closeQuietly(serverReader);
             IOUtils.closeQuietly(socket);
+            LOGGER.info("sendQuery response:" + responseWriter.toString());
         }
-
         return responseWriter.toString();
     }
 }
