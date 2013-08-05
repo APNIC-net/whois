@@ -44,8 +44,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
     private static final int MID_RANGE = 21486049;  // 21486050 is a person in nrtm_sample.sql
     private static final int MAX_RANGE = 21486100;
 
-    private static List<NrtmTestThread> testThreads;
-
     @BeforeClass
     public static void setInterval() {
         System.setProperty("nrtm.update.interval", "1");
@@ -58,7 +56,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
     @Before
     public void before() throws Exception {
-        waitForRunningThreadsToFinish();
         loadSerials(0, Integer.MAX_VALUE);
         nrtmServer.start();
     }
@@ -68,7 +65,14 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         nrtmServer.stop(true);
     }
 
-    // Try running this test first to solve weird junit threading issue
+    @Test
+    public void dontHangOnHugeAutNumObject() throws Exception {
+        String response = DummyWhoisClient.query(NrtmServer.port, String.format("-g TEST:3:%d-%d", MIN_RANGE, MAX_RANGE), 5 * 1000);
+
+        assertTrue(response, response.contains(String.format("ADD %d", MIN_RANGE)));  // serial 21486000 is a huge aut-num
+        assertTrue(response, response.contains(String.format("DEL %d", MIN_RANGE + 1)));
+    }
+
     @Test
     public void dontHangOnHugeAutNumObjectKeepalive() throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -78,9 +82,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         String query = String.format("-g TEST:3:%d-LAST -k", MIN_RANGE + 1);
 
         NrtmTestThread thread = new NrtmTestThread(query, MIN_RANGE + 1, countDownLatch);
-
-        // junit will now wait until test finishes in @Before incase it thinks test is finished (and test threads still runnning)
-        testThreads = Lists.newArrayList(thread);
 
         thread.start();
         countDownLatch.await(5, TimeUnit.SECONDS);
@@ -96,24 +97,14 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         assertThat(thread.delCount, is(3));
 
         thread.stop = true;
+        thread.join();
     }
 
-
-    @Test
-    public void dontHangOnHugeAutNumObject() throws Exception {
-        String response = DummyWhoisClient.query(NrtmServer.port, String.format("-g TEST:3:%d-%d", MIN_RANGE, MAX_RANGE), 5 * 1000);
-
-        assertTrue(response, response.contains(String.format("ADD %d", MIN_RANGE)));  // serial 21486000 is a huge aut-num
-        assertTrue(response, response.contains(String.format("DEL %d", MIN_RANGE + 1)));
-    }
 
     @Test
     public void manySimultaneousClientsReadingManyObjects() throws InterruptedException {
         // 1st part: clients request MIN to LAST with -k flag, but we provide half of the available serials only
         final List<NrtmTestThread> threads = Lists.newArrayList();
-
-        // junit will now wait until test finishes in @Before incase it thinks test is finished (and test threads still runnning)
-        testThreads = threads;
 
         CountDownLatch countDownLatch = new CountDownLatch(NUM_THREADS);
 
@@ -168,6 +159,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         }
 
         LOGGER.info("ADD: {}, DEL: {}", addResult, delResult);
+
+        waitForRunningThreadsToFinish(threads);
     }
 
 
@@ -193,9 +186,9 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         whoisTemplate.execute("TRUNCATE TABLE last");
     }
 
-    private void waitForRunningThreadsToFinish() {
-        if (testThreads != null) {
-            for (Thread thread : testThreads) {
+    private void waitForRunningThreadsToFinish(List<NrtmTestThread> threads) {
+        if (threads != null) {
+            for (Thread thread : threads) {
                 try {
                     thread.join();
                 } catch (InterruptedException ie) {}

@@ -4,6 +4,9 @@
     "endAutnum" : 10000,
     "name" : "JPNIC-NET-JP-AS-BLOCK",
     "country" : "JP",
+
+    "poo" : "junk",
+
     "entities" : [ {
         "handle" : "JNIC1-AP",
         "vcardArray" : [ "vcard", [ [ "version", {

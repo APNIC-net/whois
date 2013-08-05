@@ -39,6 +39,50 @@
             "$ref": "#/definitions/entities"
         },
 
+        "startAutnum": {
+            "type": "integer"
+        },
+
+        "endAutnum": {
+            "type": "integer"
+        },
+
+        "name": {
+            "type": "string"
+        },
+
+        "country": {
+            "type": "string"
+        },
+
+        "ldhName": {
+            "type": "string"
+        },
+
+        "nameServers": {
+            "$ref": "#/definitions/nameServers"
+        },
+
+        "startAddress": {
+            "type": "string"
+        },
+
+        "endAddress": {
+            "type": "string"
+        },
+
+        "ipVersion": {
+            "enum": [ "v4", "v6" ]
+        },
+
+        "type": {
+            "type": "string"
+        },
+
+        "parentHandle": {
+            "type": "string"
+        },
+
         "vcardArray": {
             "$ref": "#/definitions/vcardArray"
         }
@@ -172,7 +216,23 @@
             }
         },
 
+        "nameServers": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "ldhName": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+
+
         "vcardArray": {
         }
+
     }
 }

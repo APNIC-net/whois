@@ -1,5 +1,10 @@
 package net.ripe.db.whois.api.whois.rdap;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.main.JsonSchema;
+import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import com.github.fge.jsonschema.report.ProcessingReport;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
@@ -17,6 +22,7 @@ import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,12 +32,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Scanner;
 
 @Category(ManualTest.class)
 public class RdapRegressionTestIntegration {
     private static Class clazz = RdapRegressionTestIntegration.class;
     private static final Logger LOGGER = LoggerFactory.getLogger(clazz);
+
+    private static final String PKGBASE  = '/' + clazz.getPackage().getName().replace(".", "/");
+
 
     // Limit the number of queries for each rdap type ( -1 no limit )
     private static final int PROCESS_MAX_QUERIES = -1;
@@ -83,7 +91,7 @@ public class RdapRegressionTestIntegration {
         db_password = testProperties.getProperty("db_password");
 
         // Load json schema
-        rdapJsonSchema = new Scanner(clazz.getResourceAsStream(resourcePath + ".rdap.json")).useDelimiter("\\Z").next();
+//        rdapJsonSchema = new Scanner(clazz.getResourceAsStream(resourcePath + ".rdap.json")).useDelimiter("\\Z").next();
 
         // Test the rdap http server is reachable
         byte[] content = RdapHelperUtils.getHttpContent(rdap_server_url_base.toString(), true).body;
@@ -261,7 +269,7 @@ public class RdapRegressionTestIntegration {
 
 
     //@Test
-    public void validate_rdap_manual_test() throws Exception {
+    public void validate_rdap_manual_external_test() throws Exception {
         String url = "http://newwhois.tst.apnic.net/rdap/entity/HM20-AP";
         try {
             RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(url, true);
@@ -276,6 +284,21 @@ public class RdapRegressionTestIntegration {
         } catch (Throwable ex) {
             LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
         }
+    }
+
+
+    //@Test
+    public void vaildate_rdap_manual_internal_test() throws Exception {
+        final JsonNode rdap_schema = loadResource("/rdap.schema.json");
+        final JsonNode autnum_json = loadResource("/autnum.json");
+
+        final JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
+
+        final JsonSchema schema = factory.getJsonSchema(rdap_schema);
+
+        ProcessingReport report = schema.validate(autnum_json);
+
+        System.out.println(report);
     }
 
 
@@ -325,6 +348,12 @@ public class RdapRegressionTestIntegration {
         }
 
         return queries;
+    }
+
+    public static JsonNode loadResource(final String name)
+            throws IOException
+    {
+        return JsonLoader.fromResource(PKGBASE + name);
     }
 
 }

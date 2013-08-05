@@ -6,6 +6,16 @@
 
     "properties": {
         "vcardArray": {
+            "$ref": "#/definitions/vcardArray"
+        }
+    },
+    "patternProperties": {
+        "^/([^/]+(/[^/]+)*)?$": {
+            "$ref": "#/definitions/vcard"
+        }
+    },
+    "definitions": {
+        "vcardArray": {
             "type": "array",
             "items": [
                 {
@@ -19,29 +29,24 @@
                             "type": "array",
                             "items": [
                                 {
-                                    "$ref": "#/definitions/vcardTypes"
+                                    "type" : "string",
+                                    "enum": [ "fn" ]
                                 },
                                 {
                                     "type": "object"
                                 },
                                 {
-                                    "enum": [ "text"]
+                                    "enum": [ "text" ]
                                 },
                                 {
                                     "type": "string"
                                 }
                             ],
-                            "additionalProperties" : false
+                            "additionalProperties": false
                         }
                     ]
                 }
             ]
-        }
-    },
-
-    "definitions": {
-        "vcardTypes": {
-            "pattern": "^[version]|[fn]$"
         }
     }
 
