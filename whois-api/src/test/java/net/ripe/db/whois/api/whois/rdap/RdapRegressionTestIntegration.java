@@ -100,6 +100,10 @@ public class RdapRegressionTestIntegration {
         int cnt = 0;
         // For each url : call each url
         for (String pkey : pkeys) {
+            if (cnt++ >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
+                break;
+            }
+
             String url = String.format("%s%s",prefix,pkey);
             try {
                 RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(url, true);
@@ -107,13 +111,14 @@ public class RdapRegressionTestIntegration {
                 int statusCode = result.statusCode;
 
                 if (statusCode == HttpStatus.SC_OK) {
-                    LOGGER.info(response);
+                    if (LOGGER.isDebugEnabled()) LOGGER.debug(response);
                     Entity entity = RdapHelperUtils.unmarshal(response, Entity.class);
 
                     // Manual validation checks / sanity checks
 
                 } else {
                     net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
+                    LOGGER.error(url + ":" + response);
                 }
 
                 // Validate against json schema
@@ -122,9 +127,6 @@ public class RdapRegressionTestIntegration {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
             }
 
-            if (++cnt >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
-                break;
-            }
         }
     }
 
@@ -140,6 +142,10 @@ public class RdapRegressionTestIntegration {
         int cnt = 0;
         // For each url : call each url
         for (String pkey : pkeys) {
+            if (cnt++ >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
+                break;
+            }
+
             String url = String.format("%s%s", prefix, pkey);
             try {
                 RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(url, true);
@@ -147,22 +153,20 @@ public class RdapRegressionTestIntegration {
                 int statusCode = result.statusCode;
 
                 if (statusCode == HttpStatus.SC_OK) {
+                    if (LOGGER.isDebugEnabled()) LOGGER.debug(response);
                     Domain domain = RdapHelperUtils.unmarshal(response, Domain.class);
 
                     // Manual validation checks / sanity checks
 
                 } else {
                     net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
+                    LOGGER.error(url + ":" + response);
                 }
 
                 // Validate against json schema
 
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
-            }
-
-            if (++cnt >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
-                break;
             }
         }
 
@@ -178,18 +182,23 @@ public class RdapRegressionTestIntegration {
         int cnt = 0;
         // For each url : call each url
         for (String url : urls) {
+            if (cnt++ >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
+                break;
+            }
             try {
                 RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(url, true);
                 String response = new String(result.body);
                 int statusCode = result.statusCode;
 
                 if (statusCode == HttpStatus.SC_OK) {
+                    if (LOGGER.isDebugEnabled()) LOGGER.debug(response);
                     Autnum autnum = RdapHelperUtils.unmarshal(response, Autnum.class);
 
                     // Manual validation checks / sanity checks
 
                 } else {
                     net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
+                    LOGGER.error(url + ":" + response);
                 }
 
                 // Validate against json schema
@@ -199,9 +208,6 @@ public class RdapRegressionTestIntegration {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
             }
 
-            if (++cnt >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
-                break;
-            }
         }
     }
 
@@ -216,6 +222,10 @@ public class RdapRegressionTestIntegration {
         int cnt = 0;
         // For each url : call each url
         for (String pkey : pkeys) {
+            if (cnt++ >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
+                break;
+            }
+
             // ip query result needs to be converted
             String postfix = pkey.indexOf(":") > 0 ? Ipv6Resource.parse(pkey).toString() : Ipv4Resource.parse(pkey).toString();
             if (postfix.indexOf("-") >= 0) {
@@ -230,12 +240,14 @@ public class RdapRegressionTestIntegration {
                 int statusCode = result.statusCode;
 
                 if (statusCode == HttpStatus.SC_OK) {
+                    if (LOGGER.isDebugEnabled()) LOGGER.debug(response);
                     Ip ip = RdapHelperUtils.unmarshal(response, Ip.class);
 
                     // Manual validation checks / sanity checks
 
                 } else {
                     net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
+                    LOGGER.error(url + ":" + response);
                 }
 
                 // Validate against json schema
@@ -243,10 +255,6 @@ public class RdapRegressionTestIntegration {
 
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
-            }
-
-            if (++cnt >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
-                break;
             }
         }
     }

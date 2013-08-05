@@ -1,0 +1,48 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Vcard",
+    "description": "Vcard",
+    "type": "object",
+
+    "properties": {
+        "vcardArray": {
+            "type": "array",
+            "items": [
+                {
+                    "type": "string",
+                    "enum": [ "vcard" ]
+                },
+                {
+                    "type": "array",
+                    "items": [
+                        {
+                            "type": "array",
+                            "items": [
+                                {
+                                    "$ref": "#/definitions/vcardTypes"
+                                },
+                                {
+                                    "type": "object"
+                                },
+                                {
+                                    "enum": [ "text"]
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ],
+                            "additionalProperties" : false
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+
+    "definitions": {
+        "vcardTypes": {
+            "pattern": "^[version]|[fn]$"
+        }
+    }
+
+}

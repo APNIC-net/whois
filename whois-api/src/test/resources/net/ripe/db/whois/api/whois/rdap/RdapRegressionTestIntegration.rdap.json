@@ -15,8 +15,32 @@
             "$ref": "#/definitions/notices"
         },
 
+        "remarks": {
+            "$ref": "#/definitions/remarks"
+        },
+
+        "events": {
+            "$ref": "#/definitions/events"
+        },
+
         "port43": {
             "type": "string"
+        },
+
+        "links": {
+            "$ref": "#/definitions/links"
+        },
+
+        "handle": {
+            "type": "string"
+        },
+
+        "entities": {
+            "$ref": "#/definitions/entities"
+        },
+
+        "vcardArray": {
+            "$ref": "#/definitions/vcardArray"
         }
     },
 
@@ -43,30 +67,112 @@
                         "type": "array"
                     },
                     "links": {
-                        "type": "array",
-                        "minItems": 1,
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "value": {
-                                    "type": "string"
-                                },
-                                "rel": {
-                                    "type": "string"
-                                },
-                                "href": {
-                                    "type": "string"
-                                },
-                                "type": {
-                                    "type": "string"
-                                }
-                            },
-                            "additionalProperties": false
-                        }
+                        "$ref": "#/definitions/links"
                     }
                 },
                 "additionalProperties": false
             }
+        },
+        "links": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "hreflang": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "title": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "value": {
+                        "type": "string"
+                    },
+                    "rel": {
+                        "type": "string"
+                    },
+                    "href": {
+                        "format": "uri",
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "media": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+
+        "remarks": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "links": {
+                        "$ref": "#/definitions/links"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+
+        "events": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "eventAction": {
+                        "type": "string"
+                    },
+                    "eventActor": {
+                        "type": "string"
+                    },
+                    "eventDate": {
+                        "format": "date-time"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+
+        "entities": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "handle": {
+                        "type": "string"
+                    },
+                    "vcardArray": {
+                        "$ref": "#/definitions/vcardArray"
+                    }
+                },
+                "additionalProperties": true
+            }
+        },
+
+        "vcardArray": {
         }
     }
 }
