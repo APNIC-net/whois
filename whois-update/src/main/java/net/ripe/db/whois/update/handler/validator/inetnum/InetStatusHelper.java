@@ -1,9 +1,8 @@
 package net.ripe.db.whois.update.handler.validator.inetnum;
 
 import net.ripe.db.whois.common.domain.CIString;
-import net.ripe.db.whois.common.domain.attrs.Inet6numStatus;
 import net.ripe.db.whois.common.domain.attrs.InetStatus;
-import net.ripe.db.whois.common.domain.attrs.InetnumStatus;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslObject;
@@ -11,7 +10,7 @@ import net.ripe.db.whois.update.domain.PreparedUpdate;
 
 import javax.annotation.CheckForNull;
 
-class InetStatusHelper {
+public class InetStatusHelper {
     private InetStatusHelper() {
     }
 
@@ -38,12 +37,16 @@ class InetStatusHelper {
         switch (objectType) {
             case INETNUM:
                 try {
-                    return InetnumStatus.getStatusFor(value);
+                    return WhoisVariant.isAPNIC()
+                            ? net.apnic.db.whois.common.domain.attrs.InetnumStatus.getStatusFor(value)
+                            : net.ripe.db.whois.common.domain.attrs.InetnumStatus.getStatusFor(value);
                 } catch (IllegalArgumentException ignored) {
                 }
             case INET6NUM:
                 try {
-                    return Inet6numStatus.getStatusFor(value);
+                    return WhoisVariant.isAPNIC()
+                            ? net.apnic.db.whois.common.domain.attrs.Inet6numStatus.getStatusFor(value)
+                            : net.ripe.db.whois.common.domain.attrs.Inet6numStatus.getStatusFor(value);
                 } catch (IllegalArgumentException ignored) {
                 }
         }

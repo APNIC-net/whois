@@ -227,7 +227,7 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
             put(attributeSyntaxTypeMap, AttributeSyntaxType.IPV6_SYNTAX, new AttributeSyntaxParser(new AttributeParser.Ipv6ResourceParser(), "" +
                     "<ipv6-address>/<prefix>"));
 
-            put(attributeSyntaxTypeMap, AttributeSyntaxType.IRT_SYNTAX, new AttributeSyntaxRegexp(Pattern.compile("^irt-[A-Z0-9_-]*[A-Z0-9]$"), "" +
+            put(attributeSyntaxTypeMap, AttributeSyntaxType.IRT_SYNTAX, new AttributeSyntaxRegexp(Pattern.compile("(?i)^irt-[A-Z0-9_-]*[A-Z0-9]$"), "" +
                     "An irt name is made up of letters, digits, the character\n" +
                     "underscore \"_\", and the character hyphen \"-\"; it must start\n" +
                     "with \"IRT-\", and the last character of a name must be a\n" +
