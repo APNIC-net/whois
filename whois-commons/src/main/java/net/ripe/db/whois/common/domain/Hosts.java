@@ -10,23 +10,15 @@ import java.util.List;
 import java.util.Map;
 
 public enum Hosts {
-    WHOIS1("dbc-whois1.ripe.net"),
-    WHOIS2("dbc-whois2.ripe.net"),
-    WHOIS3("dbc-whois3.ripe.net"),
-    WHOIS4("dbc-whois4.ripe.net"),
-    WHOIS5("dbc-whois5.ripe.net"),
-    WHOIS6("dbc-whois6.ripe.net"),
-    PRE1("dbc-pre1.ripe.net"),
-    PRE2("dbc-pre2.ripe.net"),
-    DEV1("dbc-dev1.ripe.net"),
-    DEV2("dbc-dev2.ripe.net"),
+    WHOIS1("whoisv4-node1.apnic.net"),
+    WHOIS2("whoisv4-node2.apnic.net"),
+    WHOIS3("whoisv4-node3.apnic.net"),
+    WHOIS4("whoisv4-node4.apnic.net"),
     UNDEFINED("");
 
     private static final Map<Hosts, List<Hosts>> CLUSTER_MAP = Maps.newEnumMap(Hosts.class);
 
     static {
-        addHosts(Lists.newArrayList(DEV1, DEV2));
-        addHosts(Lists.newArrayList(PRE1, PRE2));
         addHosts(Lists.newArrayList(WHOIS1, WHOIS2, WHOIS3, WHOIS4));
     }
 
