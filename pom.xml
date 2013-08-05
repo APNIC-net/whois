@@ -636,7 +636,7 @@
                     </includes>
                     <groups>${test.groups}</groups>
                     <forkCount>${test.forkCount.integration}</forkCount>
-                    <reuseForks>true</reuseForks>
+                    <reuseForks>${test.ruseForks}</reuseForks>
                     <threadCount>1</threadCount>
                     <runOrder>random</runOrder>
                 </configuration>
@@ -732,6 +732,7 @@
                 <test.forkCount.integration>3</test.forkCount.integration>
                 <test.files.unit>None</test.files.unit>
                 <test.files.integration>net/ripe/**/*Test*.class,**/*Spec*.class</test.files.integration>
+                <test.ruseForks>true</test.ruseForks>
             </properties>
         </profile>
         <profile>
@@ -741,6 +742,7 @@
                 <test.groups>net.ripe.db.whois.common.ManualTest</test.groups>
                 <test.files.unit>None</test.files.unit>
                 <test.files.integration>**/*CompareTwoQueryInstances*</test.files.integration>
+                <test.ruseForks>true</test.ruseForks>
             </properties>
         </profile>
         <profile>
@@ -752,6 +754,7 @@
                 <test.files.integration>net/ripe/**/whois/spec/query/*Spec*.java,net/ripe/**/whois/spec/update/*Spec*.java
                 </test.files.integration>
                 <test.forkCount.integration>1</test.forkCount.integration>
+                <test.ruseForks>false</test.ruseForks>
             </properties>
         </profile>
         <profile>
@@ -762,6 +765,7 @@
                 <test.files.unit>net/ripe/**/*Test.class, spec/**/*Test.class</test.files.unit>
                 <test.files.integration>net/ripe/**/*Test*.class,spec/**/*Spec*.class</test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
+                <test.ruseForks>true</test.ruseForks>
             </properties>
         </profile>
         <profile>
@@ -771,6 +775,7 @@
                 <test.groups>None</test.groups>
                 <test.files.unit>None</test.files.unit>
                 <test.files.integration>None</test.files.integration>
+                <test.ruseForks>true</test.ruseForks>
             </properties>
             <build>
                 <plugins>
@@ -791,6 +796,7 @@
                 <test.forkCount.integration>1</test.forkCount.integration>
                 <test.files.unit>net/apnic/**/*Test.class</test.files.unit>
                 <test.files.integration>None</test.files.integration>
+                <test.ruseForks>true</test.ruseForks>
             </properties>
         </profile>
         <profile>
@@ -802,6 +808,7 @@
                 <test.forkCount.integration>3</test.forkCount.integration>
                 <test.files.unit>None</test.files.unit>
                 <test.files.integration>net/apnic/**/*Test*.class</test.files.integration>
+                <test.ruseForks>true</test.ruseForks>
             </properties>
         </profile>
         <profile>
@@ -814,6 +821,7 @@
                 <test.files.integration>net/apnic/**/whois/spec/query/*Spec.java,net/apnic/**/whois/spec/update/*Spec.java
                 </test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
+                <test.ruseForks>true</test.ruseForks>
             </properties>
         </profile>
         <profile>
@@ -825,6 +833,7 @@
                 <test.files.unit>net/apnic/**/*Test.class</test.files.unit>
                 <test.files.integration>net/apnic/**/*Test*.class</test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
+                <test.ruseForks>true</test.ruseForks>
             </properties>
         </profile>
         <profile>
@@ -835,6 +844,7 @@
                 <test.groups>None</test.groups>
                 <test.files.unit>None</test.files.unit>
                 <test.files.integration>None</test.files.integration>
+                <test.ruseForks>true</test.ruseForks>
             </properties>
             <build>
                 <plugins>
