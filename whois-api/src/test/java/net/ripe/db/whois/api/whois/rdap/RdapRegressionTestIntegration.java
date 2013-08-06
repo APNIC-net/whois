@@ -288,7 +288,8 @@ public class RdapRegressionTestIntegration {
         final JsonNode ip_json = JsonLoader.fromResource(PKGBASE + "/ip.json");
 
         ProcessingReport reportAutnum = rdapJsonSchema.validate(autnum_json);
-        assert(!reportAutnum.isSuccess());
+        LOGGER.info(String.valueOf(reportAutnum));
+        assert(reportAutnum.isSuccess());
 
         ProcessingReport reportDomain = rdapJsonSchema.validate(domain_json);
         assert(reportDomain.isSuccess());

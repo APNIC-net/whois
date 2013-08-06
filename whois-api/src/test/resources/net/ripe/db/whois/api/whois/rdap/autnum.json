@@ -55,8 +55,6 @@
         "title" : "Source",
         "description" : [ "Objects returned came from source", "APNIC" ]
     } ],
-    "port43" : "whois.apnic.net",
-
-    "some-naughty-node" : "naughtyvalue"
+    "port43" : "whois.apnic.net"
 
 }

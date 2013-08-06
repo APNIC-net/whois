@@ -3,104 +3,227 @@
     "title": "RDAP JSON",
     "description": "JSON representation of rdap entities",
     "type": "object",
-    "required": [ "rdapConformance" ],
-    "additionalProperties": false,
 
-    "properties": {
-        "rdapConformance": {
-            "$ref": "#/definitions/rdapConformance"
+    "anyOf": [
+        {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/rdapheader"
+                },
+                {
+                    "$ref": "#/definitions/autnum"
+                }
+            ]
         },
-
-        "notices": {
-            "$ref": "#/definitions/notices"
+        {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/rdapheader"
+                },
+                {
+                    "$ref": "#/definitions/domain"
+                }
+            ]
         },
-
-        "remarks": {
-            "$ref": "#/definitions/remarks"
+        {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/rdapheader"
+                },
+                {
+                    "$ref": "#/definitions/entity"
+                }
+            ]
         },
-
-        "events": {
-            "$ref": "#/definitions/events"
+        {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/rdapheader"
+                },
+                {
+                    "$ref": "#/definitions/ip"
+                }
+            ]
         },
-
-        "port43": {
-            "type": "string"
-        },
-
-        "links": {
-            "$ref": "#/definitions/links"
-        },
-
-        "handle": {
-            "type": "string"
-        },
-
-        "entities": {
-            "$ref": "#/definitions/entities"
-        },
-
-        "startAutnum": {
-            "type": "integer"
-        },
-
-        "endAutnum": {
-            "type": "integer"
-        },
-
-        "name": {
-            "type": "string"
-        },
-
-        "country": {
-            "type": "string"
-        },
-
-        "ldhName": {
-            "type": "string"
-        },
-
-        "nameServers": {
-            "$ref": "#/definitions/nameServers"
-        },
-
-        "startAddress": {
-            "type": "string"
-        },
-
-        "endAddress": {
-            "type": "string"
-        },
-
-        "ipVersion": {
-            "enum": [ "v4", "v6" ]
-        },
-
-        "type": {
-            "type": "string"
-        },
-
-        "parentHandle": {
-            "type": "string"
-        },
-
-        "errorCode": {
-            "type": "integer"
-        },
-
-        "title": {
-            "type": "string"
-        },
-
-        "description": {
-            "type": "array"
-        },
-
-        "vcardArray": {
-            "$ref": "#/definitions/vcardArray"
+        {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/rdapheader"
+                },
+                {
+                    "$ref": "#/definitions/error"
+                }
+            ]
         }
-    },
+    ],
 
     "definitions": {
+        "rdapheader": {
+            "type": "object",
+            "required": [ "rdapConformance"],
+            "properties": {
+                "rdapConformance": {
+                    "$ref": "#/definitions/rdapConformance"
+                },
+
+                "notices": {
+                    "$ref": "#/definitions/notices"
+                },
+
+                "remarks": {
+                    "$ref": "#/definitions/remarks"
+                },
+
+                "events": {
+                    "$ref": "#/definitions/events"
+                },
+
+                "port43": {
+                    "type": "string"
+                },
+
+                "links": {
+                    "$ref": "#/definitions/links"
+                }
+            }
+        },
+
+        "autnum": {
+            "type": "object",
+            "required": [ "handle", "startAutnum", "endAutnum" ],
+            "properties": {
+                "handle": {
+                    "type": "string"
+                },
+
+                "startAutnum": {
+                    "type": "integer"
+                },
+
+                "endAutnum": {
+                    "type": "integer"
+                },
+
+                "name": {
+                    "type": "string"
+                },
+
+                "country": {
+                    "type": "string"
+                },
+
+                "entities": {
+                    "$ref": "#/definitions/entities"
+                }
+            }
+        },
+
+        "domain": {
+            "required": [ "handle", "ldhName", "nameServers" ],
+            "properties": {
+                "handle": {
+                    "type": "string"
+                },
+
+                "ldhName": {
+                    "type": "string"
+                },
+
+                "nameServers": {
+                    "$ref": "#/definitions/nameServers"
+                },
+
+                "entities": {
+                    "$ref": "#/definitions/entities"
+                },
+
+                "vcardArray": {
+                    "$ref": "#/definitions/vcardArray"
+                }
+            }
+        },
+
+        "entity": {
+            "type": "object",
+            "required": [ "handle", "entities" ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/rdapheader"
+                }
+            ],
+            "properties": {
+                "handle": {
+                    "type": "string"
+                },
+
+                "entities": {
+                    "$ref": "#/definitions/entities"
+                },
+
+                "vcardArray": {
+                    "$ref": "#/definitions/vcardArray"
+                }
+            }
+        },
+
+        "ip": {
+            "type": "object",
+            "required": [ "handle", "startAddress", "endAddress", "ipVersion" ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/rdapheader"
+                }
+            ],
+
+            "properties": {
+                "handle": {
+                    "type": "string"
+                },
+
+                "startAddress": {
+                    "type": "string"
+                },
+
+                "endAddress": {
+                    "type": "string"
+                },
+
+                "ipVersion": {
+                    "enum": [ "v4", "v6" ]
+                },
+
+                "type": {
+                    "type": "string"
+                },
+
+                "parentHandle": {
+                    "type": "string"
+                },
+
+                "vcardArray": {
+                    "$ref": "#/definitions/vcardArray"
+                }
+            }
+        },
+
+        "error": {
+            "type": "object",
+            "required": [ "errorCode" ],
+            "properties": {
+                "errorCode": {
+                    "type": "integer"
+                },
+
+                "title": {
+                    "type": "string"
+                },
+
+                "description": {
+                    "type": "array"
+                }
+            }
+        },
+
         "rdapConformance": {
             "type": "array",
             "minItems": 1,
@@ -110,6 +233,7 @@
             },
             "uniqueItems": true
         },
+
         "notices": {
             "type": "array",
             "minItems": 1,
@@ -129,6 +253,7 @@
                 "additionalProperties": false
             }
         },
+
         "links": {
             "type": "array",
             "minItems": 1,
@@ -216,6 +341,7 @@
             "minItems": 1,
             "items": {
                 "type": "object",
+                "required" : [ "handle" ],
                 "properties": {
                     "handle": {
                         "type": "string"
@@ -223,8 +349,7 @@
                     "vcardArray": {
                         "$ref": "#/definitions/vcardArray"
                     }
-                },
-                "additionalProperties": true
+                }
             }
         },
 
@@ -241,7 +366,6 @@
                 "additionalProperties": false
             }
         },
-
 
         "vcardArray": {
             "type": "array",
@@ -284,6 +408,5 @@
                 }
             ]
         }
-
     }
 }
