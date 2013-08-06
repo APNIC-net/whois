@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.ripe.db</groupId>
     <artifactId>whois</artifactId>
-    <version>1.68-SNAPSHOT</version>
+    <version>1.68</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -37,7 +37,7 @@
         <sonar.jdbc.password />
 
         <!-- whois.variant is overridden by profile -->
-        <whois.variant/>
+        <whois.variant />
     </properties>
 
     <scm>
@@ -814,7 +814,7 @@
             <properties>
                 <whois.variant>apnic</whois.variant>
                 <test.redirectOutput>true</test.redirectOutput>
-                <test.groups/>
+                <test.groups />
                 <test.files.unit>None</test.files.unit>
                 <test.files.integration>net/apnic/**/whois/spec/query/*Spec.java,net/apnic/**/whois/spec/update/*Spec.java
                 </test.files.integration>

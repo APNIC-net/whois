@@ -3,13 +3,13 @@
     <parent>
         <groupId>net.ripe.db</groupId>
         <artifactId>whois</artifactId>
-        <version>1.68-SNAPSHOT</version>
+        <version>1.68</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.ripe.db</groupId>
     <artifactId>whois-db</artifactId>
-    <version>1.68-SNAPSHOT</version>
+    <version>1.68</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -191,15 +191,12 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <property name="rpm.version"
-                                                  value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}"/>
-                                        <condition property="rpm.release"
-                                                   value="${maven.build.timestamp}.${parsedVersion.qualifier}"
-                                                   else="${maven.build.timestamp}">
-                                            <equals arg1="${parsedVersion.qualifier}" arg2="SNAPSHOT"/>
+                                        <property name="rpm.version" value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}" />
+                                        <condition property="rpm.release" value="${maven.build.timestamp}.${parsedVersion.qualifier}" else="${maven.build.timestamp}">
+                                            <equals arg1="${parsedVersion.qualifier}" arg2="SNAPSHOT" />
                                         </condition>
                                         <!-- Uncomment this for property dump during build -->
-                                        <!--<echoproperties/>-->
+                                        <!--<echoproperties />-->
                                     </target>
                                     <exportAntProperties>true</exportAntProperties>
                                 </configuration>
