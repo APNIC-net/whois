@@ -47,7 +47,7 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
 
     @Override
     public void deploy(final WebAppContext context) {
-        final RdapJsonProvider jaxbJsonProvider = new RdapJsonProvider();
+        final RdapJsonProvider rdapJsonProvider = new RdapJsonProvider();
         context.setErrorHandler(new ErrorHandler() {
             @Override
             public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -84,7 +84,7 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
 
                 Error rdapError = (Error) RdapException.build(Response.Status.fromStatusCode(response.getStatus()), selfUrl);
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                jaxbJsonProvider.writeTo((Object) rdapError, rdapError.getClass(), rdapError.getClass(), new Annotation[0], null, null, byteArrayOutputStream);
+                rdapJsonProvider.writeTo((Object) rdapError, rdapError.getClass(), rdapError.getClass(), new Annotation[0], null, null, byteArrayOutputStream);
                 String responseContent = byteArrayOutputStream.toString();
                 response.getWriter().write(responseContent); 
             }
@@ -95,7 +95,7 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
                 return Sets.newLinkedHashSet(Lists.<Object>newArrayList(
                         whoisRDAPService,
                         defaultExceptionMapper,
-                        jaxbJsonProvider));
+                        rdapJsonProvider));
             }
         })), "/rdap/*");
     }
