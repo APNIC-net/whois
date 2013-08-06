@@ -2,6 +2,7 @@ package net.ripe.db.whois.common.rpsl.transform;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
 import net.ripe.db.whois.common.rpsl.*;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -14,6 +15,10 @@ public class FilterAuthFunction implements FilterFunction {
 
     @Override
     public RpslObject apply(RpslObject rpslObject) {
+        if (WhoisVariant.isAPNIC()) {
+            return rpslObject;
+        }
+
         if (!ObjectTemplate.getTemplate(rpslObject.getType()).hasAttribute(AttributeType.AUTH)) {
             return rpslObject;
         }
