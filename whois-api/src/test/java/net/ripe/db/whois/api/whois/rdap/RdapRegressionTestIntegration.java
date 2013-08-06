@@ -1,5 +1,11 @@
 package net.ripe.db.whois.api.whois.rdap;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.exceptions.ProcessingException;
+import com.github.fge.jsonschema.main.JsonSchema;
+import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import com.github.fge.jsonschema.report.ProcessingReport;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
@@ -17,6 +23,7 @@ import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,20 +33,23 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Scanner;
 
 @Category(ManualTest.class)
 public class RdapRegressionTestIntegration {
     private static Class clazz = RdapRegressionTestIntegration.class;
     private static final Logger LOGGER = LoggerFactory.getLogger(clazz);
 
-    // Limit the number of queries for each rdap type ( -1 no limit )
-    private static final int PROCESS_MAX_QUERIES = -1;
+    private static final String PKGBASE  = '/' + clazz.getPackage().getName().replace(".", "/");
 
+    // Limit the number of queries for each rdap type ( -1 no limit )
+    private static final int PROCESS_MAX_QUERIES = 3;
+
+    private final static JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
 
     private static String resourcePath = "/" + clazz.getName().replace(".", "/");
     private static Properties testProperties;
-    private static String rdapJsonSchema;
+    private static JsonSchema rdapJsonSchema;
+
     private static URL rdap_server_url_base;
     private static String db_driver;
     private static String db_url;
@@ -82,11 +92,14 @@ public class RdapRegressionTestIntegration {
         db_username = testProperties.getProperty("db_username");
         db_password = testProperties.getProperty("db_password");
 
-        // Load json schema
-        rdapJsonSchema = new Scanner(clazz.getResourceAsStream(resourcePath + ".rdap.json")).useDelimiter("\\Z").next();
+        try {
+            rdapJsonSchema = factory.getJsonSchema(JsonLoader.fromResource(PKGBASE + "/rdap.schema.json"));
+        } catch (Exception ex) {
+            LOGGER.error("Could not load rdap json schema", ex);
+        }
 
         // Test the rdap http server is reachable
-        byte[] content = RdapHelperUtils.getHttpContent(rdap_server_url_base.toString(), true).body;
+        //byte[] content = RdapHelperUtils.getHttpContent(rdap_server_url_base.toString(), true).body;
     }
 
     @Test
@@ -100,6 +113,10 @@ public class RdapRegressionTestIntegration {
         int cnt = 0;
         // For each url : call each url
         for (String pkey : pkeys) {
+            if (cnt++ >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
+                break;
+            }
+
             String url = String.format("%s%s",prefix,pkey);
             try {
                 RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(url, true);
@@ -107,25 +124,33 @@ public class RdapRegressionTestIntegration {
                 int statusCode = result.statusCode;
 
                 if (statusCode == HttpStatus.SC_OK) {
-                    LOGGER.info(response);
+                    if (LOGGER.isDebugEnabled()) LOGGER.debug(response);
                     Entity entity = RdapHelperUtils.unmarshal(response, Entity.class);
 
                     // Manual validation checks / sanity checks
 
                 } else {
                     net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
+                    LOGGER.error(url + ":" + response);
                 }
+                validateJson(url, response);
 
-                // Validate against json schema
 
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
             }
 
-            if (++cnt >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
-                break;
-            }
         }
+    }
+
+    private boolean validateJson(String url, String response) throws IOException, ProcessingException {
+        // Validate against json schema
+        final JsonNode json = JsonLoader.fromString(response);
+        ProcessingReport report = rdapJsonSchema.validate(json);
+        if (!report.isSuccess()) {
+            LOGGER.error(String.format("Schema validation failed [%s][%s]",url, report));
+        }
+        return report.isSuccess();
     }
 
 
@@ -140,6 +165,10 @@ public class RdapRegressionTestIntegration {
         int cnt = 0;
         // For each url : call each url
         for (String pkey : pkeys) {
+            if (cnt++ >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
+                break;
+            }
+
             String url = String.format("%s%s", prefix, pkey);
             try {
                 RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(url, true);
@@ -147,22 +176,20 @@ public class RdapRegressionTestIntegration {
                 int statusCode = result.statusCode;
 
                 if (statusCode == HttpStatus.SC_OK) {
+                    if (LOGGER.isDebugEnabled()) LOGGER.debug(response);
                     Domain domain = RdapHelperUtils.unmarshal(response, Domain.class);
 
                     // Manual validation checks / sanity checks
 
                 } else {
                     net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
+                    LOGGER.error(url + ":" + response);
                 }
 
-                // Validate against json schema
+                validateJson(url, response);
 
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
-            }
-
-            if (++cnt >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
-                break;
             }
         }
 
@@ -178,30 +205,31 @@ public class RdapRegressionTestIntegration {
         int cnt = 0;
         // For each url : call each url
         for (String url : urls) {
+            if (cnt++ >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
+                break;
+            }
             try {
                 RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(url, true);
                 String response = new String(result.body);
                 int statusCode = result.statusCode;
 
                 if (statusCode == HttpStatus.SC_OK) {
+                    if (LOGGER.isDebugEnabled()) LOGGER.debug(response);
                     Autnum autnum = RdapHelperUtils.unmarshal(response, Autnum.class);
 
                     // Manual validation checks / sanity checks
 
                 } else {
                     net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
+                    LOGGER.error(url + ":" + response);
                 }
 
-                // Validate against json schema
-
+                validateJson(url, response);
 
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
             }
 
-            if (++cnt >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
-                break;
-            }
         }
     }
 
@@ -216,6 +244,10 @@ public class RdapRegressionTestIntegration {
         int cnt = 0;
         // For each url : call each url
         for (String pkey : pkeys) {
+            if (cnt++ >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
+                break;
+            }
+
             // ip query result needs to be converted
             String postfix = pkey.indexOf(":") > 0 ? Ipv6Resource.parse(pkey).toString() : Ipv4Resource.parse(pkey).toString();
             if (postfix.indexOf("-") >= 0) {
@@ -230,30 +262,71 @@ public class RdapRegressionTestIntegration {
                 int statusCode = result.statusCode;
 
                 if (statusCode == HttpStatus.SC_OK) {
+                    if (LOGGER.isDebugEnabled()) LOGGER.debug(response);
                     Ip ip = RdapHelperUtils.unmarshal(response, Ip.class);
 
                     // Manual validation checks / sanity checks
 
                 } else {
                     net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
+                    LOGGER.error(url + ":" + response);
                 }
 
-                // Validate against json schema
-
+                validateJson(url, response);
 
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
             }
-
-            if (++cnt >= PROCESS_MAX_QUERIES && PROCESS_MAX_QUERIES >= 0) {
-                break;
-            }
         }
+    }
+
+    @Test
+    public void validate_rdap_manual_internal_test() throws Exception {
+        final JsonNode autnum_json = JsonLoader.fromResource(PKGBASE + "/autnum.json");
+        final JsonNode domain_json = JsonLoader.fromResource(PKGBASE + "/domain.json");
+        final JsonNode entity_json = JsonLoader.fromResource(PKGBASE + "/entity.json");
+        final JsonNode ip_json = JsonLoader.fromResource(PKGBASE + "/ip.json");
+
+        ProcessingReport reportAutnum = rdapJsonSchema.validate(autnum_json);
+        assert(!reportAutnum.isSuccess());
+
+        ProcessingReport reportDomain = rdapJsonSchema.validate(domain_json);
+        assert(reportDomain.isSuccess());
+
+        ProcessingReport reportEntity = rdapJsonSchema.validate(entity_json);
+        assert(reportEntity.isSuccess());
+
+        ProcessingReport reportIp = rdapJsonSchema.validate(ip_json);
+        assert(reportIp.isSuccess());
+
+    }
+
+
+    @Test
+    public void validate_vcardArray_manual_internal_test() throws Exception {
+        JsonSchema  vcardArrayJsonSchema = factory.getJsonSchema(JsonLoader.fromResource(PKGBASE + "/vcardArray.schema.json"));
+        final JsonNode vcardArray_json = JsonLoader.fromResource(PKGBASE + "/vcardArray.json");
+
+        ProcessingReport report = vcardArrayJsonSchema.validate(vcardArray_json);
+        LOGGER.info(String.valueOf(report));
+        assert(report.isSuccess());
+
+    }
+
+    @Test
+    public void validate_vcard_manual_internal_test() throws Exception {
+        JsonSchema  vcardJsonSchema = factory.getJsonSchema(JsonLoader.fromResource(PKGBASE + "/vcard.schema.json"));
+        final JsonNode vcard_json = JsonLoader.fromResource(PKGBASE + "/vcard.json");
+
+        ProcessingReport report = vcardJsonSchema.validate(vcard_json);
+        LOGGER.info(String.valueOf(report));
+        assert(report.isSuccess());
+
     }
 
 
     //@Test
-    public void validate_rdap_manual_test() throws Exception {
+    public void validate_rdap_manual_external_test() throws Exception {
         String url = "http://newwhois.tst.apnic.net/rdap/entity/HM20-AP";
         try {
             RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(url, true);
@@ -265,11 +338,11 @@ public class RdapRegressionTestIntegration {
             } else {
                 net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
             }
+            validateJson(url, response);
         } catch (Throwable ex) {
             LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
         }
     }
-
 
     private static List<String> runRdapQuery(List<Integer> types) throws Exception {
         String query = "select pkey from last where object_type in (" + Joiner.on(",").join(types) + ");";
