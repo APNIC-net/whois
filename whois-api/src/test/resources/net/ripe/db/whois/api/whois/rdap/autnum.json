@@ -5,8 +5,6 @@
     "name" : "JPNIC-NET-JP-AS-BLOCK",
     "country" : "JP",
 
-    "poo" : "junk",
-
     "entities" : [ {
         "handle" : "JNIC1-AP",
         "vcardArray" : [ "vcard", [ [ "version", {
@@ -57,5 +55,8 @@
         "title" : "Source",
         "description" : [ "Objects returned came from source", "APNIC" ]
     } ],
-    "port43" : "whois.apnic.net"
+    "port43" : "whois.apnic.net",
+
+    "some-naughty-node" : "naughtyvalue"
+
 }
