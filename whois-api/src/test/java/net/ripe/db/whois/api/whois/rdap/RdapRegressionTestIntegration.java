@@ -288,7 +288,6 @@ public class RdapRegressionTestIntegration {
         final JsonNode ip_json = JsonLoader.fromResource(PKGBASE + "/ip.json");
 
         ProcessingReport reportAutnum = rdapJsonSchema.validate(autnum_json);
-        LOGGER.info(String.valueOf(reportAutnum));
         assert(reportAutnum.isSuccess());
 
         ProcessingReport reportDomain = rdapJsonSchema.validate(domain_json);
@@ -299,6 +298,28 @@ public class RdapRegressionTestIntegration {
 
         ProcessingReport reportIp = rdapJsonSchema.validate(ip_json);
         assert(reportIp.isSuccess());
+
+    }
+
+    @Test
+    public void validate_rdap_manual_internal_fail_test() throws Exception {
+        final JsonNode autnum_json = JsonLoader.fromResource(PKGBASE + "/autnum.bad.json");
+        final JsonNode domain_json = JsonLoader.fromResource(PKGBASE + "/domain.bad.json");
+        final JsonNode entity_json = JsonLoader.fromResource(PKGBASE + "/entity.bad.json");
+        final JsonNode ip_json = JsonLoader.fromResource(PKGBASE + "/ip.bad.json");
+
+        ProcessingReport reportAutnum = rdapJsonSchema.validate(autnum_json);
+        assert(!reportAutnum.isSuccess());
+
+        ProcessingReport reportDomain = rdapJsonSchema.validate(domain_json);
+        assert(!reportDomain.isSuccess());
+
+        ProcessingReport reportEntity = rdapJsonSchema.validate(entity_json);
+        assert(!reportEntity.isSuccess());
+
+        ProcessingReport reportIp = rdapJsonSchema.validate(ip_json);
+        LOGGER.info(String.valueOf(reportIp));
+        assert(!reportIp.isSuccess());
 
     }
 

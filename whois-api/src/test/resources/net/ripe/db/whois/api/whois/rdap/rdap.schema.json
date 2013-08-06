@@ -146,11 +146,6 @@
         "entity": {
             "type": "object",
             "required": [ "handle", "entities" ],
-            "allOf": [
-                {
-                    "$ref": "#/definitions/rdapheader"
-                }
-            ],
             "properties": {
                 "handle": {
                     "type": "string"
@@ -169,12 +164,6 @@
         "ip": {
             "type": "object",
             "required": [ "handle", "startAddress", "endAddress", "ipVersion" ],
-            "allOf": [
-                {
-                    "$ref": "#/definitions/rdapheader"
-                }
-            ],
-
             "properties": {
                 "handle": {
                     "type": "string"
@@ -193,6 +182,10 @@
                 },
 
                 "type": {
+                    "type": "string"
+                },
+
+                "country": {
                     "type": "string"
                 },
 
