@@ -1,13 +1,29 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "rdap vcard",
-    "description": "rdap vcard",
-    "type": "array",
+    "title": "rdap vcard array",
+    "description": "rdap vcard array",
+    "type": "object",
 
-    "items": {
-        "$ref": "#/definitions/vcard"
+    "properties": {
+        "vcardArray": {
+            "$ref": "#/definitions/vcardArray"
+        }
     },
+
     "definitions": {
+        "vcardArray": {
+            "type": "array",
+            "items": [
+                {
+                    "type": "string"
+                },
+                {
+                    "items": {
+                        "$ref": "#/definitions/vcard"
+                    }
+                }
+            ]
+        },
 
         "vcard": {
             "type": "array",

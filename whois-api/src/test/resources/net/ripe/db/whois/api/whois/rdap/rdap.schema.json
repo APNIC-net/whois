@@ -244,6 +244,45 @@
 
 
         "vcardArray": {
+            "type": "array",
+            "items": [
+                {
+                    "type": "string"
+                },
+                {
+                    "items": {
+                        "$ref": "#/definitions/vcard"
+                    }
+                }
+            ]
+        },
+
+        "vcard": {
+            "type": "array",
+            "items": [
+                {
+                    "type": "string",
+                    "enum": [ "fn", "version", "kind", "adr", "tel", "email" ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "label": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "enum": [ "text" ]
+                },
+                {
+                    "type": [ "string", "array" ]
+                }
+            ]
         }
 
     }

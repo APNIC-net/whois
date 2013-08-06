@@ -99,7 +99,7 @@ public class RdapRegressionTestIntegration {
         }
 
         // Test the rdap http server is reachable
-        byte[] content = RdapHelperUtils.getHttpContent(rdap_server_url_base.toString(), true).body;
+        //byte[] content = RdapHelperUtils.getHttpContent(rdap_server_url_base.toString(), true).body;
     }
 
     @Test
@@ -280,8 +280,6 @@ public class RdapRegressionTestIntegration {
         }
     }
 
-
-
     @Test
     public void validate_rdap_manual_internal_test() throws Exception {
         final JsonNode autnum_json = JsonLoader.fromResource(PKGBASE + "/autnum.json");
@@ -302,6 +300,30 @@ public class RdapRegressionTestIntegration {
         assert(reportIp.isSuccess());
 
     }
+
+
+    @Test
+    public void validate_vcardArray_manual_internal_test() throws Exception {
+        JsonSchema  vcardArrayJsonSchema = factory.getJsonSchema(JsonLoader.fromResource(PKGBASE + "/vcardArray.schema.json"));
+        final JsonNode vcardArray_json = JsonLoader.fromResource(PKGBASE + "/vcardArray.json");
+
+        ProcessingReport report = vcardArrayJsonSchema.validate(vcardArray_json);
+        LOGGER.info(String.valueOf(report));
+        assert(report.isSuccess());
+
+    }
+
+    @Test
+    public void validate_vcard_manual_internal_test() throws Exception {
+        JsonSchema  vcardJsonSchema = factory.getJsonSchema(JsonLoader.fromResource(PKGBASE + "/vcard.schema.json"));
+        final JsonNode vcard_json = JsonLoader.fromResource(PKGBASE + "/vcard.json");
+
+        ProcessingReport report = vcardJsonSchema.validate(vcard_json);
+        LOGGER.info(String.valueOf(report));
+        assert(report.isSuccess());
+
+    }
+
 
     //@Test
     public void validate_rdap_manual_external_test() throws Exception {
