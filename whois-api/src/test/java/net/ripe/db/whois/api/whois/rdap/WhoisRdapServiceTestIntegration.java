@@ -17,11 +17,11 @@ import net.ripe.db.whois.api.whois.rdap.domain.Link;
 import net.ripe.db.whois.api.whois.rdap.domain.Notice;
 import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.api.whois.rdap.domain.Role;
+import net.ripe.db.whois.api.whois.rdap.RdapJsonProvider;
 import net.ripe.db.whois.common.IntegrationTest;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
@@ -197,7 +197,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     @Override
     public void setUpClient() throws Exception {
         ClientConfig cc = new DefaultClientConfig();
-        cc.getSingletons().add(new JacksonJaxbJsonProvider());
+        cc.getSingletons().add(new RdapJsonProvider());
         client = Client.create(cc);
     }
 
@@ -541,7 +541,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         // Test content type
         Header[] headers = response.headers;
         String contentType = checkHeaderPresent(CONTENT_TYPE_HEADER, headers);
-        assertEquals(MediaType.APPLICATION_JSON, contentType);
+        assertEquals(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, contentType);
 
         Entity entity = RdapHelperUtils.unmarshal(responseBody, Entity.class);
         assertEntityPP1_TEST(entity);
