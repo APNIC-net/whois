@@ -148,7 +148,7 @@ public class WhoisRdapService {
             response = Response.ok(lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key)));
 
         } catch (WebApplicationException webex) {
-            LOGGER.error(String.format("RDAP http error status [%s] caused by request [%s]", webex.getResponse().getStatus(), request.getRequestURL().toString()));
+            LOGGER.error(String.format("RDAP http error status [%s] caused by request [%s]: %s", webex.getResponse().getStatus(), request.getRequestURL().toString(), webex.toString()));
             int statusCode = webex.getResponse().getStatus();
             response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl));
         } catch (IllegalArgumentException iae) {
@@ -342,7 +342,7 @@ public class WhoisRdapService {
         return result;
     }
 
-    private String getBaseUrl(final HttpServletRequest request) {
+    public String getBaseUrl(final HttpServletRequest request) {
         if (StringUtils.isNotEmpty(this.baseUrl)) {
             return this.baseUrl;
         }
@@ -423,20 +423,25 @@ public class WhoisRdapService {
         return null;
     }
 
-    private void mapAcceptableMediaType(Response.ResponseBuilder response, List<MediaType> mediaTypes) {
-        if (mediaTypes != null) {
-            for (MediaType mediaType : mediaTypes) {
-                if (mediaType.equals(MediaType.TEXT_HTML_TYPE)) {
-                    response.type(MediaType.TEXT_PLAIN_TYPE);
-                    return;
-                } else if (mediaType.equals(MediaType.APPLICATION_JSON) || mediaType.equals(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON)) {
-                    /* The response type must be
-                     * application/rdap+json when the Accept header is
-                     * application/json. See 'using-http', [4.7]. */
-                    response.type(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON);
-                    return;
-                }
+    public String getAcceptableMediaType(List<MediaType> mediaTypes) {
+        if ((mediaTypes == null) || (mediaTypes.size() == 0)) {
+            return RdapJsonProvider.CONTENT_TYPE_RDAP_JSON;
+        }
+        for (MediaType mediaType : mediaTypes) {
+            if (mediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE) || mediaType.isCompatible(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON_TYPE)) {
+                return RdapJsonProvider.CONTENT_TYPE_RDAP_JSON;
             }
+            if (mediaType.isCompatible(MediaType.TEXT_HTML_TYPE) || mediaType.isCompatible(MediaType.TEXT_PLAIN_TYPE)) {
+                return MediaType.TEXT_PLAIN;
+            }
+        }
+        return null;
+    }
+
+    private void mapAcceptableMediaType(Response.ResponseBuilder response, List<MediaType> mediaTypes) {
+        String mediaType = getAcceptableMediaType(mediaTypes);
+        if (mediaType != null) {
+            response.type(mediaType);
         }
     }
 }
