@@ -215,8 +215,7 @@ public class RdapRegressionTestIntegration {
                     // Manual validation checks / sanity checks
 
                 } else {
-                    net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
-                    LOGGER.error(url + ":" + response);
+                    logError(response, url, statusCode);
                 }
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
@@ -256,8 +255,7 @@ public class RdapRegressionTestIntegration {
                     // Manual validation checks / sanity checks
 
                 } else {
-                    net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
-                    LOGGER.error(url + ":" + response);
+                    logError(response, url, statusCode);
                 }
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
@@ -294,8 +292,7 @@ public class RdapRegressionTestIntegration {
                     // Manual validation checks / sanity checks
 
                 } else {
-                    net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
-                    LOGGER.error(url + ":" + response);
+                    logError(response, url, statusCode);
                 }
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
@@ -341,8 +338,7 @@ public class RdapRegressionTestIntegration {
                     // Manual validation checks / sanity checks
 
                 } else {
-                    net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
-                    LOGGER.error(url + ":" + response);
+                    logError(response, url, statusCode);
                 }
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
@@ -368,6 +364,15 @@ public class RdapRegressionTestIntegration {
             validateJson(url, response);
         } catch (Throwable ex) {
             LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
+        }
+    }
+
+    private void logError(String response, String url, int statusCode) throws IOException {
+        net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
+        if (statusCode == HttpStatus.SC_NOT_FOUND) {
+            LOGGER.error(String.format("[%d][%s]",statusCode,url));
+        } else {
+            LOGGER.error(url + ":" + response);
         }
     }
 
