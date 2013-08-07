@@ -6,215 +6,233 @@
 
     "anyOf": [
         {
-            "allOf": [
-                {
-                    "$ref": "#/definitions/rdapheader"
-                },
-                {
-                    "$ref": "#/definitions/autnum"
-                }
-            ]
+            "$ref": "#/definitions/autnum"
         },
         {
-            "allOf": [
-                {
-                    "$ref": "#/definitions/rdapheader"
-                },
-                {
-                    "$ref": "#/definitions/domain"
-                }
-            ]
+            "$ref": "#/definitions/domain"
         },
         {
-            "allOf": [
-                {
-                    "$ref": "#/definitions/rdapheader"
-                },
-                {
-                    "$ref": "#/definitions/entity"
-                }
-            ]
+            "$ref": "#/definitions/entity"
         },
         {
-            "allOf": [
-                {
-                    "$ref": "#/definitions/rdapheader"
-                },
-                {
-                    "$ref": "#/definitions/ip"
-                }
-            ]
+            "$ref": "#/definitions/ip"
         },
         {
-            "allOf": [
-                {
-                    "$ref": "#/definitions/rdapheader"
-                },
-                {
-                    "$ref": "#/definitions/error"
-                }
-            ]
+            "$ref": "#/definitions/error"
         }
     ],
 
     "definitions": {
-        "rdapheader": {
+        "autnum": {
             "type": "object",
-            "required": [ "rdapConformance"],
+            "required": [  "rdapConformance", "handle", "startAutnum", "endAutnum" ],
             "properties": {
                 "rdapConformance": {
                     "$ref": "#/definitions/rdapConformance"
                 },
-
                 "notices": {
                     "$ref": "#/definitions/notices"
                 },
-
                 "remarks": {
                     "$ref": "#/definitions/remarks"
                 },
-
                 "events": {
                     "$ref": "#/definitions/events"
                 },
-
                 "port43": {
                     "type": "string"
                 },
-
                 "links": {
                     "$ref": "#/definitions/links"
-                }
-            }
-        },
+                },
 
-        "autnum": {
-            "type": "object",
-            "required": [ "handle", "startAutnum", "endAutnum" ],
-            "properties": {
                 "handle": {
                     "type": "string"
                 },
-
                 "startAutnum": {
                     "type": "integer"
                 },
-
                 "endAutnum": {
                     "type": "integer"
                 },
-
                 "name": {
                     "type": "string"
                 },
-
                 "country": {
                     "type": "string"
                 },
-
                 "entities": {
                     "$ref": "#/definitions/entities"
                 }
-            }
+            },
+            "additionalProperties" : false
         },
 
         "domain": {
-            "required": [ "handle", "ldhName", "nameServers" ],
+            "required": [  "rdapConformance", "handle", "ldhName", "nameServers" ],
             "properties": {
+                "rdapConformance": {
+                    "$ref": "#/definitions/rdapConformance"
+                },
+                "notices": {
+                    "$ref": "#/definitions/notices"
+                },
+                "remarks": {
+                    "$ref": "#/definitions/remarks"
+                },
+                "events": {
+                    "$ref": "#/definitions/events"
+                },
+                "port43": {
+                    "type": "string"
+                },
+                "links": {
+                    "$ref": "#/definitions/links"
+                },
+
                 "handle": {
                     "type": "string"
                 },
-
                 "ldhName": {
                     "type": "string"
                 },
-
                 "nameServers": {
                     "$ref": "#/definitions/nameServers"
                 },
-
                 "entities": {
                     "$ref": "#/definitions/entities"
                 },
-
                 "vcardArray": {
                     "$ref": "#/definitions/vcardArray"
                 }
-            }
+            },
+            "additionalProperties" : false
         },
 
         "entity": {
             "type": "object",
-            "required": [ "handle", "entities" ],
+            "required": [  "rdapConformance", "handle" ],
             "properties": {
+                "rdapConformance": {
+                    "$ref": "#/definitions/rdapConformance"
+                },
+                "notices": {
+                    "$ref": "#/definitions/notices"
+                },
+                "remarks": {
+                    "$ref": "#/definitions/remarks"
+                },
+                "events": {
+                    "$ref": "#/definitions/events"
+                },
+                "port43": {
+                    "type": "string"
+                },
+                "links": {
+                    "$ref": "#/definitions/links"
+                },
+
                 "handle": {
                     "type": "string"
                 },
-
                 "entities": {
                     "$ref": "#/definitions/entities"
                 },
-
                 "vcardArray": {
                     "$ref": "#/definitions/vcardArray"
                 }
-            }
+            },
+            "additionalProperties" : false
         },
 
         "ip": {
             "type": "object",
-            "required": [ "handle", "startAddress", "endAddress", "ipVersion" ],
+            "required": [ "rdapConformance", "handle", "startAddress", "endAddress", "ipVersion" ],
             "properties": {
+                "rdapConformance": {
+                    "$ref": "#/definitions/rdapConformance"
+                },
+                "notices": {
+                    "$ref": "#/definitions/notices"
+                },
+                "remarks": {
+                    "$ref": "#/definitions/remarks"
+                },
+                "events": {
+                    "$ref": "#/definitions/events"
+                },
+                "port43": {
+                    "type": "string"
+                },
+                "links": {
+                    "$ref": "#/definitions/links"
+                },
+
                 "handle": {
                     "type": "string"
                 },
-
                 "startAddress": {
                     "type": "string"
                 },
-
                 "endAddress": {
                     "type": "string"
                 },
-
                 "ipVersion": {
                     "enum": [ "v4", "v6" ]
                 },
-
+                "name": {
+                    "type": "string"
+                },
                 "type": {
                     "type": "string"
                 },
-
                 "country": {
                     "type": "string"
                 },
-
                 "parentHandle": {
                     "type": "string"
                 },
-
-                "vcardArray": {
-                    "$ref": "#/definitions/vcardArray"
+                "entities": {
+                    "$ref": "#/definitions/entities"
                 }
-            }
+            },
+            "additionalProperties" : false
         },
 
         "error": {
             "type": "object",
-            "required": [ "errorCode" ],
+            "required": [ "rdapConformance", "errorCode" ],
             "properties": {
+                "rdapConformance": {
+                    "$ref": "#/definitions/rdapConformance"
+                },
+                "notices": {
+                    "$ref": "#/definitions/notices"
+                },
+                "remarks": {
+                    "$ref": "#/definitions/remarks"
+                },
+                "events": {
+                    "$ref": "#/definitions/events"
+                },
+                "port43": {
+                    "type": "string"
+                },
+                "links": {
+                    "$ref": "#/definitions/links"
+                },
+
                 "errorCode": {
                     "type": "integer"
                 },
-
                 "title": {
                     "type": "string"
                 },
-
                 "description": {
                     "type": "array"
                 }
-            }
+            },
+            "additionalProperties" : false
         },
 
         "rdapConformance": {
@@ -334,7 +352,7 @@
             "minItems": 1,
             "items": {
                 "type": "object",
-                "required" : [ "handle" ],
+                "required": [ "handle" ],
                 "properties": {
                     "handle": {
                         "type": "string"
