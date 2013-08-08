@@ -51,6 +51,20 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
         context.setErrorHandler(new ErrorHandler() {
             @Override
             public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
+                String selfUrl = "";
+                if (whoisRDAPService != null) {
+                    selfUrl = whoisRDAPService.getBaseUrl(request);
+                }
+                if (request.getPathInfo() != null) {
+                    selfUrl += request.getPathInfo();
+                }
+                if (request.getQueryString() != null) {
+                    selfUrl += request.getQueryString();
+                }
+                if (!selfUrl.matches("/rdap/")) {
+                    return;
+                }
+
                 Enumeration<String> acceptHeaders = request.getHeaders("Accept");
                 List<MediaType> mediaTypes = new ArrayList<MediaType>();
                 while (acceptHeaders.hasMoreElements()) {
@@ -70,14 +84,6 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
                     response.setStatus(406);
                 }
                 response.setCharacterEncoding("utf-8");
-
-                String selfUrl = whoisRDAPService.getBaseUrl(request);
-                if (request.getPathInfo() != null) {
-                    selfUrl += request.getPathInfo();
-                }
-                if (request.getQueryString() != null) {
-                    selfUrl += request.getQueryString();
-                }
 
                 response.setHeader("Content-Type", mediaType);
                 response.setHeader("Access-Control-Allow-Origin", "*");
