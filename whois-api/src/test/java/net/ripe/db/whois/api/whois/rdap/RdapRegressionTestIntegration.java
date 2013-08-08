@@ -16,6 +16,7 @@ import net.ripe.db.whois.common.ManualTest;
 import net.ripe.db.whois.common.domain.Ipv4Resource;
 import net.ripe.db.whois.common.domain.Ipv6Resource;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.lang.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -220,8 +221,8 @@ public class RdapRegressionTestIntegration {
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
             }
-            assertTrue(validateJson(url, response));
 
+            validateResponse(response, url);
         }
     }
 
@@ -260,7 +261,8 @@ public class RdapRegressionTestIntegration {
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
             }
-            assertTrue(validateJson(url, response));
+
+            validateResponse(response, url);
         }
 
     }
@@ -297,7 +299,8 @@ public class RdapRegressionTestIntegration {
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
             }
-            assertTrue(validateJson(url, response));
+
+            validateResponse(response, url);
         }
     }
 
@@ -343,8 +346,18 @@ public class RdapRegressionTestIntegration {
             } catch (Throwable ex) {
                 LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
             }
-            assertTrue(validateJson(url, response));
 
+            validateResponse(response, url);
+
+        }
+    }
+
+    private void validateResponse(String response, String url) throws IOException, ProcessingException {
+        if (StringUtils.isEmpty(response)) {
+            LOGGER.error("Response was empty [" + url + "]");
+        } else {
+            ProcessingReport report = validateJson(url, response);
+            assertTrue(String.format("Schema validation failed [%s][%s][%s]", url, String.valueOf(report), response), report.isSuccess());
         }
     }
 
@@ -376,18 +389,10 @@ public class RdapRegressionTestIntegration {
         }
     }
 
-    private boolean validateJson(String url, String response) throws IOException, ProcessingException {
+    private ProcessingReport validateJson(String url, String response) throws IOException, ProcessingException {
         // Validate against json schema
-        if (response == null) {
-            LOGGER.error(String.format("Json response was null [%s]",url));
-            return false;
-        }
         final JsonNode json = JsonLoader.fromString(response);
-        ProcessingReport report = rdapJsonSchema.validate(json);
-        if (!report.isSuccess()) {
-            LOGGER.error(String.format("Schema validation failed [%s][%s][%s]",url, report, response));
-        }
-        return report.isSuccess();
+        return rdapJsonSchema.validate(json);
     }
 
 
