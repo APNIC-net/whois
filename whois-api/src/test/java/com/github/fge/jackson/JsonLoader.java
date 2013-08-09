@@ -33,6 +33,10 @@ import java.net.URL;
  *
  * <p>This class uses {@link JacksonUtils#getReader()} as an {@link
  * ObjectReader} to parse JSON inputs.</p>
+ *
+ * Added here so we dont need to change dependency to [version 14.x - com.google.guava]
+ * Dragan.
+ *
  */
 public final class JsonLoader
 {

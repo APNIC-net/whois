@@ -271,8 +271,8 @@ public class RdapRegressionTestIntegration {
     public void validate_all_rdap_autnums_test() throws Exception {
         assertNotNull(rdapServerUp);
         String type = autnums.getKey();
-        List<String> urls = runRdapQuery("select concat('" + rdap_server_url_base.toString() + "/" + type + "/' , trim(substring(pkey, 3, 50)) ) from last where object_type in (" +
-                Joiner.on(",").join(autnums.getValue()) + ") and pkey like 'AS%';");
+        List<String> urls = runRdapQuery("select concat('" + rdap_server_url_base.toString() + "/" + type + "/' , trim(substring(pkey, 3, 50)) ) from last where "
+                + "sequence_id > 0 and object_type in (" + Joiner.on(",").join(autnums.getValue()) + ") and pkey like 'AS%';");
         LOGGER.info(type + " query size=" + urls.size());
 
         int cnt = 0;
@@ -363,21 +363,22 @@ public class RdapRegressionTestIntegration {
 
     //@Test
     public void validate_rdap_manual_external_test() throws Exception {
-        String url = "http://newwhois.tst.apnic.net/rdap/entity/HM20-AP";
+        String url = "http://newwhois.tst.apnic.net/rdap/ip/202.119.64.0/20";
+        String response = null;
         try {
             RdapHelperUtils.HttpResponseElements result = RdapHelperUtils.getHttpHeaderAndContent(url, true);
-            String response = new String(result.body);
+            response = new String(result.body);
             int statusCode = result.statusCode;
             LOGGER.info("Response="+ response);
             if (statusCode == HttpStatus.SC_OK) {
-                Entity entity = RdapHelperUtils.unmarshal(response, Entity.class);
+                Ip responseObject = RdapHelperUtils.unmarshal(response, Ip.class);
             } else {
                 net.ripe.db.whois.api.whois.rdap.domain.Error error = RdapHelperUtils.unmarshal(response, net.ripe.db.whois.api.whois.rdap.domain.Error.class);
             }
-            validateJson(url, response);
         } catch (Throwable ex) {
             LOGGER.error("Failed to unmarshal rdap response [" + url + "]", ex);
         }
+        validateResponse(response, url);
     }
 
     private void logError(String response, String url, int statusCode) throws IOException {
@@ -397,7 +398,7 @@ public class RdapRegressionTestIntegration {
 
 
     private static List<String> runRdapQuery(List<Integer> types) throws Exception {
-        String query = "select pkey from last where object_type in (" + Joiner.on(",").join(types) + ");";
+        String query = "select pkey from last where sequence_id > 0 and object_type in (" + Joiner.on(",").join(types) + ");";
         return runQuery(query);
     }
 

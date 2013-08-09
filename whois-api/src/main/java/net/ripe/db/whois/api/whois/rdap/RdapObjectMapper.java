@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
@@ -140,7 +142,7 @@ class RdapObjectMapper {
         ip.setHandle(rpslObject.getKey().toString());
         ip.setIpVersion(rpslObject.getType() == INET6NUM ? "v6" : "v4");
 
-        String selfUrl = baseUrl + "/" + Ip.class.getSimpleName().toLowerCase() + "/" + ipInterval.toString();
+        final String selfUrl = String.format("%s/%s/%s",baseUrl,Ip.class.getSimpleName().toLowerCase(),urlencode(ipInterval.toString()));
 
         // TODO: find a better way to remove the cidr notation
         String startAddr = IpInterval.asIpInterval(ipInterval.beginAsInetAddress()).toString();
@@ -157,7 +159,9 @@ class RdapObjectMapper {
 
             CIString parentKey = parentRpslObject.getKey();
             IpInterval parentInterval = (parentRpslObject.getType() == INET6NUM) ? Ipv6Resource.parse(parentKey) : Ipv4Resource.parse(parentKey);
-            ip.getLinks().add(createLink("up", selfUrl, baseUrl + "/" + Ip.class.getSimpleName().toLowerCase() + "/" + parentInterval.toString()));
+
+            final String parentUrl = String.format("%s/%s/%s",baseUrl,Ip.class.getSimpleName().toLowerCase(),urlencode(parentInterval));
+            ip.getLinks().add(createLink("up", selfUrl, parentUrl));
         }
 
         ip.getLinks().add(createLink("self", selfUrl, selfUrl));
@@ -257,13 +261,13 @@ class RdapObjectMapper {
         entity.setHandle(rpslObject.getKey().toString());
         setVCardArray(entity,createVCard(rpslObject));
 
-        final String selfUrl = baseUrl + "/" + Entity.class.getSimpleName().toLowerCase() + "/" + entity.getHandle();
+        final String selfUrl = String.format("%s/%s/%s",baseUrl,Entity.class.getSimpleName().toLowerCase(),urlencode(entity.getHandle()));
         entity.getLinks().add(createLink("self", topUrl != null ? topUrl : selfUrl, selfUrl));
 
         return entity;
     }
 
-    private static Autnum createAutnumResponse(final RpslObject rpslObject, String requestUrl, String baseUrl) {
+    private static Autnum createAutnumResponse(final RpslObject rpslObject, final String requestUrl, final String baseUrl) {
         final Autnum autnum = new Autnum();
         final String keyValue = rpslObject.getKey().toString();
         autnum.setHandle(keyValue);
@@ -285,7 +289,7 @@ class RdapObjectMapper {
             autnum.setEndAutnum(autNum.getValue());
             autnum.setName(rpslObject.getValueForAttribute(AS_NAME).toString().replace(" ", ""));
 
-            final String selfUrl = baseUrl +  "/" + AutNum.class.getSimpleName().toLowerCase() + "/" + autNum.getValue();
+            final String selfUrl = String.format("%s/%s/%s",baseUrl,AutNum.class.getSimpleName().toLowerCase(),urlencode(autNum.getValue()));
             autnum.getLinks().add(createLink("self", selfUrl, selfUrl));
         }
 
@@ -298,7 +302,7 @@ class RdapObjectMapper {
         domain.setHandle(rpslObject.getKey().toString());
         domain.setLdhName(rpslObject.getKey().toString());
 
-        final String selfUrl = baseUrl + "/" + Domain.class.getSimpleName().toLowerCase() + "/" + domain.getHandle();
+        final String selfUrl = String.format("%s/%s/%s",baseUrl,Domain.class.getSimpleName().toLowerCase(),urlencode(domain.getHandle()));
         domain.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         final Map<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
@@ -464,5 +468,16 @@ class RdapObjectMapper {
         }
 
         return defaultUrl;
+    }
+
+    public static String urlencode(Object obj) {
+        String ret;
+        try {
+            ret = URLEncoder.encode(String.valueOf(obj), "UTF-8");
+        } catch (UnsupportedEncodingException uee) {
+            // Never happen
+            ret = String.valueOf(obj);
+        }
+        return ret;
     }
 }
