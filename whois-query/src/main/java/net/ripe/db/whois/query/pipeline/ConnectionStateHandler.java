@@ -29,26 +29,12 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
         final Channel channel = e.getChannel();
 
         // ----- Old Logic
-        if (keepAlive && query.hasOnlyKeepAlive()) {
-            channel.close();
-            LOGGER.info("!end ConnectionStateHandler.messageReceived: channel.close() " + queryString);
-            return;
-        }
-
-        if (query.hasKeepAlive()) {
-            keepAlive = true;
-        }
-
-        if (query.hasOnlyKeepAlive()) {
-            LOGGER.info("!end ConnectionStateHandler.messageReceived: channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel)) " +queryString);
-            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
-        } else {
-            LOGGER.info("!end ConnectionStateHandler.messageReceived: ctx.sendUpstream(e) " + queryString);
-            ctx.sendUpstream(e);
-        }
-
-
-        //----------- New Logic
+//        if (keepAlive && query.hasOnlyKeepAlive()) {
+//            channel.close();
+//            LOGGER.info("!end ConnectionStateHandler.messageReceived: channel.close() " + queryString);
+//            return;
+//        }
+//
 //        if (query.hasKeepAlive()) {
 //            keepAlive = true;
 //        }
@@ -56,15 +42,29 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 //        if (query.hasOnlyKeepAlive()) {
 //            LOGGER.info("!end ConnectionStateHandler.messageReceived: channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel)) " +queryString);
 //            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
-//            if (keepAlive) {
-//                channel.close();
-//                LOGGER.info("!end ConnectionStateHandler.messageReceived: channel.close() " + queryString);
-//                return;
-//            }
 //        } else {
 //            LOGGER.info("!end ConnectionStateHandler.messageReceived: ctx.sendUpstream(e) " + queryString);
 //            ctx.sendUpstream(e);
 //        }
+
+
+        //----------- New Logic
+        if (query.hasKeepAlive()) {
+            keepAlive = true;
+        }
+
+        if (query.hasOnlyKeepAlive()) {
+            LOGGER.info("!end ConnectionStateHandler.messageReceived: channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel)) " +queryString);
+            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
+            if (keepAlive) {
+                channel.close();
+                LOGGER.info("!end ConnectionStateHandler.messageReceived: channel.close() " + queryString);
+                return;
+            }
+        } else {
+            LOGGER.info("!end ConnectionStateHandler.messageReceived: ctx.sendUpstream(e) " + queryString);
+            ctx.sendUpstream(e);
+        }
 
     }
 
