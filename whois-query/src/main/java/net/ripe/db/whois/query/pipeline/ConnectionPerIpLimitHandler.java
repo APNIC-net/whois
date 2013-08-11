@@ -55,7 +55,6 @@ public class ConnectionPerIpLimitHandler extends SimpleChannelUpstreamHandler {
                 channel.write(QueryMessages.termsAndConditions());
                 channel.write(QueryMessages.connectionsExceeded(maxConnectionsPerIp));
                 channel.write(QueryMessages.servedByNotice(version)).addListener(ChannelFutureListener.CLOSE);
-                LOGGER.info("!!!!!! maxConnectionsPerIp exceeded");
                 return;
             }
         }
@@ -68,7 +67,7 @@ public class ConnectionPerIpLimitHandler extends SimpleChannelUpstreamHandler {
         final Channel channel = ctx.getChannel();
         final InetAddress remoteAddress = ChannelUtil.getRemoteAddress(channel);
         decrementOrDrop(remoteAddress);
-        LOGGER.info("!!!!!! channelClosed super.channelClosed(ctx, e)");
+
         super.channelClosed(ctx, e);
     }
 

@@ -19,15 +19,15 @@ public class DummyWhoisClient {
     private int port;
 
     public static String query(final int port, final String query) {
-       // for (int attempt = 1; attempt <= 3; attempt++) {
-       //     LOGGER.info("Query {} attempt {}", query, attempt);
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            LOGGER.info("Query {} attempt {}", query, attempt);
             DummyWhoisClient client = new DummyWhoisClient("127.0.0.1", port);
             try {
                 return client.sendQuery(query);
             } catch (IOException e) {
-                LOGGER.warn("Query {} attempt {} failed", query, 1);
+                LOGGER.warn("Query {} attempt {} failed", query, attempt);
             }
-      //  }
+        }
 
         throw new IllegalStateException("Unable to execute query");
     }
@@ -70,7 +70,6 @@ public class DummyWhoisClient {
         BufferedReader serverReader = new BufferedReader(new InputStreamReader(socket.getInputStream(), charset));
         StringWriter responseWriter = new StringWriter();
 
-        LOGGER.info("sendQuery request:" + query);
         serverWriter.println(query);
 
         try {
@@ -81,8 +80,8 @@ public class DummyWhoisClient {
             IOUtils.closeQuietly(serverWriter);
             IOUtils.closeQuietly(serverReader);
             IOUtils.closeQuietly(socket);
-            LOGGER.info("sendQuery response:" + responseWriter.toString());
         }
+
         return responseWriter.toString();
     }
 }
