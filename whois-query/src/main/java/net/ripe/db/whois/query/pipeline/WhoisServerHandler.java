@@ -11,11 +11,14 @@ import org.jboss.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+
 public class WhoisServerHandler extends SimpleChannelUpstreamHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionStateHandler.class);
 
     private final QueryHandler queryHandler;
     private boolean closed;
+    private int instance = new Random().nextInt(1000-1) + 1;
 
     public WhoisServerHandler(final QueryHandler queryHandler) {
         this.queryHandler = queryHandler;
@@ -25,7 +28,7 @@ public class WhoisServerHandler extends SimpleChannelUpstreamHandler {
     public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent event) {
         final Query query = (Query) event.getMessage();
         final String queryString = "["+ query.toString() + "]";
-        LOGGER.info("!start WhoisServerHandler.messageReceived: " + queryString);
+        LOGGER(instance, "start WhoisServerHandler.messageReceived: closed=" + closed + ": " + queryString);
         final Channel channel = event.getChannel();
         queryHandler.streamResults(query, ChannelUtil.getRemoteAddress(channel), channel.getId(), new ResponseHandler() {
             @Override
@@ -36,23 +39,31 @@ public class WhoisServerHandler extends SimpleChannelUpstreamHandler {
             @Override
             public void handle(final ResponseObject responseObject) {
                 if (closed) { // Prevent hammering a closed channel
-                    LOGGER.info("!end WhoisServerHandler.messageReceived : throw QueryException(QueryCompletionInfo.DISCONNECTED): " + queryString);
+                    LOGGER(instance, "end WhoisServerHandler.messageReceived : THROW NEW QUERYEXCEPTION(QueryCompletionInfo.DISCONNECTED): closed=" + closed + ": " + queryString);
                     throw new QueryException(QueryCompletionInfo.DISCONNECTED);
                 }
 
-                LOGGER.info("!end WhoisServerHandler.messageReceived : channel.write(responseObject): " + queryString);
+                LOGGER(instance, "end WhoisServerHandler.messageReceived : channel.write(responseObject): closed=" + closed + ": " + queryString);
                 channel.write(responseObject);
+
             }
         });
 
+        LOGGER(instance, "end WhoisServerHandler.messageReceived : channel.getPipeline().sendDownstream: closed=" + closed + ": " + queryString);
         channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
     }
 
     @SuppressWarnings("PMD.SignatureDeclareThrowsException") // Base class throws exception
     @Override
     public void channelClosed(final ChannelHandlerContext ctx, final ChannelStateEvent e) throws Exception {
-        LOGGER.info("!start WhoisServerHandler.channelClosed");
         closed = true;
+        LOGGER(instance, " WhoisServerHandler.channelClosed: closed=" + closed + ": " + e.getClass().getName());
         super.channelClosed(ctx, e);
     }
+
+
+    public static void LOGGER(int instance, String log) {
+        LOGGER.info("!" + instance + "!" + log);
+    }
+
 }
