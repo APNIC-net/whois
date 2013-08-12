@@ -15,12 +15,12 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
     @Override
     public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) {
-        final Channel channel = e.getChannel();
-        final Query query = (Query) e.getMessage();
-
         if (closed) {
             return;
         }
+
+        final Channel channel = e.getChannel();
+        final Query query = (Query) e.getMessage();
 
         // Case: First query has only -k, just keep connection open
         if (!keepAlive && query.hasOnlyKeepAlive()) {
