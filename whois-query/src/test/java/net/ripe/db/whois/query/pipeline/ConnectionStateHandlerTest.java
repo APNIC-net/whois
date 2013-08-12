@@ -92,7 +92,7 @@ public class ConnectionStateHandlerTest {
         verify(channelMock, times(0)).close();
 
         subject.handleUpstream(contextMock, messageMock);
-        verify(channelMock, times(1)).close();
+        verify(channelMock, times(0)).close();
     }
 
     @Test
@@ -114,9 +114,9 @@ public class ConnectionStateHandlerTest {
         verify(contextMock, times(1)).sendUpstream(messageMock);
 
         subject.handleDownstream(contextMock, new QueryCompletedEvent(channelMock, QueryCompletionInfo.DISCONNECTED));
-        verify(channelMock, times(0)).write(QueryMessages.termsAndConditions());
+        verify(channelMock, times(1)).write(QueryMessages.termsAndConditions());
         verify(channelMock, times(1)).write(ConnectionStateHandler.NEWLINE);
-        verify(futureMock, times(1)).addListener(ChannelFutureListener.CLOSE);
+        verify(futureMock, times(0)).addListener(ChannelFutureListener.CLOSE);
     }
 
     @Test

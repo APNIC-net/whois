@@ -4,7 +4,13 @@ import net.ripe.db.whois.query.domain.QueryMessages;
 import net.ripe.db.whois.query.query.Query;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.*;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelDownstreamHandler;
+import org.jboss.netty.channel.ChannelEvent;
+import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,36 +23,58 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
     private boolean keepAlive;
     private boolean closed;
+
     private int instance = new Random().nextInt(10000-1) + 1;
 
     @Override
     public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) {
-        final Query query = (Query) e.getMessage();
         final Channel channel = e.getChannel();
-        if (keepAlive && query.hasOnlyKeepAlive()) {
-            ChannelFuture f = channel.close();
-            LOGGER(instance, "end ConnectionStateHandler.messageReceived: ChannelFuture f = channel.close(): keepAlive=" + keepAlive + ":closed=" + closed + ":" + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + query.toString());
-            return;
-        }
+        final Query query = (Query) e.getMessage();
+        final String queryString = "["+ query.toString() + "]";
 
-        String queryString = "["+ query.toString() + "]";
         LOGGER(instance, "start ConnectionStateHandler.messageReceived: keepAlive=" + keepAlive + ":closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
         if (closed) {
             LOGGER(instance, "end ConnectionStateHandler.messageReceived: closed " + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
             return;
         }
 
+        // Case: First query has only -k, just keep connection open
+        if (!keepAlive && query.hasOnlyKeepAlive()) {
+            keepAlive = true;
+            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
+            return;
+        }
+
+        // Case: Last query has only -k, finish up
+        if (query.hasOnlyKeepAlive()) {
+            keepAlive = false;
+            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
+            return;
+        }
+
+        // Case: Any subsequent queries have -k
         if (query.hasKeepAlive()) {
             keepAlive = true;
         }
 
-        if (query.hasOnlyKeepAlive()) {
-            LOGGER(instance, "end ConnectionStateHandler.messageReceived: channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel)): keepAlive=" + keepAlive + ":closed=" + closed + ":" + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
-            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
-        } else {
-            LOGGER(instance, "end ConnectionStateHandler.messageReceived: ctx.sendUpstream(e): keepAlive=" + keepAlive + ":closed=" + closed + ":" + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
-            ctx.sendUpstream(e);
-        }
+        ctx.sendUpstream(e);
+        LOGGER(instance, "end ConnectionStateHandler.messageReceived: ctx.sendUpstream(e): keepAlive=" + keepAlive + ":closed=" + closed + ":" + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
+
+// Previous logic:
+//        if (keepAlive && query.hasOnlyKeepAlive()) {
+//            channel.close();
+//            return;
+//        }
+//
+//        if (query.hasKeepAlive()) {
+//            keepAlive = true;
+//        }
+//
+//        if (query.hasOnlyKeepAlive()) {
+//            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
+//        } else {
+//            ctx.sendUpstream(e);
+//        }
 
     }
 
@@ -57,14 +85,14 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
         if (e instanceof QueryCompletedEvent) {
             final Channel channel = e.getChannel();
-            if (keepAlive && !((QueryCompletedEvent) e).isForceClose()) {
+            if (keepAlive) {
                 channel.write(NEWLINE);
                 channel.write(QueryMessages.termsAndConditions());
                 LOGGER(instance,"end ConnectionStateHandler.handleDownstream:  channel.write(QueryMessages.termsAndConditions()): keepAlive=" + keepAlive + ":closed=" + closed);
             } else {
-                closed = true;
                 channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE);
                 LOGGER(instance, "end ConnectionStateHandler.handleDownstream:channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE): keepAlive=" + keepAlive + ":closed=" + closed);
+                closed = true;
             }
         }
     }

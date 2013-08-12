@@ -57,7 +57,7 @@ public class WhoisServerHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void channelClosed(final ChannelHandlerContext ctx, final ChannelStateEvent e) throws Exception {
         closed = true;
-        LOGGER(instance, " WhoisServerHandler.channelClosed: closed=" + closed + ": " + e.getClass().getName());
+        LOGGER(instance, "WhoisServerHandler.channelClosed: closed=" + closed + ": " + e.getClass().getName());
         super.channelClosed(ctx, e);
     }
 
