@@ -49,6 +49,7 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
         // Case: Last query is a single -k, return and cleanup normally
         if (!localFirstQuery && query.hasOnlyKeepAlive()) {
+            keepAlive = false;
             channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
             return;
         }
