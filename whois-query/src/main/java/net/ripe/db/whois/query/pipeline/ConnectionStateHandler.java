@@ -30,6 +30,9 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
         final Query query = (Query) e.getMessage();
 
         if (closed) {
+            // Now call close since all queries hae been processed.
+            // Note: Calling this method on a closed channel has no effect.
+            channel.close();
             return;
         }
 

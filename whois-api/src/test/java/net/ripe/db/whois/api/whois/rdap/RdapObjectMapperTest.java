@@ -48,7 +48,7 @@ public class RdapObjectMapperTest {
                 "mnt-lower:      TST-MNT\n" +
                 "mnt-domains:    TST-MNT\n" +
                 "mnt-routes:     TST-MNT\n" +
-                "mnt-irt:        irt-IRT1\n" +
+                "mnt-irt:        IRT-IRT1\n" +
                 "notify:         notify@test.net\n" +
                 "org:            ORG-TOL1-TEST\n" +
                 "changed:        ripe@test.net 20120101\n" +
@@ -72,9 +72,11 @@ public class RdapObjectMapperTest {
 //        assertThat(result.getLinks().get(1).getRel(), is("copyright"));
         assertThat(result.getRemarks(), hasSize(1));
         assertThat(result.getRemarks().get(0).getDescription().get(0), is("some descr"));
-        assertThat(result.getEntities(), hasSize(1));
-        assertThat(result.getEntities().get(0).getHandle(), is("TP1-TEST"));
-        assertThat(result.getEntities().get(0).getRoles().size(), is(2));
+        assertThat(result.getEntities(), hasSize(2));
+        assertThat(result.getEntities().get(0).getHandle(), is("IRT-IRT1"));
+        assertThat(result.getEntities().get(0).getRoles().size(), is(1));
+        assertThat(result.getEntities().get(1).getHandle(), is("TP1-TEST"));
+        assertThat(result.getEntities().get(1).getRoles().size(), is(2));
     }
 
     @Test
@@ -345,10 +347,12 @@ public class RdapObjectMapperTest {
 
         assertThat(result.getEntities(), hasSize(2));
         assertThat(result.getEntities().get(0).getHandle(), is("AIC1-AP"));
-        assertThat(result.getEntities().get(0).getRoles().size(), is(1));
+        assertThat(result.getEntities().get(0).getRoles(), hasSize(1));
+        assertThat(result.getEntities().get(0).getRoles(), containsInAnyOrder(Role.TECHNICAL));
 
         assertThat(result.getEntities().get(1).getHandle(), is("NO4-AP"));
-        assertThat(result.getEntities().get(1).getRoles(), containsInAnyOrder(Role.ADMINISTRATIVE));
+        assertThat(result.getEntities().get(1).getRoles(), hasSize(2));
+        assertThat(result.getEntities().get(1).getRoles(), containsInAnyOrder(Role.ADMINISTRATIVE,Role.TECHNICAL));
 
         assertThat(result.getRemarks(), hasSize(1));
         assertThat(result.getRemarks().get(0).getTitle(), is("description"));
