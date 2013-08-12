@@ -27,6 +27,7 @@ import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
 import net.ripe.db.whois.common.rpsl.RpslObject;
+import org.eclipse.jetty.util.URIUtil;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static net.ripe.db.whois.common.rpsl.AttributeType.*;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ABUSE_MAILBOX;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ADDRESS;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ADMIN_C;
+import static net.ripe.db.whois.common.rpsl.AttributeType.AS_NAME;
+import static net.ripe.db.whois.common.rpsl.AttributeType.COUNTRY;
+import static net.ripe.db.whois.common.rpsl.AttributeType.DESCR;
+import static net.ripe.db.whois.common.rpsl.AttributeType.DS_RDATA;
+import static net.ripe.db.whois.common.rpsl.AttributeType.E_MAIL;
+import static net.ripe.db.whois.common.rpsl.AttributeType.FAX_NO;
+import static net.ripe.db.whois.common.rpsl.AttributeType.GEOLOC;
+import static net.ripe.db.whois.common.rpsl.AttributeType.IRT;
+import static net.ripe.db.whois.common.rpsl.AttributeType.MNT_IRT;
+import static net.ripe.db.whois.common.rpsl.AttributeType.NETNAME;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ORG;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ORG_NAME;
+import static net.ripe.db.whois.common.rpsl.AttributeType.PERSON;
+import static net.ripe.db.whois.common.rpsl.AttributeType.PHONE;
+import static net.ripe.db.whois.common.rpsl.AttributeType.REMARKS;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ROLE;
+import static net.ripe.db.whois.common.rpsl.AttributeType.STATUS;
+import static net.ripe.db.whois.common.rpsl.AttributeType.TECH_C;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ZONE_C;
 import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
 
 class RdapObjectMapper {
@@ -64,7 +86,8 @@ class RdapObjectMapper {
     static {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ADMIN_C, Role.ADMINISTRATIVE);
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(TECH_C, Role.TECHNICAL);
-//        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, "zone");
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(MNT_IRT, Role.ABUSE);
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, Role.TECHNICAL);
     }
 
     public static RdapObject map(
@@ -140,7 +163,7 @@ class RdapObjectMapper {
         ip.setHandle(rpslObject.getKey().toString());
         ip.setIpVersion(rpslObject.getType() == INET6NUM ? "v6" : "v4");
 
-        String selfUrl = baseUrl + "/" + Ip.class.getSimpleName().toLowerCase() + "/" + ipInterval.toString();
+        final String selfUrl = String.format("%s/%s/%s",baseUrl,Ip.class.getSimpleName().toLowerCase(),urlencode(ipInterval.toString()));
 
         // TODO: find a better way to remove the cidr notation
         String startAddr = IpInterval.asIpInterval(ipInterval.beginAsInetAddress()).toString();
@@ -157,7 +180,9 @@ class RdapObjectMapper {
 
             CIString parentKey = parentRpslObject.getKey();
             IpInterval parentInterval = (parentRpslObject.getType() == INET6NUM) ? Ipv6Resource.parse(parentKey) : Ipv4Resource.parse(parentKey);
-            ip.getLinks().add(createLink("up", selfUrl, baseUrl + "/" + Ip.class.getSimpleName().toLowerCase() + "/" + parentInterval.toString()));
+
+            final String parentUrl = String.format("%s/%s/%s",baseUrl,Ip.class.getSimpleName().toLowerCase(),urlencode(parentInterval));
+            ip.getLinks().add(createLink("up", selfUrl, parentUrl));
         }
 
         ip.getLinks().add(createLink("self", selfUrl, selfUrl));
@@ -244,7 +269,11 @@ class RdapObjectMapper {
                 entity.setHandle(entry.getKey().toString());
             }
             for (final AttributeType attributeType : entry.getValue()) {
-                entity.getRoles().add(CONTACT_ATTRIBUTE_TO_ROLE_NAME.get(attributeType));
+                final List<Role> roles = entity.getRoles();
+                final Role role = CONTACT_ATTRIBUTE_TO_ROLE_NAME.get(attributeType);
+                if (!roles.contains(role)) {
+                    roles.add(role);
+                }
             }
             entities.add(entity);
         }
@@ -257,13 +286,13 @@ class RdapObjectMapper {
         entity.setHandle(rpslObject.getKey().toString());
         setVCardArray(entity,createVCard(rpslObject));
 
-        final String selfUrl = baseUrl + "/" + Entity.class.getSimpleName().toLowerCase() + "/" + entity.getHandle();
+        final String selfUrl = String.format("%s/%s/%s",baseUrl,Entity.class.getSimpleName().toLowerCase(),urlencode(entity.getHandle()));
         entity.getLinks().add(createLink("self", topUrl != null ? topUrl : selfUrl, selfUrl));
 
         return entity;
     }
 
-    private static Autnum createAutnumResponse(final RpslObject rpslObject, String requestUrl, String baseUrl) {
+    private static Autnum createAutnumResponse(final RpslObject rpslObject, final String requestUrl, final String baseUrl) {
         final Autnum autnum = new Autnum();
         final String keyValue = rpslObject.getKey().toString();
         autnum.setHandle(keyValue);
@@ -285,7 +314,7 @@ class RdapObjectMapper {
             autnum.setEndAutnum(autNum.getValue());
             autnum.setName(rpslObject.getValueForAttribute(AS_NAME).toString().replace(" ", ""));
 
-            final String selfUrl = baseUrl +  "/" + AutNum.class.getSimpleName().toLowerCase() + "/" + autNum.getValue();
+            final String selfUrl = String.format("%s/%s/%s",baseUrl,AutNum.class.getSimpleName().toLowerCase(),urlencode(autNum.getValue()));
             autnum.getLinks().add(createLink("self", selfUrl, selfUrl));
         }
 
@@ -298,7 +327,7 @@ class RdapObjectMapper {
         domain.setHandle(rpslObject.getKey().toString());
         domain.setLdhName(rpslObject.getKey().toString());
 
-        final String selfUrl = baseUrl + "/" + Domain.class.getSimpleName().toLowerCase() + "/" + domain.getHandle();
+        final String selfUrl = String.format("%s/%s/%s",baseUrl,Domain.class.getSimpleName().toLowerCase(),urlencode(domain.getHandle()));
         domain.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         final Map<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
@@ -410,7 +439,7 @@ class RdapObjectMapper {
         }
 
         for (final CIString fax : rpslObject.getValuesForAttribute(FAX_NO)) {
-            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", "fax")),fax.toString());
+            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", "fax")), fax.toString());
         }
 
         for (final CIString email : rpslObject.getValuesForAttribute(E_MAIL)) {
@@ -464,5 +493,9 @@ class RdapObjectMapper {
         }
 
         return defaultUrl;
+    }
+
+    public static String urlencode(Object obj) {
+        return URIUtil.encodePath(String.valueOf(obj));
     }
 }

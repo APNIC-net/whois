@@ -49,7 +49,7 @@ import static net.ripe.db.whois.common.domain.CIString.ciString;
 public class JdbcRpslObjectDao implements RpslObjectDao {
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcRpslObjectDao.class);
 
-    private static final List<AttributeType> RELATED_TO_ATTRIBUTES = Lists.newArrayList(AttributeType.ADMIN_C, AttributeType.AUTHOR, AttributeType.ORG, AttributeType.PING_HDL, AttributeType.TECH_C, AttributeType.ZONE_C);
+    private static final List<AttributeType> RELATED_TO_ATTRIBUTES = Lists.newArrayList(AttributeType.ADMIN_C, AttributeType.AUTHOR, AttributeType.ORG, AttributeType.PING_HDL, AttributeType.TECH_C, AttributeType.ZONE_C, AttributeType.MNT_IRT);
 
     private final JdbcTemplate jdbcTemplate;
     private final SourceContext sourceContext;

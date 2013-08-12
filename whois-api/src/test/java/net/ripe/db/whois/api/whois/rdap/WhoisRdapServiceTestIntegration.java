@@ -21,7 +21,6 @@ import net.ripe.db.whois.common.IntegrationTest;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
 import org.joda.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Before;
@@ -197,7 +196,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     @Override
     public void setUpClient() throws Exception {
         ClientConfig cc = new DefaultClientConfig();
-        cc.getSingletons().add(new JacksonJaxbJsonProvider());
+        cc.getSingletons().add(new RdapJsonProvider());
         client = Client.create(cc);
     }
 
@@ -295,7 +294,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         final List<Link> links = ip.getLinks();
         assertThat(links, hasSize(1));
-        final String selfUrl = createResource(AUDIENCE, "ip/192.0.0.0/8").toString();
+        final String selfUrl = createResource(AUDIENCE, "ip/" + RdapObjectMapper.urlencode("192.0.0.0/8")).toString();
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getHref(), equalTo(selfUrl));
         assertThat(links.get(0).getValue(), equalTo(selfUrl));
@@ -342,7 +341,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final List<Link> links = response.getLinks();
         assertThat(links, hasSize(2));
         final Link upLink = links.get(0);
-        final String upUrl = createResource(AUDIENCE, "ip/192.0.0.0/24").toString();
+        final String upUrl = createResource(AUDIENCE, "ip/" + RdapObjectMapper.urlencode("192.0.0.0/24")).toString();
         assertThat(upLink.getRel(), equalTo("up"));
         assertThat(upLink.getHref(), equalTo(upUrl));
 
@@ -439,7 +438,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         final List<Link> links = ip.getLinks();
         assertThat(links, hasSize(1));
-        final String selfUrl = createResource(AUDIENCE, "ip/2001:2002:2003::/48").toString();
+        final String selfUrl = createResource(AUDIENCE, "ip/" + RdapObjectMapper.urlencode("2001:2002:2003::/48")).toString();
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getHref(), equalTo(selfUrl));
         assertThat(links.get(0).getValue(), equalTo(selfUrl));
@@ -541,7 +540,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         // Test content type
         Header[] headers = response.headers;
         String contentType = checkHeaderPresent(CONTENT_TYPE_HEADER, headers);
-        assertEquals(MediaType.APPLICATION_JSON, contentType);
+        assertEquals(RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, contentType);
 
         Entity entity = RdapHelperUtils.unmarshal(responseBody, Entity.class);
         assertEntityPP1_TEST(entity);
@@ -930,8 +929,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 //        assertTrue(events.get(0).getEventDate().isBefore(LocalDateTime.now()));
     }
 
-    // TODO Think this test is foobar'd
-    @Ignore
     @Test
     public void lookup_inetnum_abuse_contact_as_vcard() {
         databaseHelper.addObject("" +
@@ -994,9 +991,22 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(Ip.class);
 
+        assertThat(ip.getEntities(), hasSize(3));
+
         Entity abuseContact = ip.getEntities().get(0);
-        Entity irt = ip.getEntities().get(1);
         assertThat(abuseContact.getRoles().get(0), is(Role.ABUSE));
+
+        assertThat(abuseContact.getHandle(), is("AB-TEST"));
+        assertThat(abuseContact.getVcardArray(), hasSize(2));
+        assertThat(abuseContact.getVcardArray().get(0).toString(), is("vcard"));
+        assertThat(abuseContact.getVcardArray().get(1).toString(), is("" +
+                "[[version, {}, text, 4.0], " +
+                "[fn, {}, text, Abuse Contact], " +
+                "[kind, {}, text, group], " +
+                "[adr, {label=Singel 258}, text, [, , , , , , ]], " +
+                "[tel, {type=voice}, text, +31 6 12345678]]"));
+
+        Entity irt = ip.getEntities().get(1);
         assertThat(irt.getRoles().get(0), is(Role.ABUSE));
 
         assertThat(irt.getHandle(), is("IRT-TEST1-MNT"));
@@ -1009,15 +1019,19 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "[email, {pref=1}, text, abuse@test.net], " +
                 "[email, {}, text, info@test.net]]"));
 
-        assertThat(abuseContact.getHandle(), is("AB-TEST"));
-        assertThat(abuseContact.getVcardArray(), hasSize(2));
-        assertThat(abuseContact.getVcardArray().get(0).toString(), is("vcard"));
-        assertThat(abuseContact.getVcardArray().get(1).toString(), is("" +
+        Entity techc = ip.getEntities().get(2);
+        assertThat(techc.getRoles().get(0), is(Role.TECHNICAL));
+
+        assertThat(techc.getHandle(), is("TP1-TEST"));
+        assertThat(techc.getVcardArray(), hasSize(2));
+        assertThat(techc.getVcardArray().get(0).toString(), is("vcard"));
+        assertThat(techc.getVcardArray().get(1).toString(), is("" +
                 "[[version, {}, text, 4.0], " +
-                "[fn, {}, text, Abuse Contact], " +
-                "[kind, {}, text, group], " +
+                "[fn, {}, text, Test Person], " +
+                "[kind, {}, text, individual], " +
                 "[adr, {label=Singel 258}, text, [, , , , , , ]], " +
                 "[tel, {type=voice}, text, +31 6 12345678]]"));
+
     }
 
     // organisation entity

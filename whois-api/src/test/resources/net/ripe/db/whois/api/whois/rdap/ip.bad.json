@@ -1,0 +1,84 @@
+{
+    "handle" : "2001:200:200::/40",
+    "startAddress" : "2001:200:200::",
+
+    "ipVersion" : "v6",
+    "name" : "ITJIT-NET",
+    "type" : "ASSIGNED NON-PORTABLE",
+    "country" : "JP",
+    "parentHandle" : "2001:200::/32",
+    "entities" : [ {
+        "handle" : "HS39-AP",
+        "vcardArray" : [ "vcard", [ [ "version", {
+        }, "text", "4.0" ], [ "fn", {
+        }, "text", "Hiroshi Sakuma" ], [ "kind", {
+        }, "text", "individual" ], [ "adr", {
+            "label" : "Hokusui Bldg. No. 3\n1-13-13 Tsukiji, Chuo-ku, Tokyo 104-0045 Japan"
+        }, "text", [ "", "", "", "", "", "", "" ] ], [ "tel", {
+            "type" : "voice"
+        }, "text", "+81 3 5565 3901" ], [ "tel", {
+            "type" : "fax"
+        }, "text", "+81 3 5565 3940" ], [ "email", {
+        }, "text", "sakuma@itjit.ad.jp" ] ] ],
+        "roles" : [ "administrative" ],
+        "links" : [ {
+            "value" : "http://rdap.apnic.net/ip/2001:200:200::/40",
+            "rel" : "self",
+            "href" : "http://rdap.apnic.net/entity/HS39-AP"
+        } ]
+    }, {
+        "handle" : "TY42-AP",
+        "vcardArray" : [ "vcard", [ [ "version", {
+        }, "text", "4.0" ], [ "fn", {
+        }, "text", "Takahiro Yugawa" ], [ "kind", {
+        }, "text", "individual" ], [ "adr", {
+            "label" : "Telecom Center, East Tower 2F\n2-38 Aomi, Koto-ku, Tokyo 135-8070 Japan"
+        }, "text", [ "", "", "", "", "", "", "" ] ], [ "tel", {
+            "type" : "voice"
+        }, "text", "+81-3-5500-4160" ], [ "tel", {
+            "type" : "fax"
+        }, "text", "+81-3-5500-4159" ], [ "email", {
+        }, "text", "yugawa@itjit.ad.jp" ] ] ],
+        "roles" : [ "technical" ],
+        "links" : [ {
+            "value" : "http://rdap.apnic.net/ip/2001:200:200::/40",
+            "rel" : "self",
+            "href" : "http://rdap.apnic.net/entity/TY42-AP"
+        } ]
+    } ],
+    "remarks" : [ {
+        "title" : "description",
+        "description" : [ "ASSIGNED NON-PORTABLE1 allocation from WIDE-JP" ]
+    }, {
+        "title" : "remarks",
+        "description" : [ "tunnel to Otemachi POP", "see http://www.v6.itjit.ad.jp" ]
+    } ],
+    "links" : [ {
+        "value" : "http://rdap.apnic.net/ip/2001:200:200::/40",
+        "rel" : "up",
+        "href" : "http://rdap.apnic.net/ip/2001:200::/32"
+    }, {
+        "value" : "http://rdap.apnic.net/ip/2001:200:200::/40",
+        "rel" : "self",
+        "href" : "http://rdap.apnic.net/ip/2001:200:200::/40"
+    } ],
+    "events" : [ {
+        "eventAction" : "last changed",
+        "eventDate" : "2008-09-04T06:49:15Z"
+    } ],
+    "rdapConformance" : [ "rdap_level_0" ],
+    "notices" : [ {
+        "title" : "Terms and Conditions",
+        "description" : [ "This is the APNIC WHOIS Database query service. The objects are in RDAP format." ],
+        "links" : [ {
+            "value" : "http://rdap.apnic.net/ip/2001:200:200::/40",
+            "rel" : "terms-of-service",
+            "href" : "http://www.apnic.net/db/dbcopyright.html",
+            "type" : "text/html"
+        } ]
+    }, {
+        "title" : "Source",
+        "description" : [ "Objects returned came from source", "APNIC" ]
+    } ],
+    "port43" : "whois.apnic.net"
+}

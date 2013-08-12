@@ -1,0 +1,60 @@
+{
+    "handle" : "AS10000",
+    "startAutnum" : 10000,
+    "endAutnum" : 10000,
+    "name" : "JPNIC-NET-JP-AS-BLOCK",
+    "country" : "JP",
+
+    "entities" : [ {
+        "handle" : "JNIC1-AP",
+        "vcardArray" : [ "vcard", [ [ "version", {
+        }, "text", "4.0" ], [ "fn", {
+        }, "text", "Japan Network Information Center" ], [ "kind", {
+        }, "text", "group" ], [ "adr", {
+            "label" : "Urbannet-Kanda Bldg 4F\n3-6-2 Uchi-Kanda\nChiyoda-ku, Tokyo 101-0047,Japan"
+        }, "text", [ "", "", "", "", "", "", "" ] ], [ "tel", {
+            "type" : "voice"
+        }, "text", "+81-3-5297-2311" ], [ "tel", {
+            "type" : "fax"
+        }, "text", "+81-3-5297-2312" ], [ "email", {
+        }, "text", "hostmaster@nic.ad.jp" ] ] ],
+        "roles" : [ "administrative", "technical" ],
+        "links" : [ {
+            "value" : "http://rdap.apnic.net/autnum/10000",
+            "rel" : "self",
+            "href" : "http://rdap.apnic.net/entity/JNIC1-AP"
+        } ]
+    } ],
+    "remarks" : [ {
+        "title" : "description",
+        "description" : [ "Japan Network Information Center" ]
+    }, {
+        "title" : "remarks",
+        "description" : [ "Block of 32 AS numbers from AS9990 to AS10021" ]
+    } ],
+    "links" : [ {
+        "value" : "http://rdap.apnic.net/autnum/10000",
+        "rel" : "self",
+        "href" : "http://rdap.apnic.net/autnum/10000"
+    } ],
+    "events" : [ {
+        "eventAction" : "last changed",
+        "eventDate" : "2008-09-04T06:40:28Z"
+    } ],
+    "rdapConformance" : [ "rdap_level_0" ],
+    "notices" : [ {
+        "title" : "Terms and Conditions",
+        "description" : [ "This is the APNIC WHOIS Database query service. The objects are in RDAP format." ],
+        "links" : [ {
+            "value" : "http://rdap.apnic.net/autnum/10000",
+            "rel" : "terms-of-service",
+            "href" : "http://www.apnic.net/db/dbcopyright.html",
+            "type" : "text/html"
+        } ]
+    }, {
+        "title" : "Source",
+        "description" : [ "Objects returned came from source", "APNIC" ]
+    } ],
+    "port43" : "whois.apnic.net"
+
+}

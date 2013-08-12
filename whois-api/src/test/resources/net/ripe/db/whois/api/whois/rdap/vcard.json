@@ -1,0 +1,15 @@
+[
+    [ "version", { }, "text", "4.0" , "xx"],
+    [ "fn", { }, "text", "APNIC Helpdesk" ],
+    [ "kind", { }, "text", "individual" ],
+    [ "adr", {
+        "label": "6 Cordelia Street\nSouth Brisbane\nQLD 4101"
+    }, "text", [ "", "", "", "", "", "", "" ] ],
+    [ "tel", {
+        "type": "voice"
+    }, "text", "+61 7 3858 3188" ],
+    [ "tel", {
+        "type": "fax"
+    }, "text", "+61 7 3858 3199" ],
+    [ "email", { }, "text", "helpdesk@apnic.net" ]
+]

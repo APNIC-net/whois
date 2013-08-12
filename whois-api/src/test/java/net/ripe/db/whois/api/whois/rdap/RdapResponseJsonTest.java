@@ -466,7 +466,7 @@ public class RdapResponseJsonTest {
         notices.getDescription().add("Beverages with caffeine for keeping horses awake.");
         notices.getDescription().add("Very effective.");
 
-        final Link link = RdapObjectMapper.createLink("self", "http://example.com/context_uri", "http://example.com/target_uri_href", "application/json");
+        final Link link = RdapObjectMapper.createLink("self", "http://example.com/ip/" + RdapObjectMapper.urlencode("202.112.0.0 - 202.121.255.255"), "http://example.com/target_uri_href", "application/json");
         link.getHreflang().add("en");
         link.getHreflang().add("ch");
         link.getTitle().add("title1");
@@ -479,7 +479,7 @@ public class RdapResponseJsonTest {
                 "  \"title\" : \"Beverage policy\",\n" +
                 "  \"description\" : [ \"Beverages with caffeine for keeping horses awake.\", \"Very effective.\" ],\n" +
                 "  \"links\" : [ {\n" +
-                "    \"value\" : \"http://example.com/context_uri\",\n" +
+                "    \"value\" : \"http://example.com/ip/202.112.0.0%20-%20202.121.255.255\",\n" +
                 "    \"rel\" : \"self\",\n" +
                 "    \"href\" : \"http://example.com/target_uri_href\",\n" +
                 "    \"hreflang\" : [ \"en\", \"ch\" ],\n" +

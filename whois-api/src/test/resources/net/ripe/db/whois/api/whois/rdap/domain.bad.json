@@ -1,0 +1,60 @@
+{
+
+    "ldhName" : "128.144.202.in-addr.arpa",
+    "nameServers" : [ {
+        "ldhName" : "ns2.druknet.bt"
+    }, {
+        "ldhName" : "ns1.druknet.bt"
+    } ],
+    "entities" : [ {
+        "handle" : "JT106-AP",
+        "vcardArray" : [ "vcard", [ [ "version", {
+        }, "text", "4.0" ], [ "fn", {
+        }, "text", "Jichen Thinley" ], [ "kind", {
+        }, "text", "individual" ], [ "adr", {
+            "label" : "DrukNet\nBhutan Telecom\nThimphu"
+        }, "text", [ "", "", "", "", "", "", "" ] ], [ "tel", {
+            "type" : "voice"
+        }, "text", "+975-2-320118" ], [ "tel", {
+            "type" : "fax"
+        }, "text", "+975-2-328160" ], [ "email", {
+        }, "text", "jichen@druknet.bt" ] ] ],
+        "roles" : [ "administrative", "technical" ],
+        "links" : [ {
+            "value" : "http://rdap.apnic.net/domain/128.144.202.in-addr.arpa",
+            "rel" : "self",
+            "href" : "http://rdap.apnic.net/entity/JT106-AP"
+        } ]
+    } ],
+    "remarks" : [ {
+        "title" : "description",
+        "description" : [ "Reverse delegation for 202.144.128.0/24" ]
+    }, {
+        "title" : "remarks",
+        "description" : [ "reverse zone for BTTELECOM" ]
+    } ],
+    "links" : [ {
+        "value" : "http://rdap.apnic.net/domain/128.144.202.in-addr.arpa",
+        "rel" : "self",
+        "href" : "http://rdap.apnic.net/domain/128.144.202.in-addr.arpa"
+    } ],
+    "events" : [ {
+        "eventAction" : "last changed",
+        "eventDate" : "2008-09-04T06:40:45Z"
+    } ],
+    "rdapConformance" : [ "rdap_level_0" ],
+    "notices" : [ {
+        "title" : "Terms and Conditions",
+        "description" : [ "This is the APNIC WHOIS Database query service. The objects are in RDAP format." ],
+        "links" : [ {
+            "value" : "http://rdap.apnic.net/domain/128.144.202.in-addr.arpa",
+            "rel" : "terms-of-service",
+            "href" : "http://www.apnic.net/db/dbcopyright.html",
+            "type" : "text/html"
+        } ]
+    }, {
+        "title" : "Source",
+        "description" : [ "Objects returned came from source", "APNIC" ]
+    } ],
+    "port43" : "whois.apnic.net"
+}
