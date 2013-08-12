@@ -19,14 +19,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.annotation.Annotation;
 import java.net.Socket;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
 @Category(IntegrationTest.class)
@@ -140,23 +138,16 @@ public class RdapErrorTestIntegration extends AbstractRestClientTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         bufferedWriter.write("GET /rdap/ip/[::] HTTP/1.0\n\n");
         bufferedWriter.flush();
+
+        StringBuilder response = new StringBuilder();
         String line;
-        String response = "";
-        boolean reachedContent = false;
         while ((line = bufferedReader.readLine()) != null) {
-            if (reachedContent) {
-                response += line;
-            }
-            if (line.equals("")) {
-                reachedContent = true;
-            }
+            response.append(line);
+            response.append('\n');
         }
 
-        InputStream inputStream = new ByteArrayInputStream(response.getBytes());
-
-        Error error = new Error();
-        error = (Error) rdapJsonProvider.readFrom(Object.class, Error.class, new Annotation[0], MediaType.valueOf("application/json"), null, inputStream);
-        assertThat(error.getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+        String responseStr = response.toString();
+        assertThat(responseStr, containsString(Response.Status.BAD_REQUEST.getStatusCode() + " " + Response.Status.BAD_REQUEST));
     }
 
     @Override
