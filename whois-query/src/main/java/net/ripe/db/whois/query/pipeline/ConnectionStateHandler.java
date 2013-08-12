@@ -7,6 +7,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelDownstreamHandler;
 import org.jboss.netty.channel.ChannelEvent;
+import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
@@ -21,77 +22,61 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
     static final ChannelBuffer NEWLINE = ChannelBuffers.wrappedBuffer(new byte[]{'\n'});
 
-    private boolean keepAlive;
-    private boolean closed;
+    private boolean keepAlive = false;
+    private boolean closed = false;
+    private boolean firstQuery = true;
 
-    private int instance = new Random().nextInt(10000-1) + 1;
+    private int instance = new Random().nextInt(10000 - 1) + 1;
 
     @Override
     public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) {
         final Channel channel = e.getChannel();
         final Query query = (Query) e.getMessage();
-        final String queryString = "["+ query.toString() + "]";
+        final String queryString = "[" + query.toString() + "]";
 
-        LOGGER(instance, "start ConnectionStateHandler.messageReceived: keepAlive=" + keepAlive + ":closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
+        LOGGER(instance, "start ConnectionStateHandler.messageReceived: :closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
         if (closed) {
-            LOGGER(instance, "end ConnectionStateHandler.messageReceived: closed " + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
             return;
         }
 
-        // Case: First query has only -k, just keep connection open
-        if (!keepAlive && query.hasOnlyKeepAlive()) {
+        boolean localFirstQuery = firstQuery;
+        firstQuery = false;
+
+        if (localFirstQuery && query.hasKeepAlive()) {
+            // Case: First query contains -k, keep the connection open
             keepAlive = true;
             channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
-            return;
+
+            // Case: First query is a single -k, keep the connection open, and just return
+            if (query.hasOnlyKeepAlive()) {
+                return;
+            }
         }
 
-        // Case: Last query has only -k, finish up
-        if (query.hasOnlyKeepAlive()) {
-            keepAlive = false;
+        // Case: Last query is a single -k, return and cleanup normally
+        if (!localFirstQuery && query.hasOnlyKeepAlive()) {
             channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
             return;
-        }
-
-        // Case: Any subsequent queries have -k
-        if (query.hasKeepAlive()) {
-            keepAlive = true;
         }
 
         ctx.sendUpstream(e);
-        LOGGER(instance, "end ConnectionStateHandler.messageReceived: ctx.sendUpstream(e): keepAlive=" + keepAlive + ":closed=" + closed + ":" + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
-
-// Previous logic:
-//        if (keepAlive && query.hasOnlyKeepAlive()) {
-//            channel.close();
-//            return;
-//        }
-//
-//        if (query.hasKeepAlive()) {
-//            keepAlive = true;
-//        }
-//
-//        if (query.hasOnlyKeepAlive()) {
-//            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
-//        } else {
-//            ctx.sendUpstream(e);
-//        }
 
     }
 
     @Override
     public void handleDownstream(final ChannelHandlerContext ctx, final ChannelEvent e) {
-        LOGGER(instance, "start ConnectionStateHandler.handleDownstream: ctx.sendDownstream(e): keepAlive=" + keepAlive + ": closed=" + closed);
+        //LOGGER(instance, "start ConnectionStateHandler.handleDownstream: ctx.sendDownstream(e): keepAlive=" + keepAlive + ": closed=" + closed);
         ctx.sendDownstream(e);
 
         if (e instanceof QueryCompletedEvent) {
             final Channel channel = e.getChannel();
+            ChannelFuture cf = channel.write(NEWLINE);
             if (keepAlive) {
-                channel.write(NEWLINE);
                 channel.write(QueryMessages.termsAndConditions());
-                LOGGER(instance,"end ConnectionStateHandler.handleDownstream:  channel.write(QueryMessages.termsAndConditions()): keepAlive=" + keepAlive + ":closed=" + closed);
+                //LOGGER(instance,"end ConnectionStateHandler.handleDownstream:  channel.write(QueryMessages.termsAndConditions()): keepAlive=" + keepAlive + ":closed=" + closed);
             } else {
-                channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE);
-                LOGGER(instance, "end ConnectionStateHandler.handleDownstream:channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE): keepAlive=" + keepAlive + ":closed=" + closed);
+                cf.addListener(ChannelFutureListener.CLOSE);
+                //LOGGER(instance, "end ConnectionStateHandler.handleDownstream:channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE): keepAlive=" + keepAlive + ":closed=" + closed);
                 closed = true;
             }
         }
