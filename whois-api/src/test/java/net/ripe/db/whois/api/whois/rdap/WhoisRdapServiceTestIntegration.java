@@ -17,7 +17,6 @@ import net.ripe.db.whois.api.whois.rdap.domain.Link;
 import net.ripe.db.whois.api.whois.rdap.domain.Notice;
 import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.api.whois.rdap.domain.Role;
-import net.ripe.db.whois.api.whois.rdap.RdapJsonProvider;
 import net.ripe.db.whois.common.IntegrationTest;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderElement;
@@ -295,7 +294,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         final List<Link> links = ip.getLinks();
         assertThat(links, hasSize(1));
-        final String selfUrl = createResource(AUDIENCE, "ip/192.0.0.0/8").toString();
+        final String selfUrl = createResource(AUDIENCE, "ip/" + RdapObjectMapper.urlencode("192.0.0.0/8")).toString();
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getHref(), equalTo(selfUrl));
         assertThat(links.get(0).getValue(), equalTo(selfUrl));
@@ -342,7 +341,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final List<Link> links = response.getLinks();
         assertThat(links, hasSize(2));
         final Link upLink = links.get(0);
-        final String upUrl = createResource(AUDIENCE, "ip/192.0.0.0/24").toString();
+        final String upUrl = createResource(AUDIENCE, "ip/" + RdapObjectMapper.urlencode("192.0.0.0/24")).toString();
         assertThat(upLink.getRel(), equalTo("up"));
         assertThat(upLink.getHref(), equalTo(upUrl));
 
@@ -439,7 +438,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         final List<Link> links = ip.getLinks();
         assertThat(links, hasSize(1));
-        final String selfUrl = createResource(AUDIENCE, "ip/2001:2002:2003::/48").toString();
+        final String selfUrl = createResource(AUDIENCE, "ip/" + RdapObjectMapper.urlencode("2001:2002:2003::/48")).toString();
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getHref(), equalTo(selfUrl));
         assertThat(links.get(0).getValue(), equalTo(selfUrl));
