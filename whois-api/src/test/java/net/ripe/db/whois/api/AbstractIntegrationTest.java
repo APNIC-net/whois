@@ -102,7 +102,9 @@ public abstract class AbstractIntegrationTest extends AbstractDatabaseHelperTest
             } else {
                 inputStream = connection.getErrorStream();
             }
-
+            if (inputStream == null) {
+                return null;
+            }
             BufferedReader responseReader = new BufferedReader(new InputStreamReader(inputStream));
             String line;
             while ((line = responseReader.readLine()) != null) {

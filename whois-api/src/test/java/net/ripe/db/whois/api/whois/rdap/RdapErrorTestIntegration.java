@@ -2,50 +2,32 @@ package net.ripe.db.whois.api.whois.rdap;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import net.ripe.db.whois.api.AbstractRestClientTest;
 import net.ripe.db.whois.api.httpserver.Audience;
 import net.ripe.db.whois.api.whois.rdap.domain.Error;
-import net.ripe.db.whois.api.whois.rdap.RdapJsonProvider;
 import net.ripe.db.whois.common.IntegrationTest;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HeaderElement;
-import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDateTime;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.IOException;
-import java.io.*;
-import java.lang.annotation.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.lang.annotation.Annotation;
 import java.net.Socket;
-import java.net.HttpURLConnection;
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.hasXPath;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 @Category(IntegrationTest.class)
 public class RdapErrorTestIntegration extends AbstractRestClientTest {
@@ -110,17 +92,15 @@ public class RdapErrorTestIntegration extends AbstractRestClientTest {
 
     @Test
     public void double_slash() {
-        final Error error = createResource(AUDIENCE, "/rdap/entity/PP1-TEST")
+        final ClientResponse error = createResource(AUDIENCE, "/rdap/entity/PP1-TEST")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .get(ClientResponse.class)
-                .getEntity(Error.class);
-        assertThat(error.getErrorCode(), is(Response.Status.NOT_FOUND.getStatusCode()));
+                .get(ClientResponse.class);
+        assertThat(error.getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
 
-        final Error error2 = createResource(AUDIENCE, "rdap//entity/PP1-TEST")
+        final ClientResponse error2 = createResource(AUDIENCE, "rdap//entity/PP1-TEST")
                 .accept(MediaType.APPLICATION_JSON_TYPE)
-                .get(ClientResponse.class)
-                .getEntity(Error.class);
-        assertThat(error2.getErrorCode(), is(Response.Status.NOT_FOUND.getStatusCode()));
+                .get(ClientResponse.class);
+        assertThat(error2.getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
     }
 
     @Test
