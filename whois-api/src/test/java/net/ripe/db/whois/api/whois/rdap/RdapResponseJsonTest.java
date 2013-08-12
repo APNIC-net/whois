@@ -479,7 +479,7 @@ public class RdapResponseJsonTest {
                 "  \"title\" : \"Beverage policy\",\n" +
                 "  \"description\" : [ \"Beverages with caffeine for keeping horses awake.\", \"Very effective.\" ],\n" +
                 "  \"links\" : [ {\n" +
-                "    \"value\" : \"http://example.com/ip/202.112.0.0+-+202.121.255.255\",\n" +
+                "    \"value\" : \"http://example.com/ip/202.112.0.0%20-%20202.121.255.255\",\n" +
                 "    \"rel\" : \"self\",\n" +
                 "    \"href\" : \"http://example.com/target_uri_href\",\n" +
                 "    \"hreflang\" : [ \"en\", \"ch\" ],\n" +
