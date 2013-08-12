@@ -88,7 +88,6 @@ public class ConnectionStateHandlerTest {
     @Test
     public void secondSingleKShouldCloseConnection() throws Exception {
         when(messageMock.getMessage()).thenReturn(Query.parse("-k"));
-
         subject.handleDownstream(contextMock, messageMock);
         verify(contextMock, times(1)).sendDownstream(messageMock);
 
@@ -109,7 +108,7 @@ public class ConnectionStateHandlerTest {
     }
 
     @Test
-    public void forceCloseShouldCloseConnection() throws Exception {
+    public void normalConnection() throws Exception {
         when(messageMock.getMessage()).thenReturn(Query.parse("-k -r -T inetnum 10.0.0.0"));
 
         subject.handleUpstream(contextMock, messageMock);
