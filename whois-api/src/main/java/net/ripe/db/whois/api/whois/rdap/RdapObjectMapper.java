@@ -54,6 +54,7 @@ import static net.ripe.db.whois.common.rpsl.AttributeType.E_MAIL;
 import static net.ripe.db.whois.common.rpsl.AttributeType.FAX_NO;
 import static net.ripe.db.whois.common.rpsl.AttributeType.GEOLOC;
 import static net.ripe.db.whois.common.rpsl.AttributeType.IRT;
+import static net.ripe.db.whois.common.rpsl.AttributeType.MNT_IRT;
 import static net.ripe.db.whois.common.rpsl.AttributeType.NETNAME;
 import static net.ripe.db.whois.common.rpsl.AttributeType.ORG;
 import static net.ripe.db.whois.common.rpsl.AttributeType.ORG_NAME;
@@ -63,6 +64,7 @@ import static net.ripe.db.whois.common.rpsl.AttributeType.REMARKS;
 import static net.ripe.db.whois.common.rpsl.AttributeType.ROLE;
 import static net.ripe.db.whois.common.rpsl.AttributeType.STATUS;
 import static net.ripe.db.whois.common.rpsl.AttributeType.TECH_C;
+import static net.ripe.db.whois.common.rpsl.AttributeType.ZONE_C;
 import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
 
 class RdapObjectMapper {
@@ -84,7 +86,8 @@ class RdapObjectMapper {
     static {
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ADMIN_C, Role.ADMINISTRATIVE);
         CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(TECH_C, Role.TECHNICAL);
-//        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, "zone");
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(MNT_IRT, Role.ABUSE);
+        CONTACT_ATTRIBUTE_TO_ROLE_NAME.put(ZONE_C, Role.TECHNICAL);
     }
 
     public static RdapObject map(
@@ -266,7 +269,11 @@ class RdapObjectMapper {
                 entity.setHandle(entry.getKey().toString());
             }
             for (final AttributeType attributeType : entry.getValue()) {
-                entity.getRoles().add(CONTACT_ATTRIBUTE_TO_ROLE_NAME.get(attributeType));
+                final List<Role> roles = entity.getRoles();
+                final Role role = CONTACT_ATTRIBUTE_TO_ROLE_NAME.get(attributeType);
+                if (!roles.contains(role)) {
+                    roles.add(role);
+                }
             }
             entities.add(entity);
         }
@@ -432,7 +439,7 @@ class RdapObjectMapper {
         }
 
         for (final CIString fax : rpslObject.getValuesForAttribute(FAX_NO)) {
-            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", "fax")),fax.toString());
+            builder.addTel(VCardHelper.createMap(Maps.immutableEntry("type", "fax")), fax.toString());
         }
 
         for (final CIString email : rpslObject.getValuesForAttribute(E_MAIL)) {
