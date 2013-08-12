@@ -4,7 +4,7 @@ import net.ripe.db.whois.spec.BaseSpec
 import net.ripe.db.whois.spec.BasicFixtures
 import spec.domain.AckResponse
 
-class ModifiedVersionHistorySpec2 extends BaseSpec {
+class ModifiedVersionHistory2Spec extends BaseSpec {
 
     @Override
     Map<String, String> getBasicFixtures() {
