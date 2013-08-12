@@ -18,16 +18,17 @@ public class DummyWhoisClient {
     private String host;
     private int port;
 
+
     public static String query(final int port, final String query) {
-        for (int attempt = 1; attempt <= 3; attempt++) {
-            LOGGER.info("Query {} attempt {}", query, attempt);
-            DummyWhoisClient client = new DummyWhoisClient("127.0.0.1", port);
-            try {
-                return client.sendQuery(query);
-            } catch (IOException e) {
-                LOGGER.warn("Query {} attempt {} failed", query, attempt);
-            }
+        // for (int attempt = 1; attempt <= 3; attempt++) {
+        //     LOGGER.info("Query {} attempt {}", query, attempt);
+        DummyWhoisClient client = new DummyWhoisClient("127.0.0.1", port);
+        try {
+            return client.sendQuery(query);
+        } catch (IOException e) {
+            LOGGER.warn("Query {} attempt {} failed", query, 1);
         }
+        //  }
 
         throw new IllegalStateException("Unable to execute query");
     }
