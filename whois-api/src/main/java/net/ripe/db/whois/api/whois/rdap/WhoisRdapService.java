@@ -275,8 +275,7 @@ public class WhoisRdapService {
             final RpslObject resultObject = result.remove(0);
 
             List<RpslObject> abuseContacts = Lists.newArrayList();
-//            abuseContacts.addAll(getAbuseContacts(resultObject));
-            abuseContacts.addAll(getMntIrt(resultObject));
+            abuseContacts.addAll(getAbuseContacts(resultObject));
             return RdapObjectMapper.map(
                     getRequestUrl(request),
                     getBaseUrl(request),
@@ -378,27 +377,6 @@ public class WhoisRdapService {
             return abuseCFinder.findAbuseContacts(rpslObject);
         }
         return Collections.emptyList();
-    }
-
-    private List<RpslObject> getMntIrt(final RpslObject rpslObject) {
-        List<RpslObject> mntIrtObjects = Lists.newArrayList();
-        List<RpslAttribute> mntIrtAttributes = rpslObject.findAttributes(AttributeType.MNT_IRT);
-        for (RpslAttribute mntIrtAttribute : mntIrtAttributes) {
-            final String queryString = String.format("%s %s %s %s %s",
-                    QueryFlag.NO_GROUPING.getLongFlag(),
-                    QueryFlag.SELECT_TYPES.getLongFlag(),
-                    IRT,
-                    QueryFlag.NO_FILTERING.getLongFlag(),
-                    mntIrtAttribute.getCleanValue().toString());
-            final Query query = Query.parse(queryString);
-            for (final RpslObject resultObject : runQuery(query, null, true)) {
-                if (resultObject.getType().equals(IRT)) {
-                    mntIrtObjects.add(resultObject);
-                }
-            }
-        }
-
-        return mntIrtObjects;
     }
 
     private RpslObject getParentObject(final RpslObject rpslObject) {

@@ -929,8 +929,6 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 //        assertTrue(events.get(0).getEventDate().isBefore(LocalDateTime.now()));
     }
 
-    // TODO Think this test is foobar'd
-    @Ignore
     @Test
     public void lookup_inetnum_abuse_contact_as_vcard() {
         databaseHelper.addObject("" +
@@ -993,9 +991,22 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get(Ip.class);
 
+        assertThat(ip.getEntities(), hasSize(3));
+
         Entity abuseContact = ip.getEntities().get(0);
-        Entity irt = ip.getEntities().get(1);
         assertThat(abuseContact.getRoles().get(0), is(Role.ABUSE));
+
+        assertThat(abuseContact.getHandle(), is("AB-TEST"));
+        assertThat(abuseContact.getVcardArray(), hasSize(2));
+        assertThat(abuseContact.getVcardArray().get(0).toString(), is("vcard"));
+        assertThat(abuseContact.getVcardArray().get(1).toString(), is("" +
+                "[[version, {}, text, 4.0], " +
+                "[fn, {}, text, Abuse Contact], " +
+                "[kind, {}, text, group], " +
+                "[adr, {label=Singel 258}, text, [, , , , , , ]], " +
+                "[tel, {type=voice}, text, +31 6 12345678]]"));
+
+        Entity irt = ip.getEntities().get(1);
         assertThat(irt.getRoles().get(0), is(Role.ABUSE));
 
         assertThat(irt.getHandle(), is("IRT-TEST1-MNT"));
@@ -1008,15 +1019,19 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "[email, {pref=1}, text, abuse@test.net], " +
                 "[email, {}, text, info@test.net]]"));
 
-        assertThat(abuseContact.getHandle(), is("AB-TEST"));
-        assertThat(abuseContact.getVcardArray(), hasSize(2));
-        assertThat(abuseContact.getVcardArray().get(0).toString(), is("vcard"));
-        assertThat(abuseContact.getVcardArray().get(1).toString(), is("" +
+        Entity techc = ip.getEntities().get(2);
+        assertThat(techc.getRoles().get(0), is(Role.TECHNICAL));
+
+        assertThat(techc.getHandle(), is("TP1-TEST"));
+        assertThat(techc.getVcardArray(), hasSize(2));
+        assertThat(techc.getVcardArray().get(0).toString(), is("vcard"));
+        assertThat(techc.getVcardArray().get(1).toString(), is("" +
                 "[[version, {}, text, 4.0], " +
-                "[fn, {}, text, Abuse Contact], " +
-                "[kind, {}, text, group], " +
+                "[fn, {}, text, Test Person], " +
+                "[kind, {}, text, individual], " +
                 "[adr, {label=Singel 258}, text, [, , , , , , ]], " +
                 "[tel, {type=voice}, text, +31 6 12345678]]"));
+
     }
 
     // organisation entity
