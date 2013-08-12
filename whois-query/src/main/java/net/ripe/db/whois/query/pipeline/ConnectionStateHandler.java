@@ -15,28 +15,33 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
     @Override
     public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) {
+        final Channel channel = e.getChannel();
+        final Query query = (Query) e.getMessage();
+
         if (closed) {
             return;
         }
 
-        final Query query = (Query) e.getMessage();
-        final Channel channel = e.getChannel();
-
-
-        if (keepAlive && query.hasOnlyKeepAlive()) {
-            channel.close();
+        // Case: First query has only -k, just keep connection open
+        if (!keepAlive && query.hasOnlyKeepAlive()) {
+            keepAlive = true;
+            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
             return;
         }
 
+        // Case: Last query has only -k, finish up
+        if (query.hasOnlyKeepAlive()) {
+            keepAlive = false;
+            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
+            return;
+        }
+
+        // Case: Any subsequent queries have -k
         if (query.hasKeepAlive()) {
             keepAlive = true;
         }
 
-        if (query.hasOnlyKeepAlive()) {
-            channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel));
-        } else {
-            ctx.sendUpstream(e);
-        }
+        ctx.sendUpstream(e);
     }
 
     @Override
@@ -45,7 +50,7 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
         if (e instanceof QueryCompletedEvent) {
             final Channel channel = e.getChannel();
-            if (keepAlive && !((QueryCompletedEvent) e).isForceClose()) {
+            if (keepAlive) {
                 channel.write(NEWLINE);
                 channel.write(QueryMessages.termsAndConditions());
             } else {

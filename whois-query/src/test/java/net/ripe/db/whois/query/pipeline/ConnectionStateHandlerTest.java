@@ -88,11 +88,13 @@ public class ConnectionStateHandlerTest {
     @Test
     public void secondSingleKShouldCloseConnection() throws Exception {
         when(messageMock.getMessage()).thenReturn(Query.parse("-k"));
-        subject.handleUpstream(contextMock, messageMock);
-        verify(channelMock, times(0)).close();
 
-        subject.handleUpstream(contextMock, messageMock);
-        verify(channelMock, times(1)).close();
+        subject.handleDownstream(contextMock, messageMock);
+        verify(contextMock, times(1)).sendDownstream(messageMock);
+
+        subject.handleDownstream(contextMock, new QueryCompletedEvent(channelMock));
+        verify(channelMock, times(1)).write(ConnectionStateHandler.NEWLINE);
+        verify(futureMock, times(1)).addListener(ChannelFutureListener.CLOSE);
     }
 
     @Test
@@ -114,9 +116,9 @@ public class ConnectionStateHandlerTest {
         verify(contextMock, times(1)).sendUpstream(messageMock);
 
         subject.handleDownstream(contextMock, new QueryCompletedEvent(channelMock, QueryCompletionInfo.DISCONNECTED));
-        verify(channelMock, times(0)).write(QueryMessages.termsAndConditions());
+        verify(channelMock, times(1)).write(QueryMessages.termsAndConditions());
         verify(channelMock, times(1)).write(ConnectionStateHandler.NEWLINE);
-        verify(futureMock, times(1)).addListener(ChannelFutureListener.CLOSE);
+        verify(futureMock, times(0)).addListener(ChannelFutureListener.CLOSE);
     }
 
     @Test
