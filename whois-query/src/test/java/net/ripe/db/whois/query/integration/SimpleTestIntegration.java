@@ -139,8 +139,7 @@ public class SimpleTestIntegration extends AbstractWhoisIntegrationTest {
 
     @Test
     public void testMultipleQueriesWithoutKeepAlive() throws Exception {
-        final String response = DummyWhoisClient.query(QueryServer.port, "help\nhelp");
-
+        final String response = DummyWhoisClient.query(QueryServer.port, "help\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp");
         assertThat(response, containsString("RIPE Database Reference Manual"));
         assertThat(response, not(containsString(QueryMessages.internalErrorOccured().toString())));
     }

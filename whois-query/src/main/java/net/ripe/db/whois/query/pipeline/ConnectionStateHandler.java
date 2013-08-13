@@ -1,5 +1,6 @@
 package net.ripe.db.whois.query.pipeline;
 
+import net.ripe.db.whois.query.domain.QueryCompletionInfo;
 import net.ripe.db.whois.query.domain.QueryMessages;
 import net.ripe.db.whois.query.query.Query;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -7,21 +8,18 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelDownstreamHandler;
 import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConnectionStateHandler extends SimpleChannelUpstreamHandler implements ChannelDownstreamHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionStateHandler.class);
 
     static final ChannelBuffer NEWLINE = ChannelBuffers.wrappedBuffer(new byte[]{'\n'});
 
     private boolean keepAlive = false;
     private boolean closed = false;
+    private int closedQueryCount = 0;
     private boolean firstQuery = true;
 
     @Override
@@ -30,9 +28,11 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
         final Query query = (Query) e.getMessage();
 
         if (closed) {
-            // Now call close since all queries hae been processed.
-            // Note: Calling this method on a closed channel has no effect.
-            channel.close();
+            keepAlive = false;
+            // If we get more than 5 queries while in closed state, force close the connection
+            if (++closedQueryCount > 5) {
+                channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel, QueryCompletionInfo.REJECTED));
+            }
             return;
         }
 
@@ -66,11 +66,15 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
         if (e instanceof QueryCompletedEvent) {
             final Channel channel = e.getChannel();
-            ChannelFuture cf = channel.write(NEWLINE);
             if (keepAlive) {
+                channel.write(NEWLINE);
                 channel.write(QueryMessages.termsAndConditions());
             } else {
-                cf.addListener(ChannelFutureListener.CLOSE);
+                if (((QueryCompletedEvent) e).getCompletionInfo() == QueryCompletionInfo.REJECTED) {
+                    channel.close();
+                } else {
+                    channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE);
+                }
                 closed = true;
             }
         }
