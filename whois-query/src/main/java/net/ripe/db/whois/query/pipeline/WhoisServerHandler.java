@@ -33,7 +33,7 @@ public class WhoisServerHandler extends SimpleChannelUpstreamHandler {
                     throw new QueryException(QueryCompletionInfo.DISCONNECTED);
                 }
 
-                channel.write(responseObject);
+                channel.write(responseObject).awaitUninterruptibly();
             }
         });
 
