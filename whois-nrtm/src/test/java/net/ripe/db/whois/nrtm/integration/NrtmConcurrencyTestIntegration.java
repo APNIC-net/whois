@@ -258,9 +258,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     }
 
                     if (stop) {
-                        break;
+                        return;
                     }
-                    Thread.yield();
                 }
             } catch (Exception e) {
                 error = e.getMessage();
