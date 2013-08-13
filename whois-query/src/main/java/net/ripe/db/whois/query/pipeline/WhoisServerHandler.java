@@ -39,11 +39,11 @@ public class WhoisServerHandler extends SimpleChannelUpstreamHandler {
             @Override
             public void handle(final ResponseObject responseObject) {
                 if (closed) { // Prevent hammering a closed channel
-                    LOGGER(instance, "end WhoisServerHandler.messageReceived : THROW NEW QUERYEXCEPTION(QueryCompletionInfo.DISCONNECTED): closed=" + closed + ": " + queryString);
+                    LOGGER(instance, "return WhoisServerHandler.messageReceived : THROW NEW QUERYEXCEPTION(QueryCompletionInfo.DISCONNECTED): closed=" + closed + ": " + queryString);
                     throw new QueryException(QueryCompletionInfo.DISCONNECTED);
                 }
 
-                LOGGER(instance, "end WhoisServerHandler.messageReceived : channel.write(responseObject): closed=" + closed + ": " + queryString);
+                LOGGER(instance, "WhoisServerHandler.messageReceived : channel.write(responseObject): closed=" + closed + ": " + queryString);
                 channel.write(responseObject);
 
             }
@@ -57,8 +57,8 @@ public class WhoisServerHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void channelClosed(final ChannelHandlerContext ctx, final ChannelStateEvent e) throws Exception {
         closed = true;
-        LOGGER(instance, "WhoisServerHandler.channelClosed: closed=" + closed + ": " + e.getClass().getName());
         super.channelClosed(ctx, e);
+        LOGGER(instance, "end WhoisServerHandler.channelClosed: super.channelClosed(ctx, e) : closed=" + closed + ": " + e.getClass().getName());
     }
 
 

@@ -17,6 +17,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -31,9 +33,12 @@ import static org.junit.Assert.*;
 @Category(IntegrationTest.class)
 public class SimpleTestIntegration extends AbstractWhoisIntegrationTest {
     private static final String END_OF_HEADER = "% See http://www.ripe.net/db/support/db-terms-conditions.pdf\n\n";
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleTestIntegration.class);
 
-    @Autowired IpTreeUpdater ipTreeUpdater;
-    @Autowired DateTimeProvider dateTimeProvider;
+    @Autowired
+    IpTreeUpdater ipTreeUpdater;
+    @Autowired
+    DateTimeProvider dateTimeProvider;
 
     @Before
     public void startupWhoisServer() {
@@ -132,8 +137,8 @@ public class SimpleTestIntegration extends AbstractWhoisIntegrationTest {
 
     @Test
     public void testMultipleQueriesWithoutKeepAlive() throws Exception {
-        final String response = DummyWhoisClient.query(QueryServer.port, "help\nhelp");
-
+        final String response = DummyWhoisClient.query(QueryServer.port, "help\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp\nhelp");
+        LOGGER.info("!!!RESPONSE=" + response);
         assertThat(response, containsString("RIPE Database Reference Manual"));
         assertThat(response, not(containsString(QueryMessages.internalErrorOccured().toString())));
     }
