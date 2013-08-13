@@ -1,5 +1,6 @@
 package net.ripe.db.whois.query.pipeline;
 
+import net.ripe.db.whois.query.domain.QueryCompletionInfo;
 import net.ripe.db.whois.query.domain.QueryMessages;
 import net.ripe.db.whois.query.query.Query;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -38,8 +39,8 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
         if (closed) {
             // If we get more than 5 queries while in closed state, force close the connection
             if (++closedQueryCount > 5) {
-                LOGGER(instance, "ConnectionStateHandler.messageReceived: :FORCE CLOSE : closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
-                channel.close();
+                LOGGER(instance, "ConnectionStateHandler.messageReceived: channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel, QueryCompletionInfo.REJECTED)) : closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
+                channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel, QueryCompletionInfo.REJECTED));
             }
             LOGGER(instance, "return ConnectionStateHandler.messageReceived: :closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
             return;
@@ -83,11 +84,18 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
         if (e instanceof QueryCompletedEvent) {
             final Channel channel = e.getChannel();
             if (keepAlive) {
+                channel.write(NEWLINE);
                 channel.write(QueryMessages.termsAndConditions());
                 LOGGER(instance,"end ConnectionStateHandler.handleDownstream:  channel.write(QueryMessages.termsAndConditions()): keepAlive=" + keepAlive + ":closed=" + closed);
             } else {
-                channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE);
-                LOGGER(instance, "end ConnectionStateHandler.handleDownstream:channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE): event=" + ((QueryCompletedEvent)e).getCompletionInfo() + " : keepAlive=" + keepAlive + ":closed=" + closed);
+                QueryCompletionInfo info = ((QueryCompletedEvent) e).getCompletionInfo();
+                if (info != null && info.isForceClose()) {
+                    LOGGER(instance, "end ConnectionStateHandler.handleDownstream:channel.close(): FORCE CLOSE event=" + ((QueryCompletedEvent)e).getCompletionInfo() + " : keepAlive=" + keepAlive + ":closed=" + closed);
+                    channel.close();
+                } else {
+                    channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE);
+                    LOGGER(instance, "end ConnectionStateHandler.handleDownstream:channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE): event=" + ((QueryCompletedEvent)e).getCompletionInfo() + " : keepAlive=" + keepAlive + ":closed=" + closed);
+                }
                 closed = true;
             }
         }
