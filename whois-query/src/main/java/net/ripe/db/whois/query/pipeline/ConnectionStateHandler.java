@@ -88,8 +88,7 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
                 channel.write(QueryMessages.termsAndConditions());
                 LOGGER(instance,"end ConnectionStateHandler.handleDownstream:  channel.write(QueryMessages.termsAndConditions()): keepAlive=" + keepAlive + ":closed=" + closed);
             } else {
-                QueryCompletionInfo info = ((QueryCompletedEvent) e).getCompletionInfo();
-                if (info != null && info.isForceClose()) {
+                if (((QueryCompletedEvent) e).getCompletionInfo() == QueryCompletionInfo.REJECTED) {
                     LOGGER(instance, "end ConnectionStateHandler.handleDownstream:channel.close(): FORCE CLOSE event=" + ((QueryCompletedEvent)e).getCompletionInfo() + " : keepAlive=" + keepAlive + ":closed=" + closed);
                     channel.close();
                 } else {
