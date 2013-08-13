@@ -28,6 +28,7 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
         final Query query = (Query) e.getMessage();
 
         if (closed) {
+            keepAlive = false;
             // If we get more than 5 queries while in closed state, force close the connection
             if (++closedQueryCount > 5) {
                 channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel, QueryCompletionInfo.REJECTED));
