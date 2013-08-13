@@ -75,8 +75,4 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
             }
         }
     }
-
-    public static void LOGGER(int instance, String log) {
-        LOGGER.info("!" + instance + "!" + log);
-    }
 }
