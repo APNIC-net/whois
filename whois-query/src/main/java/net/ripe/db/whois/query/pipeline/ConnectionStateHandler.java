@@ -36,6 +36,9 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
         LOGGER(instance, "start ConnectionStateHandler.messageReceived: :closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
         if (closed) {
+            // Now call close since all queries hae been processed.
+            // Note: Calling this method on a closed channel has no effect.
+            channel.close();
             return;
         }
 
