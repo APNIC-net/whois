@@ -22,6 +22,7 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
     private boolean keepAlive = false;
     private boolean closed = false;
+    private int closedQueryCount = 0;
     private boolean firstQuery = true;
 
     @Override
@@ -30,9 +31,10 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
         final Query query = (Query) e.getMessage();
 
         if (closed) {
-            // Now call close since all queries hae been processed.
-            // Note: Calling this method on a closed channel has no effect.
-            channel.close();
+            // If we get more than 5 queries while in closed state, force close the connection
+            if (++closedQueryCount > 5) {
+                channel.close();
+            }
             return;
         }
 
@@ -74,9 +76,5 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
                 closed = true;
             }
         }
-    }
-
-    public static void LOGGER(int instance, String log) {
-        LOGGER.info("!" + instance + "!" + log);
     }
 }

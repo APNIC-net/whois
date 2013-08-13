@@ -117,18 +117,23 @@ public class JettyBootstrap implements ApplicationService {
         }
     }
 
-    @RetryFor(attempts = 5, value = Exception.class)
+    @RetryFor(attempts=10, value=Exception.class)
     private Server createAndStartServer(int port, HandlerList handlers, Audience audience) throws Exception {
         int tryPort = (port <= 0) ? ServerHelper.getAvailablePort() : port;
-        LOGGER.info("Trying port {} ({})", tryPort, audience);
+        LOGGER.info("Trying port {}", tryPort);
 
         final Server server = new Server(tryPort);
-        server.setHandler(handlers);
-        server.setStopAtShutdown(true);
+        try {
+            server.setHandler(handlers);
+            server.setStopAtShutdown(true);
 
-        server.start();
-        jettyConfig.setPort(audience, tryPort);
-        LOGGER.info("Jetty started on port {} ({})", tryPort, audience);
+            server.start();
+            jettyConfig.setPort(audience, tryPort);
+            LOGGER.info("Jetty started on port {} ({})", tryPort, audience);
+        } catch (Exception ex) {
+            LOGGER.info("Tried port {} but failed to start server", tryPort);
+            throw ex;
+        }
         return server;
     }
 
@@ -140,7 +145,6 @@ public class JettyBootstrap implements ApplicationService {
 
         servers.clear();
     }
-
     private static void stopServer(final Server server) {
         new Thread() {
             @Override
