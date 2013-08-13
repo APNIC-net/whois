@@ -233,7 +233,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     }
 
                     if (stop) {
-                        break;
+                        return;
                     }
                 }
             } catch (Exception e) {
