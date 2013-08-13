@@ -69,8 +69,7 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
                 channel.write(NEWLINE);
                 channel.write(QueryMessages.termsAndConditions());
             } else {
-                QueryCompletionInfo info = ((QueryCompletedEvent) e).getCompletionInfo();
-                if (info != null && info.isForceClose()) {
+                if (((QueryCompletedEvent) e).getCompletionInfo() == QueryCompletionInfo.REJECTED) {
                     channel.close();
                 } else {
                     channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE);
