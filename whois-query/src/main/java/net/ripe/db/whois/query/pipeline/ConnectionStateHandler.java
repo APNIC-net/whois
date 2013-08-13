@@ -37,6 +37,7 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
         LOGGER(instance, "start ConnectionStateHandler.messageReceived: :closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
         if (closed) {
+            keepAlive = false;
             // If we get more than 5 queries while in closed state, force close the connection
             if (++closedQueryCount > 5) {
                 LOGGER(instance, "ConnectionStateHandler.messageReceived: channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel, QueryCompletionInfo.REJECTED)) : closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
