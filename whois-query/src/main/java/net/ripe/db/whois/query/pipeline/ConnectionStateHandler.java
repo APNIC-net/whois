@@ -1,6 +1,5 @@
 package net.ripe.db.whois.query.pipeline;
 
-import net.ripe.db.whois.query.domain.QueryCompletionInfo;
 import net.ripe.db.whois.query.domain.QueryMessages;
 import net.ripe.db.whois.query.query.Query;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -24,7 +23,6 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
     private boolean keepAlive = false;
     private boolean closed = false;
-    private int closedQueryCount = 0;
     private boolean firstQuery = true;
 
     private int instance = new Random().nextInt(10000 - 1) + 1;
@@ -37,13 +35,7 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
         LOGGER(instance, "start ConnectionStateHandler.messageReceived: :closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
         if (closed) {
-            keepAlive = false;
-            // If we get more than 5 queries while in closed state, force close the connection
-            if (++closedQueryCount > 5) {
-                LOGGER(instance, "ConnectionStateHandler.messageReceived: channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel, QueryCompletionInfo.REJECTED)) : closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
-                channel.getPipeline().sendDownstream(new QueryCompletedEvent(channel, QueryCompletionInfo.REJECTED));
-            }
-            LOGGER(instance, "return ConnectionStateHandler.messageReceived: :closed=" + closed + ":query.hasOnlyKeepAlive()=" + query.hasOnlyKeepAlive() + ":" + queryString);
+            channel.close();
             return;
         }
 
@@ -89,13 +81,8 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
                 channel.write(QueryMessages.termsAndConditions());
                 LOGGER(instance,"end ConnectionStateHandler.handleDownstream:  channel.write(QueryMessages.termsAndConditions()): keepAlive=" + keepAlive + ":closed=" + closed);
             } else {
-                if (((QueryCompletedEvent) e).getCompletionInfo() == QueryCompletionInfo.REJECTED) {
-                    LOGGER(instance, "end ConnectionStateHandler.handleDownstream:channel.close(): FORCE CLOSE event=" + ((QueryCompletedEvent)e).getCompletionInfo() + " : keepAlive=" + keepAlive + ":closed=" + closed);
-                    channel.close();
-                } else {
-                    channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE);
-                    LOGGER(instance, "end ConnectionStateHandler.handleDownstream:channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE): event=" + ((QueryCompletedEvent)e).getCompletionInfo() + " : keepAlive=" + keepAlive + ":closed=" + closed);
-                }
+                channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE);
+                LOGGER(instance, "end ConnectionStateHandler.handleDownstream:channel.write(NEWLINE).addListener(ChannelFutureListener.CLOSE): event=" + ((QueryCompletedEvent)e).getCompletionInfo() + " : keepAlive=" + keepAlive + ":closed=" + closed);
                 closed = true;
             }
         }

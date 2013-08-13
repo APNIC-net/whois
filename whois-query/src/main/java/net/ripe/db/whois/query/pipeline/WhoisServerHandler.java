@@ -43,8 +43,9 @@ public class WhoisServerHandler extends SimpleChannelUpstreamHandler {
                     throw new QueryException(QueryCompletionInfo.DISCONNECTED);
                 }
 
-                LOGGER(instance, "WhoisServerHandler.messageReceived : channel.write(responseObject): closed=" + closed + ": " + queryString);
-                channel.write(responseObject);
+                LOGGER(instance, "WhoisServerHandler.messageReceived : channel.write(responseObject).isDone(): closed=" + closed + ": " + queryString);
+                // Wait for the write to finish
+                channel.write(responseObject).awaitUninterruptibly();
 
             }
         });
