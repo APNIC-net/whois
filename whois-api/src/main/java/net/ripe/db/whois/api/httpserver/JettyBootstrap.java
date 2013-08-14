@@ -3,7 +3,6 @@ package net.ripe.db.whois.api.httpserver;
 import com.google.common.collect.Lists;
 import net.ripe.db.whois.common.ApplicationService;
 import net.ripe.db.whois.common.ServerHelper;
-import net.ripe.db.whois.common.aspects.RetryFor;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Server;
@@ -68,7 +67,6 @@ public class JettyBootstrap implements ApplicationService {
 
     Server createAndStartServer(final Audience audience, final int port, final String resourceBase) {
         final WebAppContext context = new WebAppContext();
-
         context.setContextPath("/");
         context.setResourceBase("src/main/webapp");
         context.addFilter(new FilterHolder(remoteAddressFilter), "/*", EnumSet.allOf(DispatcherType.class));
@@ -117,13 +115,14 @@ public class JettyBootstrap implements ApplicationService {
         }
     }
 
-    @RetryFor(attempts=10, value=Exception.class)
     private Server createAndStartServer(int port, HandlerList handlers, Audience audience) throws Exception {
-        int tryPort = (port <= 0) ? ServerHelper.getAvailablePort() : port;
-        LOGGER.info("Trying port {}", tryPort);
-
-        final Server server = new Server(tryPort);
+        Server server = null;
+        int tryPort = -1;
+        int retry = 0;
         try {
+            tryPort = (port <= 0) ? ServerHelper.getAvailablePort() : port;
+            LOGGER.info("Trying port {}", tryPort);
+            server = new Server(tryPort);
             server.setHandler(handlers);
             server.setStopAtShutdown(true);
 
@@ -131,8 +130,11 @@ public class JettyBootstrap implements ApplicationService {
             jettyConfig.setPort(audience, tryPort);
             LOGGER.info("Jetty started on port {} ({})", tryPort, audience);
         } catch (Exception ex) {
+            ++retry;
             LOGGER.info("Tried port {} but failed to start server", tryPort);
-            throw ex;
+            if (retry > 5) {
+                throw ex;
+            }
         }
         return server;
     }
@@ -145,6 +147,7 @@ public class JettyBootstrap implements ApplicationService {
 
         servers.clear();
     }
+
     private static void stopServer(final Server server) {
         new Thread() {
             @Override
