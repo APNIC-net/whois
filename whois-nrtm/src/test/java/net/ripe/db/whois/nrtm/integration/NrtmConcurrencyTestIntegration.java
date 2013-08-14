@@ -198,11 +198,11 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         String method;
         Map<String,CountDownLatch> countDownLatchMap;
 
-        public NrtmTestThread(String query, int lastSerial, Map<String,CountDownLatch> countDownLatchMap, String method) {
+        public NrtmTestThread(String query, int lastSerial, Map<String,CountDownLatch> countDownLatchMap, String callingMethod) {
             this.query = query;
             this.lastSerial = lastSerial;
             this.countDownLatchMap = countDownLatchMap;
-            this.method = method;
+            this.method = callingMethod;
         }
 
         public void setLastSerial(int lastSerial) {
