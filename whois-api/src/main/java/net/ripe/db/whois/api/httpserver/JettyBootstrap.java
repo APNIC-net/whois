@@ -3,7 +3,6 @@ package net.ripe.db.whois.api.httpserver;
 import com.google.common.collect.Lists;
 import net.ripe.db.whois.common.ApplicationService;
 import net.ripe.db.whois.common.ServerHelper;
-import net.ripe.db.whois.common.aspects.RetryFor;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -88,11 +87,11 @@ public class JettyBootstrap implements ApplicationService {
         }
     }
 
-    @RetryFor(attempts=10, value=Exception.class)
     private Server createAndStartServer(int port, HandlerList handlers, Audience audience) throws Exception {
         int tryPort = (port <= 0) ? ServerHelper.getAvailablePort() : port;
         LOGGER.info("Trying port {}", tryPort);
 
+        int retry = 0;
         final Server server = new Server(tryPort);
         try {
             server.setHandler(handlers);
@@ -102,8 +101,11 @@ public class JettyBootstrap implements ApplicationService {
             jettyConfig.setPort(audience, tryPort);
             LOGGER.info("Jetty started on port {} ({})", tryPort, audience);
         } catch (Exception ex) {
+            ++retry;
             LOGGER.info("Tried port {} but failed to start server", tryPort);
-            throw ex;
+            if (retry > 5) {
+                throw ex;
+            }
         }
         return server;
     }
