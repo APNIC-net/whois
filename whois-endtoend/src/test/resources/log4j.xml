@@ -14,28 +14,15 @@
         </layout>
     </appender>
 
-    <appender name="FILEOUTPUT" class="org.apache.log4j.rolling.RollingFileAppender">
-        <param name="Append" value="true" />
-        <param name="Threshold" value="INFO" />
-        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
-            <param name="FileNamePattern" value="target/endtoend.%d{yyyyMMdd}.log" />
-        </rollingPolicy>
-        <layout class="org.apache.log4j.PatternLayout">
-            <!-- The default pattern: Date Priority [Category] Message\n -->
-            <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
-        </layout>
-    </appender>
-
     <!-- Loggers -->
     <logger name="net.ripe.db.whois">
-        <level value="INFO" />
+        <level value="ERROR" />
     </logger>
 
     <!-- Root -->
     <root>
-        <level value="INFO" />
+        <level value="ERROR" />
         <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILEOUTPUT" />
     </root>
 
 </log4j:configuration>

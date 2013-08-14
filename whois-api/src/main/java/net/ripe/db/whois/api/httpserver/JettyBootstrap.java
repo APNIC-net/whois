@@ -4,19 +4,24 @@ import com.google.common.collect.Lists;
 import net.ripe.db.whois.common.ApplicationService;
 import net.ripe.db.whois.common.ServerHelper;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.RequestLogHandler;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.DispatcherType;
+import java.io.File;
+import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -71,8 +76,31 @@ public class JettyBootstrap implements ApplicationService {
         resourceHandler.setBaseResource(Resource.newClassPathResource(resourceBase));
         LOGGER.info("Serving {} from {}", audience, resourceHandler.getResourceBase());
 
+        String logDir = System.getProperty("log.dir", System.getProperty("user.dir") + File.separator + "target");
+        File logPath = new File(logDir);
+        if (logPath.exists() && logPath.isDirectory() && logPath.canWrite()) {
+            LOGGER.info(String.format("Jetty request logs will be written to [%s]",logDir));
+        } else if (!logPath.mkdirs()) {
+            String logPathError = String.format("Failed to create log directory [%s]", logPath);
+            LOGGER.error(logPathError);
+            throw new BeanInstantiationException(this.getClass(), logPathError);
+        }
+        String requestLogPath = String.format("%s%syyyy_mm_dd-%s-%s-request.log",logDir,File.separator,audience.name().toLowerCase(),port);
+        NCSARequestLog requestLog = new NCSARequestLog(requestLogPath);
+        requestLog.setRetainDays(7);
+        requestLog.setAppend(true);
+        requestLog.setExtended(true);
+        // Use server timezone
+        requestLog.setLogTimeZone(Calendar.getInstance().getTimeZone().getID());
+
+        // Setup request log handler
+        RequestLogHandler logHandler = new RequestLogHandler();
+        logHandler.setRequestLog(requestLog);
+        logHandler.setHandler(context);
+
+
         final HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[]{resourceHandler, context});
+        handlers.setHandlers(new Handler[]{resourceHandler, logHandler, context});
 
         for (final ServletDeployer servletDeployer : servletDeployers) {
             if (servletDeployer.getAudience().equals(audience)) {
