@@ -97,11 +97,11 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         thread.setLastSerial(MIN_RANGE + 4);
         setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
+        thread.stop = true;
 
         assertThat(thread.addCount, is(1));
         assertThat(thread.delCount, is(3));
 
-        thread.stop = true;
         thread.join();
     }
 
