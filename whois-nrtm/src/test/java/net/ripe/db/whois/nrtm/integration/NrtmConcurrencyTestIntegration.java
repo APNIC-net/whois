@@ -98,19 +98,24 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         NrtmTestThread thread = new NrtmTestThread(query, MIN_RANGE + 1, countDownLatchMap, method);
         LOGGER.info("!!!START dontHangOnHugeAutNumObjectKeepalive : thread.start();");
         thread.start();
+
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
         LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : countDownLatch.await(5, TimeUnit.SECONDS);");
+
         assertThat(thread.delCount, is(1));
         LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : assertThat(thread.delCount, is(1));");
 
         // expand serial range to include huge aut-num object
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
+
         countDownLatchMap.put(method, new CountDownLatch(1));
         LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : countDownLatch = new CountDownLatch(1);");
+
         thread.setLastSerial(MIN_RANGE + 4);
-        LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : thread.setLastSerial(MIN_RANGE + 4);");
-        setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
         LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : setSerial(MIN_RANGE + 1, MIN_RANGE + 4);");
+
+        setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
+
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
         LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : countDownLatch.await(5, TimeUnit.SECONDS);");
 
@@ -130,7 +135,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         LOGGER.info("!!!START manySimultaneousClientsReadingManyObjects");
         // 1st part: clients request MIN to LAST with -k flag, but we provide half of the available serials only
         final List<NrtmTestThread> threads = Lists.newArrayList();
-        //CountDownLatch countDownLatch  = new CountDownLatch(NUM_THREADS);
         countDownLatchMap.put(method, new CountDownLatch(NUM_THREADS));
 
         setSerial(MIN_RANGE, MID_RANGE);
@@ -198,8 +202,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         loadScripts(whoisTemplate, "nrtm_sample.sql");
         final int dropped = whoisTemplate.update("DELETE FROM serials WHERE serial_id < ? OR serial_id > ?", min, max);
         LOGGER.info("Dropped {} rows", dropped);
-        whoisTemplate.update("UPDATE last SET timestamp = ?", System.currentTimeMillis() / 1000);
-        whoisTemplate.update("UPDATE history SET timestamp = ?", System.currentTimeMillis() / 1000);
+        whoisTemplate.update("UPDATE last SET timestamp = ?", (System.currentTimeMillis() / 1000) + 1);
+        whoisTemplate.update("UPDATE history SET timestamp = ?",(System.currentTimeMillis() / 1000) + 1);
     }
 
     private void truncateTables() {

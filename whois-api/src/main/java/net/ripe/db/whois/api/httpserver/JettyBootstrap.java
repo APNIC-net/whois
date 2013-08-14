@@ -88,12 +88,13 @@ public class JettyBootstrap implements ApplicationService {
     }
 
     private Server createAndStartServer(int port, HandlerList handlers, Audience audience) throws Exception {
-        int tryPort = (port <= 0) ? ServerHelper.getAvailablePort() : port;
-        LOGGER.info("Trying port {}", tryPort);
-
+        Server server = null;
+        int tryPort = -1;
         int retry = 0;
-        final Server server = new Server(tryPort);
         try {
+            tryPort = (port <= 0) ? ServerHelper.getAvailablePort() : port;
+            LOGGER.info("Trying port {}", tryPort);
+            server = new Server(tryPort);
             server.setHandler(handlers);
             server.setStopAtShutdown(true);
 
