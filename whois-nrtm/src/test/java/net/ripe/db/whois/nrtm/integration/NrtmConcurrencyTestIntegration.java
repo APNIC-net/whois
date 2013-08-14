@@ -272,6 +272,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         private void signalLatch(String serial) {
             if (Integer.parseInt(serial) >= lastSerial) {
                 countDownLatchMap.get(method).countDown();
+                // Allow main latched thread to continue
+                Thread.yield();
             }
         }
     }
