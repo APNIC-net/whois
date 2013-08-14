@@ -97,6 +97,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         thread.setLastSerial(MIN_RANGE + 4);
         setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
+
+        // Immediately stop the NrtmTestThread
         thread.stop = true;
 
         assertThat(thread.addCount, is(1));
@@ -252,8 +254,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     if (stop) {
                         return;
                     }
-                    // Allow main latched thread to continue
-                    Thread.yield();
                 }
             } catch (Exception e) {
                 error = e.getMessage();
@@ -273,7 +273,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             if (Integer.parseInt(serial) >= lastSerial) {
                 countDownLatchMap.get(method).countDown();
             }
-            // Allow main latched thread to continue
+            // Allow main calling junit thread to execute
             Thread.yield();
         }
     }
