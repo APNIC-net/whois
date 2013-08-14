@@ -89,20 +89,13 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
         NrtmTestThread thread = new NrtmTestThread(query, MIN_RANGE + 1, countDownLatchMap, method);
         thread.start();
-
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
-
         assertThat(thread.delCount, is(1));
 
         // expand serial range to include huge aut-num object
-        countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
-
         countDownLatchMap.put(method, new CountDownLatch(1));
-
         thread.setLastSerial(MIN_RANGE + 4);
-
         setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
-
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
 
         assertThat(thread.addCount, is(1));
@@ -183,8 +176,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         loadScripts(whoisTemplate, "nrtm_sample.sql");
         final int dropped = whoisTemplate.update("DELETE FROM serials WHERE serial_id < ? OR serial_id > ?", min, max);
         LOGGER.info("Dropped {} rows", dropped);
-        whoisTemplate.update("UPDATE last SET timestamp = ?", (System.currentTimeMillis() / 1000) + 1);
-        whoisTemplate.update("UPDATE history SET timestamp = ?",(System.currentTimeMillis() / 1000) + 1);
+        whoisTemplate.update("UPDATE last SET timestamp = ?", System.currentTimeMillis() / 1000);
+        whoisTemplate.update("UPDATE history SET timestamp = ?", System.currentTimeMillis() / 1000);
     }
 
     private void truncateTables() {
@@ -259,6 +252,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     if (stop) {
                         return;
                     }
+                    // Allow main latched thread to continue
+                    Thread.yield();
                 }
             } catch (Exception e) {
                 error = e.getMessage();
@@ -278,7 +273,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             if (Integer.parseInt(serial) >= lastSerial) {
                 countDownLatchMap.get(method).countDown();
             }
+            // Allow main latched thread to continue
+            Thread.yield();
         }
-
     }
 }
