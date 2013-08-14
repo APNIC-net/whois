@@ -50,31 +50,23 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
     @BeforeClass
     public static void setInterval() {
-        LOGGER.info("!!!BEFORECLASS START");
         System.setProperty("nrtm.update.interval", "1");
-        LOGGER.info("!!!BEFORECLASS END");
     }
 
     @AfterClass
     public static void resetInterval() {
-        LOGGER.info("!!!AFTERCLASS START");
         System.clearProperty("nrtm.update.interval");
-        LOGGER.info("!!!AFTERCLASS END");
     }
 
     @Before
     public void before() throws Exception {
-        LOGGER.info("!!!BEFORE START");
         loadSerials(0, Integer.MAX_VALUE);
         nrtmServer.start();
-        LOGGER.info("!!!BEFORE END");
     }
 
     @After
     public void after() {
-        LOGGER.info("!!!AFTER START");
         nrtmServer.stop(true);
-        LOGGER.info("!!!AFTER END");
     }
 
     @Test
@@ -96,43 +88,26 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         String query = String.format("-g TEST:3:%d-LAST -k", MIN_RANGE + 1);
 
         NrtmTestThread thread = new NrtmTestThread(query, MIN_RANGE + 1, countDownLatchMap, method);
-        LOGGER.info("!!!START dontHangOnHugeAutNumObjectKeepalive : thread.start();");
         thread.start();
-
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
-        LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : countDownLatch.await(5, TimeUnit.SECONDS);");
-
         assertThat(thread.delCount, is(1));
-        LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : assertThat(thread.delCount, is(1));");
 
         // expand serial range to include huge aut-num object
+        countDownLatchMap.put(method, new CountDownLatch(1));
+        thread.setLastSerial(MIN_RANGE + 4);
+        setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
 
-        countDownLatchMap.put(method, new CountDownLatch(1));
-        LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : countDownLatch = new CountDownLatch(1);");
-
-        thread.setLastSerial(MIN_RANGE + 4);
-        LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : setSerial(MIN_RANGE + 1, MIN_RANGE + 4);");
-
-        setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
-
-        boolean await = countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
-        LOGGER.info("dontHangOnHugeAutNumObjectKeepalive : countDownLatch.await(5, TimeUnit.SECONDS); await=" + await);
-
-        LOGGER.info("dontHangOnHugeAutNumObjectKeepalive  :assertThat(thread.addCount, is(1)); : thread.addCount=" +thread.addCount);
         assertThat(thread.addCount, is(1));
-        LOGGER.info("dontHangOnHugeAutNumObjectKeepalive  :assertThat(thread.delCount, is(3)); : thread.delCount=" + thread.delCount);
         assertThat(thread.delCount, is(3));
 
         thread.stop = true;
         thread.join();
-        LOGGER.info("!!!END dontHangOnHugeAutNumObjectKeepalive");
     }
 
     @Test
     public void manySimultaneousClientsReadingManyObjects() throws InterruptedException {
         String method = "manySimultaneousClientsReadingManyObjects";
-        LOGGER.info("!!!START manySimultaneousClientsReadingManyObjects");
         // 1st part: clients request MIN to LAST with -k flag, but we provide half of the available serials only
         final List<NrtmTestThread> threads = Lists.newArrayList();
         countDownLatchMap.put(method, new CountDownLatch(NUM_THREADS));
@@ -189,7 +164,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         }
 
         LOGGER.info("ADD: {}, DEL: {}", addResult, delResult);
-        LOGGER.info("!!!END manySimultaneousClientsReadingManyObjects");
     }
 
     private void setSerial(int min, int max) {
@@ -235,7 +209,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
         @Override
         public void run() {
-            LOGGER.info(method + " start NrtmTestThread");
             PrintWriter out = null;
             BufferedReader in = null;
             Socket socket = null;
@@ -243,40 +216,33 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             try {
                 socket = new Socket("localhost", NrtmServer.port);
                 socket.setSoTimeout(1000);
-                LOGGER.info(method + " NrtmTestThread : socket = new Socket('localhost', NrtmServer.port); NrtmServer.port="+NrtmServer.port);
 
                 out = new PrintWriter(socket.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream(), ChannelUtil.BYTE_ENCODING));
 
                 out.println(query);
-                LOGGER.info(method + " NrtmTestThread :  out.println(query); query="+query);
 
                 for (; ; ) {
                     try {
                         String line = in.readLine();
-                        LOGGER.info(method + " NrtmTestThread : line=" + line);
 
                         if (line == null) {
                             error = "unexpected end of stream.";
-                            LOGGER.info(method + " NrtmTestThread :  line == null");
                             return;
                         }
 
                         if (line.startsWith("%ERROR:")) {
-                            LOGGER.info(method + " NrtmTestThread : line.startsWith(\"%ERROR:\"");
                             error = line;
                             return;
                         }
 
                         if (line.startsWith("ADD ")) {
                             addCount++;
-                            LOGGER.info(method + " NrtmTestThread : line.startsWith(\"ADD \") addCount="+addCount);
                             signalLatch(line.substring(4));
                         }
 
                         if (line.startsWith("DEL ")) {
                             delCount++;
-                            LOGGER.info(method + " NrtmTestThread : line.startsWith(\"DEL \") delCount="+delCount);
                             signalLatch(line.substring(4));
                         }
 
@@ -284,14 +250,13 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     }
 
                     if (stop) {
-                        LOGGER.info(method + " NrtmTestThread :stop - return");
                         return;
                     }
+                    // Allow main latched thread to continue
                     Thread.yield();
                 }
             } catch (Exception e) {
                 error = e.getMessage();
-                LOGGER.info(method + " NrtmTestThread :error = e.getMessage();  error="+error);
             } finally {
                 IOUtils.closeQuietly(out);
                 IOUtils.closeQuietly(in);
@@ -301,17 +266,13 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     } catch (IOException ignored) {
                     }
                 }
-                LOGGER.info(method + " NrtmTestThread :finally");
             }
         }
 
         private void signalLatch(String serial) {
-            LOGGER.info(method + " NrtmTestThread :Integer.parseInt(serial) >= lastSerial : Integer.parseInt(serial)=" + Integer.parseInt(serial) + ": lastSerial="+lastSerial);
             if (Integer.parseInt(serial) >= lastSerial) {
-                LOGGER.info(method + " NrtmTestThread : countDownLatch.countDown();");
                 countDownLatchMap.get(method).countDown();
             }
         }
-
     }
 }
