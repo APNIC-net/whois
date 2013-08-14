@@ -48,23 +48,31 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
     @BeforeClass
     public static void setInterval() {
+        LOGGER.info("!!!BEFORECLASS START");
         System.setProperty("nrtm.update.interval", "1");
+        LOGGER.info("!!!BEFORECLASS END");
     }
 
     @AfterClass
     public static void resetInterval() {
+        LOGGER.info("!!!AFTERCLASS START");
         System.clearProperty("nrtm.update.interval");
+        LOGGER.info("!!!AFTERCLASS END");
     }
 
     @Before
     public void before() throws Exception {
+        LOGGER.info("!!!BEFORE START");
         loadSerials(0, Integer.MAX_VALUE);
         nrtmServer.start();
+        LOGGER.info("!!!BEFORE END");
     }
 
     @After
     public void after() {
+        LOGGER.info("!!!AFTER START");
         nrtmServer.stop(true);
+        LOGGER.info("!!!AFTER END");
     }
 
     @Test
