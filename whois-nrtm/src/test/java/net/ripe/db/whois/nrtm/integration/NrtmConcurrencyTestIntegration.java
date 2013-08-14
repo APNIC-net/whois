@@ -176,8 +176,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         loadScripts(whoisTemplate, "nrtm_sample.sql");
         final int dropped = whoisTemplate.update("DELETE FROM serials WHERE serial_id < ? OR serial_id > ?", min, max);
         LOGGER.info("Dropped {} rows", dropped);
-        whoisTemplate.update("UPDATE last SET timestamp = ?", System.currentTimeMillis() / 1000);
-        whoisTemplate.update("UPDATE history SET timestamp = ?", System.currentTimeMillis() / 1000);
+        whoisTemplate.update("UPDATE last SET timestamp = ?", (System.currentTimeMillis() / 1000) + 1);
+        whoisTemplate.update("UPDATE history SET timestamp = ?", (System.currentTimeMillis() / 1000) + 1);
     }
 
     private void truncateTables() {
