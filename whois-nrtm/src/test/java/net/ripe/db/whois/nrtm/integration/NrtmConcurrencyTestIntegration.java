@@ -216,7 +216,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
         @Override
         public void run() {
-            if (method != null) LOGGER.info(method + " start NrtmTestThread");
+            LOGGER.info(method + " start NrtmTestThread");
             PrintWriter out = null;
             BufferedReader in = null;
             Socket socket = null;
@@ -224,39 +224,40 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             try {
                 socket = new Socket("localhost", NrtmServer.port);
                 socket.setSoTimeout(1000);
-                if (method != null) LOGGER.info(method + " NrtmTestThread : socket = new Socket('localhost', NrtmServer.port); NrtmServer.port="+NrtmServer.port);
+                LOGGER.info(method + " NrtmTestThread : socket = new Socket('localhost', NrtmServer.port); NrtmServer.port="+NrtmServer.port);
 
                 out = new PrintWriter(socket.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream(), ChannelUtil.BYTE_ENCODING));
 
                 out.println(query);
-                if (method != null) LOGGER.info(method + " NrtmTestThread :  out.println(query); query="+query);
+                LOGGER.info(method + " NrtmTestThread :  out.println(query); query="+query);
 
                 for (; ; ) {
                     try {
                         String line = in.readLine();
+                        LOGGER.info(method + " NrtmTestThread : line=" + line);
 
                         if (line == null) {
                             error = "unexpected end of stream.";
-                            if (method != null) LOGGER.info(method + " NrtmTestThread :  line == null");
+                            LOGGER.info(method + " NrtmTestThread :  line == null");
                             return;
                         }
 
                         if (line.startsWith("%ERROR:")) {
-                            if (method != null) LOGGER.info(method + " NrtmTestThread : line.startsWith(\"%ERROR:\"");
+                            LOGGER.info(method + " NrtmTestThread : line.startsWith(\"%ERROR:\"");
                             error = line;
                             return;
                         }
 
                         if (line.startsWith("ADD ")) {
                             addCount++;
-                            if (method != null) LOGGER.info(method + " NrtmTestThread : line.startsWith(\"ADD \") addCount="+addCount);
+                            LOGGER.info(method + " NrtmTestThread : line.startsWith(\"ADD \") addCount="+addCount);
                             signalLatch(line.substring(4));
                         }
 
                         if (line.startsWith("DEL ")) {
                             delCount++;
-                            if (method != null) LOGGER.info(method + " NrtmTestThread : line.startsWith(\"DEL \") delCount="+delCount);
+                            LOGGER.info(method + " NrtmTestThread : line.startsWith(\"DEL \") delCount="+delCount);
                             signalLatch(line.substring(4));
                         }
 
@@ -264,13 +265,13 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     }
 
                     if (stop) {
-                        if (method != null) LOGGER.info(method + " NrtmTestThread :stop - return");
+                        LOGGER.info(method + " NrtmTestThread :stop - return");
                         return;
                     }
                 }
             } catch (Exception e) {
                 error = e.getMessage();
-                if (method != null) LOGGER.info(method + " NrtmTestThread :error = e.getMessage();  error="+error);
+                LOGGER.info(method + " NrtmTestThread :error = e.getMessage();  error="+error);
             } finally {
                 IOUtils.closeQuietly(out);
                 IOUtils.closeQuietly(in);
@@ -280,14 +281,14 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     } catch (IOException ignored) {
                     }
                 }
-                if (method != null) LOGGER.info(method + " NrtmTestThread :finally");
+                LOGGER.info(method + " NrtmTestThread :finally");
             }
         }
 
         private void signalLatch(String serial) {
-            if (method != null) LOGGER.info(method + " NrtmTestThread :Integer.parseInt(serial) >= lastSerial : Integer.parseInt(serial)=" + Integer.parseInt(serial) + ": lastSerial="+lastSerial);
+            LOGGER.info(method + " NrtmTestThread :Integer.parseInt(serial) >= lastSerial : Integer.parseInt(serial)=" + Integer.parseInt(serial) + ": lastSerial="+lastSerial);
             if (Integer.parseInt(serial) >= lastSerial) {
-                if (method != null) LOGGER.info(method + " NrtmTestThread : countDownLatch.countDown();");
+                LOGGER.info(method + " NrtmTestThread : countDownLatch.countDown();");
                 countDownLatch.countDown();
             }
         }
