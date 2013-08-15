@@ -19,7 +19,7 @@ fi
 JAVA="java"
 
 ### Memory options
-MEMARGS=("-Xms1024m" "-Xmx8g")
+MEMARGS=("-Xms1024m" "-Xmx4g")
 
 ### JMX Options
 JMXARGS=("-Dcom.sun.management.jmxremote"
