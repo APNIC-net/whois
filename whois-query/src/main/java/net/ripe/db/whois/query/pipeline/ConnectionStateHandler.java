@@ -45,8 +45,9 @@ public class ConnectionStateHandler extends SimpleChannelUpstreamHandler impleme
 
         if (e instanceof QueryCompletedEvent) {
             final Channel channel = e.getChannel();
-            ChannelFuture cf = channel.write(NEWLINE).awaitUninterruptibly();
+            ChannelFuture cf = channel.write(NEWLINE);
             if (keepAlive && !((QueryCompletedEvent) e).isForceClose()) {
+                cf.awaitUninterruptibly();
                 channel.write(QueryMessages.termsAndConditions()).awaitUninterruptibly();
             } else {
                 closed = true;
