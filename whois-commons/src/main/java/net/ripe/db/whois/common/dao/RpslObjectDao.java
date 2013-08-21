@@ -20,6 +20,8 @@ public interface RpslObjectDao extends ProxyLoader<Identifiable, RpslObject> {
 
     RpslObject findAsBlock(long begin, long end);
 
+    List<RpslObjectInfo> findAllAsBlocks(long begin, long end);
+
     List<RpslObject> findAsBlockIntersections(long begin, long end);
 
     RpslObjectInfo findByKey(ObjectType type, String searchKey);
