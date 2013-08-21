@@ -11,6 +11,7 @@ import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.domain.attrs.AsBlockRange;
 import net.ripe.db.whois.common.iptree.*;
+import net.ripe.db.whois.common.profiles.WhoisVariant;
 import net.ripe.db.whois.common.rpsl.*;
 import net.ripe.db.whois.query.dao.Inet6numDao;
 import net.ripe.db.whois.query.dao.InetnumDao;
@@ -109,9 +110,16 @@ class RpslObjectSearcher {
     private Iterable<ResponseObject> asBlockLookup(final Query query) {
         final AsBlockRange range = query.getAsBlockRangeOrNull();
         if (range != null) {
-            final RpslObject asBlock = rpslObjectDao.findAsBlock(range.getBegin(), range.getEnd());
-            if (asBlock != null) {
-                return Collections.<ResponseObject>singletonList(asBlock);
+            if (WhoisVariant.isAPNIC()) {
+                final List<RpslObjectInfo> asBlock = rpslObjectDao.findAllAsBlocks(range.getBegin(), range.getEnd());
+                if (asBlock != null) {
+                    return proxy(asBlock);
+                }
+            } else {
+                final RpslObject asBlock = rpslObjectDao.findAsBlock(range.getBegin(), range.getEnd());
+                if (asBlock != null) {
+                    return Collections.<ResponseObject>singletonList(asBlock);
+                }
             }
         }
 
