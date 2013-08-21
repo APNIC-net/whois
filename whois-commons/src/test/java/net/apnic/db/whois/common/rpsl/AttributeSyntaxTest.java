@@ -12,25 +12,13 @@ import static org.junit.Assert.assertThat;
 public class AttributeSyntaxTest {
 
 
-//    @Test
-//    public void alias() {
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.ALIAS, "Moscow-BNS003-Gig0-1-707.free.net");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.ALIAS, "RIPE-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test.net");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.ALIAS, "RiPE.net");
-//
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.ALIAS, "RIPE-test_.net");
-//    }
-
     @Test
-    public void addressPrefix() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "100.100.100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "300.300.300.300");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "0/100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.0.0 -");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.1.0 _ 192.168.1.255");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.1.0/24");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.ADDRESS_PREFIX_RANGE, "192.168.0.0/22");
+    public void alias() {
+        verifySuccess(ObjectType.INET_RTR, AttributeType.ALIAS, "Moscow-BNS003-Gig0-1-707.free.net");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.ALIAS, "RIPE-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test-test.net");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.ALIAS, "RiPE.net");
+
+        verifyFailure(ObjectType.INET_RTR, AttributeType.ALIAS, "RIPE-test_.net");
     }
 
     @Test
@@ -55,20 +43,6 @@ public class AttributeSyntaxTest {
     }
 
     @Test
-    public void asNumber() {
-        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS7-");
-        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS7 -");
-        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, " ");
-        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "123");
-
-        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS0");
-        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS7");
-        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS1877");
-        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS4294967200");
-        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS42949600");
-    }
-
-    @Test
     public void asBlock() {
         verifyFailure(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS7-8");
         verifyFailure(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS7 - AS6");
@@ -81,6 +55,20 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS1877 - AS1901");
         verifySuccess(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS4294967200 - AS4294967202");
         verifySuccess(ObjectType.AS_BLOCK, AttributeType.AS_BLOCK, "AS42949600 - AS42949672");
+    }
+
+    @Test
+    public void asNumber() {
+        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS7-");
+        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS7 -");
+        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, " ");
+        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "123");
+
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS0");
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS7");
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS1877");
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS4294967200");
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS42949600");
     }
 
     @Test
@@ -101,35 +89,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.AS_SET, AttributeType.AS_SET, "AS1:AS-FOO:AS-BAR");
         verifySuccess(ObjectType.AS_SET, AttributeType.AS_SET, "AS1:AS-EXPORT:AS2");
     }
-
-//    @Test
-//    public void assignmentSize() throws Exception {
-//        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "");
-//        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "A");
-//        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "A1");
-//        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "1A");
-//        verifyFailure(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "-1");
-//
-//        verifySuccess(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "0");
-//        verifySuccess(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "00");
-//        verifySuccess(ObjectType.INET6NUM, AttributeType.ASSIGNMENT_SIZE, "1234");
-//    }
-//
-//    @Test
-//    public void autNum() {
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS");
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AAS3255");
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS-3255");
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS 3255");
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "3255");
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS4294967296");
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS42:RS43");
-//
-//        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS0");
-//        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS3255");
-//        verifySuccess(ObjectType.AUT_NUM, AttributeType.AUT_NUM, "AS4294967295");
-//    }
-//
 
     @Test
     public void auth() throws Exception {
@@ -200,31 +159,16 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.INETNUM, AttributeType.COUNTRY, "ID");
     }
 
-//    @Test
-//    public void descr() {
-//        verifySuccess(ObjectType.ROUTE, AttributeType.DESCR, "");
-//
-//        StringBuilder builder = new StringBuilder();
-//        for (char i = 0; i < Character.MAX_VALUE; i++) {
-//            builder.append(i);
-//        }
-//
-//        verifySuccess(ObjectType.ROUTE, AttributeType.DESCR, builder.toString());
-//    }
-//
-
-
     @Test
-    public void domNet() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "100.100.100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "300.300.300.300");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "0/100");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "::0/0");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.1.0/24");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.0.0/22");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.1.0");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_DOM_NET, "192.168.0.0");
+    public void descr() {
+        verifySuccess(ObjectType.INETNUM, AttributeType.DESCR, "");
+
+        StringBuilder builder = new StringBuilder();
+        for (char i = 0; i < Character.MAX_VALUE; i++) {
+            builder.append(i);
+        }
+
+        verifySuccess(ObjectType.ROUTE, AttributeType.DESCR, builder.toString());
     }
 
     @Test
@@ -260,7 +204,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.DOMAIN, AttributeType.DS_RDATA, "12345 RSAMD5 234 e7c5e507b99fb865065100ea7f4ce7a957fbdaa1");
     }
 
-
     @Test
     public void defaultAttr() throws Exception {
         verifySuccess(ObjectType.AUT_NUM, AttributeType.DEFAULT, "to AS9004\n    action pref=100;\n    networks ANY");
@@ -287,19 +230,19 @@ public class AttributeSyntaxTest {
         verifyFailure(ObjectType.PERSON, AttributeType.E_MAIL, "0@2.45678901234567890123456789012345678901234567890123456789012345678901234567890");
     }
 
-//    @Test
-//    public void encryption() throws Exception {
-//        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "PGPKEY-");
-//        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "A6D57ECE");
-//        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "X509-");
-//        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "2606");
-//        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "AUTO-");
-//        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "123");
-//
-//        verifySuccess(ObjectType.IRT, AttributeType.ENCRYPTION, "PGPKEY-A6D57ECE");
-//        verifySuccess(ObjectType.IRT, AttributeType.ENCRYPTION, "X509-2606");
-//        verifySuccess(ObjectType.IRT, AttributeType.ENCRYPTION, "AUTO-123");
-//    }
+    @Test
+    public void encryption() throws Exception {
+        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "PGPKEY-");
+        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "A6D57ECE");
+        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "X509-");
+        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "2606");
+        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "AUTO-");
+        verifyFailure(ObjectType.IRT, AttributeType.ENCRYPTION, "123");
+
+        verifySuccess(ObjectType.IRT, AttributeType.ENCRYPTION, "PGPKEY-A6D57ECE");
+        verifySuccess(ObjectType.IRT, AttributeType.ENCRYPTION, "X509-2606");
+        verifySuccess(ObjectType.IRT, AttributeType.ENCRYPTION, "AUTO-123");
+    }
 
     @Test
     public void export() throws Exception {
@@ -387,20 +330,6 @@ public class AttributeSyntaxTest {
     }
 
     @Test
-    public void fingerpr() {
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "XX");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "10.10.10");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "300:300:300:300");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, ":::");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "::0:0");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0y:66:73:z8");
-        verifyFailure(ObjectType.KEY_CERT, AttributeType.FINGERPR, "43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66;73;a8");
-
-        verifySuccess(ObjectType.KEY_CERT, AttributeType.FINGERPR, "43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8");
-        verifySuccess(ObjectType.KEY_CERT, AttributeType.FINGERPR, "43:51:43:A1:b5:FC:8B:b7:0A:3a:a9:b1:0f:66:73:a8");
-    }
-
-    @Test
     public void freeForm() throws Exception {
         verifySuccess(ObjectType.PERSON, AttributeType.REMARKS, "ABCD efgh ijkl mnop QRST uvw xyz");
         verifySuccess(ObjectType.PERSON, AttributeType.REMARKS, "~`!@$%^&*()<>?[]{}\\|/?-_=+., 1234567890");
@@ -408,45 +337,45 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.PERSON, AttributeType.REMARKS, "####");
     }
 
-//    @Test
-//    public void geoLoc() throws Exception {
-//        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "90.90 90.90");
-//        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "abc 90 90");
-//        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "abc 90 def 180");
-//        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "10.10 200");
-//        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "-90");
-//        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "-90,");
-//        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "a b");
-//        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "-180 180");
-//        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "123.321 -123.123");
-//
-//        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "90 90");
-//        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "+90 +90");
-//        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "1.2 3.4");
-//        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "-10 -10");
-//        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "-90 90");
-//        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "12 3");
-//        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "24 -2");
-//    }
-//
-//    @Test
-//    public void holes() {
-//        verifyFailure(ObjectType.ROUTE, AttributeType.HOLES, "100.100.100");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.HOLES, "300.300.300.300");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.HOLES, "0/100");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.HOLES, "::0/0");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.HOLES, "");
-//
-//        verifySuccess(ObjectType.ROUTE, AttributeType.HOLES, "192.168.1.10");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.HOLES, "192.168.1.10,192.168.1.11");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.HOLES, "0/0");
-//
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.HOLES, "");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.HOLES, "100.100.100");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.HOLES, "0/0");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.HOLES, "::0/0");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.HOLES, "2a00:c00::/48,2a00:c01::/48");
-//    }
+    @Test
+    public void geoLoc() throws Exception {
+        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "90.90 90.90");
+        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "abc 90 90");
+        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "abc 90 def 180");
+        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "10.10 200");
+        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "-90");
+        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "-90,");
+        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "a b");
+        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "-180 180");
+        verifyFailure(ObjectType.INETNUM, AttributeType.GEOLOC, "123.321 -123.123");
+
+        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "90 90");
+        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "+90 +90");
+        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "1.2 3.4");
+        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "-10 -10");
+        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "-90 90");
+        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "12 3");
+        verifySuccess(ObjectType.INETNUM, AttributeType.GEOLOC, "24 -2");
+    }
+
+    @Test
+    public void holes() {
+        verifyFailure(ObjectType.ROUTE, AttributeType.HOLES, "100.100.100");
+        verifyFailure(ObjectType.ROUTE, AttributeType.HOLES, "300.300.300.300");
+        verifyFailure(ObjectType.ROUTE, AttributeType.HOLES, "0/100");
+        verifyFailure(ObjectType.ROUTE, AttributeType.HOLES, "::0/0");
+        verifyFailure(ObjectType.ROUTE, AttributeType.HOLES, "");
+
+        verifySuccess(ObjectType.ROUTE, AttributeType.HOLES, "192.168.1.10");
+        verifySuccess(ObjectType.ROUTE, AttributeType.HOLES, "192.168.1.10,192.168.1.11");
+        verifySuccess(ObjectType.ROUTE, AttributeType.HOLES, "0/0");
+
+        verifyFailure(ObjectType.ROUTE6, AttributeType.HOLES, "");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.HOLES, "100.100.100");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.HOLES, "0/0");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.HOLES, "::0/0");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.HOLES, "2a00:c00::/48,2a00:c01::/48");
+    }
 
     @Test
     public void ifaddr() {
@@ -510,7 +439,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.INET_RTR, AttributeType.INET_RTR, "Brisbane.apnic.net");
         verifySuccess(ObjectType.INET_RTR, AttributeType.INET_RTR, "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz.abcdefghijklmnopqrstuvwxyz.abcdefghijklmnopqrstuvwxyz");
     }
-
 
     @Test
     public void inetnum() {
@@ -601,36 +529,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.KEY_CERT, AttributeType.KEY_CERT, "AUTO-123");
     }
 
-//    @Test
-//    public void limerick() throws Exception {
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "");
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim.ASDf");
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim");
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "LIM -");
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "");
-//        verifyFailure(ObjectType.POEM, AttributeType.LIMERICK, "lim_1214");
-//
-//        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "lim-1231");
-//        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "LIM-1111_ASDF");
-//        verifySuccess(ObjectType.POEM, AttributeType.LIMERICK, "LIM-AS12-PO23");
-//    }
-
-//    @Test
-//    public void membersAs() throws Exception {
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS00123");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-asdfsdf:asdfsd");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-1231;as-asfd");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS01234");
-//        verifyFailure(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS102112341313131312312313");
-//
-//        verifySuccess(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "AS123424324");
-//        verifySuccess(ObjectType.AS_SET, AttributeType.APNIC_MEMBERS_AS, "as-123123:as-0123123");
-//
-//    }
-
     @Test
     public void mbrsByRef() throws Exception {
         verifyFailure(ObjectType.AS_SET, AttributeType.MBRS_BY_REF, "ASdf");
@@ -660,86 +558,76 @@ public class AttributeSyntaxTest {
     }
 
     @Test
-    public void objectName() {
-        verifyFailure(ObjectType.INETNUM, AttributeType.MNT_BY, "registry-");
-        verifyFailure(ObjectType.INETNUM, AttributeType.MNT_BY, "registry APNIC");
-        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "Re4istry-A234");
-        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "Registry-Name-is-APNIC");
-        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "Registry-Name");
-        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "REGISTRY-NAME");
-        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "REGISTRY-NAME-APNIC");
-        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "Registry-Name-is-A1-B2-C3");
+    public void language() throws Exception {
+        verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "");
+        verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "a");
+        verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "aaa,");
+        verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "a1");
+        verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "@@");
+
+        verifySuccess(ObjectType.INETNUM, AttributeType.LANGUAGE, "nl");
+        verifySuccess(ObjectType.INETNUM, AttributeType.LANGUAGE, "Nl");
+        verifySuccess(ObjectType.INETNUM, AttributeType.LANGUAGE, "en");
+        verifySuccess(ObjectType.INETNUM, AttributeType.LANGUAGE, "EN");
     }
 
-//
-//    @Test
-//    public void language() throws Exception {
-//        verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "a");
-//        verifyFailure(ObjectType.INETNUM, AttributeType.LANGUAGE, "aaa,");
-//
-//        verifySuccess(ObjectType.INETNUM, AttributeType.LANGUAGE, "nl");
-//        verifySuccess(ObjectType.INETNUM, AttributeType.LANGUAGE, "Nl");
-//        verifySuccess(ObjectType.INETNUM, AttributeType.LANGUAGE, "en");
-//        verifySuccess(ObjectType.INETNUM, AttributeType.LANGUAGE, "EN");
-//    }
-//
-//    @Test
-//    public void localAs() {
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AAS3255");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS-3255");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS 3255");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "3255");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS4294967296");
-//
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS0");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS3255");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS4294967295");
-//    }
-//
-//    @Test
-//    public void memberOf() {
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.MEMBER_OF, "AS-TESTNET");
-//
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS");
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS1");
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS TESTNET");
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS3320:");
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, ":AS-AUTH-PLOT-FOO-FROM-AS2724");
-//
-//        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "AS-TESTNET");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "AS-TESTNET");
-//        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS-TESTNET");
-//        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "as-foo-software");
-//        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS-SET-TEST");
-//        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS3320:AS-AUTH-PLOT-FOO-FROM-AS4724");
-//        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS-SET-FOO-1");
-//        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS-SET-TEST,AS3320:AS-AUTH-PLOT-FOO-FROM-AS4724");
-//
-//        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "RS");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "RS");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "RS1");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "RS1");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "RS TESTNET");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "RS TESTNET");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "AS20773:");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "AS20773:");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, ":RS-AUTH-PLOT-FOO-FROM-RS2724");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, ":RS-AUTH-PLOT-FOO-FROM-RS2724");
-//
-//        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "RS-TESTNET");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.MEMBER_OF, "RS-TESTNET");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "RS-TESTNET");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.MEMBER_OF, "AS20773:RS-HOSTEUROPE");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "AS20773:RS-HOSTEUROPE");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.MEMBER_OF, "AS702:RS-DE,AS702:RS-DE-PI");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "AS702:RS-DE,AS702:RS-DE-PI");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "rtrs-as15469-edge");
-//
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MEMBER_OF, "rtrs-as15469-edge");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MEMBER_OF, "rtrs-gasp2");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.MEMBER_OF, "AS702:RS-DE,AS702:RS-DE-PI");
-//    }
+    @Test
+    public void localAs() {
+        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AAS3255");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS-3255");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS 3255");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "3255");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS4294967296");
+
+        verifySuccess(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS0");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS3255");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.LOCAL_AS, "AS4294967295");
+    }
+
+    @Test
+    public void memberOf() {
+        verifyFailure(ObjectType.INET_RTR, AttributeType.MEMBER_OF, "AS-TESTNET");
+
+        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS");
+        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS1");
+        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS TESTNET");
+        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS3320:");
+        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, ":AS-AUTH-PLOT-FOO-FROM-AS2724");
+
+        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "AS-TESTNET");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "AS-TESTNET");
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS-TESTNET");
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "as-foo-software");
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS-SET-TEST");
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS3320:AS-AUTH-PLOT-FOO-FROM-AS4724");
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS-SET-FOO-1");
+        verifySuccess(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "AS-SET-TEST,AS3320:AS-AUTH-PLOT-FOO-FROM-AS4724");
+
+        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "RS");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "RS");
+        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "RS1");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "RS1");
+        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "RS TESTNET");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "RS TESTNET");
+        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "AS20773:");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "AS20773:");
+        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, ":RS-AUTH-PLOT-FOO-FROM-RS2724");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.MEMBER_OF, ":RS-AUTH-PLOT-FOO-FROM-RS2724");
+
+        verifyFailure(ObjectType.AUT_NUM, AttributeType.MEMBER_OF, "RS-TESTNET");
+        verifySuccess(ObjectType.ROUTE, AttributeType.MEMBER_OF, "RS-TESTNET");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "RS-TESTNET");
+        verifySuccess(ObjectType.ROUTE, AttributeType.MEMBER_OF, "AS20773:RS-HOSTEUROPE");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "AS20773:RS-HOSTEUROPE");
+        verifySuccess(ObjectType.ROUTE, AttributeType.MEMBER_OF, "AS702:RS-DE,AS702:RS-DE-PI");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.MEMBER_OF, "AS702:RS-DE,AS702:RS-DE-PI");
+        verifyFailure(ObjectType.ROUTE, AttributeType.MEMBER_OF, "rtrs-as15469-edge");
+
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MEMBER_OF, "rtrs-as15469-edge");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MEMBER_OF, "rtrs-gasp2");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.MEMBER_OF, "AS702:RS-DE,AS702:RS-DE-PI");
+    }
 
     @Test
     public void members() throws Exception {
@@ -799,64 +687,68 @@ public class AttributeSyntaxTest {
         verifyFailure(ObjectType.RTR_SET, AttributeType.MP_MEMBERS, "2a00:10C0::/");
     }
 
-//    @Test
-//    public void mntBy() throws Exception {
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_BY, "A");
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_BY, "A1, A");
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_BY, "A12345678901234567890123456789012345678901234567890123456789012345678901234567890");
-//
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_BY, "ABCDEfghijKLMNOprstuVWXYz0123456789_______________----_________________________0");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_BY, "A1");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_BY, "A1, A2");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_BY, "FOO-BAR-ZOT");
-//    }
+    @Test
+    public void mntBy() throws Exception {
+        verifyFailure(ObjectType.IRT, AttributeType.MNT_BY, "1212121");
+        verifyFailure(ObjectType.IRT, AttributeType.MNT_BY, "A,121212");
+        verifyFailure(ObjectType.IRT, AttributeType.MNT_BY, "A sdf");
+        verifyFailure(ObjectType.IRT, AttributeType.MNT_BY, "A12345678901234567890123456789012345678901234567890123456789012345678901234567890");
 
-//    @Test
-//    public void mntDomains() throws Exception {
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_DOMAINS, "A");
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_DOMAINS, "A1, A");
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_DOMAINS, "A12345678901234567890123456789012345678901234567890123456789012345678901234567890");
-//
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_DOMAINS, "ABCDEfghijKLMNOprstuVWXYz0123456789_______________----_________________________0");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_DOMAINS, "A1");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_DOMAINS, "A1, A2");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_DOMAINS, "FOO-BAR-ZOT");
-//    }
-//
-//    @Test
-//    public void mntIrt() {
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_IRT, "irt");
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_IRT, "irtAA");
-//
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_IRT, "irt-1");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_IRT, "irt-1,irt-2");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_IRT, "irt-1-1");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_IRT, "irt-A_A");
-//    }
-//
-//    @Test
-//    public void mntLower() throws Exception {
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_LOWER, "A");
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_LOWER, "A1, A");
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_LOWER, "A12345678901234567890123456789012345678901234567890123456789012345678901234567890");
-//
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_LOWER, "ABCDEfghijKLMNOprstuVWXYz0123456789_______________----_________________________0");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_LOWER, "A1");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_LOWER, "A1, A2");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_LOWER, "FOO-BAR-ZOT");
-//    }
-//
-//    @Test
-//    public void mntRef() throws Exception {
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_REF, "A");
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_REF, "A1, A");
-//        verifyFailure(ObjectType.IRT, AttributeType.MNT_REF, "A12345678901234567890123456789012345678901234567890123456789012345678901234567890");
-//
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_REF, "ABCDEfghijKLMNOprstuVWXYz0123456789_______________----_________________________0");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_REF, "A1");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_REF, "A1, A2");
-//        verifySuccess(ObjectType.IRT, AttributeType.MNT_REF, "FOO-BAR-ZOT");
-//    }
+        verifySuccess(ObjectType.IRT, AttributeType.MNT_BY, "ABCDEfghijKLMNOprstuVWXYz0123456789_______________----_________________________0");
+        verifySuccess(ObjectType.IRT, AttributeType.MNT_BY, "A1");
+        verifySuccess(ObjectType.IRT, AttributeType.MNT_BY, "A1, A2");
+        verifySuccess(ObjectType.IRT, AttributeType.MNT_BY, "FOO-BAR-ZOT");
+    }
+
+    @Test
+    public void mntDomains() throws Exception {
+        verifyFailure(ObjectType.INETNUM, AttributeType.MNT_DOMAINS, "1212121");
+        verifyFailure(ObjectType.INETNUM, AttributeType.MNT_DOMAINS, "A,121212");
+        verifyFailure(ObjectType.INETNUM, AttributeType.MNT_DOMAINS, "A sdf");
+        verifyFailure(ObjectType.INETNUM, AttributeType.MNT_DOMAINS, "A12345678901234567890123456789012345678901234567890123456789012345678901234567890");
+
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_DOMAINS, "ABCDEfghijKLMNOprstuVWXYz0123456789_______________----_________________________0");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_DOMAINS, "A1");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_DOMAINS, "A1, A2");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_DOMAINS, "FOO-BAR-ZOT");
+    }
+
+    @Test
+    public void mntIrt() {
+        verifyFailure(ObjectType.INETNUM, AttributeType.MNT_IRT, "irt");
+        verifyFailure(ObjectType.INETNUM, AttributeType.MNT_IRT, "irtAA");
+
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_IRT, "irt-1");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_IRT, "irt-1,irt-2");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_IRT, "irt-1-1");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_IRT, "irt-A_A");
+    }
+
+    @Test
+    public void mntLower() throws Exception {
+        verifyFailure(ObjectType.ROUTE, AttributeType.MNT_LOWER, "1212121");
+        verifyFailure(ObjectType.ROUTE, AttributeType.MNT_LOWER, "A,121212");
+        verifyFailure(ObjectType.ROUTE, AttributeType.MNT_LOWER, "A SDF");
+        verifyFailure(ObjectType.ROUTE, AttributeType.MNT_LOWER, "A12345678901234567890123456789012345678901234567890123456789012345678901234567890");
+
+        verifySuccess(ObjectType.ROUTE, AttributeType.MNT_LOWER, "ABCDEfghijKLMNOprstuVWXYz0123456789_______________----_________________________0");
+        verifySuccess(ObjectType.ROUTE, AttributeType.MNT_LOWER, "A1");
+        verifySuccess(ObjectType.ROUTE, AttributeType.MNT_LOWER, "A1, A2");
+        verifySuccess(ObjectType.ROUTE, AttributeType.MNT_LOWER, "FOO-BAR-ZOT");
+    }
+
+    @Test
+    public void mntRef() throws Exception {
+        verifyFailure(ObjectType.ORGANISATION, AttributeType.MNT_REF, "1212121");
+        verifyFailure(ObjectType.ORGANISATION, AttributeType.MNT_REF, "A,121212");
+        verifyFailure(ObjectType.ORGANISATION, AttributeType.MNT_REF, "A SDF");
+        verifyFailure(ObjectType.ORGANISATION, AttributeType.MNT_REF, "A12345678901234567890123456789012345678901234567890123456789012345678901234567890");
+
+        verifySuccess(ObjectType.ORGANISATION, AttributeType.MNT_REF, "ABCDEfghijKLMNOprstuVWXYz0123456789_______________----_________________________0");
+        verifySuccess(ObjectType.ORGANISATION, AttributeType.MNT_REF, "A1");
+        verifySuccess(ObjectType.ORGANISATION, AttributeType.MNT_REF, "A1, A2");
+        verifySuccess(ObjectType.ORGANISATION, AttributeType.MNT_REF, "FOO-BAR-ZOT");
+    }
 
     @Test
     public void mpDefault() throws Exception {
@@ -902,29 +794,29 @@ public class AttributeSyntaxTest {
         verifyFailure(ObjectType.AUT_NUM, AttributeType.MP_IMPORT, "INVALID");
     }
 
-//    @Test
-//    public void mpPeer() throws Exception {
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 2001::1A asno(AS2334)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 2001::1A asno(AS0)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 2001::1A asno(AS1)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:1234::1 asno(AS12345)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:: asno(AS12345)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:: asno(AS1)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:67c:2e8:13:a8a9:745d:3ed8:94b0 asno(AS12345)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 192.168.1.2 asno(AS2345)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 192.168.1.2 asno(AS2345)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 0.0.0.0 asno(PeERaS)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 192.168.1.2       asno(    PeERaS)");
-//
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:: asno(AS01)");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 2001::1A asno()");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:: asno(AS)");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001::/1 asno(AS12345)");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "0.0.0.0 asno(PeERaS)");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 192.168.1. asno(PeERaS)");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 255.255.255.256 asno(PeERaS)");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "INVALID");
-//    }
+    @Test
+    public void mpPeer() throws Exception {
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 2001::1A asno(AS2334)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 2001::1A asno(AS0)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 2001::1A asno(AS1)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:1234::1 asno(AS12345)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:: asno(AS12345)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:: asno(AS1)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:67c:2e8:13:a8a9:745d:3ed8:94b0 asno(AS12345)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 192.168.1.2 asno(AS2345)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 192.168.1.2 asno(AS2345)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 0.0.0.0 asno(PeERaS)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 192.168.1.2       asno(    PeERaS)");
+
+        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:: asno(AS01)");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 2001::1A asno()");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001:: asno(AS)");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "MPBGP 2001::/1 asno(AS12345)");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "0.0.0.0 asno(PeERaS)");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 192.168.1. asno(PeERaS)");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "BGP4 255.255.255.256 asno(PeERaS)");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.MP_PEER, "INVALID");
+    }
 
     @Test
     public void mpPeering() throws Exception {
@@ -1014,7 +906,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.ROLE, AttributeType.NIC_HDL, "AuTo-1");
         verifySuccess(ObjectType.ROLE, AttributeType.NIC_HDL, "auto-12345678901234567890aaaa");
         verifySuccess(ObjectType.ROLE, AttributeType.NIC_HDL, "auto-01");
-
     }
 
     @Test
@@ -1028,6 +919,18 @@ public class AttributeSyntaxTest {
         verifyFailure(ObjectType.DOMAIN, AttributeType.NSERVER, "144.102.5.in-addr.arpa 144.102.5.in-addr.arpa");
         verifyFailure(ObjectType.DOMAIN, AttributeType.NSERVER, "RIPE.NL.ip6.arpa 144.102.5.e164.arpa");
         verifyFailure(ObjectType.DOMAIN, AttributeType.NSERVER, "RIPE.NL.ip6.arpa, ns6.bogus.com");
+    }
+
+    @Test
+    public void objectName() {
+        verifyFailure(ObjectType.INETNUM, AttributeType.MNT_BY, "registry-");
+        verifyFailure(ObjectType.INETNUM, AttributeType.MNT_BY, "registry APNIC");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "Re4istry-A234");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "Registry-Name-is-APNIC");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "Registry-Name");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "REGISTRY-NAME");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "REGISTRY-NAME-APNIC");
+        verifySuccess(ObjectType.INETNUM, AttributeType.MNT_BY, "Registry-Name-is-A1-B2-C3");
     }
 
     @Test
@@ -1053,20 +956,20 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.ORGANISATION, AttributeType.ORG, "auto-12345678901234567890aa");
     }
 
-//    @Test
-//    public void origin() {
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "AS");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "AAS3255");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "AS-3255");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "AS 3255");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "3255");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "AS4294967296");
-//
-//        verifySuccess(ObjectType.ROUTE, AttributeType.ORIGIN, "AS0");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.ORIGIN, "AS3255");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.ORIGIN, "AS4294967295");
-//    }
-//
+    @Test
+    public void origin() {
+        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "AS");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "AAS3255");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "AS-3255");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "AS 3255");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "3255");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ORIGIN, "AS4294967296");
+
+        verifySuccess(ObjectType.ROUTE, AttributeType.ORIGIN, "AS0");
+        verifySuccess(ObjectType.ROUTE, AttributeType.ORIGIN, "AS3255");
+        verifySuccess(ObjectType.ROUTE, AttributeType.ORIGIN, "AS4294967295");
+    }
+
     @Test
     public void orgName() {
         verifyFailure(ObjectType.ORGANISATION, AttributeType.ORG_NAME, "\"MAD\" $NAME");
@@ -1088,29 +991,29 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.ORGANISATION, AttributeType.ORG_TYPE, "LIR");
         verifySuccess(ObjectType.ORGANISATION, AttributeType.ORG_TYPE, "NON-REGISTRY");
     }
-//
-//    @Test
-//    public void owner() {
-//        verifySuccess(ObjectType.KEY_CERT, AttributeType.OWNER, "");
-//
-//        StringBuilder builder = new StringBuilder()
-//        for (char i = 0; i < Character.MAX_VALUE; i++) {
-//            builder.append(i);
-//        }
-//
-//        verifySuccess(ObjectType.KEY_CERT, AttributeType.OWNER, builder.toString());
-//    }
-//
-//    @Test
-//    public void peer() {
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.PEER, "BGP4 192.168.1.2 asno(AS2345)");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.PEER, "BGP4 192.168.1.2 asno(PeerAS), flap_damp()");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.PEER, "BGP4 rtrs-ibgp-peers asno(AS3333), flap_damp()");
-//        verifySuccess(ObjectType.INET_RTR, AttributeType.PEER, "BGP4 prng-ebgp-peers asno(PeerAS)");
-//
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.PEER, "BGP4 192.168.1.2 asno(PeerAS_), flap_damp()");
-//        verifyFailure(ObjectType.INET_RTR, AttributeType.PEER, "invalid");
-//    }
+
+    @Test
+    public void owner() {
+        verifySuccess(ObjectType.KEY_CERT, AttributeType.OWNER, "");
+
+        StringBuilder builder = new StringBuilder();
+        for (char i = 0; i < Character.MAX_VALUE; i++) {
+            builder.append(i);
+        }
+
+        verifySuccess(ObjectType.KEY_CERT, AttributeType.OWNER, builder.toString());
+    }
+
+    @Test
+    public void peer() {
+        verifySuccess(ObjectType.INET_RTR, AttributeType.PEER, "BGP4 192.168.1.2 asno(AS2345)");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.PEER, "BGP4 192.168.1.2 asno(PeerAS), flap_damp()");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.PEER, "BGP4 rtrs-ibgp-peers asno(AS3333), flap_damp()");
+        verifySuccess(ObjectType.INET_RTR, AttributeType.PEER, "BGP4 prng-ebgp-peers asno(PeerAS)");
+
+        verifyFailure(ObjectType.INET_RTR, AttributeType.PEER, "BGP4 192.168.1.2 asno(PeerAS_), flap_damp()");
+        verifyFailure(ObjectType.INET_RTR, AttributeType.PEER, "invalid");
+    }
 
     @Test
     public void peering() {
@@ -1154,37 +1057,36 @@ public class AttributeSyntaxTest {
         verifyFailure(ObjectType.PERSON, AttributeType.PERSON, "1person is bogus");
     }
 
-    // What is object and attribute type for this
-//    @Test
-//    public void mbrsByRefSet() {
-//        verifySuccess(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "PRNG-AS15469");
-//        verifySuccess(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "prng-node-bogus");
-//        verifySuccess(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "AS8627:prng-TRANSIT-OUT");
-//        verifySuccess(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "PRNG-RIPE:PRNG-ALLOCBNDR:PRNG-IPV6");
-//        verifySuccess(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "AS8627:prng-TRANSIT-OUT");
-//
-//        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "prng");
-//        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "Prng1");
-//        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "prng TESTNET");
-//        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "AS20773:");
-//        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, ":PRNG-AUTH-PLOT-BOGUS-FROM-RS3724");
-//    }
-//
-//    @Test
-//    public void person() {
-//        verifyFailure(ObjectType.PERSON, AttributeType.PERSON, "some [name]");
-//        verifyFailure(ObjectType.PERSON, AttributeType.PERSON, "Mad 'Dog'");
-//        verifyFailure(ObjectType.PERSON, AttributeType.PERSON, "1Big guy");
-//
-//        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Agoston Horvath");
-//        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Andre Kampert");
-//        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Angela Sjoholm");
-//        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Denis Walker");
-//        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Ed Shryane");
-//        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Kaveh Ranjbar");
-//
-//        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Martin . Fowler");
-//    }
+    @Test
+    public void mbrsByRefSet() {
+        verifySuccess(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "PRNG-AS15469");
+        verifySuccess(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "prng-node-bogus");
+        verifySuccess(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "AS8627:prng-TRANSIT-OUT");
+        verifySuccess(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "PRNG-RIPE:PRNG-ALLOCBNDR:PRNG-IPV6");
+        verifySuccess(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "AS8627:prng-TRANSIT-OUT");
+
+        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "prng");
+        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "Prng1");
+        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "prng TESTNET");
+        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, "AS20773:");
+        verifyFailure(ObjectType.PEERING_SET, AttributeType.PEERING_SET, ":PRNG-AUTH-PLOT-BOGUS-FROM-RS3724");
+    }
+
+    @Test
+    public void person() {
+        verifyFailure(ObjectType.PERSON, AttributeType.PERSON, "some [name]");
+        verifyFailure(ObjectType.PERSON, AttributeType.PERSON, "Mad 'Dog'");
+        verifyFailure(ObjectType.PERSON, AttributeType.PERSON, "1Big guy");
+
+        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Agoston Horvath");
+        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Andre Kampert");
+        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Angela Sjoholm");
+        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Denis Walker");
+        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Ed Shryane");
+        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Kaveh Ranjbar");
+
+        verifySuccess(ObjectType.PERSON, AttributeType.PERSON, "Martin . Fowler");
+    }
 
     @Test
     public void phone() {
@@ -1205,31 +1107,51 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.PERSON, AttributeType.PHONE, "+31610210776 EXT.123");
     }
 
-//    @Test
-//    public void poem() {
-//        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem");
-//        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem-");
-//        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem poem");
-//        verifyFailure(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM");
-//
-//        verifySuccess(ObjectType.POEM, AttributeType.POEM, "poem-poem");
-//        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM");
-//        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-POEM");
-//        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-A1-B2-C3");
-//    }
-//
-//    @Test
-//    public void poeticForm() {
-//        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form");
-//        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form-");
-//        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form form");
-//        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM");
-//
-//        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form-form");
-//        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM");
-//        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-FORM");
-//        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-A1-B2-C3");
-//    }
+    @Test
+    public void pingable() {
+        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "");
+        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "100.100.100");
+        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "300.300.300.300");
+        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "0/100");
+        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "::0/0");
+
+        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "192.168.1.10,192.168.1.11");
+        verifySuccess(ObjectType.ROUTE, AttributeType.PINGABLE, "192.168.1.10");
+        verifySuccess(ObjectType.ROUTE, AttributeType.PINGABLE, "0/0");
+
+        verifyFailure(ObjectType.ROUTE6, AttributeType.PINGABLE, "");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.PINGABLE, "100.100.100");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.PINGABLE, "0/0");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.PINGABLE, "2a00:c00::/48,2a00:c01::/48");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.PINGABLE, "::0/0");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.PINGABLE, "2a00:c00::/48");
+    }
+
+    @Test
+    public void poem() {
+        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem");
+        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem-");
+        verifyFailure(ObjectType.POEM, AttributeType.POEM, "poem poem");
+        verifyFailure(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM-POEM");
+
+        verifySuccess(ObjectType.POEM, AttributeType.POEM, "poem-poem");
+        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM");
+        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-POEM");
+        verifySuccess(ObjectType.POEM, AttributeType.POEM, "POEM-POEM-A1-B2-C3");
+    }
+
+    @Test
+    public void poeticForm() {
+        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form");
+        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form-");
+        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form form");
+        verifyFailure(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM-FORM");
+
+        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "form-form");
+        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM");
+        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-FORM");
+        verifySuccess(ObjectType.POETIC_FORM, AttributeType.POETIC_FORM, "FORM-FORM-A1-B2-C3");
+    }
 
     //  Any syntax
     @Test
@@ -1237,62 +1159,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.KEY_CERT, AttributeType.CERTIF, "mQGiBD0GnVIRBADDmMMFTKQ1Ye7r8T+Rg4y1kqjQBd1rCVU8ifZjQBy9G7W9MZa1");
         verifySuccess(ObjectType.KEY_CERT, AttributeType.CERTIF, "Rj5NPpvAxQ5T7PyGVQ1EHL+vsFPRyQ2g4XQUytRn7Isp1/j8RmnXFNoBawaGwcuS");
     }
-
-//    @Test
-//    public void remarks() {
-//        verifySuccess(ObjectType.PERSON, AttributeType.REMARKS, "");
-//
-//        StringBuilder builder = new StringBuilder();
-//        for (char i = 0; i < Character.MAX_VALUE; i++) {
-//            builder.append(i);
-//        }
-//
-//        verifySuccess(ObjectType.PERSON, AttributeType.REMARKS, builder.toString());
-//    }
-//
-//    @Test
-//    public void role() {
-//        verifyFailure(ObjectType.ROLE, AttributeType.ROLE, "some [name]");
-//        verifyFailure(ObjectType.ROLE, AttributeType.ROLE, "Mad 'Dog'");
-//        verifyFailure(ObjectType.ROLE, AttributeType.ROLE, "1Big guy");
-//
-//        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Agoston Horvath");
-//        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Andre Kampert");
-//        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Angela Sjoholm");
-//        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Denis Walker");
-//        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Ed Shryane");
-//        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Kaveh Ranjbar");
-//
-//        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Martin . Fowler");
-//    }
-//
-//    @Test
-//    public void route() {
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "100.100.100");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "300.300.300.300");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "0/100");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "192.168.1.10");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "192.168.1.0-192.168.1.255");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "::0/0");
-//
-//        verifySuccess(ObjectType.ROUTE, AttributeType.ROUTE, "0/0");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.ROUTE, "195.10.40.0/29");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.ROUTE, "195.10.42.46/32");
-//    }
-//
-//    @Test
-//    public void route6() {
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.ROUTE6, "::0");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.ROUTE6, "195.10.40.0/29");
-//
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.ROUTE6, "::0/0");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.ROUTE6, "2001:1578:0200::/40");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.ROUTE6, "2a01:e0::/32");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.ROUTE6, "2a01:00e0::/32");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.ROUTE6, "2A01:E0::/32");
-//    }
-//
 
     @Test
     public void referralBy() throws Exception {
@@ -1303,15 +1169,58 @@ public class AttributeSyntaxTest {
     }
 
     @Test
-    public void registryName() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "registry-");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "registry APNIC");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Re4istry-A234");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Registry-Name-is-APNIC");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Registry-Name");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "REGISTRY-NAME");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "REGISTRY-NAME-APNIC");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_REGISTRY_NAME, "Registry-Name-is-A1-B2-C3");
+    public void remarks() {
+        verifySuccess(ObjectType.PERSON, AttributeType.REMARKS, "");
+
+        StringBuilder builder = new StringBuilder();
+        for (char i = 0; i < Character.MAX_VALUE; i++) {
+            builder.append(i);
+        }
+
+        verifySuccess(ObjectType.PERSON, AttributeType.REMARKS, builder.toString());
+    }
+
+    @Test
+    public void role() {
+        verifyFailure(ObjectType.ROLE, AttributeType.ROLE, "some [name]");
+        verifyFailure(ObjectType.ROLE, AttributeType.ROLE, "Mad 'Dog'");
+        verifyFailure(ObjectType.ROLE, AttributeType.ROLE, "1Big guy");
+
+        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Agoston Horvath");
+        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Andre Kampert");
+        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Angela Sjoholm");
+        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Denis Walker");
+        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Ed Shryane");
+        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Kaveh Ranjbar");
+
+        verifySuccess(ObjectType.ROLE, AttributeType.ROLE, "Martin . Fowler");
+    }
+
+    @Test
+    public void route() {
+        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "100.100.100");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "300.300.300.300");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "0/100");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "192.168.1.10");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "192.168.1.0-192.168.1.255");
+        verifyFailure(ObjectType.ROUTE, AttributeType.ROUTE, "::0/0");
+
+        verifySuccess(ObjectType.ROUTE, AttributeType.ROUTE, "0/0");
+        verifySuccess(ObjectType.ROUTE, AttributeType.ROUTE, "195.10.40.0/29");
+        verifySuccess(ObjectType.ROUTE, AttributeType.ROUTE, "195.10.42.46/32");
+    }
+
+    @Test
+    public void route6() {
+        verifyFailure(ObjectType.ROUTE6, AttributeType.ROUTE6, "::0");
+        verifyFailure(ObjectType.ROUTE6, AttributeType.ROUTE6, "195.10.40.0/29");
+
+        verifySuccess(ObjectType.ROUTE6, AttributeType.ROUTE6, "::0/0");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.ROUTE6, "2001:1578:0200::/40");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.ROUTE6, "2a01:e0::/32");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.ROUTE6, "2a01:00e0::/32");
+        verifySuccess(ObjectType.ROUTE6, AttributeType.ROUTE6, "2A01:E0::/32");
     }
 
     @Test
@@ -1340,27 +1249,20 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.RTR_SET, AttributeType.RTR_SET, "RTRS-RIPE:RTRS-ALLOCBNDR:RTRS-IPV6");
     }
 
-//    @Test
-//    public void pingable() {
-//        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "100.100.100");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "300.300.300.300");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "0/100");
-//        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "::0/0");
-//
-//        verifyFailure(ObjectType.ROUTE, AttributeType.PINGABLE, "192.168.1.10,192.168.1.11");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.PINGABLE, "192.168.1.10");
-//        verifySuccess(ObjectType.ROUTE, AttributeType.PINGABLE, "0/0");
-//
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.PINGABLE, "");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.PINGABLE, "100.100.100");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.PINGABLE, "0/0");
-//        verifyFailure(ObjectType.ROUTE6, AttributeType.PINGABLE, "2a00:c00::/48,2a00:c01::/48");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.PINGABLE, "::0/0");
-//        verifySuccess(ObjectType.ROUTE6, AttributeType.PINGABLE, "2a00:c00::/48");
-//    }
+    @Test
+    public void signature() throws Exception {
+        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "PGPKEY-");
+        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "A6D57ECE");
+        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "X509-");
+        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "2606");
+        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "AUTO-");
+        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "123");
 
-      // Cannot be tested until inetnumStatus module is written for APNIC
+        verifySuccess(ObjectType.IRT, AttributeType.SIGNATURE, "PGPKEY-A6D57ECE");
+        verifySuccess(ObjectType.IRT, AttributeType.SIGNATURE, "X509-2606");
+        verifySuccess(ObjectType.IRT, AttributeType.SIGNATURE, "AUTO-123");
+    }
+
     @Test
     public void statusI4I6() {
         verifyFailure(ObjectType.INETNUM, AttributeType.STATUS, "SOME_INVALID_STATUS");
@@ -1376,49 +1278,6 @@ public class AttributeSyntaxTest {
         verifySuccess(ObjectType.INETNUM, AttributeType.STATUS, "ALLOCATED PORTABLE");
         verifySuccess(ObjectType.INETNUM, AttributeType.STATUS, "ASSIGNED PORTABLE");
     }
-
-
-//    @Test
-//    public void signature() throws Exception {
-//        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "PGPKEY-");
-//        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "A6D57ECE");
-//        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "X509-");
-//        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "2606");
-//        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "AUTO-");
-//        verifyFailure(ObjectType.IRT, AttributeType.SIGNATURE, "123");
-//
-//        verifySuccess(ObjectType.IRT, AttributeType.SIGNATURE, "PGPKEY-A6D57ECE");
-//        verifySuccess(ObjectType.IRT, AttributeType.SIGNATURE, "X509-2606");
-//        verifySuccess(ObjectType.IRT, AttributeType.SIGNATURE, "AUTO-123");
-//    }
-
-    @Test
-    public void subdomainIn() {
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, ".");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "..");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "-.-.");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "SOME-INVALID-STATUS.ALSO-");
-        verifyFailure(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "SOME-INVALID-STATUS.-.");
-
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "0000-1111.STATUS-2222.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "STATUS-abcd.STATUS-2222.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "subdomain-1111.sUbdomain-ABCD-2222.");
-        verifySuccess(ObjectType.DOMAIN, AttributeType.APNIC_SUBDOMAIN_NAME, "0000-1111.");
-    }
-
-
-//    @Test
-//    public void text() {
-//        verifySuccess(ObjectType.POEM, AttributeType.TEXT, "");
-//
-//        StringBuilder builder = new StringBuilder();
-//        for (char i = 0; i < Character.MAX_VALUE; i++) {
-//            builder.append(i);
-//        }
-//
-//        verifySuccess(ObjectType.POEM, AttributeType.TEXT, builder.toString());
-//    }
 
     private void verifySuccess(final ObjectType objectType, final AttributeType attributeType, final String value) {
         verify(objectType, attributeType, value, false);

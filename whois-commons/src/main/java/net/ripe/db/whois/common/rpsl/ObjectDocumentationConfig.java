@@ -144,9 +144,8 @@ public class ObjectDocumentationConfig {
     }
 
     private static void put(Map<ObjectType, String> map, ObjectType objectType, String text) {
-        if (map.get(objectType) == null) {
-            map.put(objectType, text);
-        } else {
+        // Test for duplicates
+        if (map.put(objectType, text) != null) {
             throw new BeanInitializationException("Object Documentation duplicate mapping exception: " + objectType.getName());
         }
     }

@@ -13,6 +13,6 @@ abstract class BaseSpec extends EndToEndSpec {
     }
 
     def passwords(String... passwords) {
-        passwords.collect { "password:" + it }.join("\n")
+        "\n" + passwords.collect { "password:" + it }.join("\n") + "\n"
     }
 }

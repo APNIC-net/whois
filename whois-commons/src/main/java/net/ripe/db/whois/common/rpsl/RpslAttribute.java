@@ -23,12 +23,10 @@ import static net.ripe.db.whois.common.domain.CIString.ciString;
 
 @Immutable
 public final class RpslAttribute {
-
     public static final String DBM_EMAIL_POSTFIX_REGEX = WhoisVariantHelperFactory.getDbmEmailPostfixRegex();
 
     private static final int LEADING_CHARS = 16;
     private static final int LEADING_CHARS_SHORTHAND = 5;
-
 
     private static final Pattern INVALID_EMAIL_PATTERN =  Pattern.compile("(?i)((?:auto|test)" + DBM_EMAIL_POSTFIX_REGEX + ")");
 
@@ -85,7 +83,6 @@ public final class RpslAttribute {
     public Set<CIString> getCleanValues() {
         if (cleanValues == null) {
             final String cleanedValue = determineCleanValue(value);
-            // System.out.println("cleanedValue:" + cleanedValue);
 
             final Set<CIString> values;
             if (type == null) {
@@ -144,8 +141,6 @@ public final class RpslAttribute {
 
     private static String determineCleanValue(final String value) {
         final StringBuilder result = new StringBuilder(value.length());
-
-        //System.out.println("initialValue" + value);
 
         boolean comment = false;
         boolean space = false;
