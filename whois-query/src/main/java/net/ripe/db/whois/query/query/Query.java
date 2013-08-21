@@ -503,7 +503,10 @@ public final class Query {
             try {
                 final AttributeType type = AttributeType.getByName(attributeType);
                 if (AttributeType.PERSON.equals(type)) {
-                    ret.addAll(Arrays.asList(AttributeType.ADMIN_C, AttributeType.TECH_C, AttributeType.ZONE_C, AttributeType.AUTHOR, AttributeType.PING_HDL));
+                    ret.addAll(Arrays.asList(AttributeType.ADMIN_C, AttributeType.TECH_C, AttributeType.ZONE_C, AttributeType.AUTHOR));
+                    if (!WhoisVariant.isAPNIC()) {
+                        ret.add(AttributeType.PING_HDL);
+                    }
                 } else {
                     ret.add(type);
                 }
