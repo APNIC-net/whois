@@ -9,6 +9,7 @@ import net.ripe.db.whois.common.aspects.RetryFor;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
 import net.ripe.db.whois.common.dao.RpslObjectInfo;
 import net.ripe.db.whois.common.dao.jdbc.domain.ObjectTypeIds;
+import net.ripe.db.whois.common.dao.jdbc.domain.RpslObjectInfoMapper;
 import net.ripe.db.whois.common.dao.jdbc.domain.RpslObjectResultSetExtractor;
 import net.ripe.db.whois.common.dao.jdbc.domain.RpslObjectRowMapper;
 import net.ripe.db.whois.common.dao.jdbc.index.IndexStrategies;
@@ -230,6 +231,25 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
                 end);
 
         return asBlock.isEmpty() ? null : asBlock.get(0);
+    }
+
+    @Override
+    public List<RpslObjectInfo> findAllAsBlocks(long begin, long end) {
+        final List<RpslObjectInfo> asBlock = jdbcTemplate.query("" +
+                "SELECT l.object_id, l.object_type, l.pkey " +
+//                "SELECT l.object_id, l.object " +
+                "FROM last l " +
+                "JOIN as_block a ON l.object_id = a.object_id " +
+                "WHERE ? >= a.begin_as " +
+                "AND ? <= a.end_as " +
+                "AND l.sequence_id != 0 " +
+                "ORDER BY a.begin_as",
+//                new RpslObjectRowMapper(),
+                new RpslObjectInfoMapper(),
+                begin,
+                end);
+
+        return asBlock;
     }
 
     @Override
