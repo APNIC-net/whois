@@ -203,9 +203,13 @@ public interface AttributeSyntax extends Documented {
         @Override
         public String getDescription(final ObjectType objectType) {
             return "" +
-                    "Location coordinates of the resource. Can take one of the following forms:\n" +
+                    "Location coordinates of the resource. Must take the following form:\n" +
                     "\n" +
-                    "[-90,90][-180,180]\n";
+                    "    <latitude> <longitude>\n" +
+                    "\n" +
+                    "Where <latitude> and <longitude> are whole or decimal numbers and\n" +
+                    "    <latitude> is in the range -90 to 90 inclusive, and\n" +
+                    "    <longitude> is in the range -180 to 180 inclusive.\n";
         }
     }
 
