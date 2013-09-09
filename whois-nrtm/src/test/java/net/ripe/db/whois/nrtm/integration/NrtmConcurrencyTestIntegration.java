@@ -9,11 +9,7 @@ import net.ripe.db.whois.common.pipeline.ChannelUtil;
 import net.ripe.db.whois.common.support.DummyWhoisClient;
 import net.ripe.db.whois.nrtm.NrtmServer;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import static net.ripe.db.whois.common.dao.jdbc.JdbcRpslObjectOperations.loadScripts;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @Category(IntegrationTest.class)
 public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase {
@@ -98,7 +92,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
 
-        // Immediately stop the NrtmTestThread
+        // Immediately stop the NrtmTestThread. This needs to happen straight away in case the sneaky thread continues to read
+        // and spoil the assert party below.
         thread.stop = true;
 
         assertThat(thread.addCount, is(1));
@@ -251,8 +246,11 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     } catch (SocketTimeoutException ignored) {
                     }
 
+                    // Allow main calling junit thread to execute
+                    Thread.yield();
+
                     if (stop) {
-                        return;
+                        break;
                     }
                 }
             } catch (Exception e) {
@@ -272,9 +270,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         private void signalLatch(String serial) {
             if (Integer.parseInt(serial) >= lastSerial) {
                 countDownLatchMap.get(method).countDown();
-            }
-            if (countDownLatchMap.get(method).getCount() <= 0) {
-                stop = true;
             }
         }
     }
