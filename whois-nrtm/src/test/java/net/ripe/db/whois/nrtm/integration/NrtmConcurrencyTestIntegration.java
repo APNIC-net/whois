@@ -273,8 +273,9 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             if (Integer.parseInt(serial) >= lastSerial) {
                 countDownLatchMap.get(method).countDown();
             }
-            // Allow main calling junit thread to execute
-            Thread.yield();
+            if (countDownLatchMap.get(method).getCount() <= 0) {
+                stop = true;
+            }
         }
     }
 }
