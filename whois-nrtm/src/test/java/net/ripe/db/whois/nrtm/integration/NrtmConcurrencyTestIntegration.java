@@ -94,8 +94,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
 
-        // Immediately stop the NrtmTestThread. This needs to happen straight away in case the sneaky thread continues to read
-        // and spoil the assert party below.
+        // Immediately stop the NrtmTestThread.
         thread.stop = true;
 
         LOGGER.info("thread.addCount-b=" + thread.addCount);
