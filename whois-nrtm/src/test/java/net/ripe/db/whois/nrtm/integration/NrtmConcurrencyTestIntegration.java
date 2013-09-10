@@ -86,6 +86,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
         assertThat(thread.delCount, is(1));
 
+        LOGGER.info("thread.addCount-a=" + thread.addCount);
+        LOGGER.info("thread.delCount-a=" + thread.delCount);
         // expand serial range to include huge aut-num object
         countDownLatchMap.put(method, new CountDownLatch(1));
         thread.setLastSerial(MIN_RANGE + 4);
@@ -95,6 +97,9 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         // Immediately stop the NrtmTestThread. This needs to happen straight away in case the sneaky thread continues to read
         // and spoil the assert party below.
         thread.stop = true;
+
+        LOGGER.info("thread.addCount-b=" + thread.addCount);
+        LOGGER.info("thread.delCount-b=" + thread.delCount);
 
         assertThat(thread.addCount, is(1));
         assertThat(thread.delCount, is(3));
@@ -253,6 +258,9 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                         break;
                     }
                 }
+                LOGGER.info("thread.addCount-x=" + addCount);
+                LOGGER.info("thread.delCount-x=" + delCount);
+
             } catch (Exception e) {
                 error = e.getMessage();
             } finally {
@@ -269,8 +277,13 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
         private void signalLatch(String serial) {
             if (Integer.parseInt(serial) >= lastSerial) {
+                LOGGER.info("thread.countDownLatchMap.get(method).countDown()=" + countDownLatchMap.get(method));
                 countDownLatchMap.get(method).countDown();
             }
+            LOGGER.info("thread.countDownLatchMap.get(method).countDown()=" + countDownLatchMap.get(method));
+            LOGGER.info("thread.addCount-y=" + addCount);
+            LOGGER.info("thread.delCount-y=" + delCount);
+
         }
     }
 }
