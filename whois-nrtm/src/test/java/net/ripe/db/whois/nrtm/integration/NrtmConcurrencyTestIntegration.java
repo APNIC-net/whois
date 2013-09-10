@@ -92,7 +92,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         countDownLatchMap.put(method, new CountDownLatch(1));
         thread.setLastSerial(MIN_RANGE + 4);
         setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
-        countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
+        boolean awaitResult = countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
+        LOGGER.info("awaitResult="+awaitResult);
 
         // Immediately stop the NrtmTestThread.
         thread.stop = true;
@@ -250,9 +251,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     } catch (SocketTimeoutException ignored) {
                     }
 
-                    // Allow main calling junit thread to execute
-                    Thread.yield();
-
                     if (stop) {
                         break;
                     }
@@ -282,7 +280,9 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             LOGGER.info("thread.countDownLatchMap.get(method).countDown()=" + countDownLatchMap.get(method));
             LOGGER.info("thread.addCount-y=" + addCount);
             LOGGER.info("thread.delCount-y=" + delCount);
-
+            if (countDownLatchMap.get(method).getCount() == 0) {
+                stop = true;
+            }
         }
     }
 }
