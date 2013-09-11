@@ -83,7 +83,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
         NrtmTestThread thread = new NrtmTestThread(query, MIN_RANGE + 1, countDownLatchMap, method);
         thread.start();
-        countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
+        countDownLatchMap.get(method).await(10, TimeUnit.SECONDS);
         assertThat(thread.delCount, is(1));
 
         LOGGER.info("thread.addCount-a=" + thread.addCount);
@@ -92,7 +92,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         countDownLatchMap.put(method, new CountDownLatch(1));
         thread.setLastSerial(MIN_RANGE + 4);
         setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
-        boolean awaitResult = countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
+        boolean awaitResult = countDownLatchMap.get(method).await(10, TimeUnit.SECONDS);
         LOGGER.info("awaitResult="+awaitResult);
 
         // Immediately stop the NrtmTestThread.
@@ -148,10 +148,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             thread.stop = true;
             if (thread.error != null) {
                 fail("Thread reported error: " + thread.error);
-            }
-
-            if (!thread.isAlive()) {
-                fail("Thread is no longer running, but didn't report an error?");
             }
 
             if (thread.addCount != addResult || thread.delCount != delResult) {
