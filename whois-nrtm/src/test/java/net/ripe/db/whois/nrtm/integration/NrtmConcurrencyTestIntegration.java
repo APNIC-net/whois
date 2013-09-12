@@ -92,21 +92,21 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         countDownLatchMap.get(method).await(10, TimeUnit.SECONDS);
         assertThat(thread.delCount, is(1));
 
-        LOGGER.info("main - thread.addCount=" +  thread.addCount);
-        LOGGER.info("main - thread.delCount=" +  thread.delCount);
+        LOGGER.info(method + ".addCount=" +  thread.addCount);
+        LOGGER.info(method + ".delCount=" +  thread.delCount);
 
         // expand serial range to include huge aut-num object
         countDownLatchMap.put(method, new CountDownLatch(1));
         thread.setLastSerial(MIN_RANGE + 4);
         setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
         boolean awaitResult = countDownLatchMap.get(method).await(10, TimeUnit.SECONDS);
-        LOGGER.info("main awaitResult="+awaitResult);
+        LOGGER.info(method + ".awaitResult="+awaitResult);
 
         // Immediately stop the NrtmTestThread.
         thread.stop = true;
 
-        LOGGER.info("main.interrupt - thread.addCount=" +  thread.addCount);
-        LOGGER.info("main.interrupt - thread.delCount=" +  thread.delCount);
+        LOGGER.info(method + ".addCount=" +  thread.addCount);
+        LOGGER.info(method + ".delCount=" +  thread.delCount);
 
         assertThat(thread.addCount, is(1));
         assertThat(thread.delCount, is(3));
@@ -264,7 +264,6 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     }
                 }
 
-                Thread.sleep(30000);
             } catch (Exception e) {
                 error = e.getMessage();
             } finally {
@@ -282,16 +281,16 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             }
         }
 
-        private void signalLatch(String serial) {
+        private void signalLatch(String serial) throws Exception {
+            LOGGER.info("signalLatch() - addCount=" + addCount);
+            LOGGER.info("signalLatch() - delCount=" + delCount);
             if (Integer.parseInt(serial) >= lastSerial) {
                 LOGGER.info("signalLatch() - getCount()=" + countDownLatchMap.get(method).getCount());
                 countDownLatchMap.get(method).countDown();
             }
-            LOGGER.info("signalLatch() - getCount()=" + countDownLatchMap.get(method).getCount());
-            LOGGER.info("signalLatch() - addCount=" + addCount);
-            LOGGER.info("signalLatch() - delCount=" + delCount);
-            if (countDownLatchMap.get(method).getCount() == 0) {
-                stop = true;
+            if ( countDownLatchMap.get(method).getCount() == 0) {
+                LOGGER.info("signalLatch() sleeping - getCount()=" + countDownLatchMap.get(method).getCount());
+                Thread.sleep(30000);
             }
         }
     }
