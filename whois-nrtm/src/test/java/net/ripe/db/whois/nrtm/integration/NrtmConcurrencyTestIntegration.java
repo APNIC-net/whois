@@ -9,7 +9,11 @@ import net.ripe.db.whois.common.pipeline.ChannelUtil;
 import net.ripe.db.whois.common.support.DummyWhoisClient;
 import net.ripe.db.whois.nrtm.NrtmServer;
 import org.apache.commons.io.IOUtils;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +31,9 @@ import java.util.concurrent.TimeUnit;
 
 import static net.ripe.db.whois.common.dao.jdbc.JdbcRpslObjectOperations.loadScripts;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @Category(IntegrationTest.class)
 public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase {
@@ -250,7 +256,9 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     } catch (SocketTimeoutException ignored) {
                     }
 
+                    yield();
                     if (isInterrupted()) {
+                        LOGGER.info("run() - isInterrupted()=" + isInterrupted());
                         break;
                     }
                 }
@@ -280,9 +288,9 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             LOGGER.info("signalLatch() - getCount()=" + countDownLatchMap.get(method).getCount());
             LOGGER.info("signalLatch() - addCount=" + addCount);
             LOGGER.info("signalLatch() - delCount=" + delCount);
-            if (countDownLatchMap.get(method).getCount() == 0) {
-                interrupt();
-            }
+//            if (countDownLatchMap.get(method).getCount() == 0) {
+//                interrupt();
+//            }
         }
     }
 }
