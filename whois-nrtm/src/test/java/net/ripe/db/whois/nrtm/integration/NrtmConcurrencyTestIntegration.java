@@ -86,20 +86,21 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         countDownLatchMap.get(method).await(10, TimeUnit.SECONDS);
         assertThat(thread.delCount, is(1));
 
-        LOGGER.info("thread.addCount-a=" + thread.addCount);
-        LOGGER.info("thread.delCount-a=" + thread.delCount);
+        LOGGER.info("main - thread.addCount=" +  thread.addCount);
+        LOGGER.info("main - thread.delCount=" +  thread.delCount);
+
         // expand serial range to include huge aut-num object
         countDownLatchMap.put(method, new CountDownLatch(1));
         thread.setLastSerial(MIN_RANGE + 4);
         setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
         boolean awaitResult = countDownLatchMap.get(method).await(10, TimeUnit.SECONDS);
-        LOGGER.info("awaitResult="+awaitResult);
+        LOGGER.info("main awaitResult="+awaitResult);
 
         // Immediately stop the NrtmTestThread.
-        thread.stop = true;
+        thread.interrupt();
 
-        LOGGER.info("thread.addCount-b=" + thread.addCount);
-        LOGGER.info("thread.delCount-b=" + thread.delCount);
+        LOGGER.info("main.interrupt - thread.addCount=" +  thread.addCount);
+        LOGGER.info("main.interrupt - thread.delCount=" +  thread.delCount);
 
         assertThat(thread.addCount, is(1));
         assertThat(thread.delCount, is(3));
@@ -145,7 +146,9 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         int addResult = threads.get(0).addCount;
         int delResult = threads.get(0).delCount;
         for (NrtmTestThread thread : threads) {
-            thread.stop = true;
+            //thread.stop = true;
+            thread.interrupt();
+
             if (thread.error != null) {
                 fail("Thread reported error: " + thread.error);
             }
@@ -188,7 +191,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         volatile String error;
         volatile int addCount;
         volatile int delCount;
-        volatile boolean stop = false;
+        //volatile boolean stop = false;
         final String query;
         int lastSerial;
         String method;
@@ -247,16 +250,17 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     } catch (SocketTimeoutException ignored) {
                     }
 
-                    if (stop) {
+                    if (isInterrupted()) {
                         break;
                     }
                 }
-                LOGGER.info("thread.addCount-x=" + addCount);
-                LOGGER.info("thread.delCount-x=" + delCount);
 
             } catch (Exception e) {
                 error = e.getMessage();
             } finally {
+                LOGGER.info("run() - finally getCount()=" + countDownLatchMap.get(method).getCount());
+                LOGGER.info("run() - finally addCount=" + addCount);
+                LOGGER.info("run() - finally delCount=" + delCount);
                 IOUtils.closeQuietly(out);
                 IOUtils.closeQuietly(in);
                 if (socket != null) {
@@ -270,14 +274,14 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
         private void signalLatch(String serial) {
             if (Integer.parseInt(serial) >= lastSerial) {
-                LOGGER.info("thread.countDownLatchMap.get(method).countDown()=" + countDownLatchMap.get(method));
+                LOGGER.info("signalLatch() - getCount()=" + countDownLatchMap.get(method).getCount());
                 countDownLatchMap.get(method).countDown();
             }
-            LOGGER.info("thread.countDownLatchMap.get(method).countDown()=" + countDownLatchMap.get(method));
-            LOGGER.info("thread.addCount-y=" + addCount);
-            LOGGER.info("thread.delCount-y=" + delCount);
+            LOGGER.info("signalLatch() - getCount()=" + countDownLatchMap.get(method).getCount());
+            LOGGER.info("signalLatch() - addCount=" + addCount);
+            LOGGER.info("signalLatch() - delCount=" + delCount);
             if (countDownLatchMap.get(method).getCount() == 0) {
-                stop = true;
+                interrupt();
             }
         }
     }
