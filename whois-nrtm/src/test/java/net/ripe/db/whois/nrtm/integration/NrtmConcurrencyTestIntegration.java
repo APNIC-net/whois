@@ -103,7 +103,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         LOGGER.info("main awaitResult="+awaitResult);
 
         // Immediately stop the NrtmTestThread.
-        thread.interrupt();
+        thread.stop = true;
 
         LOGGER.info("main.interrupt - thread.addCount=" +  thread.addCount);
         LOGGER.info("main.interrupt - thread.delCount=" +  thread.delCount);
@@ -111,6 +111,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         assertThat(thread.addCount, is(1));
         assertThat(thread.delCount, is(3));
 
+        thread.interrupt();
         thread.join();
     }
 
@@ -152,8 +153,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         int addResult = threads.get(0).addCount;
         int delResult = threads.get(0).delCount;
         for (NrtmTestThread thread : threads) {
-            //thread.stop = true;
-            thread.interrupt();
+            thread.stop = true;
 
             if (thread.error != null) {
                 fail("Thread reported error: " + thread.error);
@@ -167,6 +167,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     }
                 }));
             }
+            thread.interrupt();
             thread.join();
         }
 
@@ -197,7 +198,7 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
         volatile String error;
         volatile int addCount;
         volatile int delCount;
-        //volatile boolean stop = false;
+        volatile boolean stop = false;
         final String query;
         int lastSerial;
         String method;
@@ -257,12 +258,13 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     }
 
                     yield();
-                    if (isInterrupted()) {
-                        LOGGER.info("run() - isInterrupted()=" + isInterrupted());
+                    if (stop) {
+                        LOGGER.info("run() - stop=" + true);
                         break;
                     }
                 }
 
+                Thread.sleep(30000);
             } catch (Exception e) {
                 error = e.getMessage();
             } finally {
@@ -288,9 +290,9 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             LOGGER.info("signalLatch() - getCount()=" + countDownLatchMap.get(method).getCount());
             LOGGER.info("signalLatch() - addCount=" + addCount);
             LOGGER.info("signalLatch() - delCount=" + delCount);
-//            if (countDownLatchMap.get(method).getCount() == 0) {
-//                interrupt();
-//            }
+            if (countDownLatchMap.get(method).getCount() == 0) {
+                stop = true;
+            }
         }
     }
 }
