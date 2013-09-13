@@ -89,21 +89,24 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
 
         NrtmTestThread thread = new NrtmTestThread(query, MIN_RANGE + 1, countDownLatchMap, method);
         thread.start();
-        countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
+        countDownLatchMap.get(method).await(WAIT_FOR_CLIENT_THREADS, TimeUnit.SECONDS);
         assertThat(thread.delCount, is(1));
 
         // expand serial range to include huge aut-num object
         countDownLatchMap.put(method, new CountDownLatch(1));
         thread.setLastSerial(MIN_RANGE + 4);
         setSerial(MIN_RANGE + 1, MIN_RANGE + 4);
-        countDownLatchMap.get(method).await(5, TimeUnit.SECONDS);
 
-        // Immediately stop the NrtmTestThread
-        thread.stop = true;
+        // Continue processing
+        thread.interrupt();
+        countDownLatchMap.get(method).await(WAIT_FOR_CLIENT_THREADS, TimeUnit.SECONDS);
 
         assertThat(thread.addCount, is(1));
         assertThat(thread.delCount, is(3));
 
+        thread.stop = true;
+        // Let thread finish
+        thread.interrupt();
         thread.join();
     }
 
@@ -131,6 +134,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                 fail("Thread reported error: " + thread.error);
             }
             thread.setLastSerial(MAX_RANGE);
+            // Continue processing
+            thread.interrupt();
         }
 
         // 2nd part: clients get all of the serials (-k part of server kicks in)
@@ -162,6 +167,8 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     }
                 }));
             }
+            // Let thread finish
+            thread.interrupt();
             thread.join();
         }
 
@@ -251,8 +258,11 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
                     } catch (SocketTimeoutException ignored) {
                     }
 
+                    // Allow main calling junit thread to execute
+                    Thread.yield();
+
                     if (stop) {
-                        return;
+                        break;
                     }
                 }
             } catch (Exception e) {
@@ -273,8 +283,16 @@ public class NrtmConcurrencyTestIntegration extends AbstractNrtmIntegrationBase 
             if (Integer.parseInt(serial) >= lastSerial) {
                 countDownLatchMap.get(method).countDown();
             }
-            // Allow main calling junit thread to execute
-            Thread.yield();
+
+            if (countDownLatchMap.get(method).getCount() == 0) {
+                LOGGER.info("signalLatch() thread sleeping - getCount()=" + countDownLatchMap.get(method).getCount());
+                try {
+                    Thread.sleep(60000);
+                } catch (InterruptedException ie) {
+                    LOGGER.info("signalLatch() thread continuing processing - getCount()=" + countDownLatchMap.get(method).getCount());
+                }
+            }
+
         }
     }
 }
