@@ -1,10 +1,15 @@
 package net.ripe.db.whois.common.dao.jdbc;
 
 import com.google.common.base.Function;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheBuilderSpec;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import net.ripe.db.whois.common.aspects.RetryFor;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
 import net.ripe.db.whois.common.dao.RpslObjectInfo;
@@ -26,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.RecoverableDataAccessException;
@@ -55,10 +62,23 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
     private final JdbcTemplate jdbcTemplate;
     private final SourceContext sourceContext;
 
+    private final Map<String, LoadingCache<String, Set<RpslObjectInfo>>> keyIndexCache = new HashMap<>();
+    private final Map<String, LoadingCache<Integer, RpslObject>> keyObjectCache = new HashMap<>();
+    private CacheBuilderSpec cacheSettings = CacheBuilderSpec.disableCaching();
+
     @Autowired
     public JdbcRpslObjectDao(@Qualifier("sourceAwareDataSource") final DataSource dataSource, final SourceContext sourceContext) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.sourceContext = sourceContext;
+    }
+
+    @Value("${jdbc.cachespec:}")
+    public void setCacheSettings(final String cachespec) {
+        if (cachespec.isEmpty()) {
+            this.cacheSettings = CacheBuilderSpec.disableCaching();
+        } else {
+            this.cacheSettings = CacheBuilderSpec.parse(cachespec);
+        }
     }
 
     @Override
@@ -106,11 +126,18 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
     }
 
     private Set<Integer> loadObjects(final List<Identifiable> proxy, final Map<Integer, RpslObject> loadedObjects) {
+        LoadingCache<Integer, RpslObject> cache = getKeyObjectCacheForCurrentSource();
         final StringBuilder queryBuilder = new StringBuilder();
         final List<Integer> objectIds = Lists.newArrayListWithExpectedSize(proxy.size());
         for (final Identifiable identifiable : proxy) {
             final Integer objectId = identifiable.getObjectId();
             if (loadedObjects.containsKey(objectId)) {
+                continue;
+            }
+
+            RpslObject object = cache.getIfPresent(objectId);
+            if (object != null) {
+                loadedObjects.put(objectId, object);
                 continue;
             }
 
@@ -132,20 +159,23 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
             }
         }
 
-        final List<RpslObject> rpslObjects = jdbcTemplate.query(
-                queryBuilder.toString(),
-                new PreparedStatementSetter() {
+        if (queryBuilder.length() > 0) {
+            final List<RpslObject> rpslObjects = jdbcTemplate.query(
+                    queryBuilder.toString(),
+                    new PreparedStatementSetter() {
                     @Override
                     public void setValues(final PreparedStatement ps) throws SQLException {
-                        for (int i = 0; i < objectIds.size(); i++) {
-                            ps.setInt(i + 1, objectIds.get(i));
+                            for (int i = 0; i < objectIds.size(); i++) {
+                                ps.setInt(i + 1, objectIds.get(i));
+                            }
                         }
-                    }
                 },
-                new RpslObjectRowMapper());
+                    new RpslObjectRowMapper());
 
-        for (final RpslObject rpslObject : rpslObjects) {
-            loadedObjects.put(rpslObject.getObjectId(), rpslObject);
+            for (final RpslObject rpslObject : rpslObjects) {
+                loadedObjects.put(rpslObject.getObjectId(), rpslObject);
+                cache.put(rpslObject.getObjectId(), rpslObject);
+            }
         }
 
         if (proxy.size() == loadedObjects.size()) {
@@ -163,14 +193,38 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
         return differences;
     }
 
+    private LoadingCache<Integer, RpslObject> getKeyObjectCacheForCurrentSource() {
+        String cacheIdentifier = sourceContext.getCurrentSource().toString();
+        if (!keyObjectCache.containsKey(cacheIdentifier)) {
+            keyObjectCache.put(cacheIdentifier, CacheBuilder.from(cacheSettings)
+                    .build(new CacheLoader<Integer, RpslObject>() {
+                        public RpslObject load(Integer key) {
+                            return jdbcTemplate.queryForObject("" +
+                                    "SELECT object_id, object FROM last " +
+                                    "WHERE object_id = ? " +
+                                    "AND sequence_id != 0",
+                                    new RpslObjectRowMapper(),
+                                    key);
+                        }
+                    }));
+        }
+        return keyObjectCache.get(cacheIdentifier);
+    }
+
     @Override
     public RpslObject getById(final int objectId) {
-        return jdbcTemplate.queryForObject("" +
-                "SELECT object_id, object FROM last " +
-                "WHERE object_id = ? " +
-                "AND sequence_id != 0",
-                new RpslObjectRowMapper(),
-                objectId);
+        RpslObject result;
+        try {
+            result = getKeyObjectCacheForCurrentSource().getUnchecked(objectId);
+        } catch (UncheckedExecutionException e) {
+            Throwable throwable = e.getCause();
+            if (throwable instanceof DataAccessException) {
+                throw (DataAccessException) throwable;
+            } else {
+                throw e;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -305,20 +359,30 @@ public class JdbcRpslObjectDao implements RpslObjectDao {
     }
 
     private Set<RpslObjectInfo> findByKeyInIndex(final ObjectType type, final CIString key) {
-        final Set<RpslObjectInfo> objectInfos = Sets.newHashSetWithExpectedSize(1);
-        final ObjectTemplate objectTemplate = ObjectTemplate.getTemplate(type);
-        for (final AttributeType attributeType : objectTemplate.getKeyAttributes()) {
-            final List<RpslObjectInfo> rpslObjectInfos = IndexStrategies.get(attributeType).findInIndex(jdbcTemplate, key);
-            for (final RpslObjectInfo rpslObjectInfo : rpslObjectInfos) {
+        String cacheIdentifier = sourceContext.getCurrentSource() + ": " + type.getShortName();
+        if (!keyIndexCache.containsKey(cacheIdentifier)) {
+            keyIndexCache.put(cacheIdentifier, CacheBuilder.from(cacheSettings)
+                    .build(new CacheLoader<String, Set<RpslObjectInfo>>() {
+                        public Set<RpslObjectInfo> load(String key) {
+                            final Set<RpslObjectInfo> objectInfos = Sets.newHashSetWithExpectedSize(1);
+                            final ObjectTemplate objectTemplate = ObjectTemplate.getTemplate(type);
+                            for (final AttributeType attributeType : objectTemplate.getKeyAttributes()) {
+                                final List<RpslObjectInfo> rpslObjectInfos = IndexStrategies.get(attributeType).findInIndex(jdbcTemplate, key);
+                                for (final RpslObjectInfo rpslObjectInfo : rpslObjectInfos) {
 
-                // Make sure the object type actually matches the requested type, can otherwise fail e.g. when looking up person/role
-                if (rpslObjectInfo.getObjectType().equals(type)) {
-                    objectInfos.add(rpslObjectInfo);
-                }
-            }
+                                    // Make sure the object type actually matches the requested type, can otherwise fail e.g. when looking up person/role
+                                    if (rpslObjectInfo.getObjectType().equals(type)) {
+                                        objectInfos.add(rpslObjectInfo);
+                                    }
+                                }
+                            }
+
+                            return objectInfos;
+                        }
+                    }));
         }
 
-        return objectInfos;
+        return keyIndexCache.get(cacheIdentifier).getUnchecked(key.toString());
     }
 
     @Override
