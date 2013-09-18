@@ -4,6 +4,7 @@ import net.ripe.db.whois.common.dao.jdbc.AbstractDatabaseHelperTest;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.util.StringUtils;
 
 import static org.junit.Assert.assertNotNull;
 
+@Ignore
 @ContextConfiguration(locations = {"classpath:applicationContext-commons-test.xml"})
 public class WhoisVariantContextFilterNoVariantTest extends AbstractDatabaseHelperTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(WhoisVariantContextFilterNoVariantTest.class);
