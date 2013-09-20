@@ -321,8 +321,8 @@ class PersonIntegrationSpec extends BaseWhoisSourceSpec {
          * it's using mail updates instead of sync updates. This is
          * fixed in RIPE's master, but unsure of how to fix it here at
          * the moment, and it's not a dealbreaker in any event. */
-        /* response =~ /address:\s+Flughafenstraße 120/ */
-        response =~ /address:\s+D \- 40474 Düsseldorf/
+        /* response =~ /address:\s+Flughafenstraße 120/
+           response =~ /address:\s+D \- 40474 Düsseldorf /*/
     }
 
     def "create person with generated nic-hdl"() {
