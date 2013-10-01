@@ -448,11 +448,7 @@ class FirstUpdatesSpec extends BaseSpec {
 
         ack.countErrorWarnInfo(1, 2, 0)
         
-        /* todo: this is failing when run on a bamboo-agent by bamboo,
-         * but not when run manually, on those machines or any others
-         * tried.  When it fails, the response contains question marks
-         * in lieu of the non-ASCII characters. */
-        /* ack.objErrorContains("Create", "FAILED", "person", "FPEü1-TEST   First Person Error","Syntax error in FPE") */
+        ack.objErrorContains("Create", "FAILED", "person", "FPEü1-TEST   First Person Error","Syntax error in FPE")
 
         queryNothing("-rGBT person FPE1-TEST")
     }
