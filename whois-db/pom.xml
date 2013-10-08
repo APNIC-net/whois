@@ -103,9 +103,9 @@
             <id>apnic-release</id>
 
             <properties>
-                <!-- START: RIPE Release Procedure -->
+                <!-- START: APNIC Release Procedure -->
                 <whois.main>net.ripe.db.whois.WhoisServer</whois.main>
-                <!-- END: RIPE Release Procedure -->
+                <!-- END: APNIC Release Procedure -->
 
                 <maven.build.timestamp.format>yyyyMMdd.HHmmss</maven.build.timestamp.format>
 
@@ -138,7 +138,7 @@
 
             <build>
                 <plugins>
-                    <!-- START: RIPE Release Procedure -->
+                    <!-- START: APNIC Release Procedure -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
@@ -162,7 +162,7 @@
                             </filters>
                         </configuration>
                     </plugin>
-                    <!-- END: RIPE Release Procedure -->
+                    <!-- END: APNIC Release Procedure -->
 
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
@@ -383,6 +383,30 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.5</version>
+                <executions>
+                    <execution>
+                        <id>clean-jars</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>*${project.build.finalName}*.jar</include>
+                                    </includes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.gmaven</groupId>
                 <artifactId>gmaven-plugin</artifactId>
