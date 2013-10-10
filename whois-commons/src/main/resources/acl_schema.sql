@@ -56,6 +56,7 @@ DROP TABLE IF EXISTS `acl_limit`;
 CREATE TABLE `acl_limit` (
   `prefix` varchar(50) NOT NULL,
   `daily_limit` int(11) NOT NULL DEFAULT '-1',
+  `query_limit` int(11) NOT NULL DEFAULT '-1',
   `comment` text,
   `unlimited_connections` bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`prefix`)
