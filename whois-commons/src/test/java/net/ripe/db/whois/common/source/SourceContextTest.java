@@ -64,7 +64,8 @@ public class SourceContextTest {
                 whoisSlavePassword,
                 whoisMasterDataSource,
                 whoisSlaveDataSource,
-                dataSourceFactory
+                dataSourceFactory,
+                null
         );
     }
 
@@ -115,8 +116,36 @@ public class SourceContextTest {
         final String invalidAdditionalSource = "INVALID";
         try {
             new SourceContext(
+                    mainSourceNameString,
+                    invalidAdditionalSource,
+                    grsSourceNames,
+                    nrtmSourceNames,
+                    mirrorSourceNames,
+                    grsSourceNamesForDummification,
+                    grsMasterBaseUrl,
+                    whoisMasterUsername,
+                    whoisMasterPassword,
+                    grsSlaveBaseUrl,
+                    mirrorSlaveBaseUrl,
+                    whoisSlaveUsername,
+                    whoisSlavePassword,
+                    whoisMasterDataSource,
+                    whoisSlaveDataSource,
+                    dataSourceFactory,
+                    null
+            );
+            fail();
+        } catch (IllegalSourceException e) {
+            assertThat(e.getMessage(), containsString("Invalid source specified: INVALID"));
+        }
+    }
+
+    @Test
+    public void noAdditionalSources() {
+        final String noAdditionalSources = "";
+        subject = new SourceContext(
                 mainSourceNameString,
-                invalidAdditionalSource,
+                noAdditionalSources,
                 grsSourceNames,
                 nrtmSourceNames,
                 mirrorSourceNames,
@@ -130,34 +159,8 @@ public class SourceContextTest {
                 whoisSlavePassword,
                 whoisMasterDataSource,
                 whoisSlaveDataSource,
-                dataSourceFactory
-            );
-            fail();
-        } catch (IllegalSourceException e) {
-            assertThat(e.getMessage(), containsString("Invalid source specified: INVALID"));
-        }
-    }
-
-    @Test
-    public void noAdditionalSources() {
-        final String noAdditionalSources = "";
-        subject = new SourceContext(
-            mainSourceNameString,
-            noAdditionalSources,
-            grsSourceNames,
-            nrtmSourceNames,
-            mirrorSourceNames,
-            grsSourceNamesForDummification,
-            grsMasterBaseUrl,
-            whoisMasterUsername,
-            whoisMasterPassword,
-            grsSlaveBaseUrl,
-            mirrorSlaveBaseUrl,
-            whoisSlaveUsername,
-            whoisSlavePassword,
-            whoisMasterDataSource,
-            whoisSlaveDataSource,
-            dataSourceFactory
+                dataSourceFactory,
+                null
         );
         assertThat(subject.getAdditionalSourceNames(), Matchers.hasSize(0));
     }

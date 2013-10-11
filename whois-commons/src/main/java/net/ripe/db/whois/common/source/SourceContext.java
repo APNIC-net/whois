@@ -8,15 +8,18 @@ import com.google.common.collect.Sets;
 import com.mchange.v2.c3p0.DataSources;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.jdbc.DataSourceFactory;
+import net.ripe.db.whois.common.jdbc.DatabaseVersionCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -44,8 +47,10 @@ public class SourceContext {
     private final Set<CIString> allSourceNames;
     private final Set<CIString> additionalSourceNames;
     private final Map<CIString, CIString> aliases;
+    private DatabaseVersionCheck databaseVersionCheck;
 
     private ThreadLocal<SourceConfiguration> current = new ThreadLocal<>();
+    private final ApplicationContext applicationContext;
 
     @Autowired
     public SourceContext(
@@ -64,8 +69,10 @@ public class SourceContext {
             @Value("${whois.db.slave.password}") final String whoisSlavePassword,
             @Qualifier("whoisMasterDataSource") final DataSource whoisMasterDataSource,
             @Qualifier("whoisSlaveDataSource") final DataSource whoisSlaveDataSource,
-            final DataSourceFactory dataSourceFactory) {
+            final DataSourceFactory dataSourceFactory,
+            final ApplicationContext applicationContext) {
 
+        this.applicationContext = applicationContext;
         final CIString mainSourceName = ciString(mainSourceNameString);
         this.mainMasterSource = Source.master(mainSourceName);
         this.mainSlaveSource = Source.slave(mainSourceName);
@@ -175,6 +182,21 @@ public class SourceContext {
         if (!additionalSources.isEmpty()) {
             LOGGER.info("Additional sources: {}", additionalSources);
         }
+        if (databaseVersionCheck != null) {
+            databaseVersionCheck.check(applicationContext);
+        }
+    }
+
+    @Autowired(required = false)
+    public void setDatabaseVersionCheck(DatabaseVersionCheck databaseVersionCheck) {
+        this.databaseVersionCheck = databaseVersionCheck;
+    }
+
+    @PostConstruct
+    public void init() {
+        if (databaseVersionCheck != null) {
+            databaseVersionCheck.check(applicationContext);
+        }
     }
 
     private String createSourceUrl(final String baseUrl, final CIString sourceName) {
@@ -276,4 +298,5 @@ public class SourceContext {
         final CIString sourceName = getCurrentSource().getName();
         return grsSourceNamesForDummification.contains(sourceName);
     }
+
 }

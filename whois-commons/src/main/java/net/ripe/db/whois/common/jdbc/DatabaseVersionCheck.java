@@ -9,7 +9,6 @@ import net.ripe.db.whois.common.source.SourceConfiguration;
 import net.ripe.db.whois.common.source.SourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -17,7 +16,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.Arrays;
@@ -33,13 +31,13 @@ public class DatabaseVersionCheck {
     static final Pattern RESOURCE_MATCHER = Pattern.compile("(?i)^([a-z]+)-([0-9.]+)$");
     static final Splitter VERSION_SPLITTER = Splitter.on('.').omitEmptyStrings();
 
-    private final ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
     @Value("${application.version}")
     private String applicationVersion;
 
-    @Autowired
-    public DatabaseVersionCheck(ApplicationContext applicationContext) {
+    public void check(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+        checkDatabaseVersions();
     }
 
     /**
@@ -79,19 +77,21 @@ public class DatabaseVersionCheck {
         });
     }
 
-    @PostConstruct
     public void checkDatabaseVersions() {
         try {
-            checkAllDataSources();
+            if (!checkAllDataSources()) {
+                throw new IllegalStateException("Database version check failed");
+            }
         } catch (Exception e) {
             LOGGER.error("Database version check failed", e);
         }
     }
 
-    private void checkAllDataSources() throws IOException {
+    private boolean checkAllDataSources() throws IOException {
         final Iterable<String> resources = getSqlPatchResources();
         final Map<String, DataSource> beansOfType = applicationContext.getBeansOfType(DataSource.class);
 
+        boolean dataSourcesOk = true;
         for (Map.Entry<String, DataSource> dataSourceEntry : beansOfType.entrySet()) {
             final DataSource dataSource = dataSourceEntry.getValue();
 
@@ -102,23 +102,25 @@ public class DatabaseVersionCheck {
                     try {
                         sourceContext.setCurrent(source.getSource());
                         final String dataSourceName = dataSourceEntry.getKey() + "/" + source;
-                        checkDataSource(resources, dataSource, dataSourceName);
+                        dataSourcesOk = dataSourcesOk && checkDataSource(resources, dataSource, dataSourceName);
                     } finally {
                         sourceContext.removeCurrentSource();
                     }
                 }
             } else {
                 final String dataSourceName = dataSourceEntry.getKey() + "[" + dataSource.getClass() + "]";
-                checkDataSource(resources, dataSource, dataSourceName);
+                dataSourcesOk = dataSourcesOk && checkDataSource(resources, dataSource, dataSourceName);
             }
         }
+        return dataSourcesOk;
     }
 
-    private void checkDataSource(Iterable<String> resources, DataSource dataSource, String dataSourceName) {
+    private boolean checkDataSource(Iterable<String> resources, DataSource dataSource, String dataSourceName) {
+        boolean dataSourceOk = false;
         try {
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
             final String dbVersion = jdbcTemplate.queryForObject("SELECT version FROM version", String.class);
-            checkDatabase(resources, dataSourceName, dbVersion);
+            dataSourceOk = checkDatabase(resources, dataSourceName, dbVersion);
         } catch (Exception e) {
             if (e.getMessage().contains("SELECT command denied to user")) { // ugly but no other way to get this, sadly
                 LOGGER.info("Datasource {} skipped (no rights)", dataSourceName);
@@ -126,12 +128,14 @@ public class DatabaseVersionCheck {
                 LOGGER.warn("Error checking datasource {}", dataSourceName, e);
             }
         }
+        return dataSourceOk;
     }
 
-    public void checkDatabase(Iterable<String> resources, String dataSourceName, String dbVersion) {
+    public boolean checkDatabase(Iterable<String> resources, String dataSourceName, String dbVersion) {
         Matcher dbVersionMatcher = RESOURCE_MATCHER.matcher(dbVersion);
         if (!dbVersionMatcher.matches()) {
-            throw new IllegalStateException("Invalid version: " + dbVersion);
+            LOGGER.error("Invalid version : Datasource [{}] DBVersion [{}]", dataSourceName, dbVersion);
+            return false;
         }
 
         for (String resource : resources) {
@@ -142,9 +146,11 @@ public class DatabaseVersionCheck {
             final String dbVersionNumber = dbVersionMatcher.group(2);
             final String resourceVersionNumber = resourceMatcher.group(2);
             if (compareVersions(dbVersionNumber, resourceVersionNumber) < 0) {
-                throw new IllegalStateException("Patch " + resource + ".sql was not applied");
+                LOGGER.error("Datasource [{}] DBVersion [{}] patch [{}.sql] was not applied", dataSourceName, dbVersion, resource);
+                return false;
             }
         }
         LOGGER.info("Datasource {} validated OK (DB version: {})", dataSourceName, dbVersion);
+        return true;
     }
 }

@@ -7,6 +7,8 @@ import org.junit.Test;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class DatabaseVersionCheckTest {
 
@@ -35,19 +37,18 @@ public class DatabaseVersionCheckTest {
 
     @Test
     public void testCheckDatabaseOK() {
-        DatabaseVersionCheck subject = new DatabaseVersionCheck(null);
-        subject.checkDatabase(ImmutableList.of("whois-1.51", "whois-1.4", "whois-2.15.4"), "TEST", "whois-2.16");
+        DatabaseVersionCheck subject = new DatabaseVersionCheck();
+        assertTrue(subject.checkDatabase(ImmutableList.of("whois-1.51", "whois-1.4", "whois-2.15.4"), "TEST", "whois-2.16"));
     }
 
-    @Test(expected = IllegalStateException.class)
     public void testCheckDatabaseFail() {
-        DatabaseVersionCheck subject = new DatabaseVersionCheck(null);
-        subject.checkDatabase(ImmutableList.of("whois-1.51", "whois-1.4", "whois-2.15.4"), "TEST", "whois-1.16");
+        DatabaseVersionCheck subject = new DatabaseVersionCheck();
+        assertFalse(subject.checkDatabase(ImmutableList.of("whois-1.51", "whois-1.4", "whois-2.15.4"), "TEST", "whois-1.16"));
     }
 
     @Test
     public void testCheckDatabaseSucceedForAnotherDB() {
-        DatabaseVersionCheck subject = new DatabaseVersionCheck(null);
-        subject.checkDatabase(ImmutableList.of("scheduler-1.51", "whois-1.4", "acl-2.15.4"), "TEST", "whois-1.16");
+        DatabaseVersionCheck subject = new DatabaseVersionCheck();
+        assertTrue(subject.checkDatabase(ImmutableList.of("scheduler-1.51", "whois-1.4", "acl-2.15.4"), "TEST", "whois-1.16"));
     }
 }
