@@ -1,5 +1,6 @@
 package net.ripe.db.whois.update.mail;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.jayway.awaitility.Awaitility;
 import net.ripe.db.whois.common.Stub;
@@ -17,6 +18,7 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -30,9 +32,7 @@ public class MailSenderStub extends MailSenderBase implements Stub {
 
     @Override
     public void reset() {
-        synchronized (messages) {
-            messages.clear();
-        }
+        messages.clear();
     }
 
     @Override
@@ -40,10 +40,8 @@ public class MailSenderStub extends MailSenderBase implements Stub {
         try {
             final MimeMessage mimeMessage = new MimeMessage((Session) null);
             mimeMessagePreparator.prepare(mimeMessage);
-            synchronized (messages) {
-                LOGGER.info("Send message: {}\n\n{}\n\n", EnumerationUtils.toList(mimeMessage.getAllHeaderLines()), mimeMessage.getContent());
-                messages.add(mimeMessage);
-            }
+            LOGGER.info("Send message: {}\n\n{}\n\n", EnumerationUtils.toList(mimeMessage.getAllHeaderLines()), mimeMessage.getContent());
+            messages.add(mimeMessage);
         } catch (Exception e) {
             throw new RuntimeException("Send message", e);
         }
@@ -55,16 +53,13 @@ public class MailSenderStub extends MailSenderBase implements Stub {
         try {
             Awaitility.await().atMost(30, TimeUnit.SECONDS).until(getResponse);
             final MimeMessage message = getResponse.getMessage();
-            synchronized (messages) {
-                messages.remove(message);
-            }
+            messages.remove(message);
             return message;
         } catch (Exception e) {
-            synchronized (messages) {
-                for (final MimeMessage message : messages) {
-                    LOGGER.warn("Got message for: {}", message.getRecipients(Message.RecipientType.TO)[0].toString());
-                }
+            for (final MimeMessage message : messages) {
+                LOGGER.warn("Got message for: {}", message.getRecipients(Message.RecipientType.TO)[0].toString());
             }
+
             throw new AssertionError("Unable to get message for: " + to + ": " + e.getMessage());
         }
     }
@@ -79,14 +74,13 @@ public class MailSenderStub extends MailSenderBase implements Stub {
 
         @Override
         public Boolean call() throws Exception {
-            synchronized (messages) {
-                for (MimeMessage message : messages) {
-                    if (message.getRecipients(Message.RecipientType.TO)[0].toString().equalsIgnoreCase(to)) {
-                        this.message = message;
-                        return true;
-                    }
+            for (MimeMessage message : messages) {
+                if (message.getRecipients(Message.RecipientType.TO)[0].toString().equalsIgnoreCase(to)) {
+                    this.message = message;
+                    return true;
                 }
             }
+
             return false;
         }
 
@@ -97,18 +91,28 @@ public class MailSenderStub extends MailSenderBase implements Stub {
 
     public boolean anyMoreMessages() {
         if (!messages.isEmpty()) {
-            synchronized (messages) {
-                for (Message message : messages) {
-                    try {
-                        Address[] to = message.getRecipients(Message.RecipientType.TO);
-                        LOGGER.warn("Found message to: {}, subject: {}", Arrays.deepToString(to), message.getSubject());
-                    } catch (MessagingException e) {
-                        throw new IllegalStateException(e);
-                    }
+            for (Message message : messages) {
+                try {
+                    Address[] to = message.getRecipients(Message.RecipientType.TO);
+                    LOGGER.warn("Found message to: {}, subject: {}", Arrays.deepToString(to), message.getSubject());
+                } catch (MessagingException e) {
+                    throw new IllegalStateException(e);
                 }
             }
         }
 
         return !messages.isEmpty();
+    }
+
+    public List<Address> getAllRecipients() {
+        final List<Address> addresses = Lists.newArrayList();
+        for (Message message : messages) {
+            try {
+                addresses.addAll(Arrays.asList(message.getRecipients(Message.RecipientType.TO)));
+            } catch (MessagingException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return addresses;
     }
 }

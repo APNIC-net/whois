@@ -4,13 +4,13 @@
     <parent>
         <groupId>net.ripe.db</groupId>
         <artifactId>whois</artifactId>
-        <version>1.68.6-SNAPSHOT</version>
+        <version>1.69.1-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.ripe.db</groupId>
     <artifactId>whois-nrtm</artifactId>
-    <version>1.68.6-SNAPSHOT</version>
+    <version>1.69.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -73,12 +73,6 @@
                 <excludes>
                     <exclude>**/nrtm.properties</exclude>
                 </excludes>
-            </resource>
-            <resource>
-                <directory>target/generated-sources/enunciate</directory>
-                <includes>
-                    <include>**/*</include>
-                </includes>
             </resource>
         </resources>
         <plugins>
