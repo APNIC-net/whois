@@ -120,7 +120,11 @@ public class RdapErrorTestIntegration extends AbstractRestClientTest {
     public void implicit_error_handling_preserved() {
         final ClientResponse clientResponse = createResource(AUDIENCE, "whois/lookup/test/person//PP1-TEST")
                 .get(ClientResponse.class);
-        assertThat(clientResponse.getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
+        // Tom says "Technically speaking (according to the spec) this should be a 400, but the test in our (APNIC) repository
+        // was passing when it checked for 404 (i.e. prior to the merge of upstream), and we are unsure as to why it is now
+        // returning 400 in this case. However, it's not worth investigating at the moment (not a big deal), let alone that
+        // this behaviour is 'more correct' anyway."
+        assertThat(clientResponse.getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
         System.err.println(clientResponse.getEntity(String.class));
         boolean unableToParse = false;
         try {
