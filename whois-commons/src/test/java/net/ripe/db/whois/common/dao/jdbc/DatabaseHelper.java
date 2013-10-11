@@ -383,6 +383,14 @@ public class DatabaseHelper implements EmbeddedValueResolverAware {
                 prefix, limit, unlimitedConnections, "comment");
     }
 
+
+    public void insertAclIpLimit(final String prefix, final int limit, int queryLimit, final boolean unlimitedConnections) {
+        aclTemplate.update(
+                "INSERT INTO acl_limit (prefix, daily_limit, query_limit, unlimited_connections, comment) VALUES (?, ?, ?, ?, ?)",
+                prefix, limit, queryLimit, unlimitedConnections, "comment");
+    }
+
+
     public void insertAclIpProxy(final String prefix) {
         aclTemplate.update(
                 "INSERT INTO acl_proxy (prefix, comment) VALUES (?, ?)",
