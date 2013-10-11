@@ -8,15 +8,18 @@ import com.google.common.collect.Sets;
 import com.mchange.v2.c3p0.DataSources;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.jdbc.DataSourceFactory;
+import net.ripe.db.whois.common.jdbc.DatabaseVersionCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -33,18 +36,20 @@ public class SourceContext {
     private static final Logger LOGGER = LoggerFactory.getLogger(SourceContext.class);
     private static final Splitter COMMA_SPLITTER = Splitter.on(',').omitEmptyStrings();
 
-    private final Source mainMasterSource;
-    private final Source mainSlaveSource;
+    private  Source mainMasterSource;
+    private  Source mainSlaveSource;
 
-    private final Map<Source, SourceConfiguration> sourceConfigurations = Maps.newLinkedHashMap();
+    private  Map<Source, SourceConfiguration> sourceConfigurations = Maps.newLinkedHashMap();
 
-    private final Set<CIString> grsSourceNames;
-    private final Set<CIString> grsSourceNamesForDummification;
-    private final Set<CIString> allSourceNames;
-    private final Set<CIString> additionalSourceNames;
-    private final Map<CIString, CIString> aliases;
+    private  Set<CIString> grsSourceNames;
+    private  Set<CIString> grsSourceNamesForDummification;
+    private  Set<CIString> allSourceNames;
+    private  Set<CIString> additionalSourceNames;
+    private  Map<CIString, CIString> aliases;
+    private DatabaseVersionCheck databaseVersionCheck;
 
     private ThreadLocal<SourceConfiguration> current = new ThreadLocal<>();
+    private  ApplicationContext applicationContext;
 
     @Autowired
     public SourceContext(
@@ -61,8 +66,11 @@ public class SourceContext {
             @Value("${whois.db.slave.password}") final String whoisSlavePassword,
             @Qualifier("whoisMasterDataSource") final DataSource whoisMasterDataSource,
             @Qualifier("whoisSlaveDataSource") final DataSource whoisSlaveDataSource,
-            final DataSourceFactory dataSourceFactory) {
+            final DataSourceFactory dataSourceFactory,
+            final ApplicationContext applicationContext) {
 
+        this.applicationContext = applicationContext;
+        this.databaseVersionCheck = databaseVersionCheck;
         final CIString mainSourceName = ciString(mainSourceNameString);
         this.mainMasterSource = Source.master(mainSourceName);
         this.mainSlaveSource = Source.slave(mainSourceName);
@@ -147,6 +155,9 @@ public class SourceContext {
 
         if (!additionalSources.isEmpty()) {
             LOGGER.info("Additional sources: {}", additionalSources);
+        }
+        if (databaseVersionCheck != null) {
+            databaseVersionCheck.check(applicationContext);
         }
     }
 
@@ -244,5 +255,17 @@ public class SourceContext {
     public boolean isDummificationRequired() {
         final CIString sourceName = getCurrentSource().getName();
         return grsSourceNamesForDummification.contains(sourceName);
+    }
+
+    @Autowired(required = false)
+    public void setDatabaseVersionCheck(DatabaseVersionCheck databaseVersionCheck) {
+        this.databaseVersionCheck = databaseVersionCheck;
+    }
+
+    @PostConstruct
+    public void init() {
+        if (databaseVersionCheck != null) {
+            databaseVersionCheck.check(applicationContext);
+        }
     }
 }

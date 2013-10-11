@@ -60,7 +60,8 @@ public class SourceContextTest {
                 whoisSlavePassword,
                 whoisMasterDataSource,
                 whoisSlaveDataSource,
-                dataSourceFactory
+                dataSourceFactory,
+                null
         );
     }
 
@@ -124,7 +125,8 @@ public class SourceContextTest {
                 whoisSlavePassword,
                 whoisMasterDataSource,
                 whoisSlaveDataSource,
-                dataSourceFactory
+                dataSourceFactory,
+                null
             );
             fail();
         } catch (IllegalSourceException e) {
@@ -149,7 +151,8 @@ public class SourceContextTest {
             whoisSlavePassword,
             whoisMasterDataSource,
             whoisSlaveDataSource,
-            dataSourceFactory
+            dataSourceFactory,
+            null
         );
         assertThat(subject.getAdditionalSourceNames(), Matchers.hasSize(0));
     }
