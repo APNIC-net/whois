@@ -66,6 +66,12 @@ public final class QueryMessagesMap {
                 + "%% My Database for non-operational purposes.\n"
                 + "%% Refer to http://www.apnic.net/db/copyright.html for more information.\n");
 
+        put(QueryMessages.QueryMessageType.QUERY_OBJECT_LIMIT_REACHED, ""
+                + "%%ERROR:201: access control limit reached for %s\n"
+                + "%%\n"
+                + "%% Too many objects in response, output has been truncated.\n"
+                + "%% For bulk access to WHOIS data, see http://www.apnic.net/apnic-info/whois_search/using-whois/bulk-access\n");
+
         put(QueryMessages.QueryMessageType.TIMEOUT, ""
                 + "%ERROR:305: connection has been closed\n"
                 + "%\n"

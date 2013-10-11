@@ -16,12 +16,14 @@ public class IpResourceConfiguration {
     private static final int TREE_UPDATE_IN_SECONDS = 120;
 
     private static final int DEFAULT_LIMIT = 5000;
+    private static final int DEFAULT_QUERY_LIMIT = -1;
 
     private final Loader loader;
 
     private IpResourceTree<Boolean> denied;
     private IpResourceTree<Boolean> proxy;
     private IpResourceTree<Integer> limit;
+    private IpResourceTree<Integer> queryLimit;
     private IpResourceTree<Boolean> unlimitedConnections;
 
     @Autowired
@@ -59,6 +61,11 @@ public class IpResourceConfiguration {
         return result == null ? DEFAULT_LIMIT : result;
     }
 
+    public int getQueryLimit(final InetAddress address) {
+        final Integer result = queryLimit.getValue(IpInterval.asIpInterval(address));
+        return result == null ? DEFAULT_QUERY_LIMIT : result;
+    }
+
     public boolean isUnlimitedConnections(final InetAddress address) {
         final Boolean result = unlimitedConnections.getValue(IpInterval.asIpInterval(address));
         return result != null && result;
@@ -75,6 +82,7 @@ public class IpResourceConfiguration {
         denied = refreshEntries(loader.loadIpDenied());
         proxy = refreshEntries(loader.loadIpProxy());
         limit = refreshEntries(loader.loadIpLimit());
+        queryLimit = refreshEntries(loader.loadIpQueryLimit());
         unlimitedConnections = refreshEntries(loader.loadUnlimitedConnections());
     }
 
@@ -106,6 +114,13 @@ public class IpResourceConfiguration {
          * @return All IP limit entries.
          */
         List<IpResourceEntry<Integer>> loadIpLimit();
+
+
+        /**
+         * @return All IP limit entries (total limit).
+         */
+        List<IpResourceEntry<Integer>> loadIpQueryLimit();
+
 
         /**
          * @return All IP unlimited connections.

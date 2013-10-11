@@ -233,6 +233,10 @@ public final class QueryMessages {
         return new Message(Type.ERROR, queryMessages.get(QueryMessageType.ACCESS_DENIED_TEMPORARILY), remoteAddress.getHostAddress());
     }
 
+    public static Message queryObjectLimitReached(final InetAddress remoteAddress) {
+        return new Message(Type.ERROR, queryMessages.get(QueryMessageType.QUERY_OBJECT_LIMIT_REACHED), remoteAddress.getHostAddress());
+    }
+
     public static Message notAllowedToProxy() {
         return new Message(Type.ERROR, ""
                 + "%ERROR:203: you are not allowed to act as a proxy\n");
@@ -304,6 +308,7 @@ public final class QueryMessages {
         ILLEGAL_RANGE,
         ACCESS_DENIED_PERMANENTLY,
         ACCESS_DENIED_TEMPORARILY,
+        QUERY_OBJECT_LIMIT_REACHED,
         TIMEOUT,
     }
 }

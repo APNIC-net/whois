@@ -56,6 +56,11 @@ public final class QueryMessagesMap {
                 + "%% For more information, see\n"
                 + "%% http://www.ripe.net/data-tools/db/faq/faq-db/why-did-you-receive-the-error-201-access-denied\n");
 
+        put(QueryMessages.QueryMessageType.QUERY_OBJECT_LIMIT_REACHED, ""
+                + "%%ERROR:201: access control limit reached for %s\n"
+                + "%%\n"
+                + "%% Too many objects in response, output has been truncated.\n");
+
         put(QueryMessages.QueryMessageType.TIMEOUT, ""
                 + "%ERROR:305: connection has been closed\n"
                 + "%\n"

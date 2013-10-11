@@ -58,6 +58,14 @@ public class AccessControlListManager {
         return resourceConfiguration.getLimit(remoteAddress);
     }
 
+    int getQueryDataLimit(final InetAddress remoteAddress) {
+        return resourceConfiguration.getQueryLimit(remoteAddress);
+    }
+
+    public boolean isQueryUnlimited(final InetAddress remoteAddress) {
+        return getQueryDataLimit(remoteAddress) < 0;
+    }
+
     public boolean isUnlimited(final InetAddress remoteAddress) {
         return getPersonalDataLimit(remoteAddress) < 0;
     }
@@ -76,6 +84,13 @@ public class AccessControlListManager {
         final int personalDataLimit = getPersonalDataLimit(remoteAddress);
 
         return personalDataLimit - queried;
+    }
+
+    public int getAnyObjects(final InetAddress remoteAddress) {
+        if (isQueryUnlimited(remoteAddress)) {
+            return Integer.MAX_VALUE;
+        }
+        return getQueryDataLimit(remoteAddress);
     }
 
     /**

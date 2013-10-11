@@ -127,6 +127,11 @@ public class JdbcAccessControlListDao implements AccessControlListDao {
     }
 
     @Override
+    public List<IpResourceEntry<Integer>> loadIpQueryLimit() {
+        return jdbcTemplate.query("SELECT prefix, query_limit FROM acl_limit", new QueryLimitMapperResultSetExtractor());
+    }
+
+    @Override
     public List<IpResourceEntry<Boolean>> loadUnlimitedConnections() {
         return jdbcTemplate.query("SELECT prefix FROM acl_limit where unlimited_connections != 0", new BooleanEntryMapper());
     }
@@ -171,4 +176,37 @@ public class JdbcAccessControlListDao implements AccessControlListDao {
             return result;
         }
     }
+
+    private static class QueryLimitMapper implements RowMapper<IpResourceEntry<Integer>> {
+        @Override
+        public IpResourceEntry<Integer> mapRow(ResultSet rs, int rowNum) throws SQLException {
+            String prefix = rs.getString(1);
+            int limit = rs.getInt(2);
+
+            return new IpResourceEntry<>(IpInterval.parse(prefix), limit);
+        }
+    }
+
+    private static class QueryLimitMapperResultSetExtractor implements ResultSetExtractor<List<IpResourceEntry<Integer>>> {
+        private final QueryLimitMapper queryLimitMapper = new QueryLimitMapper();
+
+        @Override
+        public List<IpResourceEntry<Integer>> extractData(final ResultSet rs) throws SQLException, DataAccessException {
+            final List<IpResourceEntry<Integer>> result = Lists.newArrayList();
+
+            int rowNum = 0;
+            while (rs.next()) {
+                try {
+                    result.add(queryLimitMapper.mapRow(rs, rowNum));
+                } catch (RuntimeException e) {
+                    LOGGER.error("Skipping limit because of error in row {}", rowNum, e);
+                } finally {
+                    rowNum++;
+                }
+            }
+
+            return result;
+        }
+    }
+
 }

@@ -13,6 +13,8 @@ import net.ripe.db.whois.query.domain.QueryMessages;
 import net.ripe.db.whois.query.domain.ResponseHandler;
 import net.ripe.db.whois.query.executor.QueryExecutor;
 import net.ripe.db.whois.query.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,8 @@ import java.util.List;
 
 @Component
 public class QueryHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryHandler.class);
+
     private final WhoisLog whoisLog;
     private final AccessControlListManager accessControlListManager;
     private final SourceContext sourceContext;
@@ -40,10 +44,14 @@ public class QueryHandler {
             private final Stopwatch stopwatch = new Stopwatch().start();
 
             private InetAddress accountingAddress;
-            private boolean useAcl;
-            private int accountedObjects;
-            private int notAccountedObjects;
-            private int accountingLimit = -1;
+            private boolean useAclPersonal;
+            private int accountedObjectsPersonal;
+            private int notAccountedObjectsPersonal;
+            private int accountingLimitPersonal = -1;
+
+            private boolean useAclTotal;
+            private int accountedObjectsAny;
+            private int accountingLimitAny = -1;
 
             @Override
             public void run() {
@@ -59,8 +67,8 @@ public class QueryHandler {
                     logQuery(QueryCompletionInfo.EXCEPTION);
                     throw e;
                 } finally {
-                    if (accountedObjects > 0) {
-                        accessControlListManager.accountPersonalObjects(accountingAddress, accountedObjects);
+                    if (accountedObjectsPersonal > 0) {
+                        accessControlListManager.accountPersonalObjects(accountingAddress, accountedObjectsPersonal);
                     }
                 }
             }
@@ -90,7 +98,9 @@ public class QueryHandler {
                         accountingAddress = remoteAddress;
                     }
 
-                    useAcl = !accessControlListManager.isUnlimited(accountingAddress);
+                    useAclPersonal = !accessControlListManager.isUnlimited(accountingAddress);
+                    useAclTotal = !accessControlListManager.isQueryUnlimited(accountingAddress);
+
                 }
             }
 
@@ -112,16 +122,26 @@ public class QueryHandler {
                     @Override
                     public void handle(final ResponseObject responseObject) {
                         if (responseObject instanceof RpslObject) {
-                            if (useAcl && accessControlListManager.requiresAcl((RpslObject) responseObject, sourceContext.getCurrentSource())) {
-                                if (accountingLimit == -1) {
-                                    accountingLimit = accessControlListManager.getPersonalObjects(accountingAddress);
+                            if (useAclPersonal && accessControlListManager.requiresAcl((RpslObject) responseObject, sourceContext.getCurrentSource())) {
+                                if (accountingLimitPersonal == -1) {
+                                    accountingLimitPersonal = accessControlListManager.getPersonalObjects(accountingAddress);
                                 }
 
-                                if (++accountedObjects > accountingLimit) {
+                                if (++accountedObjectsPersonal > accountingLimitPersonal) {
                                     throw new QueryException(QueryCompletionInfo.BLOCKED, QueryMessages.accessDeniedTemporarily(accountingAddress));
                                 }
                             } else {
-                                notAccountedObjects++;
+                                notAccountedObjectsPersonal++;
+                            }
+
+                            if (useAclTotal) {
+                                if (accountingLimitAny == -1) {
+                                    accountingLimitAny = accessControlListManager.getAnyObjects(accountingAddress);
+                                }
+
+                                if (++accountedObjectsAny > accountingLimitAny) {
+                                    throw new QueryException(QueryCompletionInfo.EXCEPTION, QueryMessages.queryObjectLimitReached(accountingAddress));
+                                }
                             }
                         }
 
@@ -131,7 +151,7 @@ public class QueryHandler {
             }
 
             private void logQuery(@Nullable final QueryCompletionInfo completionInfo) {
-                whoisLog.logQueryResult(responseHandler.getApi(), accountedObjects, notAccountedObjects, completionInfo, stopwatch.elapsedMillis(), remoteAddress, contextId, query.toString());
+                whoisLog.logQueryResult(responseHandler.getApi(), accountedObjectsPersonal, notAccountedObjectsPersonal, completionInfo, stopwatch.elapsedMillis(), remoteAddress, contextId, query.toString());
             }
 
         }.run();
