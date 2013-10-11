@@ -46,16 +46,13 @@ public class RdapResponseJsonTest {
         entity.setPort43("whois.example.com");
 
         assertThat(RdapHelperUtils.marshal(entity), equalTo("" +
-                "{\n  \"handle\" : \"XXXX\",\n" +
-                "  \"vcardArray\" :" +
-                " [ \"vcard\", [" +
-                " [ \"version\", {\n  }, \"text\", \"4.0\" ]," +
-                " [ \"fn\", {\n  }, \"text\", \"Joe User\" ]," +
-                " [ \"n\", {\n  }, \"text\", [ \"User\", \"Joe\", \"\", [ \"ing. jr\", \"M.Sc.\" ] ] ]," +
-                " [ \"gender\", {\n  }, \"text\", \"M\" ], [ \"lang\", {\n    \"pref\" : \"1\"\n  }, \"language-tag\", \"fr\" ]" +
-                " ] ],\n" +
-                "  \"port43\" : \"whois.example.com\"" +
-                "\n}"));
+                "{\n" +
+                "  \"handle\" : \"XXXX\",\n" +
+                "  \"vcardArray\" : [ \"vcard\", [ [ \"version\", { }, \"text\", \"4.0\" ], [ \"fn\", { }, \"text\", \"Joe User\" ], [ \"n\", { }, \"text\", [ \"User\", \"Joe\", \"\", [ \"ing. jr\", \"M.Sc.\" ] ] ], [ \"gender\", { }, \"text\", \"M\" ], [ \"lang\", {\n" +
+                "    \"pref\" : \"1\"\n" +
+                "  }, \"language-tag\", \"fr\" ] ] ],\n" +
+                "  \"port43\" : \"whois.example.com\"\n" +
+                "}"));
     }
 
     @Test
@@ -85,21 +82,12 @@ public class RdapResponseJsonTest {
                 .addKey(createMap(immutableEntry("type", "work")), "http://example.org");
 
         assertThat(RdapHelperUtils.marshal(builder.build()), equalTo("" +
-                "{\n  \"vcard\" : [ [ \"version\", {\n" +
-                "  }, \"text\", \"4.0\" ], [ \"fn\", {\n" +
-                "  }, \"text\", \"Joe User\" ], [ \"n\", {\n" +
-                "  }, \"text\", [ \"User\", \"Joe\", \"\", \"\", [ \"ing. jr\", \"M.Sc.\" ] ] ], [ \"bday\", {\n" +
-                "  }, \"date-and-or-time\", \"--02-03\" ], [ \"anniversary\", {\n" +
-                "  }, \"date-and-or-time\", \"20130101\" ], [ \"gender\", {\n" +
-                "  }, \"text\", \"M\" ], [ \"kind\", {\n" +
-                "  }, \"text\", \"individual\" ], [ \"lang\", {\n" +
+                "{\n" +
+                "  \"vcard\" : [ [ \"version\", { }, \"text\", \"4.0\" ], [ \"fn\", { }, \"text\", \"Joe User\" ], [ \"n\", { }, \"text\", [ \"User\", \"Joe\", \"\", \"\", [ \"ing. jr\", \"M.Sc.\" ] ] ], [ \"bday\", { }, \"date-and-or-time\", \"--02-03\" ], [ \"anniversary\", { }, \"date-and-or-time\", \"20130101\" ], [ \"gender\", { }, \"text\", \"M\" ], [ \"kind\", { }, \"text\", \"individual\" ], [ \"lang\", {\n" +
                 "    \"pref\" : \"1\"\n" +
                 "  }, \"language-tag\", \"fr\" ], [ \"lang\", {\n" +
                 "    \"pref\" : \"2\"\n" +
-                "  }, \"language-tag\", \"en\" ], [ \"org\", {\n" +
-                "  }, \"text\", \"Example\" ], [ \"title\", {\n" +
-                "  }, \"text\", \"Research Scientist\" ], [ \"role\", {\n" +
-                "  }, \"text\", \"Project Lead\" ], [ \"adr\", {\n" +
+                "  }, \"language-tag\", \"en\" ], [ \"org\", { }, \"text\", \"Example\" ], [ \"title\", { }, \"text\", \"Research Scientist\" ], [ \"role\", { }, \"text\", \"Project Lead\" ], [ \"adr\", {\n" +
                 "    \"type\" : \"work\"\n" +
                 "  }, \"text\", [ \"\", \"Suite 1234\", \"4321 Rue Somewhere\", \"Quebec\", \"QC\", \"G1V 2M2\", \"Canada\" ] ], [ \"adr\", {\n" +
                 "    \"pref\" : \"1\"\n" +
@@ -113,10 +101,10 @@ public class RdapResponseJsonTest {
                 "    \"type\" : \"work\"\n" +
                 "  }, \"uri\", \"geo:46.772673,-71.282945\" ], [ \"key\", {\n" +
                 "    \"type\" : \"work\"\n" +
-                "  }, \"text\", \"http://www.example.com/joe.user/joe.asc\" ], [ \"tz\", {\n" +
-                "  }, \"utc-offset\", \"-05:00\" ], [ \"key\", {\n" +
+                "  }, \"text\", \"http://www.example.com/joe.user/joe.asc\" ], [ \"tz\", { }, \"utc-offset\", \"-05:00\" ], [ \"key\", {\n" +
                 "    \"type\" : \"work\"\n" +
-                "  }, \"text\", \"http://example.org\" ] ]\n}"));
+                "  }, \"text\", \"http://example.org\" ] ]\n" +
+                "}"));
     }
 
     @Test
@@ -286,16 +274,7 @@ public class RdapResponseJsonTest {
                 "  },\n" +
                 "  \"entities\" : [ {\n" +
                 "    \"handle\" : \"XXXX\",\n" +
-                "    \"vcardArray\" : [ \"vcard\", [ [ \"version\", {\n" +
-                "    }, \"text\", \"4.0\" ], [ \"fn\", {\n" +
-                "    }, \"text\", \"Joe User\" ], [ \"kind\", {\n" +
-                "    }, \"text\", \"individual\" ], [ \"org\", {\n" +
-                "    }, \"text\", \"Example\" ], [ \"title\", {\n" +
-                "    }, \"text\", \"Research Scientist\" ], [ \"role\", {\n" +
-                "    }, \"text\", \"Project Lead\" ], [ \"adr\", {\n" +
-                "    }, \"text\", [ \"\", \"Suite 1234\", \"4321 Rue Somewhere\", \"Quebec\", \"QC\", \"G1V 2M2\", \"Canada\" ] ], [ \"tel\", {\n" +
-                "    }, \"uri\", \"tel:+1-555-555-1234;ext=102\" ], [ \"email\", {\n" +
-                "    }, \"text\", \"joe.user@example.com\" ] ] ],\n" +
+                "    \"vcardArray\" : [ \"vcard\", [ [ \"version\", { }, \"text\", \"4.0\" ], [ \"fn\", { }, \"text\", \"Joe User\" ], [ \"kind\", { }, \"text\", \"individual\" ], [ \"org\", { }, \"text\", \"Example\" ], [ \"title\", { }, \"text\", \"Research Scientist\" ], [ \"role\", { }, \"text\", \"Project Lead\" ], [ \"adr\", { }, \"text\", [ \"\", \"Suite 1234\", \"4321 Rue Somewhere\", \"Quebec\", \"QC\", \"G1V 2M2\", \"Canada\" ] ], [ \"tel\", { }, \"uri\", \"tel:+1-555-555-1234;ext=102\" ], [ \"email\", { }, \"text\", \"joe.user@example.com\" ] ] ],\n" +
                 "    \"roles\" : [ \"registrant\" ],\n" +
                 "    \"remarks\" : [ {\n" +
                 "      \"description\" : [ \"She sells sea shells down by the sea shore.\", \"Originally written by Terry Sullivan.\" ]\n" +
@@ -406,16 +385,7 @@ public class RdapResponseJsonTest {
                 "  \"status\" : [ \"allocated\" ],\n" +
                 "  \"entities\" : [ {\n" +
                 "    \"handle\" : \"XXXX\",\n" +
-                "    \"vcardArray\" : [ \"vcard\", [ [ \"version\", {\n" +
-                "    }, \"text\", \"4.0\" ], [ \"fn\", {\n" +
-                "    }, \"text\", \"Joe User\" ], [ \"kind\", {\n" +
-                "    }, \"text\", \"individual\" ], [ \"org\", {\n" +
-                "    }, \"text\", \"Example\" ], [ \"title\", {\n" +
-                "    }, \"text\", \"Research Scientist\" ], [ \"role\", {\n" +
-                "    }, \"text\", \"Project Lead\" ], [ \"adr\", {\n" +
-                "    }, \"text\", [ \"\", \"Suite 1234\", \"4321 Rue Somewhere\", \"Quebec\", \"QC\", \"G1V 2M2\", \"Canada\" ] ], [ \"tel\", {\n" +
-                "    }, \"uri\", \"tel:+1-555-555-1234;ext=102\" ], [ \"email\", {\n" +
-                "    }, \"text\", \"joe.user@example.com\" ] ] ],\n" +
+                "    \"vcardArray\" : [ \"vcard\", [ [ \"version\", { }, \"text\", \"4.0\" ], [ \"fn\", { }, \"text\", \"Joe User\" ], [ \"kind\", { }, \"text\", \"individual\" ], [ \"org\", { }, \"text\", \"Example\" ], [ \"title\", { }, \"text\", \"Research Scientist\" ], [ \"role\", { }, \"text\", \"Project Lead\" ], [ \"adr\", { }, \"text\", [ \"\", \"Suite 1234\", \"4321 Rue Somewhere\", \"Quebec\", \"QC\", \"G1V 2M2\", \"Canada\" ] ], [ \"tel\", { }, \"uri\", \"tel:+1-555-555-1234;ext=102\" ], [ \"email\", { }, \"text\", \"joe.user@example.com\" ] ] ],\n" +
                 "    \"roles\" : [ \"registrant\" ],\n" +
                 "    \"remarks\" : [ {\n" +
                 "      \"description\" : [ \"She sells sea shells down by the sea shore.\", \"Originally written by Terry Sullivan.\" ]\n" +

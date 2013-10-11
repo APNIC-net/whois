@@ -36,6 +36,9 @@
         <sonar.jdbc.driver>com.mysql.jdbc.Driver</sonar.jdbc.driver>
         <sonar.jdbc.username>dbint</sonar.jdbc.username>
         <sonar.jdbc.password />
+
+        <!-- whois.variant is overridden by profile -->
+        <whois.variant />
     </properties>
 
     <scm>
@@ -361,6 +364,17 @@
                 <artifactId>jackson-xc</artifactId>
                 <version>1.9.13</version>
             </dependency>
+            <!-- enunciate to generate API docs -->
+            <dependency>
+                <groupId>org.codehaus.enunciate</groupId>
+                <artifactId>enunciate-core-annotations</artifactId>
+                <version>1.26.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.enunciate</groupId>
+                <artifactId>enunciate-jersey-rt</artifactId>
+                <version>1.26.2</version>
+            </dependency>
 
             <!-- lucene for fulltext search -->
             <dependency>
@@ -609,6 +623,9 @@
                         net.ripe.db.whois.common.IntegrationTest,
                         net.ripe.db.whois.common.ManualTest
                     </excludedGroups>
+                    <systemProperties>
+                        <whois.variant>${whois.variant}</whois.variant>
+                    </systemProperties>
                 </configuration>
             </plugin>
             <plugin>
@@ -626,6 +643,9 @@
                     <reuseForks>true</reuseForks>
                     <threadCount>1</threadCount>
                     <runOrder>random</runOrder>
+                    <systemProperties>
+                        <whois.variant>${whois.variant}</whois.variant>
+                    </systemProperties>
                 </configuration>
                 <executions>
                     <execution>
@@ -707,7 +727,7 @@
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups>None</test.groups>
                 <test.forkCount.integration>1</test.forkCount.integration>
-                <test.files.unit>**/*Test.class</test.files.unit>
+                <test.files.unit>net/ripe/**/*Test.class, spec/**/*Test.class</test.files.unit>
                 <test.files.integration>None</test.files.integration>
             </properties>
         </profile>
@@ -718,7 +738,7 @@
                 <test.groups>net.ripe.db.whois.common.IntegrationTest</test.groups>
                 <test.forkCount.integration>3</test.forkCount.integration>
                 <test.files.unit>None</test.files.unit>
-                <test.files.integration>**/*TestIntegration*.class,**/*Spec*.class</test.files.integration>
+                <test.files.integration>net/ripe/**/*Test*.class,**/*Spec*.class</test.files.integration>
             </properties>
         </profile>
         <profile>
@@ -736,7 +756,7 @@
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups />
                 <test.files.unit>None</test.files.unit>
-                <test.files.integration>**/whois/spec/query/*Spec*.java,**/whois/spec/update/*Spec*.java
+                <test.files.integration>net/ripe/**/whois/spec/query/*Spec*.java,net/ripe/**/whois/spec/update/*Spec*.java
                 </test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
             </properties>
@@ -746,8 +766,8 @@
             <properties>
                 <test.redirectOutput>true</test.redirectOutput>
                 <test.groups>net.ripe.db.whois.common.IntegrationTest</test.groups>
-                <test.files.unit>**/*Test.class</test.files.unit>
-                <test.files.integration>**/*Test*.class,**/*Spec*.class</test.files.integration>
+                <test.files.unit>net/ripe/**/*Test.class, spec/**/*Test.class</test.files.unit>
+                <test.files.integration>net/ripe/**/*Test*.class,spec/**/*Spec*.class</test.files.integration>
                 <test.forkCount.integration>3</test.forkCount.integration>
             </properties>
         </profile>
@@ -759,6 +779,78 @@
                 <test.files.unit>None</test.files.unit>
                 <test.files.integration>None</test.files.integration>
             </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>apnic</id>
+            <properties>
+                <whois.variant>apnic</whois.variant>
+                <test.redirectOutput>true</test.redirectOutput>
+                <test.groups>None</test.groups>
+                <test.forkCount.integration>1</test.forkCount.integration>
+                <test.files.unit>net/apnic/**/*Test.class</test.files.unit>
+                <test.files.integration>None</test.files.integration>
+            </properties>
+        </profile>
+        <profile>
+            <id>apnic-integration</id>
+            <properties>
+                <whois.variant>apnic</whois.variant>
+                <test.redirectOutput>true</test.redirectOutput>
+                <test.groups>net.apnic.db.whois.common.IntegrationTest</test.groups>
+                <test.forkCount.integration>3</test.forkCount.integration>
+                <test.files.unit>None</test.files.unit>
+                <test.files.integration>net/apnic/**/*Test*.class</test.files.integration>
+            </properties>
+        </profile>
+        <profile>
+            <id>apnic-endtoend</id>
+            <properties>
+                <whois.variant>apnic</whois.variant>
+                <test.redirectOutput>true</test.redirectOutput>
+                <test.groups />
+                <test.files.unit>None</test.files.unit>
+                <test.files.integration>net/apnic/**/whois/spec/query/*Spec.java,net/apnic/**/whois/spec/update/*Spec.java
+                </test.files.integration>
+                <test.forkCount.integration>1</test.forkCount.integration>
+            </properties>
+        </profile>
+        <profile>
+            <id>apnic-all</id>
+            <properties>
+                <whois.variant>apnic</whois.variant>
+                <test.redirectOutput>true</test.redirectOutput>
+                <test.groups>net.apnic.db.whois.common.IntegrationTest</test.groups>
+                <test.files.unit>net/apnic/**/*Test.class</test.files.unit>
+                <test.files.integration>net/apnic/**/*Test*.class</test.files.integration>
+                <test.forkCount.integration>3</test.forkCount.integration>
+            </properties>
+        </profile>
+        <profile>
+            <id>apnic-release</id>
+            <properties>
+                <whois.variant>apnic</whois.variant>
+                <test.redirectOutput>true</test.redirectOutput>
+                <test.groups>None</test.groups>
+                <test.files.unit>None</test.files.unit>
+                <test.files.integration>None</test.files.integration>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
