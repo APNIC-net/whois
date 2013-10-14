@@ -27,4 +27,11 @@ public class WhoisProfile {
         WhoisProfile.endtoend = true;
         System.setProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, ENDTOEND);
     }
+
+    public static void reset() {
+        WhoisProfile.deployed = false;
+        WhoisProfile.endtoend = false;
+        System.setProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, "");
+    }
+
 }

@@ -72,6 +72,14 @@ public class DatabaseHelper implements EmbeddedValueResolverAware {
     @Autowired SourceContext sourceContext;
     private StringValueResolver valueResolver;
 
+    public static String getDbBaseName() {
+        return dbBaseName;
+    }
+
+    public static JdbcTemplate createJdbcTemplate(final String databaseName) {
+        return new JdbcTemplate(DatabaseHelper.createDataSource(DatabaseHelper.getDbBaseName() + "_" + databaseName));
+    }
+
     @Autowired(required = false)
     @Qualifier("aclDataSource")
     public void setAclTemplate(final DataSource aclDataSource) {

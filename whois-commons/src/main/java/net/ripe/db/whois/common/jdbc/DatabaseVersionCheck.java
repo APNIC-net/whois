@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,7 +83,7 @@ public class DatabaseVersionCheck {
             if (!checkAllDataSources()) {
                 throw new IllegalStateException("Database version check failed");
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOGGER.error("Database version check failed", e);
         }
     }
@@ -116,11 +117,17 @@ public class DatabaseVersionCheck {
     }
 
     private boolean checkDataSource(Iterable<String> resources, DataSource dataSource, String dataSourceName) {
-        boolean dataSourceOk = false;
+        boolean dataSourceOk = true;
         try {
             final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-            final String dbVersion = jdbcTemplate.queryForObject("SELECT version FROM version", String.class);
-            dataSourceOk = checkDatabase(resources, dataSourceName, dbVersion);
+            // Query for version table
+            if (jdbcTemplate.queryForList("SHOW TABLES", String.class).contains("version")) {
+                // Get versions
+                final List<String> dbVersions = jdbcTemplate.queryForList("SELECT version FROM version", String.class);
+                for (String dbVersion : dbVersions) {
+                    dataSourceOk = dataSourceOk && checkDatabase(resources, dataSourceName, dbVersion);
+                }
+            }
         } catch (Exception e) {
             if (e.getMessage().contains("SELECT command denied to user")) { // ugly but no other way to get this, sadly
                 LOGGER.info("Datasource {} skipped (no rights)", dataSourceName);

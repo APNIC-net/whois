@@ -285,14 +285,14 @@ public class JdbcRpslObjectUpdateDaoTest extends AbstractDaoTest {
 
     @Test
     public void create_and_delete_person_role_names() {
-        final Database empty = new Database(whoisTemplate);
+        final Database empty = filterVersionTable(new Database(whoisTemplate));
 
         final RpslObjectUpdateInfo first_person = subject.createObject(new RpslObject(1, ImmutableList.of(new RpslAttribute("person", "first person name"), new RpslAttribute("nic-hdl", "P1"))));
         final RpslObjectUpdateInfo second_person = subject.createObject(new RpslObject(2, ImmutableList.of(new RpslAttribute("person", "second person name"), new RpslAttribute("nic-hdl", "P2"))));
         final RpslObjectUpdateInfo first_role = subject.createObject(new RpslObject(3, ImmutableList.of(new RpslAttribute("role", "first role name"), new RpslAttribute("nic-hdl", "R1"))));
         final RpslObjectUpdateInfo second_role = subject.createObject(new RpslObject(4, ImmutableList.of(new RpslAttribute("role", "second role name"), new RpslAttribute("nic-hdl", "R2"))));
 
-        final Database created = new Database(whoisTemplate);
+        final Database created =  new Database(whoisTemplate);
         final DatabaseDiff diff = Database.diff(empty, created);
         final Database added = diff.getAdded();
 
@@ -341,7 +341,7 @@ public class JdbcRpslObjectUpdateDaoTest extends AbstractDaoTest {
 
     @Test
     public void create_organisation_names() {
-        final Database empty = new Database(whoisTemplate);
+        final Database empty = filterVersionTable(new Database(whoisTemplate));
 
         final RpslObjectUpdateInfo first_org = subject.createObject(new RpslObject(1, ImmutableList.of(new RpslAttribute("organisation", "O1"), new RpslAttribute("org-name", "first organisation name"))));
         final RpslObjectUpdateInfo second_org = subject.createObject(new RpslObject(2, ImmutableList.of(new RpslAttribute("organisation", "O2"), new RpslAttribute("org-name", "second organisation name"))));
@@ -838,7 +838,7 @@ public class JdbcRpslObjectUpdateDaoTest extends AbstractDaoTest {
     @Test
     public void create_caseInsensitiveDuplicate_Main() {
         final RpslObjectUpdateInfo created = subject.createObject(makeObject(ObjectType.MNTNER, "PKEY"));
-        final Database before = new Database(whoisTemplate);
+        final Database before = filterVersionTable(new Database(whoisTemplate));
 
         final AttributeType attributeType = AttributeType.UPD_TO;
         final RpslObjectUpdateInfo updated = subject.updateObject(created.getObjectId(), makeObject(ObjectType.MNTNER, "PKEY",
@@ -862,7 +862,7 @@ public class JdbcRpslObjectUpdateDaoTest extends AbstractDaoTest {
     public void create_caseInsensitiveDuplicate_Leaf() {
         subject.createObject(makeObject(ObjectType.ORGANISATION, "ORG-REF"));
         final RpslObjectUpdateInfo created = subject.createObject(makeObject(ObjectType.MNTNER, "PKEY"));
-        final Database before = new Database(whoisTemplate);
+        final Database before = filterVersionTable(new Database(whoisTemplate));
 
         final AttributeType attributeType = AttributeType.ORG;
         final RpslObjectUpdateInfo updated = subject.updateObject(created.getObjectId(), makeObject(ObjectType.MNTNER, "PKEY",
