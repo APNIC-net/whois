@@ -34,7 +34,7 @@ public class BootstrapFromFileTestIntegration extends AbstractSchedulerIntegrati
 
     @Test
     public void testSplitFileLoad() throws Exception {
-        final Database before = filterVersionTable(new Database(whoisTemplate));
+        final Database before = new Database(whoisTemplate);
 
         bootstrap.setDumpFileLocation(applicationContext.getResource("TEST.db").getURI().getPath());
         final String result = bootstrap.bootstrap();
@@ -53,10 +53,5 @@ public class BootstrapFromFileTestIntegration extends AbstractSchedulerIntegrati
 
         final Database removed = diff.getRemoved();
         assertThat(removed.getAll(), hasSize(0));
-    }
-
-    private static Database filterVersionTable(Database database) {
-        database.getTableNames().remove("version");
-        return database;
     }
 }
