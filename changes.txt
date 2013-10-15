@@ -1,4 +1,5 @@
 ## 1.69.1-APNIC-1.0
+[all]     Adopting new versioning scheme using "RIPE Base Version" + "APNIC Version"
 [all]     SCRUM-1896 Incremental builds of whois do not include modified classes when packaged with maven-shade
 [query]   SCRUM-1869 Add a 1000-object limit to whois query results. (REQUIRES DB PATCH aclapnic-1.0.sql)
 [commons] SCRUM-1870 Fixed issue with DatabaseVersionCheck not failing properly on spring context startup
