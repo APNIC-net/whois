@@ -86,7 +86,7 @@ public class AccessControlListManager {
         return personalDataLimit - queried;
     }
 
-    public int getAnyObjects(final InetAddress remoteAddress) {
+    public int getQueryObjectsLimit(final InetAddress remoteAddress) {
         if (isQueryUnlimited(remoteAddress)) {
             return Integer.MAX_VALUE;
         }

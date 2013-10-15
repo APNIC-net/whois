@@ -78,12 +78,13 @@ public class QueryHandler_AclTest {
         });
 
         when(sourceContext.getWhoisSlaveSource()).thenReturn(Source.slave("RIPE"));
+
+        when(accessControlListManager.getQueryObjectsLimit(remoteAddress)).thenReturn(Integer.MAX_VALUE);
     }
 
     @Test
     public void source_without_acl() {
         when(accessControlListManager.requiresAcl(any(RpslObject.class), any(Source.class))).thenReturn(false);
-        when(accessControlListManager.getAnyObjects(remoteAddress)).thenReturn(Integer.MAX_VALUE);
 
         final Query query = Query.parse("DEV-MNT");
         subject.streamResults(query, remoteAddress, contextId, responseHandler);
@@ -94,7 +95,6 @@ public class QueryHandler_AclTest {
     @Test
     public void acl_with_unlimited() {
         when(accessControlListManager.isUnlimited(remoteAddress)).thenReturn(true);
-        when(accessControlListManager.isQueryUnlimited(remoteAddress)).thenReturn(true);
 
         final Query query = Query.parse("DEV-MNT");
         subject.streamResults(query, remoteAddress, contextId, responseHandler);
@@ -106,7 +106,6 @@ public class QueryHandler_AclTest {
     @Test
     public void acl_without_hitting_limit() {
         when(accessControlListManager.getPersonalObjects(remoteAddress)).thenReturn(10);
-        when(accessControlListManager.getAnyObjects(remoteAddress)).thenReturn(Integer.MAX_VALUE);
 
         final Query query = Query.parse("DEV-MNT");
         subject.streamResults(query, remoteAddress, contextId, responseHandler);
@@ -123,7 +122,6 @@ public class QueryHandler_AclTest {
     @Test
     public void acl_hitting_limit() {
         when(accessControlListManager.getPersonalObjects(remoteAddress)).thenReturn(1);
-        when(accessControlListManager.getAnyObjects(remoteAddress)).thenReturn(Integer.MAX_VALUE);
 
         final Query query = Query.parse("DEV-MNT");
         try {
@@ -150,7 +148,7 @@ public class QueryHandler_AclTest {
         when(accessControlListManager.isAllowedToProxy(remoteAddress)).thenReturn(true);
         when(accessControlListManager.canQueryPersonalObjects(clientAddress)).thenReturn(true);
         when(accessControlListManager.getPersonalObjects(clientAddress)).thenReturn(10);
-        when(accessControlListManager.getAnyObjects(clientAddress)).thenReturn(Integer.MAX_VALUE);
+        when(accessControlListManager.getQueryObjectsLimit(clientAddress)).thenReturn(Integer.MAX_VALUE);
 
         final Query query = Query.parse("-VclientId,10.0.0.0 DEV-MNT");
         subject.streamResults(query, remoteAddress, contextId, responseHandler);
@@ -163,6 +161,34 @@ public class QueryHandler_AclTest {
 
         verifyLog(query, null, 2, 2);
     }
+
+
+    @Test
+    public void acl_hitting_query_limit() {
+        // Remove personal acl
+        when(accessControlListManager.requiresAcl(any(RpslObject.class), any(Source.class))).thenReturn(false);
+        when(accessControlListManager.isUnlimited(remoteAddress)).thenReturn(true);
+
+        // Set query object limit
+        when(accessControlListManager.getQueryObjectsLimit(remoteAddress)).thenReturn(3);
+        when(accessControlListManager.isQueryUnlimited(remoteAddress)).thenReturn(false);
+
+        final Query query = Query.parse("DEV-MNT");
+        try {
+            subject.streamResults(query, remoteAddress, contextId, responseHandler);
+            fail("Expected failure");
+        } catch (QueryException e) {
+            assertThat(e.getCompletionInfo(), is(QueryCompletionInfo.EXCEPTION));
+            assertThat(e.getMessages(), containsInAnyOrder(QueryMessages.queryObjectLimitReached(remoteAddress)));
+
+            final ArgumentCaptor<ResponseObject> responseCaptor = ArgumentCaptor.forClass(ResponseObject.class);
+            verify(responseHandler, times(4)).handle(responseCaptor.capture());
+            assertThat(responseCaptor.getAllValues(), contains(message, maintainer, personTest, roleTest));
+
+            verifyLog(query, QueryCompletionInfo.EXCEPTION, 0, 4);
+        }
+    }
+
 
     private void verifyLog(final Query query, final QueryCompletionInfo completionInfo, final int nrAccounted, final int nrNotAccounted) {
         verify(whoisLog).logQueryResult(anyString(), eq(nrAccounted), eq(nrNotAccounted), eq(completionInfo), anyLong(), eq(remoteAddress), eq(contextId), eq(query.toString()));

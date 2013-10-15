@@ -49,9 +49,9 @@ public class QueryHandler {
             private int notAccountedObjectsPersonal;
             private int accountingLimitPersonal = -1;
 
-            private boolean useAclTotal;
-            private int accountedObjectsAny;
-            private int accountingLimitAny = -1;
+            private boolean useAclQuery;
+            private int accountedObjectsQuery;
+            private int accountingLimitQuery = -1;
 
             @Override
             public void run() {
@@ -99,7 +99,7 @@ public class QueryHandler {
                     }
 
                     useAclPersonal = !accessControlListManager.isUnlimited(accountingAddress);
-                    useAclTotal = !accessControlListManager.isQueryUnlimited(accountingAddress);
+                    useAclQuery = !accessControlListManager.isQueryUnlimited(accountingAddress);
 
                 }
             }
@@ -134,12 +134,12 @@ public class QueryHandler {
                                 notAccountedObjectsPersonal++;
                             }
 
-                            if (useAclTotal) {
-                                if (accountingLimitAny == -1) {
-                                    accountingLimitAny = accessControlListManager.getAnyObjects(accountingAddress);
+                            if (useAclQuery) {
+                                if (accountingLimitQuery == -1) {
+                                    accountingLimitQuery = accessControlListManager.getQueryObjectsLimit(accountingAddress);
                                 }
 
-                                if (++accountedObjectsAny > accountingLimitAny) {
+                                if (++accountedObjectsQuery > accountingLimitQuery) {
                                     throw new QueryException(QueryCompletionInfo.EXCEPTION, QueryMessages.queryObjectLimitReached(accountingAddress));
                                 }
                             }
