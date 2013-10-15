@@ -189,7 +189,6 @@ public class QueryHandler_AclTest {
         }
     }
 
-
     private void verifyLog(final Query query, final QueryCompletionInfo completionInfo, final int nrAccounted, final int nrNotAccounted) {
         verify(whoisLog).logQueryResult(anyString(), eq(nrAccounted), eq(nrNotAccounted), eq(completionInfo), anyLong(), eq(remoteAddress), eq(contextId), eq(query.toString()));
     }
