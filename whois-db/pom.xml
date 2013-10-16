@@ -3,13 +3,13 @@
     <parent>
         <groupId>net.ripe.db</groupId>
         <artifactId>whois</artifactId>
-        <version>1.69.1-SNAPSHOT</version>
+        <version>1.69.1-APNIC.1.0.SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.ripe.db</groupId>
     <artifactId>whois-db</artifactId>
-    <version>1.69.1-SNAPSHOT</version>
+    <version>1.69.1-APNIC.1.0.SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -206,7 +206,7 @@
                                     <description>Whois</description>
                                     <!-- Organisation name is used as the License field -->
                                     <!-- (along with the vendor and packager fields, but at least you can override them -->
-                                    <version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}</version>
+                                    <version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</version>
                                     <release>${parsedVersion.qualifier}</release>
                                     <targetOS>centos6-linux</targetOS>
                                     <packager>APNIC</packager>

@@ -38,5 +38,4 @@ CREATE TABLE `version` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-TRUNCATE version;
-INSERT INTO version VALUES ('whois-1.68');
+INSERT INTO `version` VALUES ('whoisapnic-1.0');
