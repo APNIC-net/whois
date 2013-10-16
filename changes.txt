@@ -1,3 +1,13 @@
+## 1.69.1-APNIC-1.0
+[all]     Adopting new versioning scheme using "RIPE Base Version" + "APNIC Version"
+[all]     SCRUM-1896 Incremental builds of whois do not include modified classes when packaged with maven-shade
+[query]   SCRUM-1869 Add a 1000-object limit to whois query results. (REQUIRES DB PATCH aclapnic-1.0.sql & running *-data.sql to sync up versions)
+[commons] SCRUM-1870 Fixed issue with DatabaseVersionCheck not failing properly on spring context startup
+[commons] SCRUM-1895 Fixed issue with whois.variant configuration excluding spring profile beans (@DeployProfile etc)
+[upgrade] ## 1.69.1 - whois.properties changes
+                        - dir.wsearch.index= (removed)
+                        - api.rest.lookup.baseurl= (added)
+
 ## 1.69
 [update] enable dry-run
 [all] in-addr.arpa bugfix
