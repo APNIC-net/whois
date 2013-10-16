@@ -184,32 +184,6 @@
                     </plugin>
 
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>${maven-antrun-plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <id>set-conditionals</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <property name="rpm.version" value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}" />
-                                        <condition property="rpm.release" value="${maven.build.timestamp}.${parsedVersion.qualifier}" else="${maven.build.timestamp}">
-                                            <equals arg1="${parsedVersion.qualifier}" arg2="SNAPSHOT" />
-                                        </condition>
-                                        <!-- Uncomment this for property dump during build -->
-                                        <!--<echoproperties />-->
-                                    </target>
-                                    <exportAntProperties>true</exportAntProperties>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>rpm-maven-plugin</artifactId>
                         <version>${maven-rpm-plugin.version}</version>
@@ -232,8 +206,8 @@
                                     <description>Whois</description>
                                     <!-- Organisation name is used as the License field -->
                                     <!-- (along with the vendor and packager fields, but at least you can override them -->
-                                    <version>${rpm.version}</version>
-                                    <release>${rpm.release}</release>
+                                    <version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}</version>
+                                    <release>${parsedVersion.qualifier}</release>
                                     <targetOS>centos6-linux</targetOS>
                                     <packager>APNIC</packager>
                                     <name>${rpm.name}</name>
