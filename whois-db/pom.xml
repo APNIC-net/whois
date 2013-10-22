@@ -3,13 +3,13 @@
     <parent>
         <groupId>net.ripe.db</groupId>
         <artifactId>whois</artifactId>
-        <version>1.69.1-APNIC-1.0-SNAPSHOT</version>
+        <version>1.69.1-APNICv1r0-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.ripe.db</groupId>
     <artifactId>whois-db</artifactId>
-    <version>1.69.1-APNIC-1.0-SNAPSHOT</version>
+    <version>1.69.1-APNICv1r0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -176,6 +176,7 @@
                         <executions>
                             <execution>
                                 <id>parse-version</id>
+                                <phase>initialize</phase>
                                 <goals>
                                     <goal>parse-version</goal>
                                 </goals>
@@ -190,25 +191,42 @@
                         <executions>
                             <execution>
                                 <id>set-conditionals</id>
-                                <phase>validate</phase>
+                                <phase>compile</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <target>
-                                        <property name="rpm.version" value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}" />
-                                        <condition property="rpm.release" value="${maven.build.timestamp}.${parsedVersion.qualifier}" else="${maven.build.timestamp}">
-                                            <equals arg1="${parsedVersion.qualifier}" arg2="SNAPSHOT" />
-                                        </condition>
-                                        <!-- Uncomment this for property dump during build -->
+                                    <target name="get-rpm-version-number">
+                                        <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath"/>
+                                        <propertyregex property="parsedVersion.qualifier.filtered" input="${parsedVersion.qualifier}" regexp="\.|-" replace="" global="true" />
+                                        <property name="rpm.version" value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}.${parsedVersion.qualifier.filtered}" />
                                         <!--<echoproperties />-->
                                     </target>
                                     <exportAntProperties>true</exportAntProperties>
                                 </configuration>
                             </execution>
                         </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>ant-contrib</groupId>
+                                <artifactId>ant-contrib</artifactId>
+                                <version>1.0b2</version>
+                                <exclusions>
+                                    <exclusion>
+                                        <groupId>ant</groupId>
+                                        <artifactId>ant</artifactId>
+                                    </exclusion>
+                                </exclusions>
+                                <scope>runtime</scope>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant-nodeps</artifactId>
+                                <version>1.8.1</version>
+                                <scope>runtime</scope>
+                            </dependency>
+                        </dependencies>
                     </plugin>
-
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>rpm-maven-plugin</artifactId>
@@ -233,7 +251,7 @@
                                     <!-- Organisation name is used as the License field -->
                                     <!-- (along with the vendor and packager fields, but at least you can override them -->
                                     <version>${rpm.version}</version>
-                                    <release>${rpm.release}</release>
+                                    <release>${maven.build.timestamp}</release>
                                     <targetOS>centos6-linux</targetOS>
                                     <packager>APNIC</packager>
                                     <name>${rpm.name}</name>

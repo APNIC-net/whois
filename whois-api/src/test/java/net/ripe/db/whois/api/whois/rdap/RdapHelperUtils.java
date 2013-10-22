@@ -1,15 +1,14 @@
 package net.ripe.db.whois.api.whois.rdap;
 
-import com.Ostermiller.util.LineEnds;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomWriter;
+import net.ripe.db.whois.common.support.FileHelper;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -91,16 +90,6 @@ public class RdapHelperUtils {
         return ret;
     }
 
-    public static String convertEOLToUnix(String str) {
-        ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
-        try {
-            LineEnds.convert(IOUtils.toInputStream(str), resultStream, LineEnds.STYLE_UNIX);
-        } catch (Exception ex) {
-            LOGGER.error("convertEOLToUnix failed", ex);
-        }
-        return resultStream.toString();
-    }
-
     public static byte[] getHttpContent(String url) {
         return getHttpHeaderAndContent(url).body;
     }
@@ -148,7 +137,7 @@ public class RdapHelperUtils {
         generator.close();
 
         // So that the test can run on ALL platform (Curse you iScampi!!)
-        return RdapHelperUtils.convertEOLToUnix(outputStream.toString());
+        return FileHelper.convertEOLToUnix(outputStream.toString());
     }
 
     public static <T> T unmarshal(final String content, Class<T> valueType) throws IOException {
