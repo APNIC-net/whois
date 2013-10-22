@@ -1,4 +1,4 @@
-## 1.69.1-APNICv1r0-SNAPSHOT
+## 1.69.1-APNICv1r0
 [all]      Adopting new versioning scheme using "RIPE Base Version" + "APNIC Version Qualifier"
 [all]      SCRUM-1896 Incremental builds of whois do not include modified classes when packaged with maven-shade
 [query]    SCRUM-1869 Add a 1000-object limit to whois query results.
