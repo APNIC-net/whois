@@ -3,13 +3,13 @@
     <parent>
         <groupId>net.ripe.db</groupId>
         <artifactId>whois</artifactId>
-        <version>1.69.1-APNICv1r0-SNAPSHOT</version>
+        <version>1.69.1-APNICv1r0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.ripe.db</groupId>
     <artifactId>whois-db</artifactId>
-    <version>1.69.1-APNICv1r0-SNAPSHOT</version>
+    <version>1.69.1-APNICv1r0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -197,7 +197,7 @@
                                 </goals>
                                 <configuration>
                                     <target name="get-rpm-version-number">
-                                        <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath"/>
+                                        <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath" />
                                         <propertyregex property="parsedVersion.qualifier.filtered" input="${parsedVersion.qualifier}" regexp="\.|-" replace="" global="true" />
                                         <property name="rpm.version" value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}.${parsedVersion.qualifier.filtered}" />
                                         <!--<echoproperties />-->
