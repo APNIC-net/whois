@@ -3,13 +3,13 @@
     <parent>
         <groupId>net.ripe.db</groupId>
         <artifactId>whois</artifactId>
-        <version>1.69.1-APNICv1r0-SNAPSHOT</version>
+        <version>1.69.1-APNICv1r0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.ripe.db</groupId>
     <artifactId>whois-db</artifactId>
-    <version>1.69.1-APNICv1r0-SNAPSHOT</version>
+    <version>1.69.1-APNICv1r0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -198,8 +198,9 @@
                                 <configuration>
                                     <target name="get-rpm-version-number">
                                         <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath"/>
-                                        <propertyregex property="parsedVersion.qualifier.filtered" input="${parsedVersion.qualifier}" regexp="\.|-" replace="" global="true" />
+                                        <propertyregex property="parsedVersion.qualifier.filtered" input="${parsedVersion.qualifier}" regexp="\.|-" replace="" global="true" defaultValue="${parsedVersion.qualifier}" />
                                         <property name="rpm.version" value="${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}.${parsedVersion.qualifier.filtered}" />
+                                        <!-- If we need to see all properties during the build -->
                                         <!--<echoproperties />-->
                                     </target>
                                     <exportAntProperties>true</exportAntProperties>
@@ -210,7 +211,7 @@
                             <dependency>
                                 <groupId>ant-contrib</groupId>
                                 <artifactId>ant-contrib</artifactId>
-                                <version>1.0b2</version>
+                                <version>1.0b3</version>
                                 <exclusions>
                                     <exclusion>
                                         <groupId>ant</groupId>
@@ -222,7 +223,7 @@
                             <dependency>
                                 <groupId>org.apache.ant</groupId>
                                 <artifactId>ant-nodeps</artifactId>
-                                <version>1.8.1</version>
+                                <version>1.7.0</version>
                                 <scope>runtime</scope>
                             </dependency>
                         </dependencies>
