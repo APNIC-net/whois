@@ -33,11 +33,13 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
 
     private final WhoisRdapService whoisRDAPService;
     private final DefaultExceptionMapper defaultExceptionMapper;
+    private final NoticeFactory noticeFactory;
 
     @Autowired
-    public WhoisRdapServletDeployer(final WhoisRdapService whoisRDAPService, final DefaultExceptionMapper defaultExceptionMapper) {
+    public WhoisRdapServletDeployer(final WhoisRdapService whoisRDAPService, final DefaultExceptionMapper defaultExceptionMapper, final NoticeFactory noticeFactory) {
         this.whoisRDAPService = whoisRDAPService;
         this.defaultExceptionMapper = defaultExceptionMapper;
+        this.noticeFactory = noticeFactory;
     }
 
     @Override
@@ -88,7 +90,7 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
                 response.setHeader("Content-Type", mediaType);
                 response.setHeader("Access-Control-Allow-Origin", "*");
 
-                Error rdapError = (Error) RdapException.build(Response.Status.fromStatusCode(response.getStatus()), selfUrl);
+                Error rdapError = (Error) RdapException.build(Response.Status.fromStatusCode(response.getStatus()), selfUrl, noticeFactory);
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 rdapJsonProvider.writeTo((Object) rdapError, rdapError.getClass(), rdapError.getClass(), new Annotation[0], null, null, byteArrayOutputStream);
                 String responseContent = byteArrayOutputStream.toString();

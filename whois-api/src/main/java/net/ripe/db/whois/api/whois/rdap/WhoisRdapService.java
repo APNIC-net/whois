@@ -13,6 +13,7 @@ import net.ripe.db.whois.api.whois.ApiResponseHandler;
 import net.ripe.db.whois.api.search.IndexTemplate;
 import net.ripe.db.whois.api.whois.rdap.domain.RdapObject;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
+import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.domain.attrs.AttributeParseException;
@@ -131,13 +132,13 @@ public class WhoisRdapService {
         this.freeTextIndex         = freeTextIndex;
         this.baseUrl               = baseUrl;
         this.noticeFactory         = noticeFactory;
+        this.port43                = port43;
         if (sourceContext != null) {
             this.source = sourceContext.getCurrentSource()
                                        .getName().toString();
         } else {
             this.source = "";
         }
-        this.port43                = port43;
     }
 
     @GET
@@ -148,7 +149,7 @@ public class WhoisRdapService {
                            @PathParam("objectType") final String objectType,
                            @PathParam("key") final String key) {
 
-        Response.ResponseBuilder response;
+        Response.ResponseBuilder response = null;
         String selfUrl = SLASH_JOINER.join(getBaseUrl(request), objectType, key);
 
         final Set<ObjectType> whoisObjectTypes = Sets.newHashSet();
@@ -189,22 +190,40 @@ public class WhoisRdapService {
                 throw new WebApplicationException(Response.Status.BAD_REQUEST);
             }
 
-            response = Response.ok(lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key)));
-
+            RdapObject obj = null;
+            try {
+                obj = lookupObject(request, whoisObjectTypes, getKey(whoisObjectTypes, key));
+            } catch (WebApplicationException webex) {
+                int statusCode = webex.getResponse().getStatus();
+                if (statusCode == 404) {
+                    Query q = getLookupQuery(whoisObjectTypes, getKey(whoisObjectTypes, key));
+                    response = redirect(request.getRequestURL().toString(), q);
+                } else {
+                    throw webex;
+                }
+            }
+            if ((response == null) && (obj != null)) {
+                response = Response.ok(obj);
+            }
         } catch (WebApplicationException webex) {
             LOGGER.error(String.format("RDAP http error status [%s] caused by request [%s]: %s", webex.getResponse().getStatus(), request.getRequestURL().toString(), webex.toString()));
             int statusCode = webex.getResponse().getStatus();
-            response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl));
+            response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl, noticeFactory));
         } catch (IllegalArgumentException iae) {
-            response = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, selfUrl));
+            response = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, selfUrl, noticeFactory));
         } catch (Throwable t) {
             LOGGER.error("RDAP Internal Server error", t);
             // catch Everything
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(RdapException.build(Response.Status.INTERNAL_SERVER_ERROR, selfUrl));
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(RdapException.build(Response.Status.INTERNAL_SERVER_ERROR, selfUrl, noticeFactory));
         }
         mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
         response.header("Access-Control-Allow-Origin", "*");
         return response.build();
+    }
+
+    private Response.ResponseBuilder redirect(final String requestPath, final Query query) {
+        final URI uri = delegatedStatsService.getUriForRedirect(requestPath, query);
+        return Response.status(Response.Status.MOVED_PERMANENTLY).location(uri);
     }
 
     @GET
@@ -369,7 +388,10 @@ public class WhoisRdapService {
                 @Override
                 public void handle(final ResponseObject responseObject) {
                     if (responseObject instanceof RpslObject) {
-                        result.add((RpslObject) responseObject);
+                        RpslObject ro = (RpslObject) responseObject; 
+                        if (!(ro.getKey().equals(CIString.ciString("0.0.0.0 - 255.255.255.255")) || ro.getKey().equals(CIString.ciString("0::/0")))) {
+                            result.add(ro);
+                        }
                     }
                 }
             });
@@ -395,6 +417,16 @@ public class WhoisRdapService {
         buffer.setLength(buffer.length() - request.getRequestURI().length() + request.getServletPath().length());
 
         return buffer.toString();
+    }
+
+    private Query getLookupQuery(final Set<ObjectType> objectTypes, final String key) {
+        final String objectTypesString = COMMA_JOINER.join(Iterables.transform(objectTypes, new Function<ObjectType, String>() {
+            @Override
+            public String apply(final ObjectType input) {
+                return input.getName();
+            }
+        }));
+        return getLookupQuery(objectTypesString, key);
     }
 
     private Query getLookupQuery(final String objectType, final String key) {

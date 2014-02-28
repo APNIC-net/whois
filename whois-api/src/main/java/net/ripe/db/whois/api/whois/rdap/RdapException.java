@@ -10,14 +10,11 @@ import java.util.List;
 
 public class RdapException {
 
-    @Autowired
-    private static NoticeFactory noticeFactory;
-
-    public static Object build (final Response.StatusType status, final String selfUrl) {
-        return build(status, selfUrl, Lists.<String>newArrayList());
+    public static Object build (final Response.StatusType status, final String selfUrl, final NoticeFactory noticeFactory) {
+        return build(status, selfUrl, Lists.<String>newArrayList(), noticeFactory);
     }
 
-    public static Object build (final Response.StatusType status, final String selfUrl, List<String> descriptions) {
+    public static Object build (final Response.StatusType status, final String selfUrl, List<String> descriptions, final NoticeFactory noticeFactory) {
         final Error exception = new Error();
         exception.setErrorCode(status.getStatusCode());
         exception.setTitle(status.getReasonPhrase());

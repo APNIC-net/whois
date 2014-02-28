@@ -71,16 +71,22 @@ public class DelegatedStatsService implements EmbeddedValueResolverAware {
                 return ALLOWED_OBJECTTYPES.contains(input);
             }
         });
-
-        if (objectType.isPresent()) {
+        final ObjectType realObjectType =
+            (objectType.isPresent())
+                ? objectType.get()
+          : (query.getObjectTypes().contains(ObjectType.AS_BLOCK))
+                ? ObjectType.AUT_NUM
+                : null;
+        
+        if (realObjectType != null) {
             for (Map.Entry<CIString, String> entry : sourceToPathMap.entrySet()) {
                 final CIString sourceName = entry.getKey();
                 final AuthoritativeResource authoritativeResource = resourceData.getAuthoritativeResource(sourceName);
-                if (authoritativeResource.isMaintainedInRirSpace(objectType.get(), CIString.ciString(query.getSearchValue()))) {
+                if (authoritativeResource.isMaintainedInRirSpace(realObjectType, CIString.ciString(query.getSearchValue()))) {
                     final String basePath = entry.getValue();
                     LOGGER.debug("Redirecting {} to {}", requestPath, sourceName);
                     // TODO: don't include local path prefix (lookup from base context and replace)
-                    return URI.create(String.format("%s%s", basePath, requestPath.replaceFirst("/rdap", "")));
+                    return URI.create(String.format("%s%s", basePath, requestPath.replaceFirst(".*/rdap", "")));
                 }
             }
         }
