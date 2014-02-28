@@ -47,7 +47,7 @@ public class WhoisRdapServiceTest {
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
         when(request.getRequestURL()).thenReturn(new StringBuffer().append("http://localhost/"));
 
-        subject = new WhoisRdapService(queryHandler,rpslObjectDao,null,"http://localhost/");
+        subject = new WhoisRdapService(queryHandler,rpslObjectDao,null,null,null,null,null,"port43","http://localhost/");
     }
 
     @Test

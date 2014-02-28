@@ -32,7 +32,8 @@ public class NoticeFactoryTest {
                 "source:        TEST");
 
         Entity entity = new Entity();
-        entity.getNotices().addAll(NoticeFactory.generateObjectNotices(rpslObject, "http://selfurl"));
+        NoticeFactory noticeFactory = new NoticeFactory("", "", "", "", "", "", "", "", "", "", "", "", "", "", "");           
+        entity.getNotices().addAll(noticeFactory.generateObjectNotices(rpslObject, "http://selfurl"));
 
         String json = RdapHelperUtils.marshal(entity);
         assertThat(json, equalTo("" +

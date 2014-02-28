@@ -2,11 +2,16 @@ package net.ripe.db.whois.api.whois.rdap;
 
 import com.google.common.collect.Lists;
 import net.ripe.db.whois.api.whois.rdap.domain.Error;
+import net.ripe.db.whois.api.whois.rdap.NoticeFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
 
 public class RdapException {
+
+    @Autowired
+    private static NoticeFactory noticeFactory;
 
     public static Object build (final Response.StatusType status, final String selfUrl) {
         return build(status, selfUrl, Lists.<String>newArrayList());
@@ -17,7 +22,7 @@ public class RdapException {
         exception.setErrorCode(status.getStatusCode());
         exception.setTitle(status.getReasonPhrase());
         exception.getRdapConformance().addAll(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL);
-        exception.getNotices().addAll(NoticeFactory.generateNotices(selfUrl));
+        exception.getNotices().addAll(noticeFactory.generateResponseNotices(selfUrl));
 
         switch (status.getStatusCode()) {
             case 400:

@@ -14,6 +14,7 @@ import net.ripe.db.whois.api.whois.rdap.domain.Nameserver;
 import net.ripe.db.whois.api.whois.rdap.domain.RdapObject;
 import net.ripe.db.whois.api.whois.rdap.domain.Remark;
 import net.ripe.db.whois.api.whois.rdap.domain.Role;
+import net.ripe.db.whois.api.whois.rdap.domain.SearchResult;
 import net.ripe.db.whois.api.whois.rdap.domain.vcard.VCard;
 import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
@@ -39,9 +40,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 import static net.ripe.db.whois.common.rpsl.AttributeType.ABUSE_MAILBOX;
 import static net.ripe.db.whois.common.rpsl.AttributeType.ADDRESS;
@@ -66,12 +69,14 @@ import static net.ripe.db.whois.common.rpsl.AttributeType.STATUS;
 import static net.ripe.db.whois.common.rpsl.AttributeType.TECH_C;
 import static net.ripe.db.whois.common.rpsl.AttributeType.ZONE_C;
 import static net.ripe.db.whois.common.rpsl.ObjectType.INET6NUM;
+import static net.ripe.db.whois.common.rpsl.ObjectType.DOMAIN;
 
 class RdapObjectMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapObjectMapper.class);
 
     protected static final List<String> RDAP_CONFORMANCE_LEVEL = Lists.newArrayList("rdap_level_0");
     private static final Joiner NEWLINE_JOINER = Joiner.on("\n");
+    private final String port43 = "port43";
 
     protected static DatatypeFactory dtf;
     static {
@@ -98,8 +103,21 @@ class RdapObjectMapper {
             final LocalDateTime lastChangedTimestamp,
             final List<RpslObject> abuseContacts,
             final RpslObject parentRpslObject,
-            final String port43) {
+            final String port43,
+            final NoticeFactory noticeFactory) {
+        RdapObject rdapResponse = getRdapObject(requestUrl, baseUrl, rpslObject, relatedObjects, lastChangedTimestamp, abuseContacts, parentRpslObject, noticeFactory);
+        addInformational(baseUrl, rpslObject, relatedObjects, lastChangedTimestamp, abuseContacts, parentRpslObject, port43, rdapResponse, requestUrl, noticeFactory);
+        return rdapResponse;
+    }
 
+    private static RdapObject getRdapObject(final String requestUrl, 
+                                            final String baseUrl,
+                                            final RpslObject rpslObject, 
+                                            final List<RpslObject> relatedObjects,
+                                            final LocalDateTime lastChangedTimestamp, 
+                                            final List<RpslObject> abuseContacts,
+                                            final RpslObject parentRpslObject,
+                                            final NoticeFactory noticeFactory) {
         RdapObject rdapResponse;
         final ObjectType rpslObjectType = rpslObject.getType();
 
@@ -117,8 +135,6 @@ class RdapObjectMapper {
                 break;
             case PERSON:
             case ROLE:
-            // TODO: [RL] Configuration (property?) for allowed RPSL object types for entity lookups
-            // TODO: [ES] Denis to review
             case ORGANISATION:
             case IRT:
                 rdapResponse = createEntity(rpslObject, null, baseUrl);
@@ -127,16 +143,39 @@ class RdapObjectMapper {
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
         }
 
-        addInformational(baseUrl, rpslObject, relatedObjects, lastChangedTimestamp, abuseContacts, port43, rdapResponse, requestUrl);
+        rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
+
+        rdapResponse.getNotices().addAll(noticeFactory.generateObjectNotices(rpslObject, requestUrl));
 
         return rdapResponse;
     }
 
-    private static void addInformational(String baseUrl, RpslObject rpslObject, List<RpslObject> relatedObjects, LocalDateTime lastChangedTimestamp, List<RpslObject> abuseContacts, String port43, RdapObject rdapResponse, String requestUrl) {
+    public static RdapObject mapSearch(final String requestUrl, 
+                                       final String baseUrl,
+                                       final List<RpslObject> objects, 
+                                       final Iterable<LocalDateTime> localDateTimes,
+                                       final NoticeFactory noticeFactory) {
+        final SearchResult searchResult = new SearchResult();
+        final Iterator<LocalDateTime> iterator = localDateTimes.iterator();
+
+        for (final RpslObject object : objects) {
+            if (object.getType() == DOMAIN) {
+                searchResult.addDomainSearchResult((Domain) getRdapObject(requestUrl, baseUrl, object, new ArrayList<RpslObject>(), iterator.next(), Collections.EMPTY_LIST, null, noticeFactory));
+            } else {
+                searchResult.addEntitySearchResult((Entity) getRdapObject(requestUrl, baseUrl, object, new ArrayList<RpslObject>(), iterator.next(), Collections.EMPTY_LIST, null, noticeFactory));
+            }
+        }
+
+        searchResult.getNotices().addAll(noticeFactory.generateResponseNotices(requestUrl));
+
+        return searchResult;
+    }
+
+    private static void addInformational(String baseUrl, RpslObject rpslObject, List<RpslObject> relatedObjects, LocalDateTime lastChangedTimestamp, List<RpslObject> abuseContacts, RpslObject parentRpslObject, String port43, RdapObject rdapResponse, String requestUrl, NoticeFactory noticeFactory) {
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
         final String selfUrl = getSelfUrl(rdapResponse, requestUrl);
 
-        rdapResponse.getNotices().addAll(NoticeFactory.generateObjectNotices(rpslObject, selfUrl));
+        rdapResponse.getNotices().addAll(noticeFactory.generateResponseNotices(requestUrl));
 
         final List<Remark> remarks = createRemarks(rpslObject);
         if (!remarks.isEmpty()) {
