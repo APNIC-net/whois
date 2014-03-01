@@ -324,13 +324,13 @@ public class WhoisRdapService {
 
     private boolean objectExists(final HttpServletRequest request, final ObjectType objectType, final String key) {
         final Query query = getLookupQuery(objectType.getName(), key);
-        final List<RpslObject> result = runQuery(query, request, true);
+        final List<RpslObject> result = runQuery(query, request, true, false);
         return !result.isEmpty();
     }
 
     protected RdapObject handleQuery(final Query query, final HttpServletRequest request) {
         try {
-            final List<RpslObject> result = runQuery(query, request, false);
+            final List<RpslObject> result = runQuery(query, request, false, true);
             if (result.isEmpty()) {
                 throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
             }
@@ -368,7 +368,7 @@ public class WhoisRdapService {
         return properties;
     }
 
-    private List<RpslObject> runQuery(final Query query, final HttpServletRequest request, final boolean internalRequest) {
+    private List<RpslObject> runQuery(final Query query, final HttpServletRequest request, final boolean internalRequest, final boolean ignoreIana) {
         final int contextId = System.identityHashCode(Thread.currentThread());
         final InetAddress queryAddress;
         if (internalRequest) {
@@ -382,6 +382,8 @@ public class WhoisRdapService {
         }
 
         final List<RpslObject> result = Lists.newArrayList();
+        final boolean[] returnNothing = new boolean[1];
+        returnNothing[0] = false;
 
         try {
             queryHandler.streamResults(query, queryAddress, contextId, new ApiResponseHandler() {
@@ -389,8 +391,22 @@ public class WhoisRdapService {
                 public void handle(final ResponseObject responseObject) {
                     if (responseObject instanceof RpslObject) {
                         RpslObject ro = (RpslObject) responseObject; 
-                        if (!(ro.getKey().equals(CIString.ciString("0.0.0.0 - 255.255.255.255")) || ro.getKey().equals(CIString.ciString("0::/0")))) {
-                            result.add(ro);
+                        /* If an 'IANA' object is found in the query results,
+                           and ignoreIana is true, then return an empty result
+                           list. (In this instance, the presence of an IANA
+                           (placeholder) object indicates a 404. The caller
+                           can't determine that, though, if miscellaneous
+                           related objects are returned as well.)
+                           */
+                        result.add(ro);
+                        List<RpslAttribute> admins =
+                            ro.findAttributes(AttributeType.ADMIN_C);
+                        if (admins != null) {
+                            for (RpslAttribute admin : admins) {
+                                if (admin.getCleanValue().toString().equals("IANA1-AP")) {
+                                    returnNothing[0] = true;
+                                }
+                            }
                         }
                     }
                 }
@@ -405,6 +421,10 @@ public class WhoisRdapService {
             }
         }
 
+        if (returnNothing[0]) {
+            List<RpslObject> actualResult = Lists.newArrayList();
+            return actualResult;
+        }
         return result;
     }
 
@@ -469,7 +489,8 @@ public class WhoisRdapService {
                                 QueryFlag.ONE_LESS.getLongFlag(),
                                 rpslObject.getKey().toString())),
                 null,
-                true
+                true,
+                false
             );
             if (parents.size() > 0) {
                 return parents.get(0);
@@ -540,16 +561,6 @@ public class WhoisRdapService {
             @QueryParam("name") final String name) {
         return handleSearch(new String[]{"domain"}, name, request);
     }
-
-    /* Not sure what exception to throw, here.
-    private void validateDomain(final String key) {
-        try {
-            Domain.parse(key);
-        } catch (AttributeParseException e) {
-            throw new NotFoundException("RIPE NCC does not support forward domain queries.");
-        }
-    }
-    */
 
     private Response handleSearch(final String[] fields, final String term, final HttpServletRequest request) {
         LOGGER.info("Search {} for {}", fields, term);
