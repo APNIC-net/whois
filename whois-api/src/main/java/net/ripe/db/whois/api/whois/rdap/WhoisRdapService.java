@@ -59,6 +59,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import net.ripe.db.whois.api.whois.rdap.domain.Help;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -231,7 +232,10 @@ public class WhoisRdapService {
     @Path("/help")
     public Response lookupHelp(@Context final HttpServletRequest request, @Context HttpHeaders httpHeaders) {
         final String selfUrl =  getBaseUrl(request) + "/help";
-        final Response.ResponseBuilder response = Response.ok().entity(RdapHelp.build(selfUrl));
+        final Help help = new Help();
+        help.getRdapConformance().addAll(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL);
+        help.getNotices().addAll(noticeFactory.generateHelpNotices(selfUrl));
+        final Response.ResponseBuilder response = Response.ok().entity(help);
         mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
         response.header("Access-Control-Allow-Origin", "*");
         return response.build();
