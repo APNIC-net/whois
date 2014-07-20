@@ -145,8 +145,8 @@ class RdapObjectMapper {
 
         rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
-        /* todo: This shouldn't be null. The check should only be here
-         * temporarily. */
+        /* todo: null here indicates that notices should not be added. It might
+         * be better to add an explicit flag for that, though. */
         if (noticeFactory != null) {
             rdapResponse.getNotices().addAll(noticeFactory.generateObjectNotices(rpslObject, requestUrl));
         }
@@ -166,9 +166,9 @@ class RdapObjectMapper {
 
         for (final RpslObject object : objects) {
             if (object.getType() == DOMAIN) {
-                searchResult.addDomainSearchResult((Domain) getRdapObject(requestUrl, baseUrl, object, new ArrayList<RpslObject>(), iterator.next(), Collections.EMPTY_LIST, null, noticeFactory));
+                searchResult.addDomainSearchResult((Domain) getRdapObject(requestUrl, baseUrl, object, new ArrayList<RpslObject>(), iterator.next(), Collections.EMPTY_LIST, null, null));
             } else {
-                searchResult.addEntitySearchResult((Entity) getRdapObject(requestUrl, baseUrl, object, new ArrayList<RpslObject>(), iterator.next(), Collections.EMPTY_LIST, null, noticeFactory));
+                searchResult.addEntitySearchResult((Entity) getRdapObject(requestUrl, baseUrl, object, new ArrayList<RpslObject>(), iterator.next(), Collections.EMPTY_LIST, null, null));
             }
         }
 
