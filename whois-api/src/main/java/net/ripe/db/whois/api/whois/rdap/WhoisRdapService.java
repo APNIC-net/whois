@@ -3,6 +3,7 @@ package net.ripe.db.whois.api.whois.rdap;
 import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.util.Arrays;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -231,6 +232,9 @@ public class WhoisRdapService {
             LOGGER.error(String.format("RDAP http error status [%s] caused by request [%s]: %s", webex.getResponse().getStatus(), request.getRequestURL().toString(), webex.toString()));
             int statusCode = webex.getResponse().getStatus();
             response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl, noticeFactory));
+        } catch (SyntaxNotValidHereException snvhe) {
+            LOGGER.error(String.format("RDAP query with spec-valid but here-invalid syntax: %s", request.getRequestURL().toString()));
+            response = Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(RdapException.build(Response.Status.NOT_FOUND, selfUrl, Arrays.asList("The syntax used for this request is invalid for this particular server."), noticeFactory));
         } catch (IllegalArgumentException iae) {
             response = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, selfUrl, noticeFactory));
         } catch (Throwable t) {
@@ -315,15 +319,15 @@ public class WhoisRdapService {
     private void validateEntity(final String key) {
         if (key.toUpperCase().startsWith("ORG-")) {
             if (!AttributeType.ORGANISATION.isValidValue(ORGANISATION, key)) {
-                throw new IllegalArgumentException("Invalid syntax.");
+                throw new SyntaxNotValidHereException();
             }
         } else if (key.toUpperCase().startsWith("IRT-")) {
             if (!AttributeType.IRT.isValidValue(IRT, key)) {
-                throw new IllegalArgumentException("Invalid syntax.");
+                throw new SyntaxNotValidHereException();
             }
         } else {
             if (!AttributeType.NIC_HDL.isValidValue(ObjectType.PERSON, key)) {
-                throw new IllegalArgumentException("Invalid syntax");
+                throw new SyntaxNotValidHereException();
             }
         }
     }
