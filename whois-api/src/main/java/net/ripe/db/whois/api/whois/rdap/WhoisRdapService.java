@@ -132,6 +132,11 @@ public class WhoisRdapService {
 
     private String port43 = (String)properties.get("rdap.port43");
 
+    private static void addResponseHeaders(HttpHeaders httpHeaders, Response.ResponseBuilder response) {
+        mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
+        response.header("Access-Control-Allow-Origin", "*");
+    }
+
     @Autowired
     public WhoisRdapService(final QueryHandler queryHandler, 
                             final RpslObjectDao objectDao, 
@@ -233,8 +238,7 @@ public class WhoisRdapService {
             // catch Everything
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()).entity(RdapException.build(Response.Status.INTERNAL_SERVER_ERROR, selfUrl, noticeFactory));
         }
-        mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
-        response.header("Access-Control-Allow-Origin", "*");
+        addResponseHeaders(httpHeaders, response);
         return response.build();
     }
 
@@ -252,8 +256,7 @@ public class WhoisRdapService {
         help.getRdapConformance().addAll(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL);
         help.getNotices().addAll(noticeFactory.generateHelpNotices(selfUrl));
         final Response.ResponseBuilder response = Response.ok().entity(help);
-        mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
-        response.header("Access-Control-Allow-Origin", "*");
+        addResponseHeaders(httpHeaders, response);
         return response.build();
     }
 
@@ -519,7 +522,7 @@ public class WhoisRdapService {
         return null;
     }
 
-    public String getAcceptableMediaType(List<MediaType> mediaTypes) {
+    public static String getAcceptableMediaType(List<MediaType> mediaTypes) {
         if ((mediaTypes == null) || (mediaTypes.size() == 0)) {
             return RdapJsonProvider.CONTENT_TYPE_RDAP_JSON;
         }
@@ -534,7 +537,7 @@ public class WhoisRdapService {
         return null;
     }
 
-    private void mapAcceptableMediaType(Response.ResponseBuilder response, List<MediaType> mediaTypes) {
+    private static void mapAcceptableMediaType(Response.ResponseBuilder response, List<MediaType> mediaTypes) {
         String mediaType = getAcceptableMediaType(mediaTypes);
         if (mediaType != null) {
             response.type(mediaType);
@@ -546,14 +549,15 @@ public class WhoisRdapService {
     @Path("/entities")
     public Response searchEntities(
             @Context final HttpServletRequest request,
+            @Context final HttpHeaders httpHeaders,
             @QueryParam("fn") final String name,
             @QueryParam("handle") final String handle) {
         if (name != null && handle == null) {
-            return handleSearch("entity", new String[]{"person", "role", "org-name"}, name, request);
+            return handleSearch("entity", new String[]{"person", "role", "org-name"}, name, request, httpHeaders);
         }
 
         if (name == null && handle != null) {
-            return handleSearch("entity", new String[]{"organisation", "nic-hdl"}, handle, request);
+            return handleSearch("entity", new String[]{"organisation", "nic-hdl"}, handle, request, httpHeaders);
         }
 
         LOGGER.info("Bad request: {}", request.getRequestURI());
@@ -578,15 +582,16 @@ public class WhoisRdapService {
     @Path("/domains")
     public Response searchDomains(
             @Context final HttpServletRequest request,
+            @Context final HttpHeaders httpHeaders,
             @QueryParam("name") final String name) {
         if (StringUtils.isEmpty(name)) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        return handleSearch("domain", new String[]{"domain"}, name, request);
+        return handleSearch("domain", new String[]{"domain"}, name, request, httpHeaders);
     }
 
-    private Response handleSearch(final String objectType, final String[] fields, final String term, final HttpServletRequest request) {
+    private Response handleSearch(final String objectType, final String[] fields, final String term, final HttpServletRequest request, final HttpHeaders httpHeaders) {
         LOGGER.info("Search {} for {}", fields, term);
         try {
             final List<RpslObject> objects = freeTextIndex.search(new IndexTemplate.SearchCallback<List<RpslObject>>() {
@@ -623,30 +628,20 @@ public class WhoisRdapService {
                 }
             });
 
-            if (objects.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND)
-                               .entity(RdapObjectMapper.mapSearch(
-                                           objectType,
+            RdapObject result =
+                RdapObjectMapper.mapSearch(objectType,
                                            getRequestUrl(request),
                                            baseUrl,
                                            objects,
                                            lastUpdateds,
-                                           noticeFactory
-                                       ))
-                               .header("Content-Type", RdapJsonProvider.CONTENT_TYPE_RDAP_JSON)
-                               .build();
-            }
+                                           noticeFactory);
 
-            return Response.ok(RdapObjectMapper.mapSearch(
-                    objectType,
-                    getRequestUrl(request),
-                    baseUrl,
-                    objects,
-                    lastUpdateds,
-                    noticeFactory))
-                    .header("Content-Type", RdapJsonProvider.CONTENT_TYPE_RDAP_JSON)
-                    .build();
-
+            Response.ResponseBuilder searchResponse =
+                Response.status(objects.isEmpty() ? Response.Status.NOT_FOUND
+                                                  : Response.Status.OK);
+            searchResponse.entity(result);
+            addResponseHeaders(httpHeaders, searchResponse);
+            return searchResponse.build();
         } catch (IOException e) {
             LOGGER.error("Caught IOException", e);
             throw new IllegalStateException(e);
