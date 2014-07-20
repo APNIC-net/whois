@@ -172,6 +172,7 @@ class RdapObjectMapper {
             }
         }
 
+        searchResult.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
         searchResult.getNotices().addAll(noticeFactory.generateResponseNotices(requestUrl));
 
         return searchResult;
