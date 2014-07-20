@@ -1,5 +1,9 @@
 package net.ripe.db.whois.api.whois.rdap;
 
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
@@ -103,6 +107,18 @@ public class WhoisRdapService {
 
     static {
         initProperties();
+        dbg("started");
+    }
+
+    private static void dbg(String msg)
+    {
+        try {
+        Writer output;
+        output = new BufferedWriter(new FileWriter("/tmp/dbg", true));
+        output.append(msg + "\n");
+        output.close();
+        } catch (Exception e) {
+        }
     }
 
     private final QueryHandler queryHandler;
@@ -143,7 +159,7 @@ public class WhoisRdapService {
     }
 
     @GET
-    @Produces( { RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Produces( { RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN } )
     @Path("/{objectType}/{key:.*}")
     public Response lookup(@Context final HttpServletRequest request,
                            @Context HttpHeaders httpHeaders,
@@ -526,18 +542,18 @@ public class WhoisRdapService {
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, RdapJsonProvider.CONTENT_TYPE_RDAP_JSON})
+    @Produces({MediaType.APPLICATION_JSON, RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.TEXT_PLAIN})
     @Path("/entities")
     public Response searchEntities(
             @Context final HttpServletRequest request,
             @QueryParam("fn") final String name,
             @QueryParam("handle") final String handle) {
         if (name != null && handle == null) {
-            return handleSearch(new String[]{"person", "role", "org-name"}, name, request);
+            return handleSearch("entity", new String[]{"person", "role", "org-name"}, name, request);
         }
 
         if (name == null && handle != null) {
-            return handleSearch(new String[]{"organisation", "nic-hdl"}, handle, request);
+            return handleSearch("entity", new String[]{"organisation", "nic-hdl"}, handle, request);
         }
 
         LOGGER.info("Bad request: {}", request.getRequestURI());
@@ -545,7 +561,7 @@ public class WhoisRdapService {
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, RdapJsonProvider.CONTENT_TYPE_RDAP_JSON})
+    @Produces({MediaType.APPLICATION_JSON, RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.TEXT_PLAIN})
     @Path("/nameservers")
     public Response searchNameservers(
             @Context final HttpServletRequest request,
@@ -558,15 +574,15 @@ public class WhoisRdapService {
     }
 
     @GET
-    @Produces({MediaType.APPLICATION_JSON, RdapJsonProvider.CONTENT_TYPE_RDAP_JSON})
+    @Produces({MediaType.APPLICATION_JSON, RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.TEXT_PLAIN})
     @Path("/domains")
     public Response searchDomains(
             @Context final HttpServletRequest request,
             @QueryParam("name") final String name) {
-        return handleSearch(new String[]{"domain"}, name, request);
+        return handleSearch("domain", new String[]{"domain"}, name, request);
     }
 
-    private Response handleSearch(final String[] fields, final String term, final HttpServletRequest request) {
+    private Response handleSearch(final String objectType, final String[] fields, final String term, final HttpServletRequest request) {
         LOGGER.info("Search {} for {}", fields, term);
         try {
             final List<RpslObject> objects = freeTextIndex.search(new IndexTemplate.SearchCallback<List<RpslObject>>() {
@@ -595,10 +611,6 @@ public class WhoisRdapService {
                 }
             });
 
-            if (objects.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
             final Iterable<LocalDateTime> lastUpdateds = Iterables.transform(objects, new Function<RpslObject, LocalDateTime>() {
                 @Nullable
                 @Override
@@ -607,7 +619,22 @@ public class WhoisRdapService {
                 }
             });
 
+            if (objects.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                               .entity(RdapObjectMapper.mapSearch(
+                                           objectType,
+                                           getRequestUrl(request),
+                                           baseUrl,
+                                           objects,
+                                           lastUpdateds,
+                                           noticeFactory
+                                       ))
+                               .header("Content-Type", RdapJsonProvider.CONTENT_TYPE_RDAP_JSON)
+                               .build();
+            }
+
             return Response.ok(RdapObjectMapper.mapSearch(
+                    objectType,
                     getRequestUrl(request),
                     baseUrl,
                     objects,

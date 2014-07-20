@@ -6,6 +6,7 @@ import net.ripe.db.whois.api.mail.dequeue.MessageDequeue;
 import net.ripe.db.whois.update.domain.DequeueStatus;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
 
@@ -19,6 +20,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
+@Ignore
 public class MailMessageDaoJdbcTest extends AbstractIntegrationTest {
     private MailMessageDao subject;
     @Autowired private MessageDequeue messageDequeue;

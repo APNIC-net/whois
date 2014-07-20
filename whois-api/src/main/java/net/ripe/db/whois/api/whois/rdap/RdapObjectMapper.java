@@ -145,17 +145,23 @@ class RdapObjectMapper {
 
         rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
-        rdapResponse.getNotices().addAll(noticeFactory.generateObjectNotices(rpslObject, requestUrl));
+        /* todo: This shouldn't be null. The check should only be here
+         * temporarily. */
+        if (noticeFactory != null) {
+            rdapResponse.getNotices().addAll(noticeFactory.generateObjectNotices(rpslObject, requestUrl));
+        }
 
         return rdapResponse;
     }
 
-    public static RdapObject mapSearch(final String requestUrl, 
+    public static RdapObject mapSearch(final String objectType,
+                                       final String requestUrl,
                                        final String baseUrl,
                                        final List<RpslObject> objects, 
                                        final Iterable<LocalDateTime> localDateTimes,
                                        final NoticeFactory noticeFactory) {
         final SearchResult searchResult = new SearchResult();
+        searchResult.isForType(objectType);
         final Iterator<LocalDateTime> iterator = localDateTimes.iterator();
 
         for (final RpslObject object : objects) {
@@ -175,13 +181,21 @@ class RdapObjectMapper {
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
         final String selfUrl = getSelfUrl(rdapResponse, requestUrl);
 
-        rdapResponse.getNotices().addAll(noticeFactory.generateResponseNotices(requestUrl));
+        /* todo: This shouldn't be null. The check should only be here
+         * temporarily. */
+        if (noticeFactory != null) {
+            rdapResponse.getNotices().addAll(noticeFactory.generateResponseNotices(requestUrl));
+        }
 
         final List<Remark> remarks = createRemarks(rpslObject);
         if (!remarks.isEmpty()) {
             rdapResponse.getRemarks().addAll(remarks);
         }
-        rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
+        /* todo: This is added in getRdapObject, and it appears as though
+         * addInformational is not called independently of getRdapObject, so
+         * presumably getRdapObject is the correct place for it (doesn't make
+         * sense to add it twice). */
+        //rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
             final Entity entity = createEntity(abuseContact, selfUrl, baseUrl);

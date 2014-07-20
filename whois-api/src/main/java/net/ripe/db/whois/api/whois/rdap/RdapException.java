@@ -19,7 +19,10 @@ public class RdapException {
         exception.setErrorCode(status.getStatusCode());
         exception.setTitle(status.getReasonPhrase());
         exception.getRdapConformance().addAll(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL);
-        exception.getNotices().addAll(noticeFactory.generateResponseNotices(selfUrl));
+        /* todo: This shouldn't be null. The check should only be here temporarily. */
+        if (noticeFactory != null) {
+            exception.getNotices().addAll(noticeFactory.generateResponseNotices(selfUrl));
+        }
 
         switch (status.getStatusCode()) {
             case 400:

@@ -210,7 +210,6 @@ public class RdapObjectMapperTest {
 
         assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'ns3.test.com.au']"));
 
-
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP_LOCAL));

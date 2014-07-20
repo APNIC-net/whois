@@ -43,4 +43,12 @@ public class SearchResult extends RdapObject implements Serializable {
         }
         domainResults.add(domain);
     }
+
+    public void isForType(final String objectType) {
+        if (objectType.equals("entity")) {
+            entityResults = Lists.newArrayList();
+        } else if (objectType.equals("domain")) {
+            domainResults = Lists.newArrayList();
+        }
+    }
 }
