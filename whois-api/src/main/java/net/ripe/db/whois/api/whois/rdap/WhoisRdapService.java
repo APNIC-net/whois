@@ -579,6 +579,10 @@ public class WhoisRdapService {
     public Response searchDomains(
             @Context final HttpServletRequest request,
             @QueryParam("name") final String name) {
+        if (StringUtils.isEmpty(name)) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
         return handleSearch("domain", new String[]{"domain"}, name, request);
     }
 
