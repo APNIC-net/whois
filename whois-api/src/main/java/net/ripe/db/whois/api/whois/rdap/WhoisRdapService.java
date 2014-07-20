@@ -662,7 +662,18 @@ public class WhoisRdapService {
                     objectId = Integer.parseInt(field.stringValue());
                 }
             } else {
-                attributes.add(new RpslAttribute(AttributeType.getByName(field.name()), field.stringValue()));
+                /* Objects may contain attributes that are no longer valid. Try
+                 * to get the attribute by name first, and skip it if it is
+                 * invalid. */
+                AttributeType attributeType;
+                try {
+                    attributeType = AttributeType.getByName(field.name());
+                } catch (IllegalArgumentException ie) {
+                    attributeType = null;
+                }
+                if (attributeType != null) {
+                    attributes.add(new RpslAttribute(attributeType, field.stringValue()));
+                }
             }
         }
 
