@@ -133,9 +133,21 @@ public class WhoisRdapService {
 
     private String port43 = (String)properties.get("rdap.port43");
 
-    private static void addResponseHeaders(HttpHeaders httpHeaders, Response.ResponseBuilder response) {
+    private static Response.ResponseBuilder addResponseHeaders(HttpHeaders httpHeaders, Response.ResponseBuilder response) {
         mapAcceptableMediaType(response, httpHeaders.getAcceptableMediaTypes());
-        response.header("Access-Control-Allow-Origin", "*");
+        return response.header("Access-Control-Allow-Origin", "*");
+    }
+
+    private Response.ResponseBuilder getUnsupportedObjectClassResponse(HttpServletRequest request) {
+        String url = getRequestUrl(request);
+        LOGGER.error(String.format("RDAP query for unsupported object type: %s", url));
+        return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, url, Arrays.asList("This object class is not supported by this server."), noticeFactory, true));
+    }
+
+    private Response.ResponseBuilder getBadRequestResponse(HttpServletRequest request) {
+        String url = getRequestUrl(request);
+        LOGGER.error(String.format("RDAP query with malformed syntax: %s", url));
+        return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, url, noticeFactory));
     }
 
     @Autowired
@@ -230,17 +242,16 @@ public class WhoisRdapService {
                 response = Response.ok(obj);
             }
         } catch (WebApplicationException webex) {
-            LOGGER.error(String.format("RDAP http error status [%s] caused by request [%s]: %s", webex.getResponse().getStatus(), request.getRequestURL().toString(), webex.toString()));
+            LOGGER.error(String.format("RDAP http error status [%s] caused by request [%s]: %s", webex.getResponse().getStatus(), getRequestUrl(request), webex.toString()));
             int statusCode = webex.getResponse().getStatus();
             response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl, noticeFactory));
         } catch (SyntaxNotValidHereException snvhe) {
-            LOGGER.error(String.format("RDAP query with spec-valid but here-invalid syntax: %s", request.getRequestURL().toString()));
+            LOGGER.error(String.format("RDAP query with spec-valid but here-invalid syntax: %s", getRequestUrl(request)));
             response = Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(RdapException.build(Response.Status.NOT_FOUND, selfUrl, Arrays.asList("The syntax used for this request is invalid for this particular server."), noticeFactory, false));
         } catch (UnsupportedOperationException uoe) {
-            LOGGER.error(String.format("RDAP query for unsupported object type: %s", request.getRequestURL().toString()));
-            response = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, selfUrl, Arrays.asList("This object class is not supported by this server."), noticeFactory, true));
+            response = getUnsupportedObjectClassResponse(request);
         } catch (IllegalArgumentException iae) {
-            response = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, selfUrl, noticeFactory));
+            response = getBadRequestResponse(request);
         } catch (Throwable t) {
             LOGGER.error("RDAP Internal Server error", t);
             // catch Everything
@@ -568,8 +579,7 @@ public class WhoisRdapService {
             return handleSearch("entity", new String[]{"organisation", "nic-hdl"}, handle, request, httpHeaders);
         }
 
-        LOGGER.info("Bad request: {}", request.getRequestURI());
-        return Response.status(Response.Status.BAD_REQUEST).build();
+        return addResponseHeaders(httpHeaders, getBadRequestResponse(request)).build();
     }
 
     @GET
@@ -577,12 +587,9 @@ public class WhoisRdapService {
     @Path("/nameservers")
     public Response searchNameservers(
             @Context final HttpServletRequest request,
+            @Context final HttpHeaders httpHeaders,
             @QueryParam("name") final String name) {
-        if (StringUtils.isEmpty(name)) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
-        return Response.status(Response.Status.NOT_FOUND).build();
+        return addResponseHeaders(httpHeaders, getUnsupportedObjectClassResponse(request)).build();
     }
 
     @GET
@@ -593,7 +600,7 @@ public class WhoisRdapService {
             @Context final HttpHeaders httpHeaders,
             @QueryParam("name") final String name) {
         if (StringUtils.isEmpty(name)) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return addResponseHeaders(httpHeaders, getBadRequestResponse(request)).build();
         }
 
         return handleSearch("domain", new String[]{"domain"}, name, request, httpHeaders);
