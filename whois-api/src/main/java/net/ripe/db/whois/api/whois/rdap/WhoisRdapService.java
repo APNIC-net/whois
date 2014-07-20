@@ -206,7 +206,8 @@ public class WhoisRdapService {
                     }
                     break;
 
-                case "nameserver" : break; // Not yet supported
+                case "nameserver":
+                    throw new UnsupportedOperationException();
             }
 
             if (whoisObjectTypes.isEmpty()) {
@@ -234,7 +235,10 @@ public class WhoisRdapService {
             response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl, noticeFactory));
         } catch (SyntaxNotValidHereException snvhe) {
             LOGGER.error(String.format("RDAP query with spec-valid but here-invalid syntax: %s", request.getRequestURL().toString()));
-            response = Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(RdapException.build(Response.Status.NOT_FOUND, selfUrl, Arrays.asList("The syntax used for this request is invalid for this particular server."), noticeFactory));
+            response = Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(RdapException.build(Response.Status.NOT_FOUND, selfUrl, Arrays.asList("The syntax used for this request is invalid for this particular server."), noticeFactory, false));
+        } catch (UnsupportedOperationException uoe) {
+            LOGGER.error(String.format("RDAP query for unsupported object type: %s", request.getRequestURL().toString()));
+            response = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, selfUrl, Arrays.asList("This object class is not supported by this server."), noticeFactory, true));
         } catch (IllegalArgumentException iae) {
             response = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, selfUrl, noticeFactory));
         } catch (Throwable t) {
