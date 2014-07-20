@@ -6,6 +6,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import net.ripe.db.whois.api.freetext.FreeTextIndex;
 import net.ripe.db.whois.api.AbstractRestClientTest;
 import net.ripe.db.whois.api.httpserver.Audience;
 import net.ripe.db.whois.api.whois.rdap.domain.Autnum;
@@ -51,6 +52,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Category(IntegrationTest.class)
 public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
@@ -58,9 +60,11 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     private static final Audience AUDIENCE = Audience.PUBLIC;
 
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    @Autowired private FreeTextIndex freeTextIndex;
 
     @Before
     public void setup() throws Exception {
+        freeTextIndex.rebuild();
         databaseHelper.addObject("" +
                 "person: Test Person\n" +
                 "nic-hdl: TP1-TEST");
@@ -188,9 +192,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                 "source:         TEST\n" +
                 "password:       test\n");
         ipTreeUpdater.rebuild();
-        /*
-        Thread.sleep(10000000);
-        */
+        freeTextIndex.update();
+        //Thread.sleep(10000000);
     }
 
     // inetnum
