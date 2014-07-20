@@ -311,7 +311,16 @@ public class WhoisRdapService {
         try {
             Domain.parse(key);
         } catch (AttributeParseException e) {
-            throw new IllegalArgumentException("Invalid syntax.");
+            /* Very strictly speaking, this should be returning a 404
+             * for a valid domain name (of any type) and a 400
+             * otherwise. However, a 'proper' IDN library can't be
+             * found at the moment, so unless one exists, or there's
+             * some other easy way to validate a domain name, this
+             * will return a 400 with a note about the syntax not
+             * being supported here for arguments that aren't reverse
+             * domains, or one of the other special types handled by
+             * the server. */
+            throw new SyntaxNotValidHereException();
         }
     }
 
