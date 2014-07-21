@@ -101,7 +101,7 @@ public class WhoisRdapService {
     private static final Joiner SLASH_JOINER = Joiner.on("/");
     public static final Joiner COMMA_JOINER = Joiner.on(",");
 
-    private static final int SEARCH_MAX_RESULTS = 100;
+    private static final int SEARCH_MAX_RESULTS = 1000;
     private static final Set<String> SEARCH_INDEX_FIELDS_NOT_MAPPED_TO_RPSL_OBJECT = Sets.newHashSet("primary-key", "object-type", "lookup-key");
     protected static Properties properties;
     protected static String rdapPropertiesPath = System.getProperty("rdap.config","");
@@ -618,26 +618,30 @@ public class WhoisRdapService {
     private Response handleSearch(final String objectType, final String[] fields, final String term, final HttpServletRequest request, final HttpHeaders httpHeaders) {
         LOGGER.info("Search {} for {}", fields, term);
         try {
+            final boolean[] isTruncated = new boolean[1];
+            isTruncated[0] = false;
             final List<RpslObject> objects = freeTextIndex.search(new IndexTemplate.SearchCallback<List<RpslObject>>() {
                 @Override
                 public List<RpslObject> search(IndexReader indexReader, TaxonomyReader taxonomyReader, IndexSearcher indexSearcher) throws IOException {
                     final Stopwatch stopWatch = new Stopwatch().start();
-                    final List<RpslObject> results = Lists.newArrayList();
-                    final int maxResults = Math.max(SEARCH_MAX_RESULTS, indexReader.numDocs());
+                    List<RpslObject> results = Lists.newArrayList();
                     try {
                         final QueryParser queryParser = new MultiFieldQueryParser(Version.LUCENE_44, fields, new RdapAnalyzer());
                         queryParser.setAllowLeadingWildcard(true);
                         queryParser.setDefaultOperator(QueryParser.Operator.AND);
                         final org.apache.lucene.search.Query query = queryParser.parse(term);
-                        final TopDocs topDocs = indexSearcher.search(query, maxResults);
+                        final TopDocs topDocs = indexSearcher.search(query, SEARCH_MAX_RESULTS + 1);
                         for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
                             final Document document = indexSearcher.doc(scoreDoc.doc);
                             results.add(convertLuceneDocumentToRpslObject(document));
                         }
+                        if (results.size() >= (SEARCH_MAX_RESULTS + 1)) {
+                            isTruncated[0] = true;
+                            results = results.subList(0, SEARCH_MAX_RESULTS);
+                        }
 
                         LOGGER.info("Found {} objects in {}", results.size(), stopWatch.stop());
                         return results;
-
                     } catch (ParseException e) {
                         throw new IllegalArgumentException(e);
                     }
@@ -658,7 +662,8 @@ public class WhoisRdapService {
                                            baseUrl,
                                            objects,
                                            lastUpdateds,
-                                           noticeFactory);
+                                           noticeFactory,
+                                           isTruncated[0]);
 
             Response.ResponseBuilder searchResponse =
                 Response.status(objects.isEmpty() ? Response.Status.NOT_FOUND

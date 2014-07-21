@@ -159,7 +159,8 @@ class RdapObjectMapper {
                                        final String baseUrl,
                                        final List<RpslObject> objects, 
                                        final Iterable<LocalDateTime> localDateTimes,
-                                       final NoticeFactory noticeFactory) {
+                                       final NoticeFactory noticeFactory,
+                                       final boolean isTruncated) {
         final SearchResult searchResult = new SearchResult();
         searchResult.isForType(objectType);
         final Iterator<LocalDateTime> iterator = localDateTimes.iterator();
@@ -174,6 +175,11 @@ class RdapObjectMapper {
 
         searchResult.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
         searchResult.getNotices().addAll(noticeFactory.generateResponseNotices(requestUrl));
+        /* By default, the resultsTruncated key will not be included in the
+         * response unless it is true. */
+        if (isTruncated) {
+            searchResult.setResultsTruncated(true);
+        }
 
         return searchResult;
     }

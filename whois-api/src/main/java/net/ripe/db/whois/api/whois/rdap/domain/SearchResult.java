@@ -22,6 +22,9 @@ public class SearchResult extends RdapObject implements Serializable {
     @XmlElement(name = "domainSearchResults")
     protected List<Domain> domainResults;
 
+    @XmlElement(name = "resultsTruncated")
+    protected Boolean resultsTruncated;
+
     public List<Entity> getEntitySearchResults() {
         return entityResults;
     }
@@ -50,5 +53,9 @@ public class SearchResult extends RdapObject implements Serializable {
         } else if (objectType.equals("domain")) {
             domainResults = Lists.newArrayList();
         }
+    }
+
+    public void setResultsTruncated(boolean resultsTruncated) {
+        this.resultsTruncated = resultsTruncated;
     }
 }
