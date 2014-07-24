@@ -665,9 +665,7 @@ public class WhoisRdapService {
                                            noticeFactory,
                                            isTruncated[0]);
 
-            Response.ResponseBuilder searchResponse =
-                Response.status(objects.isEmpty() ? Response.Status.NOT_FOUND
-                                                  : Response.Status.OK);
+            Response.ResponseBuilder searchResponse = Response.status(Response.Status.OK);
             searchResponse.entity(result);
             addResponseHeaders(httpHeaders, searchResponse);
             return searchResponse.build();
