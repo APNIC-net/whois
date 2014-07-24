@@ -75,7 +75,7 @@ class RdapObjectMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdapObjectMapper.class);
 
     protected static final List<String> RDAP_CONFORMANCE_LEVEL = Lists.newArrayList("rdap_level_0");
-    private static final Joiner NEWLINE_JOINER = Joiner.on("\n");
+    private static final Joiner NEWLINE_JOINER = Joiner.on("\\n");
     private final String port43 = "port43";
 
     protected static DatatypeFactory dtf;
