@@ -108,18 +108,6 @@ public class WhoisRdapService {
 
     static {
         initProperties();
-        dbg("started");
-    }
-
-    private static void dbg(String msg)
-    {
-        try {
-        Writer output;
-        output = new BufferedWriter(new FileWriter("/tmp/dbg", true));
-        output.append(msg + "\n");
-        output.close();
-        } catch (Exception e) {
-        }
     }
 
     private final QueryHandler queryHandler;
