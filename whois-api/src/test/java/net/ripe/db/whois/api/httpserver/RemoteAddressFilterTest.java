@@ -3,7 +3,6 @@ package net.ripe.db.whois.api.httpserver;
 import com.google.common.collect.Lists;
 import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.IpRanges;
-import org.eclipse.jetty.http.HttpHeaders;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
@@ -63,7 +62,7 @@ public class RemoteAddressFilterTest {
 
     @Test
     public void forward_header() throws Exception {
-        when(request.getHeaders(HttpHeaders.X_FORWARDED_FOR)).thenReturn(Collections.enumeration(Lists.newArrayList("193.0.20.1")));
+        when(request.getHeaders("X-Forwarded-For")).thenReturn(Collections.enumeration(Lists.newArrayList("193.0.20.1")));
         when(request.getRemoteAddr()).thenReturn("10.0.0.0");
 
         subject.doFilter(request, response, filterChain);
@@ -73,7 +72,7 @@ public class RemoteAddressFilterTest {
 
     @Test
     public void forward_header_with_zone_index() throws Exception {
-        when(request.getHeaders(HttpHeaders.X_FORWARDED_FOR)).thenReturn(Collections.enumeration(Lists.newArrayList("193.0.20.1%1024")));
+        when(request.getHeaders("X-Forwarded-For")).thenReturn(Collections.enumeration(Lists.newArrayList("193.0.20.1%1024")));
         when(request.getRemoteAddr()).thenReturn("10.0.0.0");
 
         subject.doFilter(request, response, filterChain);
@@ -84,7 +83,7 @@ public class RemoteAddressFilterTest {
     @Test
     public void forward_header_ripe_range() throws Exception {
         when(ipRanges.isTrusted(IpInterval.parse("193.0.20.1"))).thenReturn(true);
-        when(request.getHeaders(HttpHeaders.X_FORWARDED_FOR)).thenReturn(Collections.enumeration(Lists.newArrayList("74.125.136.99, 193.0.20.1")));
+        when(request.getHeaders("X-Forwarded-For")).thenReturn(Collections.enumeration(Lists.newArrayList("74.125.136.99, 193.0.20.1")));
         when(request.getRemoteAddr()).thenReturn("10.0.0.0");
 
         subject.doFilter(request, response, filterChain);
@@ -95,7 +94,7 @@ public class RemoteAddressFilterTest {
     @Test
     public void forward_headers_ripe_range() throws Exception {
         when(ipRanges.isTrusted(IpInterval.parse("193.0.20.1"))).thenReturn(true);
-        when(request.getHeaders(HttpHeaders.X_FORWARDED_FOR)).thenReturn(Collections.enumeration(Lists.newArrayList("74.125.136.99", "193.0.20.1")));
+        when(request.getHeaders("X-Forwarded-For")).thenReturn(Collections.enumeration(Lists.newArrayList("74.125.136.99", "193.0.20.1")));
         when(request.getRemoteAddr()).thenReturn("10.0.0.0");
 
         subject.doFilter(request, response, filterChain);

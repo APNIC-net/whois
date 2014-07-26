@@ -63,7 +63,7 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
                 if (request.getQueryString() != null) {
                     selfUrl += request.getQueryString();
                 }
-                if (!selfUrl.matches("/rdap/")) {
+                if (!selfUrl.matches(".*/rdap/.*")) {
                     return;
                 }
 

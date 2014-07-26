@@ -28,7 +28,7 @@
         <compiler.version>1.7</compiler.version>
         <java.version>1.7</java.version>
         <jersey.version>1.17</jersey.version>
-        <jetty.version>9.1.5.v20140505</jetty.version>
+        <jetty.version>9.2.2.v20140723</jetty.version>
         <lucene.version>4.4.0</lucene.version>
         <whois.main>OVERRIDE</whois.main>
         <sonar.skippedModules>whois-oneshot</sonar.skippedModules>

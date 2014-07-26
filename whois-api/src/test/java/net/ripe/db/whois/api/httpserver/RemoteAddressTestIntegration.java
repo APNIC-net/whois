@@ -3,7 +3,6 @@ package net.ripe.db.whois.api.httpserver;
 import net.ripe.db.whois.api.AbstractRestClientTest;
 import net.ripe.db.whois.common.IntegrationTest;
 import net.ripe.db.whois.common.domain.IpRanges;
-import org.eclipse.jetty.http.HttpHeaders;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ public class RemoteAddressTestIntegration extends AbstractRestClientTest {
     public void help_forward_header() throws Exception {
         final String index = client.resource(
                 String.format("http://localhost:%s/whois/syncupdates/TEST?HELP=yes", getPort(AUDIENCE)))
-                .header(HttpHeaders.X_FORWARDED_FOR, "10.0.0.0")
+                .header("X-Forwarded-For", "10.0.0.0")
                 .get(String.class);
 
         assertThat(index, containsString("From-Host: 10.0.0.0"));
@@ -42,8 +41,8 @@ public class RemoteAddressTestIntegration extends AbstractRestClientTest {
 
         final String index = client.resource(
                 String.format("http://localhost:%s/whois/syncupdates/TEST?HELP=yes", getPort(AUDIENCE)))
-                .header(HttpHeaders.X_FORWARDED_FOR, "193.0.20.1")
-                .header(HttpHeaders.X_FORWARDED_FOR, "74.125.136.99")
+                .header("X-Forwarded-For", "193.0.20.1")
+                .header("X-Forwarded-For", "74.125.136.99")
                 .get(String.class);
 
         assertThat(index, containsString("From-Host: 74.125.136.99"));
