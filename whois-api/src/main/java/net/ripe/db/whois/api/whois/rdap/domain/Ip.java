@@ -77,6 +77,13 @@ public class Ip
     protected String parentHandle;
 
     /**
+     * Constructor: sets objectClassName to the correct value.
+     */
+    public Ip() {
+        setObjectClassName("ip network");
+    }
+
+    /**
      * Gets the value of the handle property.
      * 
      * @return

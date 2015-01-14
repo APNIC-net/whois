@@ -113,6 +113,13 @@ public class Domain
     protected HashMap publicIds;
 
     /**
+     * Constructor: sets objectClassName to the correct value.
+     */
+    public Domain() {
+        setObjectClassName("domain");
+    }
+
+    /**
      * Gets the value of the handle property.
      * 
      * @return

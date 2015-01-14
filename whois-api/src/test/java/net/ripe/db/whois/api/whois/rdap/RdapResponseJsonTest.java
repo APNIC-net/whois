@@ -51,6 +51,7 @@ public class RdapResponseJsonTest {
                 "  \"vcardArray\" : [ \"vcard\", [ [ \"version\", { }, \"text\", \"4.0\" ], [ \"fn\", { }, \"text\", \"Joe User\" ], [ \"n\", { }, \"text\", [ \"User\", \"Joe\", \"\", [ \"ing. jr\", \"M.Sc.\" ] ] ], [ \"gender\", { }, \"text\", \"M\" ], [ \"lang\", {\n" +
                 "    \"pref\" : \"1\"\n" +
                 "  }, \"language-tag\", \"fr\" ] ] ],\n" +
+                "  \"objectClassName\" : \"entity\",\n" +
                 "  \"port43\" : \"whois.example.com\"\n" +
                 "}"));
     }
@@ -148,6 +149,7 @@ public class RdapResponseJsonTest {
                 "    \"ipv4\" : [ \"192.0.2.1\", \"192.0.2.2\" ],\n" +
                 "    \"ipv6\" : [ \"2001:db8::123\" ]\n" +
                 "  },\n" +
+                "  \"objectClassName\" : \"nameserver\",\n" +
                 "  \"status\" : [ \"active\" ],\n" +
                 "  \"remarks\" : [ {\n" +
                 "    \"description\" : [ \"She sells sea shells down by the sea shore.\", \"Originally written by Terry Sullivan.\" ]\n" +
@@ -259,9 +261,11 @@ public class RdapResponseJsonTest {
                 "  \"handle\" : \"XXXX\",\n" +
                 "  \"ldhName\" : \"192.in-addr.arpa\",\n" +
                 "  \"nameservers\" : [ {\n" +
-                "    \"ldhName\" : \"ns1.rir.example\"\n" +
+                "    \"ldhName\" : \"ns1.rir.example\",\n" +
+                "    \"objectClassName\" : \"nameserver\"\n" +
                 "  }, {\n" +
-                "    \"ldhName\" : \"ns2.rir.example\"\n" +
+                "    \"ldhName\" : \"ns2.rir.example\",\n" +
+                "    \"objectClassName\" : \"nameserver\"\n" +
                 "  } ],\n" +
                 "  \"secureDNS\" : {\n" +
                 "    \"delegationSigned\" : true,\n" +
@@ -272,10 +276,12 @@ public class RdapResponseJsonTest {
                 "      \"digestType\" : 1\n" +
                 "    } ]\n" +
                 "  },\n" +
+                "  \"objectClassName\" : \"domain\",\n" +
                 "  \"entities\" : [ {\n" +
                 "    \"handle\" : \"XXXX\",\n" +
                 "    \"vcardArray\" : [ \"vcard\", [ [ \"version\", { }, \"text\", \"4.0\" ], [ \"fn\", { }, \"text\", \"Joe User\" ], [ \"kind\", { }, \"text\", \"individual\" ], [ \"org\", { }, \"text\", \"Example\" ], [ \"title\", { }, \"text\", \"Research Scientist\" ], [ \"role\", { }, \"text\", \"Project Lead\" ], [ \"adr\", { }, \"text\", [ \"\", \"Suite 1234\", \"4321 Rue Somewhere\", \"Quebec\", \"QC\", \"G1V 2M2\", \"Canada\" ] ], [ \"tel\", { }, \"uri\", \"tel:+1-555-555-1234;ext=102\" ], [ \"email\", { }, \"text\", \"joe.user@example.com\" ] ] ],\n" +
                 "    \"roles\" : [ \"registrant\" ],\n" +
+                "    \"objectClassName\" : \"entity\",\n" +
                 "    \"remarks\" : [ {\n" +
                 "      \"description\" : [ \"She sells sea shells down by the sea shore.\", \"Originally written by Terry Sullivan.\" ]\n" +
                 "    } ],\n" +
@@ -382,11 +388,13 @@ public class RdapResponseJsonTest {
                 "  \"type\" : \"DIRECT ALLOCATION\",\n" +
                 "  \"country\" : \"AU\",\n" +
                 "  \"parentHandle\" : \"YYYY-RIR\",\n" +
+                "  \"objectClassName\" : \"ip network\",\n" +
                 "  \"status\" : [ \"allocated\" ],\n" +
                 "  \"entities\" : [ {\n" +
                 "    \"handle\" : \"XXXX\",\n" +
                 "    \"vcardArray\" : [ \"vcard\", [ [ \"version\", { }, \"text\", \"4.0\" ], [ \"fn\", { }, \"text\", \"Joe User\" ], [ \"kind\", { }, \"text\", \"individual\" ], [ \"org\", { }, \"text\", \"Example\" ], [ \"title\", { }, \"text\", \"Research Scientist\" ], [ \"role\", { }, \"text\", \"Project Lead\" ], [ \"adr\", { }, \"text\", [ \"\", \"Suite 1234\", \"4321 Rue Somewhere\", \"Quebec\", \"QC\", \"G1V 2M2\", \"Canada\" ] ], [ \"tel\", { }, \"uri\", \"tel:+1-555-555-1234;ext=102\" ], [ \"email\", { }, \"text\", \"joe.user@example.com\" ] ] ],\n" +
                 "    \"roles\" : [ \"registrant\" ],\n" +
+                "    \"objectClassName\" : \"entity\",\n" +
                 "    \"remarks\" : [ {\n" +
                 "      \"description\" : [ \"She sells sea shells down by the sea shore.\", \"Originally written by Terry Sullivan.\" ]\n" +
                 "    } ],\n" +

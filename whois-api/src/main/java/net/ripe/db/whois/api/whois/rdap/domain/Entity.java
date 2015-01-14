@@ -61,6 +61,13 @@ public class Entity
     protected HashMap publicIds;
 
     /**
+     * Constructor: sets objectClassName to the correct value.
+     */
+    public Entity() {
+        setObjectClassName("entity");
+    }
+
+    /**
      * Gets the value of the handle property.
      * 
      * @return

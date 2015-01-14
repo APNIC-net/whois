@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
+ *         &lt;element name="objectClassName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="status" type="{http://www.w3.org/2001/XMLSchema}anyType" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="entities" type="{}entity" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="remarks" type="{}remark" maxOccurs="unbounded" minOccurs="0"/>
@@ -47,6 +48,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "rdapObject", propOrder = {
+    "objectClassName",
     "status",
     "entities",
     "remarks",
@@ -67,7 +69,7 @@ import javax.xml.bind.annotation.XmlType;
 public class RdapObject
     implements Serializable
 {
-
+    protected String objectClassName;
     protected List<Object> status;
     protected List<Entity> entities;
     protected List<Remark> remarks;
@@ -330,4 +332,27 @@ public class RdapObject
         this.port43 = value;
     }
 
+    /**
+     * Gets the value of the objectClassName property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getObjectClassName() {
+        return objectClassName;
+    }
+
+    /**
+     * Sets the value of the objectClassName property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setObjectClassName(String value) {
+        this.objectClassName = value;
+    }
 }

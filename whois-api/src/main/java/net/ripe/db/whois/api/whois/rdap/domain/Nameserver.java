@@ -69,6 +69,13 @@ public class Nameserver
     protected Nameserver.IpAddresses ipAddresses;
 
     /**
+     * Constructor: sets objectClassName to the correct value.
+     */
+    public Nameserver() {
+        setObjectClassName("nameserver");
+    }
+
+    /**
      * Gets the value of the handle property.
      * 
      * @return

@@ -67,6 +67,13 @@ public class Autnum
     protected String country;
 
     /**
+     * Constructor: sets objectClassName to the correct value.
+     */
+    public Autnum() {
+        setObjectClassName("autnum");
+    }
+
+    /**
      * Gets the value of the handle property.
      * 
      * @return
