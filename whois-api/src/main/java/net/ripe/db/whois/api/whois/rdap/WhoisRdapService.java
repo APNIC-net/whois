@@ -106,6 +106,8 @@ public class WhoisRdapService {
     protected static Properties properties;
     protected static String rdapPropertiesPath = System.getProperty("rdap.config","");
 
+    private static final int NOT_IMPLEMENTED = 501;
+
     static {
         initProperties();
     }
@@ -129,7 +131,7 @@ public class WhoisRdapService {
     private Response.ResponseBuilder getUnsupportedObjectClassResponse(HttpServletRequest request) {
         String url = getRequestUrl(request);
         LOGGER.error(String.format("RDAP query for unsupported object type: %s", url));
-        return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, url, Arrays.asList("This object class is not supported by this server."), noticeFactory, true));
+        return Response.status(NOT_IMPLEMENTED).entity(RdapException.build(NOT_IMPLEMENTED, "Not Implemented", url, Arrays.asList("This object class is not supported by this server."), noticeFactory, true));
     }
 
     private Response.ResponseBuilder getBadRequestResponse(HttpServletRequest request) {

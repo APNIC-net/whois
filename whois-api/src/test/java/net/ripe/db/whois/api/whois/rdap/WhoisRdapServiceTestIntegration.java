@@ -207,6 +207,18 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
     }
 
     @Test
+    public void lookup_nameserver() {
+        try {
+            createResource(AUDIENCE, "nameserver/asdf")
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .get(Nameserver.class);
+            fail();
+        } catch (final UniformInterfaceException e) {
+            assertThat(e.getResponse().getStatus(), is(501));
+        }
+    }
+
+    @Test
     public void lookup_inetnum_range() {
         databaseHelper.addObject("" +
                 "inetnum:      192.0.0.0 - 192.255.255.255\n" +
