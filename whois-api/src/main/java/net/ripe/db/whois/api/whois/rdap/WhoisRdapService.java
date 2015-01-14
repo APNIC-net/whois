@@ -128,10 +128,10 @@ public class WhoisRdapService {
         return response.header("Access-Control-Allow-Origin", "*");
     }
 
-    private Response.ResponseBuilder getUnsupportedObjectClassResponse(HttpServletRequest request) {
+    private Response.ResponseBuilder getUnsupportedOperationResponse(HttpServletRequest request) {
         String url = getRequestUrl(request);
         LOGGER.error(String.format("RDAP query for unsupported object type: %s", url));
-        return Response.status(NOT_IMPLEMENTED).entity(RdapException.build(NOT_IMPLEMENTED, "Not Implemented", url, Arrays.asList("This object class is not supported by this server."), noticeFactory, true));
+        return Response.status(NOT_IMPLEMENTED).entity(RdapException.build(NOT_IMPLEMENTED, "Not Implemented", url, Arrays.asList("This type of request is not supported by this server."), noticeFactory, true));
     }
 
     private Response.ResponseBuilder getBadRequestResponse(HttpServletRequest request) {
@@ -239,7 +239,7 @@ public class WhoisRdapService {
             LOGGER.error(String.format("RDAP query with spec-valid but here-invalid syntax: %s", getRequestUrl(request)));
             response = Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(RdapException.build(Response.Status.NOT_FOUND, selfUrl, Arrays.asList("The syntax used for this request is invalid for this particular server."), noticeFactory, false));
         } catch (UnsupportedOperationException uoe) {
-            response = getUnsupportedObjectClassResponse(request);
+            response = getUnsupportedOperationResponse(request);
         } catch (IllegalArgumentException iae) {
             response = getBadRequestResponse(request);
         } catch (Throwable t) {
@@ -588,7 +588,7 @@ public class WhoisRdapService {
             @Context final HttpServletRequest request,
             @Context final HttpHeaders httpHeaders,
             @QueryParam("name") final String name) {
-        return addResponseHeaders(httpHeaders, getUnsupportedObjectClassResponse(request)).build();
+        return addResponseHeaders(httpHeaders, getUnsupportedOperationResponse(request)).build();
     }
 
     @GET
@@ -597,7 +597,12 @@ public class WhoisRdapService {
     public Response searchDomains(
             @Context final HttpServletRequest request,
             @Context final HttpHeaders httpHeaders,
-            @QueryParam("name") final String name) {
+            @QueryParam("name") final String name,
+            @QueryParam("nsIp") final String nsIp,
+            @QueryParam("nsLdhName") final String nsLdhName) {
+        if (!StringUtils.isEmpty(nsIp) || !StringUtils.isEmpty(nsLdhName)) {
+            return addResponseHeaders(httpHeaders, getUnsupportedOperationResponse(request)).build();
+        }
         if (StringUtils.isEmpty(name)) {
             return addResponseHeaders(httpHeaders, getBadRequestResponse(request)).build();
         }
