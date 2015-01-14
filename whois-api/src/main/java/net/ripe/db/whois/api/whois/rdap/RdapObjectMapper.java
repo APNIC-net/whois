@@ -429,7 +429,7 @@ class RdapObjectMapper {
                 nameserver.setIpAddresses(ipAddresses);
             }
 
-            domain.getNameServers().add(nameserver);
+            domain.getNameservers().add(nameserver);
         }
 
         final Domain.SecureDNS secureDNS = new Domain.SecureDNS();

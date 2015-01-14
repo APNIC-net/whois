@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="handle" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="ldhName" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="unicodeName" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="nameServers" type="{}nameserver" maxOccurs="unbounded"/>
+ *         &lt;element name="nameservers" type="{}nameserver" maxOccurs="unbounded"/>
  *         &lt;element name="secureDNS" minOccurs="0">
  *           &lt;complexType>
  *             &lt;complexContent>
@@ -91,7 +91,7 @@ import javax.xml.bind.annotation.XmlType;
     "handle",
     "ldhName",
     "unicodeName",
-    "nameServers",
+    "nameservers",
     "secureDNS",
     "publicIds"
 })
@@ -108,7 +108,7 @@ public class Domain
     @XmlElement(required = true)
     protected String unicodeName;
     @XmlElement(required = true)
-    protected List<Nameserver> nameServers;
+    protected List<Nameserver> nameservers;
     protected Domain.SecureDNS secureDNS;
     protected HashMap publicIds;
 
@@ -185,18 +185,18 @@ public class Domain
     }
 
     /**
-     * Gets the value of the nameServers property.
+     * Gets the value of the nameservers property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the nameServers property.
+     * This is why there is not a <CODE>set</CODE> method for the nameservers property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getNameServers().add(newItem);
+     *    getNameservers().add(newItem);
      * </pre>
      * 
      * 
@@ -206,11 +206,11 @@ public class Domain
      * 
      * 
      */
-    public List<Nameserver> getNameServers() {
-        if (nameServers == null) {
-            nameServers = new ArrayList<Nameserver>();
+    public List<Nameserver> getNameservers() {
+        if (nameservers == null) {
+            nameservers = new ArrayList<Nameserver>();
         }
-        return this.nameServers;
+        return this.nameservers;
     }
 
     /**

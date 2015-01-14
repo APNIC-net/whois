@@ -1,7 +1,7 @@
 {
 
     "ldhName" : "128.144.202.in-addr.arpa",
-    "nameServers" : [ {
+    "nameservers" : [ {
         "ldhName" : "ns2.druknet.bt"
     }, {
         "ldhName" : "ns1.druknet.bt"

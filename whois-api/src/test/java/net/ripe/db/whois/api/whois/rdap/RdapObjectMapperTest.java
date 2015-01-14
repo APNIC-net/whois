@@ -146,8 +146,8 @@ public class RdapObjectMapperTest {
         assertThat(result.getRdapConformance(), is(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL));
         assertThat(result.getHandle(), is("2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
         assertThat(result.getLdhName(), is("2.1.2.1.5.5.5.2.0.2.1.e164.arpa"));
-        assertThat(result.getNameServers(), hasSize(1));
-        assertThat(result.getNameServers().get(0).getLdhName(), is("ns.1.net"));
+        assertThat(result.getNameservers(), hasSize(1));
+        assertThat(result.getNameservers().get(0).getLdhName(), is("ns.1.net"));
         assertThat(result.getEvents(), hasSize(1));
         assertThat(result.getEvents().get(0).getEventAction(), is("last changed"));
         assertThat(result.getEvents().get(0).getEventDate(), is(XML_GC_VERSION_TIMESTAMP_LOCAL));
@@ -192,12 +192,12 @@ public class RdapObjectMapperTest {
         assertThat(result.getHandle(), is("31.12.202.in-addr.arpa"));
         assertThat(result.getLdhName(), is("31.12.202.in-addr.arpa"));
 
-        assertThat(result.getNameServers(), hasSize(3));
+        assertThat(result.getNameservers(), hasSize(3));
 
         // For easy testing of unordered List<Object> values using xpath
         Document domResult = RdapHelperUtils.toDOM(result);
         LOGGER.info(RdapHelperUtils.DOMToString(domResult));
-        String prefixpath = "/" + Domain.class.getName() + "/nameServers/" + Nameserver.class.getName();
+        String prefixpath = "/" + Domain.class.getName() + "/nameservers/" + Nameserver.class.getName();
 
         // Use xpath to test for presence of bean values in unordered list
         assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'ns1.test.com.au']"));
@@ -269,12 +269,12 @@ public class RdapObjectMapperTest {
         assertThat(result.getRdapConformance(), is(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL));
         assertThat(result.getHandle(), is("102.130.in-addr.arpa"));
         assertThat(result.getLdhName(), is("102.130.in-addr.arpa"));
-        assertThat(result.getNameServers(), hasSize(4));
+        assertThat(result.getNameservers(), hasSize(4));
 
         // For easy testing of unordered List<Object> values using xpath
         Document domResult = RdapHelperUtils.toDOM(result);
         //LOGGER.info(RdapHelperUtils.DOMToString(domResult));
-        String prefixpath = "/" + Domain.class.getName() + "/nameServers/" + Nameserver.class.getName();
+        String prefixpath = "/" + Domain.class.getName() + "/nameservers/" + Nameserver.class.getName();
 
         // Use xpath to test for presence of bean values in unordered list
         assertThat(domResult, hasXPath(prefixpath+ "/ldhName[text() = 'NS1.UQ.EDU.AU']"));
@@ -320,12 +320,12 @@ public class RdapObjectMapperTest {
         assertThat(result.getHandle(), is("29.12.202.in-addr.arpa"));
         assertThat(result.getLdhName(), is("29.12.202.in-addr.arpa"));
 
-        assertThat(result.getNameServers(), hasSize(3));
+        assertThat(result.getNameservers(), hasSize(3));
 
         // For easy testing of unordered List<Object> values using xpath
         Document domResult = RdapHelperUtils.toDOM(result);
         //LOGGER.info(RdapHelperUtils.DOMToString(domResult));
-        String prefixpath = "/" + Domain.class.getName() + "/nameServers/" + Nameserver.class.getName();
+        String prefixpath = "/" + Domain.class.getName() + "/nameservers/" + Nameserver.class.getName();
 
         // Use xpath to test for presence of bean values in unordered list
         assertThat(domResult, hasXPath(prefixpath + "/ldhName[text() = 'cumin.apnic.net']"));

@@ -178,11 +178,11 @@ public class RdapResponseJsonTest {
 
         final Nameserver nameserver1 = new Nameserver();
         nameserver1.setLdhName("ns1.rir.example");
-        domain.getNameServers().add(nameserver1);
+        domain.getNameservers().add(nameserver1);
 
         final Nameserver nameserver2 = new Nameserver();
         nameserver2.setLdhName("ns2.rir.example");
-        domain.getNameServers().add(nameserver2);
+        domain.getNameservers().add(nameserver2);
 
         final Remark remark = new Remark();
         remark.getDescription().addAll(Lists.newArrayList("She sells sea shells down by the sea shore.", "Originally written by Terry Sullivan."));
@@ -258,7 +258,7 @@ public class RdapResponseJsonTest {
                 "{\n" +
                 "  \"handle\" : \"XXXX\",\n" +
                 "  \"ldhName\" : \"192.in-addr.arpa\",\n" +
-                "  \"nameServers\" : [ {\n" +
+                "  \"nameservers\" : [ {\n" +
                 "    \"ldhName\" : \"ns1.rir.example\"\n" +
                 "  }, {\n" +
                 "    \"ldhName\" : \"ns2.rir.example\"\n" +
