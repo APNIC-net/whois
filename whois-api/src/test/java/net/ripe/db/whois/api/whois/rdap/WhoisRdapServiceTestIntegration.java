@@ -593,7 +593,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                     .get(Entity.class);
             fail();
         } catch (UniformInterfaceException e) {
-            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
         }
     }
 
@@ -671,8 +671,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                     .get(Domain.class);
             fail();
         } catch (UniformInterfaceException e) {
-            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
+            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.NOT_FOUND.getStatusCode()));
         }
     }
 
@@ -684,8 +684,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                     .get(Domain.class);
             fail();
         } catch (UniformInterfaceException e) {
-            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
+            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.NOT_FOUND.getStatusCode()));
         }
     }
 
@@ -711,8 +711,8 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                     .get(Entity.class);
             fail();
         } catch (UniformInterfaceException e) {
-            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
-            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
+            assertThat(e.getResponse().getEntity(net.ripe.db.whois.api.whois.rdap.domain.Error.class).getErrorCode(), is(Response.Status.NOT_FOUND.getStatusCode()));
         }
     }
 
@@ -1102,7 +1102,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
                     .get(Entity.class);
             fail();
         } catch (UniformInterfaceException e) {
-            assertThat(e.getResponse().getStatus(), is(Response.Status.BAD_REQUEST.getStatusCode()));
+            assertThat(e.getResponse().getStatus(), is(Response.Status.NOT_FOUND.getStatusCode()));
         }
     }
 
