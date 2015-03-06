@@ -157,7 +157,8 @@ public class RdapResponseJsonTest {
                 "  \"links\" : [ {\n" +
                 "    \"value\" : \"http://example.net/nameserver/xxxx\",\n" +
                 "    \"rel\" : \"self\",\n" +
-                "    \"href\" : \"http://example.net/nameserver/xxxx\"\n" +
+                "    \"href\" : \"http://example.net/nameserver/xxxx\",\n" +
+                "    \"type\" : \"application/rdap+json\"\n" +
                 "  } ],\n" +
                 "  \"events\" : [ {\n" +
                 "    \"eventAction\" : \"registration\",\n" +
@@ -173,6 +174,8 @@ public class RdapResponseJsonTest {
 
     @Test
     public void domain_serialization_test() throws Exception {
+        /* Since this doesn't use RdapObjectMapper, the links don't have "type"
+         * attributes.  This is purposeful. */
         final Domain domain = new Domain();
 
         domain.setHandle("XXXX");
@@ -401,7 +404,8 @@ public class RdapResponseJsonTest {
                 "    \"links\" : [ {\n" +
                 "      \"value\" : \"http://example.net/entity/xxxx\",\n" +
                 "      \"rel\" : \"self\",\n" +
-                "      \"href\" : \"http://example.net/entity/xxxx\"\n" +
+                "      \"href\" : \"http://example.net/entity/xxxx\",\n" +
+                "      \"type\" : \"application/rdap+json\"\n" +
                 "    } ],\n" +
                 "    \"events\" : [ {\n" +
                 "      \"eventAction\" : \"registration\",\n" +
@@ -419,11 +423,13 @@ public class RdapResponseJsonTest {
                 "  \"links\" : [ {\n" +
                 "    \"value\" : \"http://example.net/ip/2001:db8::/48\",\n" +
                 "    \"rel\" : \"self\",\n" +
-                "    \"href\" : \"http://example.net/ip/2001:db8::/48\"\n" +
+                "    \"href\" : \"http://example.net/ip/2001:db8::/48\",\n" +
+                "    \"type\" : \"application/rdap+json\"\n" +
                 "  }, {\n" +
                 "    \"value\" : \"http://example.net/ip/2001:db8::/48\",\n" +
                 "    \"rel\" : \"up\",\n" +
-                "    \"href\" : \"http://example.net/ip/2001:C00::/23\"\n" +
+                "    \"href\" : \"http://example.net/ip/2001:C00::/23\",\n" +
+                "    \"type\" : \"application/rdap+json\"\n" +
                 "  } ],\n" +
                 "  \"events\" : [ {\n" +
                 "    \"eventAction\" : \"registration\",\n" +

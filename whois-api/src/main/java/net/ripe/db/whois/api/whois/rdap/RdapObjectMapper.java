@@ -524,7 +524,7 @@ class RdapObjectMapper {
     }
 
     public static Link createLink(final String rel, final String value, final String href) {
-        return createLink(rel, value, href, null);
+        return createLink(rel, value, href, "application/rdap+json");
     }
 
     public static Link createLink(final String rel, final String value, final String href, final String type) {
