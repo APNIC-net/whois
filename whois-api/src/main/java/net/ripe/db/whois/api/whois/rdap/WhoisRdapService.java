@@ -64,6 +64,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.EmptyResultDataAccessException;
 import net.ripe.db.whois.api.whois.rdap.domain.Help;
 
 import javax.annotation.Nullable;
@@ -369,6 +370,28 @@ public class WhoisRdapService {
         return !result.isEmpty();
     }
 
+    private LocalDateTime getLastUpdated(RpslObject rpslObject) {
+        LocalDateTime ldt;
+        try {
+            String source = rpslObject.getValueForAttribute(AttributeType.SOURCE).toString();
+            /* If this object has a source other than APNIC, then do
+             * not try to fetch the last updated time from objectDao,
+             * since that object only looks in the apnicdb database.
+             * */
+            if (source.equals("APNIC")) {
+                ldt = objectDao.getLastUpdated(rpslObject.getObjectId());
+            } else {
+                ldt = null;
+            }
+        } catch (final EmptyResultDataAccessException erdae) {
+            /* This shouldn't happen, given the source check at the
+             * beginning, but the absence of this value should not
+             * prevent the rest of the object from being returned. */
+            ldt = null;
+        }
+        return ldt;
+    }
+
     protected RdapObject handleQuery(final Query query, final HttpServletRequest request) {
         try {
             final List<RpslObject> result = runQuery(query, request, false, true);
@@ -386,7 +409,7 @@ public class WhoisRdapService {
                     resultObject,
                     result,
                     // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
-                    objectDao.getLastUpdated(resultObject.getObjectId()),
+                    getLastUpdated(resultObject),
                     // TODO: [RL] for the equivalent, APNIC needs to find the referenced IRT object
                     abuseContacts,
                     getParentObject(resultObject),
@@ -647,7 +670,7 @@ public class WhoisRdapService {
                 @Nullable
                 @Override
                 public LocalDateTime apply(@Nullable RpslObject input) {
-                    return objectDao.getLastUpdated(input.getObjectId());
+                    return getLastUpdated(input);
                 }
             });
 

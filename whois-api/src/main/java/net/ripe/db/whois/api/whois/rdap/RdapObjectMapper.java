@@ -143,7 +143,12 @@ class RdapObjectMapper {
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
         }
 
-        rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
+        /* todo: null here indicates that the object is not in APNIC's
+         * core whois database.  As per notes in WhoisRdapService, the
+         * handling of such cases needs to be better. */
+        if (lastChangedTimestamp != null) {
+            rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
+        }
 
         /* todo: null here indicates that notices should not be added. It might
          * be better to add an explicit flag for that, though. */
@@ -201,7 +206,8 @@ class RdapObjectMapper {
         /* todo: This is added in getRdapObject, and it appears as though
          * addInformational is not called independently of getRdapObject, so
          * presumably getRdapObject is the correct place for it (doesn't make
-         * sense to add it twice). */
+         * sense to add it twice). (Note also that this can now be
+         * null.) */
         //rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
