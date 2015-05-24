@@ -373,12 +373,12 @@ public class WhoisRdapService {
     private LocalDateTime getLastUpdated(RpslObject rpslObject) {
         LocalDateTime ldt;
         try {
-            String source = rpslObject.getValueForAttribute(AttributeType.SOURCE).toString();
-            /* If this object has a source other than APNIC, then do
-             * not try to fetch the last updated time from objectDao,
-             * since that object only looks in the apnicdb database.
-             * */
-            if (source.equals("APNIC")) {
+            String objectSource = rpslObject.getValueForAttribute(AttributeType.SOURCE).toString();
+            /* If this object has a source other than the one for
+             * which this class was initialised, then do not try to
+             * fetch the last updated time from objectDao, since that
+             * object only looks in the 'core' database.  */
+            if (objectSource.equals(source)) {
                 ldt = objectDao.getLastUpdated(rpslObject.getObjectId());
             } else {
                 ldt = null;
