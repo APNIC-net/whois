@@ -266,9 +266,10 @@ class pendingRouteSpec extends BaseSpec {
         ack.summary.assertErrors(1, 1, 0, 0)
         ack.countErrorWarnInfo(2, 0, 0)
         ack.errors.any { it.operation == "Create" && it.key == "[route] 192.168.0.0/16AS100" }
-        ack.errorMessagesFor("Create", "[route] 192.168.0.0/16AS100") ==
-                ["Authorisation for [route] 192.168.0.0/16AS100 failed using \"mnt-by:\" not authenticated by: OWNER-MNT",
-                        "Authorisation for [inetnum] 192.168.0.0 - 192.169.255.255 failed using \"mnt-lower:\" not authenticated by: P-INET-MNT"]
+        def errorMessages = ack.errorMessagesFor("Create", "[route] 192.168.0.0/16AS100")
+        errorMessages.sort()
+        errorMessages == ["Authorisation for [inetnum] 192.168.0.0 - 192.169.255.255 failed using \"mnt-lower:\" not authenticated by: P-INET-MNT",
+                          "Authorisation for [route] 192.168.0.0/16AS100 failed using \"mnt-by:\" not authenticated by: OWNER-MNT"]
 
         queryObjectNotFound("-rGBT route 192.168.0.0/16", "route", "192.168.0.0/16")
     }
