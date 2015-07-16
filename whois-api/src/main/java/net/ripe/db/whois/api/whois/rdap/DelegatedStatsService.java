@@ -35,7 +35,7 @@ public class DelegatedStatsService implements EmbeddedValueResolverAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(DelegatedStatsService.class);
 
     private static final Set<ObjectType> ALLOWED_OBJECTTYPES = Sets.newHashSet(ObjectType.AUT_NUM, ObjectType.INET6NUM, ObjectType.INETNUM);
-    private final Map<CIString, String> sourceToPathMap = Maps.newHashMap();
+    private final Map<CIString, Map<String, String>> sourceToPathMap = Maps.newHashMap();
     private final Set<CIString> sources;
     private final AuthoritativeResourceData resourceData;
     private StringValueResolver valueResolver;
@@ -57,14 +57,20 @@ public class DelegatedStatsService implements EmbeddedValueResolverAware {
         for (CIString source : sources) {
             final String sourceName = source.toLowerCase().replace("-grs", "");
             final String propertyName = String.format("${rdap.redirect.%s:}", sourceName);
-            final String redirectUrl = valueResolver.resolveStringValue(propertyName);
-            if (!StringUtils.isBlank(redirectUrl)) {
-                sourceToPathMap.put(source, redirectUrl);
+            final String propertyValue = valueResolver.resolveStringValue(propertyName);
+            if (!StringUtils.isBlank(propertyValue)) {
+                final String[] redirectUrls = propertyValue.split(",");
+                final Map<String, String> schemeToPathMap = Maps.newHashMap();
+                for (String redirectUrl : redirectUrls) {
+                    final String scheme = redirectUrl.replaceFirst("://.*$", "").toLowerCase();
+                    schemeToPathMap.put(scheme, redirectUrl);
+                }
+                sourceToPathMap.put(source, schemeToPathMap);
             }
         }
     }
 
-    public URI getUriForRedirect(final String requestPath, final Query query) {
+    public URI getUriForRedirect(final String scheme, final String requestPath, final Query query) {
         final Optional<ObjectType> objectType = Iterables.tryFind(query.getObjectTypes(), new Predicate<ObjectType>() {
             @Override
             public boolean apply(ObjectType input) {
@@ -79,14 +85,20 @@ public class DelegatedStatsService implements EmbeddedValueResolverAware {
                 : null;
         
         if (realObjectType != null) {
-            for (Map.Entry<CIString, String> entry : sourceToPathMap.entrySet()) {
+            for (Map.Entry<CIString, Map<String, String>> entry : sourceToPathMap.entrySet()) {
                 final CIString sourceName = entry.getKey();
                 final AuthoritativeResource authoritativeResource = resourceData.getAuthoritativeResource(sourceName);
                 if (authoritativeResource.isMaintainedInRirSpace(realObjectType, CIString.ciString(query.getSearchValue()))) {
-                    final String basePath = entry.getValue();
-                    LOGGER.debug("Redirecting {} to {}", requestPath, sourceName);
-                    // TODO: don't include local path prefix (lookup from base context and replace)
-                    return URI.create(String.format("%s%s", basePath, requestPath.replaceFirst(".*/rdap", "")));
+                    final Map<String, String> schemeToPathMap = entry.getValue();
+                    if (!schemeToPathMap.isEmpty()) {
+                        String basePath = schemeToPathMap.get(scheme.toLowerCase());
+                        if (StringUtils.isEmpty(basePath)) {
+                            basePath = schemeToPathMap.entrySet().iterator().next().getValue();
+                        }
+                        LOGGER.debug("Redirecting {} to {}", requestPath, sourceName);
+                        // TODO: don't include local path prefix (lookup from base context and replace)
+                        return URI.create(String.format("%s%s", basePath, requestPath.replaceFirst(".*/rdap", "")));
+                    }
                 }
             }
         }
