@@ -224,7 +224,7 @@ public class WhoisRdapService {
                 int statusCode = webex.getResponse().getStatus();
                 if (statusCode == 404) {
                     Query q = getLookupQuery(whoisObjectTypes, getKey(whoisObjectTypes, key));
-                    response = redirect(request.getRequestURL().toString(), q);
+                    response = redirect(request.getScheme(), request.getRequestURL().toString(), q);
                 } else {
                     throw webex;
                 }
@@ -252,8 +252,8 @@ public class WhoisRdapService {
         return response.build();
     }
 
-    private Response.ResponseBuilder redirect(final String requestPath, final Query query) {
-        final URI uri = delegatedStatsService.getUriForRedirect(requestPath, query);
+    private Response.ResponseBuilder redirect(final String scheme, final String requestPath, final Query query) {
+        final URI uri = delegatedStatsService.getUriForRedirect(scheme, requestPath, query);
         return Response.status(Response.Status.MOVED_PERMANENTLY).location(uri);
     }
 
