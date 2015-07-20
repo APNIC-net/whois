@@ -4,12 +4,14 @@ import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.Arrays;
+import java.util.Map;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import net.ripe.db.whois.api.whois.rdap.DelegatedStatsService;
@@ -120,7 +122,7 @@ public class WhoisRdapService {
     private final FreeTextIndex freeTextIndex;
     private final NoticeFactory noticeFactory;
     private final String source;
-    private final String baseUrl;
+    private final Map<String, String> baseUrls;
 
     private String port43 = (String)properties.get("rdap.port43");
 
@@ -156,7 +158,7 @@ public class WhoisRdapService {
         this.abuseCFinder          = abuseCFinder;
         this.delegatedStatsService = delegatedStatsService;
         this.freeTextIndex         = freeTextIndex;
-        this.baseUrl               = baseUrl;
+        this.baseUrls              = extractBaseUrls(baseUrl);
         this.noticeFactory         = noticeFactory;
         this.port43                = port43;
         if (sourceContext != null) {
@@ -492,14 +494,29 @@ public class WhoisRdapService {
         return result;
     }
 
+    private static Map<String, String> extractBaseUrls(final String baseUrls) {
+        final Map<String, String> schemeToBaseUrlMap = Maps.newHashMap();
+        if (StringUtils.isNotEmpty(baseUrls)) {
+            final String[] baseUrlsArr = baseUrls.split(",");
+            for (String baseUrl : baseUrlsArr) {
+                final String scheme = baseUrl.replaceFirst("://.*$", "").toLowerCase();
+                schemeToBaseUrlMap.put(scheme, baseUrl);
+            }
+        }
+        return schemeToBaseUrlMap;
+    }
+
     public String getBaseUrl(final HttpServletRequest request) {
-        if (StringUtils.isNotEmpty(this.baseUrl)) {
-            return this.baseUrl;
+        if (!this.baseUrls.isEmpty()) {
+            String baseUrl = this.baseUrls.get(request.getScheme().toLowerCase());
+            if (StringUtils.isEmpty(baseUrl)) {
+                baseUrl = this.baseUrls.entrySet().iterator().next().getValue();
+            }
+            return baseUrl;
         }
 
         final StringBuffer buffer = request.getRequestURL();
         buffer.setLength(buffer.length() - request.getRequestURI().length() + request.getServletPath().length());
-
         return buffer.toString();
     }
 
@@ -677,7 +694,7 @@ public class WhoisRdapService {
             RdapObject result =
                 RdapObjectMapper.mapSearch(objectType,
                                            getRequestUrl(request),
-                                           baseUrl,
+                                           getBaseUrl(request),
                                            objects,
                                            lastUpdateds,
                                            noticeFactory,
