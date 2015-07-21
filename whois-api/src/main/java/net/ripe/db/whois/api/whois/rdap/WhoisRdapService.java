@@ -1,36 +1,28 @@
 package net.ripe.db.whois.api.whois.rdap;
 
-import java.io.Writer;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.util.Arrays;
-import java.util.Map;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
-import net.ripe.db.whois.api.whois.rdap.DelegatedStatsService;
 import net.ripe.db.whois.api.freetext.FreeTextIndex;
-import net.ripe.db.whois.api.whois.ApiResponseHandler;
 import net.ripe.db.whois.api.search.IndexTemplate;
+import net.ripe.db.whois.api.whois.ApiResponseHandler;
+import net.ripe.db.whois.api.whois.rdap.domain.Help;
 import net.ripe.db.whois.api.whois.rdap.domain.RdapObject;
 import net.ripe.db.whois.common.dao.RpslObjectDao;
-import net.ripe.db.whois.common.domain.CIString;
 import net.ripe.db.whois.common.domain.IpInterval;
 import net.ripe.db.whois.common.domain.ResponseObject;
 import net.ripe.db.whois.common.domain.attrs.AttributeParseException;
 import net.ripe.db.whois.common.domain.attrs.AutNum;
 import net.ripe.db.whois.common.domain.attrs.Domain;
-import net.ripe.db.whois.common.source.SourceContext;
 import net.ripe.db.whois.common.rpsl.AttributeType;
 import net.ripe.db.whois.common.rpsl.ObjectType;
 import net.ripe.db.whois.common.rpsl.RpslAttribute;
 import net.ripe.db.whois.common.rpsl.RpslObject;
+import net.ripe.db.whois.common.source.SourceContext;
 import net.ripe.db.whois.query.domain.QueryCompletionInfo;
 import net.ripe.db.whois.query.domain.QueryException;
 import net.ripe.db.whois.query.handler.QueryHandler;
@@ -55,28 +47,21 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.Version;
-import org.joda.time.LocalDateTime;
 import org.codehaus.enunciate.modules.jersey.ExternallyManagedLifecycle;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
-import net.ripe.db.whois.api.whois.rdap.domain.Help;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -85,10 +70,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.InetAddress;
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import static net.ripe.db.whois.common.rpsl.ObjectType.*;
 
@@ -132,13 +114,15 @@ public class WhoisRdapService {
     }
 
     private Response.ResponseBuilder getUnsupportedOperationResponse(HttpServletRequest request) {
-        String url = getRequestUrl(request);
+        final RdapUrlFactory rdapUrlFactory = createRdapUrlFactory(request);
+        final String url = rdapUrlFactory.getRequestUrl();
         LOGGER.error(String.format("RDAP query for unsupported object type: %s", url));
         return Response.status(NOT_IMPLEMENTED).entity(RdapException.build(NOT_IMPLEMENTED, "Not Implemented", url, Arrays.asList("This type of request is not supported by this server."), noticeFactory, true));
     }
 
     private Response.ResponseBuilder getBadRequestResponse(HttpServletRequest request) {
-        String url = getRequestUrl(request);
+        final RdapUrlFactory rdapUrlFactory = createRdapUrlFactory(request);
+        final String url = rdapUrlFactory.getRequestUrl();
         LOGGER.error(String.format("RDAP query with malformed syntax: %s", url));
         return Response.status(Response.Status.BAD_REQUEST.getStatusCode()).entity(RdapException.build(Response.Status.BAD_REQUEST, url, noticeFactory));
     }
@@ -158,7 +142,7 @@ public class WhoisRdapService {
         this.abuseCFinder          = abuseCFinder;
         this.delegatedStatsService = delegatedStatsService;
         this.freeTextIndex         = freeTextIndex;
-        this.baseUrls              = extractBaseUrls(baseUrl);
+        this.baseUrls              = RdapUrlFactory.buildSchemeToUrlMap(baseUrl);
         this.noticeFactory         = noticeFactory;
         this.port43                = port43;
         if (sourceContext != null) {
@@ -178,7 +162,8 @@ public class WhoisRdapService {
                            @PathParam("key") final String key) {
 
         Response.ResponseBuilder response = null;
-        String selfUrl = SLASH_JOINER.join(getBaseUrl(request), objectType, key);
+        final RdapUrlFactory rdapUrlFactory = createRdapUrlFactory(request);
+        final String selfUrl = rdapUrlFactory.generateObjectUrl(objectType, key);
 
         final Set<ObjectType> whoisObjectTypes = Sets.newHashSet();
         try {
@@ -225,8 +210,8 @@ public class WhoisRdapService {
             } catch (WebApplicationException webex) {
                 int statusCode = webex.getResponse().getStatus();
                 if (statusCode == 404) {
-                    Query q = getLookupQuery(whoisObjectTypes, getKey(whoisObjectTypes, key));
-                    response = redirect(request.getScheme(), request.getRequestURL().toString(), q);
+                    final Query q = getLookupQuery(whoisObjectTypes, getKey(whoisObjectTypes, key));
+                    response = redirect(RdapUrlFactory.getScheme(request), request.getRequestURI(), q);
                 } else {
                     throw webex;
                 }
@@ -235,11 +220,11 @@ public class WhoisRdapService {
                 response = Response.ok(obj);
             }
         } catch (WebApplicationException webex) {
-            LOGGER.error(String.format("RDAP http error status [%s] caused by request [%s]: %s", webex.getResponse().getStatus(), getRequestUrl(request), webex.toString()));
+            LOGGER.error(String.format("RDAP http error status [%s] caused by request [%s]: %s", webex.getResponse().getStatus(), rdapUrlFactory.getRequestUrl(), webex.toString()));
             int statusCode = webex.getResponse().getStatus();
             response = Response.status(statusCode).entity(RdapException.build(Response.Status.fromStatusCode(statusCode), selfUrl, noticeFactory));
         } catch (SyntaxNotValidHereException snvhe) {
-            LOGGER.error(String.format("RDAP query with spec-valid but here-invalid syntax: %s", getRequestUrl(request)));
+            LOGGER.error(String.format("RDAP query with spec-valid but here-invalid syntax: %s", rdapUrlFactory.getRequestUrl()));
             response = Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(RdapException.build(Response.Status.NOT_FOUND, selfUrl, Arrays.asList("The syntax used for this request is invalid for this particular server."), noticeFactory, false));
         } catch (UnsupportedOperationException uoe) {
             response = getUnsupportedOperationResponse(request);
@@ -263,7 +248,8 @@ public class WhoisRdapService {
     @Produces( { RdapJsonProvider.CONTENT_TYPE_RDAP_JSON, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Path("/help")
     public Response lookupHelp(@Context final HttpServletRequest request, @Context HttpHeaders httpHeaders) {
-        final String selfUrl =  getBaseUrl(request) + "/help";
+        final RdapUrlFactory rdapUrlFactory = createRdapUrlFactory(request);
+        final String selfUrl = rdapUrlFactory.getHelpUrl();
         final Help help = new Help();
         help.getRdapConformance().addAll(RdapObjectMapper.RDAP_CONFORMANCE_LEVEL);
         help.getNotices().addAll(noticeFactory.generateHelpNotices(selfUrl));
@@ -275,7 +261,8 @@ public class WhoisRdapService {
     @GET
     @Path("/")
     public Response redirectToDocumentation(@Context final HttpServletRequest request) {
-        return Response.status(Response.Status.MOVED_PERMANENTLY).location(URI.create(getBaseUrl(request) + "/help")).build();
+        final RdapUrlFactory rdapUrlFactory = createRdapUrlFactory(request);
+        return Response.status(Response.Status.MOVED_PERMANENTLY).location(URI.create(rdapUrlFactory.getHelpUrl())).build();
     }
 
     private static void initProperties() {
@@ -401,13 +388,13 @@ public class WhoisRdapService {
                 throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
             }
 
+            final RdapUrlFactory rdapUrlFactory = createRdapUrlFactory(request);
             final RpslObject resultObject = result.remove(0);
 
             List<RpslObject> abuseContacts = Lists.newArrayList();
             abuseContacts.addAll(getAbuseContacts(resultObject));
             return RdapObjectMapper.map(
-                    getRequestUrl(request),
-                    getBaseUrl(request),
+                    rdapUrlFactory,
                     resultObject,
                     result,
                     // TODO: [RL] move these two params into methods on RdapObjectMapper so that they can be used for nested objects?
@@ -494,30 +481,8 @@ public class WhoisRdapService {
         return result;
     }
 
-    private static Map<String, String> extractBaseUrls(final String baseUrls) {
-        final Map<String, String> schemeToBaseUrlMap = Maps.newHashMap();
-        if (StringUtils.isNotEmpty(baseUrls)) {
-            final String[] baseUrlsArr = baseUrls.split(",");
-            for (String baseUrl : baseUrlsArr) {
-                final String scheme = baseUrl.replaceFirst("://.*$", "").toLowerCase();
-                schemeToBaseUrlMap.put(scheme, baseUrl);
-            }
-        }
-        return schemeToBaseUrlMap;
-    }
-
-    public String getBaseUrl(final HttpServletRequest request) {
-        if (!this.baseUrls.isEmpty()) {
-            String baseUrl = this.baseUrls.get(request.getScheme().toLowerCase());
-            if (StringUtils.isEmpty(baseUrl)) {
-                baseUrl = this.baseUrls.entrySet().iterator().next().getValue();
-            }
-            return baseUrl;
-        }
-
-        final StringBuffer buffer = request.getRequestURL();
-        buffer.setLength(buffer.length() - request.getRequestURI().length() + request.getServletPath().length());
-        return buffer.toString();
+    public RdapUrlFactory createRdapUrlFactory(final HttpServletRequest request) {
+        return new RdapUrlFactory(request, baseUrls);
     }
 
     private Query getLookupQuery(final Set<ObjectType> objectTypes, final String key) {
@@ -538,15 +503,6 @@ public class WhoisRdapService {
                         objectType,
                         QueryFlag.NO_FILTERING.getLongFlag(),
                         key));
-    }
-
-    private String getRequestUrl(final HttpServletRequest request) {
-        final StringBuffer buffer = request.getRequestURL();
-        if (request.getQueryString() != null) {
-            buffer.append('?');
-            buffer.append(request.getQueryString());
-        }
-        return buffer.toString();
     }
 
     private List<RpslObject> getAbuseContacts(final RpslObject rpslObject) {
@@ -691,10 +647,10 @@ public class WhoisRdapService {
                 }
             });
 
+            final RdapUrlFactory rdapUrlFactory = createRdapUrlFactory(request);
             RdapObject result =
                 RdapObjectMapper.mapSearch(objectType,
-                                           getRequestUrl(request),
-                                           getBaseUrl(request),
+                                           rdapUrlFactory,
                                            objects,
                                            lastUpdateds,
                                            noticeFactory,

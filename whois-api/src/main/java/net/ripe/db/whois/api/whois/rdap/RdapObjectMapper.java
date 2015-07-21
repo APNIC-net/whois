@@ -96,8 +96,7 @@ class RdapObjectMapper {
     }
 
     public static RdapObject map(
-            final String requestUrl,
-            final String baseUrl,
+            final RdapUrlFactory rdapUrlFactory,
             final RpslObject rpslObject,
             final List<RpslObject> relatedObjects,
             final LocalDateTime lastChangedTimestamp,
@@ -105,13 +104,12 @@ class RdapObjectMapper {
             final RpslObject parentRpslObject,
             final String port43,
             final NoticeFactory noticeFactory) {
-        RdapObject rdapResponse = getRdapObject(requestUrl, baseUrl, rpslObject, relatedObjects, lastChangedTimestamp, abuseContacts, parentRpslObject, noticeFactory);
-        addInformational(baseUrl, rpslObject, relatedObjects, lastChangedTimestamp, abuseContacts, parentRpslObject, port43, rdapResponse, requestUrl, noticeFactory);
+        RdapObject rdapResponse = getRdapObject(rdapUrlFactory, rpslObject, relatedObjects, lastChangedTimestamp, abuseContacts, parentRpslObject, noticeFactory);
+        addInformational(rdapUrlFactory, rpslObject, relatedObjects, lastChangedTimestamp, abuseContacts, parentRpslObject, port43, rdapResponse, noticeFactory);
         return rdapResponse;
     }
 
-    private static RdapObject getRdapObject(final String requestUrl, 
-                                            final String baseUrl,
+    private static RdapObject getRdapObject(final RdapUrlFactory rdapUrlFactory,
                                             final RpslObject rpslObject, 
                                             final List<RpslObject> relatedObjects,
                                             final LocalDateTime lastChangedTimestamp, 
@@ -123,21 +121,21 @@ class RdapObjectMapper {
 
         switch (rpslObjectType) {
             case DOMAIN:
-                rdapResponse = createDomain(rpslObject, baseUrl);
+                rdapResponse = createDomain(rpslObject, rdapUrlFactory);
                 break;
             case AUT_NUM:
             case AS_BLOCK:
-                rdapResponse = createAutnumResponse(rpslObject, requestUrl, baseUrl);
+                rdapResponse = createAutnumResponse(rpslObject, rdapUrlFactory);
                 break;
             case INETNUM:
             case INET6NUM:
-                rdapResponse = createIp(rpslObject, parentRpslObject, requestUrl, baseUrl);
+                rdapResponse = createIp(rpslObject, parentRpslObject, rdapUrlFactory);
                 break;
             case PERSON:
             case ROLE:
             case ORGANISATION:
             case IRT:
-                rdapResponse = createEntity(rpslObject, null, baseUrl);
+                rdapResponse = createEntity(rpslObject, null, rdapUrlFactory);
                 break;
             default:
                 throw new IllegalArgumentException("Unhandled object type: " + rpslObject.getType());
@@ -153,15 +151,14 @@ class RdapObjectMapper {
         /* todo: null here indicates that notices should not be added. It might
          * be better to add an explicit flag for that, though. */
         if (noticeFactory != null) {
-            rdapResponse.getNotices().addAll(noticeFactory.generateObjectNotices(rpslObject, requestUrl));
+            rdapResponse.getNotices().addAll(noticeFactory.generateObjectNotices(rpslObject, rdapUrlFactory.getRequestUrl()));
         }
 
         return rdapResponse;
     }
 
     public static RdapObject mapSearch(final String objectType,
-                                       final String requestUrl,
-                                       final String baseUrl,
+                                       final RdapUrlFactory rdapUrlFactory,
                                        final List<RpslObject> objects, 
                                        final Iterable<LocalDateTime> localDateTimes,
                                        final NoticeFactory noticeFactory,
@@ -172,14 +169,14 @@ class RdapObjectMapper {
 
         for (final RpslObject object : objects) {
             if (object.getType() == DOMAIN) {
-                searchResult.addDomainSearchResult((Domain) getRdapObject(requestUrl, baseUrl, object, new ArrayList<RpslObject>(), iterator.next(), Collections.EMPTY_LIST, null, null));
+                searchResult.addDomainSearchResult((Domain) getRdapObject(rdapUrlFactory, object, new ArrayList<RpslObject>(), iterator.next(), Collections.EMPTY_LIST, null, null));
             } else {
-                searchResult.addEntitySearchResult((Entity) getRdapObject(requestUrl, baseUrl, object, new ArrayList<RpslObject>(), iterator.next(), Collections.EMPTY_LIST, null, null));
+                searchResult.addEntitySearchResult((Entity) getRdapObject(rdapUrlFactory, object, new ArrayList<RpslObject>(), iterator.next(), Collections.EMPTY_LIST, null, null));
             }
         }
 
         searchResult.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
-        searchResult.getNotices().addAll(noticeFactory.generateResponseNotices(requestUrl));
+        searchResult.getNotices().addAll(noticeFactory.generateResponseNotices(rdapUrlFactory.generateSelfUrl(searchResult)));
         /* By default, the resultsTruncated key will not be included in the
          * response unless it is true. */
         if (isTruncated) {
@@ -189,14 +186,13 @@ class RdapObjectMapper {
         return searchResult;
     }
 
-    private static void addInformational(String baseUrl, RpslObject rpslObject, List<RpslObject> relatedObjects, LocalDateTime lastChangedTimestamp, List<RpslObject> abuseContacts, RpslObject parentRpslObject, String port43, RdapObject rdapResponse, String requestUrl, NoticeFactory noticeFactory) {
+    private static void addInformational(RdapUrlFactory rdapUrlFactory, RpslObject rpslObject, List<RpslObject> relatedObjects, LocalDateTime lastChangedTimestamp, List<RpslObject> abuseContacts, RpslObject parentRpslObject, String port43, RdapObject rdapResponse, NoticeFactory noticeFactory) {
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
-        final String selfUrl = getSelfUrl(rdapResponse, requestUrl);
+        final String selfUrl = rdapUrlFactory.generateSelfUrl(rdapResponse);
 
-        /* todo: This shouldn't be null. The check should only be here
-         * temporarily. */
+        /* todo: This shouldn't be null. The check should only be here temporarily. */
         if (noticeFactory != null) {
-            rdapResponse.getNotices().addAll(noticeFactory.generateResponseNotices(requestUrl));
+            rdapResponse.getNotices().addAll(noticeFactory.generateResponseNotices(selfUrl));
         }
 
         final List<Remark> remarks = createRemarks(rpslObject);
@@ -211,11 +207,11 @@ class RdapObjectMapper {
         //rdapResponse.getEvents().add(createEvent(lastChangedTimestamp));
 
         for (final RpslObject abuseContact : abuseContacts) {
-            final Entity entity = createEntity(abuseContact, selfUrl, baseUrl);
+            final Entity entity = createEntity(abuseContact, selfUrl, rdapUrlFactory);
             entity.getRoles().add(Role.ABUSE);
             rdapResponse.getEntities().add(entity);
         }
-        List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, selfUrl, baseUrl);
+        List<Entity> ctcEntities = contactEntities(rpslObject, relatedObjects, selfUrl, rdapUrlFactory);
         if (!ctcEntities.isEmpty()) {
             rdapResponse.getEntities().addAll(ctcEntities);
         }
@@ -223,13 +219,13 @@ class RdapObjectMapper {
         rdapResponse.setPort43(port43);
     }
 
-    private static Ip createIp(final RpslObject rpslObject, final RpslObject parentRpslObject, final String requestUrl, final String baseUrl) {
+    private static Ip createIp(final RpslObject rpslObject, final RpslObject parentRpslObject, final RdapUrlFactory rdapUrlFactory) {
         final Ip ip = new Ip();
         final IpInterval ipInterval = IpInterval.parse(rpslObject.getKey());
         ip.setHandle(rpslObject.getKey().toString());
         ip.setIpVersion(rpslObject.getType() == INET6NUM ? "v6" : "v4");
 
-        final String selfUrl = String.format("%s/%s/%s",baseUrl,Ip.class.getSimpleName().toLowerCase(),urlencode(ipInterval.toString()));
+        final String selfUrl = rdapUrlFactory.generateObjectUrl(Ip.class.getSimpleName().toLowerCase(), ipInterval);
 
         // TODO: find a better way to remove the cidr notation
         String startAddr = IpInterval.asIpInterval(ipInterval.beginAsInetAddress()).toString();
@@ -247,7 +243,7 @@ class RdapObjectMapper {
             CIString parentKey = parentRpslObject.getKey();
             IpInterval parentInterval = (parentRpslObject.getType() == INET6NUM) ? Ipv6Resource.parse(parentKey) : Ipv4Resource.parse(parentKey);
 
-            final String parentUrl = String.format("%s/%s/%s",baseUrl,Ip.class.getSimpleName().toLowerCase(),urlencode(parentInterval));
+            final String parentUrl = rdapUrlFactory.generateObjectUrl(Ip.class.getSimpleName().toLowerCase(), parentInterval);
             ip.getLinks().add(createLink("up", selfUrl, parentUrl));
         }
 
@@ -299,7 +295,7 @@ class RdapObjectMapper {
         return lastChangedEvent;
     }
 
-    private static List<Entity> contactEntities(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String topUrl, final String baseUrl) {
+    private static List<Entity> contactEntities(final RpslObject rpslObject, List<RpslObject> relatedObjects, final String topUrl, final RdapUrlFactory rdapUrlFactory) {
         final List<Entity> entities = Lists.newArrayList();
         final Map<CIString, Set<AttributeType>> contacts = Maps.newTreeMap();
 
@@ -324,7 +320,7 @@ class RdapObjectMapper {
             final Entity entity;
             if (relatedObjectMap.containsKey(entry.getKey())) {
                 final RpslObject contactRpslObject = relatedObjectMap.get(entry.getKey());
-                entity = createEntity(contactRpslObject, topUrl, baseUrl);
+                entity = createEntity(contactRpslObject, topUrl, rdapUrlFactory);
 
                 final List<Remark> remarks = createRemarks(contactRpslObject);
                 if (!remarks.isEmpty()) {
@@ -347,18 +343,18 @@ class RdapObjectMapper {
         return entities;
     }
 
-    private static Entity createEntity(final RpslObject rpslObject, final String topUrl, final String baseUrl) {
+    private static Entity createEntity(final RpslObject rpslObject, final String topUrl, final RdapUrlFactory rdapUrlFactory) {
         final Entity entity = new Entity();
         entity.setHandle(rpslObject.getKey().toString());
-        setVCardArray(entity,createVCard(rpslObject));
+        entity.setVcardArray(createVCard(rpslObject));
 
-        final String selfUrl = String.format("%s/%s/%s",baseUrl,Entity.class.getSimpleName().toLowerCase(),urlencode(entity.getHandle()));
+        final String selfUrl = rdapUrlFactory.generateObjectUrl(Entity.class.getSimpleName().toLowerCase(), entity.getHandle());
         entity.getLinks().add(createLink("self", topUrl != null ? topUrl : selfUrl, selfUrl));
 
         return entity;
     }
 
-    private static Autnum createAutnumResponse(final RpslObject rpslObject, final String requestUrl, final String baseUrl) {
+    private static Autnum createAutnumResponse(final RpslObject rpslObject, final RdapUrlFactory rdapUrlFactory) {
         final Autnum autnum = new Autnum();
         final String keyValue = rpslObject.getKey().toString();
         autnum.setHandle(keyValue);
@@ -373,14 +369,15 @@ class RdapObjectMapper {
             autnum.setName(keyValue);
 
             // TODO: [RL] What's the canonical self url for a block? Punt for now and just use what they requested
-            autnum.getLinks().add(createLink("self", requestUrl, requestUrl));
+            final String selfUrl = rdapUrlFactory.getRequestUrl();
+            autnum.getLinks().add(createLink("self", selfUrl, selfUrl));
         } else {
             final AutNum autNum = AutNum.parse(keyValue);
             autnum.setStartAutnum(autNum.getValue());
             autnum.setEndAutnum(autNum.getValue());
             autnum.setName(rpslObject.getValueForAttribute(AS_NAME).toString().replace(" ", ""));
 
-            final String selfUrl = String.format("%s/%s/%s",baseUrl,AutNum.class.getSimpleName().toLowerCase(),urlencode(autNum.getValue()));
+            final String selfUrl = rdapUrlFactory.generateObjectUrl(AutNum.class.getSimpleName().toLowerCase(), autNum.getValue());
             autnum.getLinks().add(createLink("self", selfUrl, selfUrl));
         }
 
@@ -388,12 +385,12 @@ class RdapObjectMapper {
         return autnum;
     }
 
-    private static Domain createDomain(final RpslObject rpslObject, String baseUrl) {
+    private static Domain createDomain(final RpslObject rpslObject, RdapUrlFactory rdapUrlFactory) {
         final Domain domain = new Domain();
         domain.setHandle(rpslObject.getKey().toString());
         domain.setLdhName(rpslObject.getKey().toString());
 
-        final String selfUrl = String.format("%s/%s/%s",baseUrl,Domain.class.getSimpleName().toLowerCase(),urlencode(domain.getHandle()));
+        final String selfUrl = rdapUrlFactory.generateObjectUrl(Domain.class.getSimpleName().toLowerCase(), domain.getHandle());
         domain.getLinks().add(createLink("self", selfUrl, selfUrl));
 
         final Map<CIString, Set<IpInterval>> hostnameMap = new HashMap<>();
@@ -540,28 +537,5 @@ class RdapObjectMapper {
         link.setHref(href);
         link.setType(type);
         return link;
-    }
-
-    public static void setVCardArray(final Entity entity, final VCard... vCards) {
-        List<Object> vcardArray = entity.getVcardArray();
-        vcardArray.add("vcard");
-        for (VCard next : vCards) {
-            vcardArray.add(next.getValues());
-        }
-    }
-
-    public static String getSelfUrl(final RdapObject rdapObject, final String defaultUrl) {
-        List<Link> links = rdapObject.getLinks();
-        for (final Link link : links) {
-            if (link.getRel().equals("self")) {
-                return link.getHref();
-            }
-        }
-
-        return defaultUrl;
-    }
-
-    public static String urlencode(Object obj) {
-        return URIUtil.encodePath(String.valueOf(obj));
     }
 }

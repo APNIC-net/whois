@@ -41,7 +41,7 @@ public class RdapResponseJsonTest {
 
         Entity entity = new Entity();
         entity.setHandle("XXXX");
-        RdapObjectMapper.setVCardArray(entity,vcard);
+        entity.setVcardArray(vcard);
 
         entity.setPort43("whois.example.com");
 
@@ -243,7 +243,7 @@ public class RdapResponseJsonTest {
                 .addTel("tel:+1-555-555-1234;ext=102")
                 .addEmail("joe.user@example.com");
 
-        RdapObjectMapper.setVCardArray(entity,builder.build());
+        entity.setVcardArray(builder.build());
 
         final Domain.SecureDNS secureDNS = new Domain.SecureDNS();
 
@@ -370,7 +370,7 @@ public class RdapResponseJsonTest {
                 .addAdr(createAddress("", "Suite 1234", "4321 Rue Somewhere", "Quebec", "QC", "G1V 2M2", "Canada"))
                 .addTel("tel:+1-555-555-1234;ext=102")
                 .addEmail("joe.user@example.com");
-        RdapObjectMapper.setVCardArray(entity,builder.build());
+        entity.setVcardArray(builder.build());
         entity.getRoles().add(Role.REGISTRANT);
         entity.getRemarks().add(remark);
         entity.getEvents().add(registrationEvent);
@@ -450,7 +450,7 @@ public class RdapResponseJsonTest {
         notices.getDescription().add("Beverages with caffeine for keeping horses awake.");
         notices.getDescription().add("Very effective.");
 
-        final Link link = RdapObjectMapper.createLink("self", "http://example.com/ip/" + RdapObjectMapper.urlencode("202.112.0.0 - 202.121.255.255"), "http://example.com/target_uri_href", "application/json");
+        final Link link = RdapObjectMapper.createLink("self", "http://example.com/ip/" + RdapUrlFactory.urlencode("202.112.0.0 - 202.121.255.255"), "http://example.com/target_uri_href", "application/json");
         link.getHreflang().add("en");
         link.getHreflang().add("ch");
         link.getTitle().add("title1");

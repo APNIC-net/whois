@@ -8,6 +8,8 @@
 
 package net.ripe.db.whois.api.whois.rdap.domain;
 
+import net.ripe.db.whois.api.whois.rdap.domain.vcard.VCard;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -118,6 +120,22 @@ public class Entity
             vcardArray = new ArrayList<Object>();
         }
         return this.vcardArray;
+    }
+
+    /**
+     * Sets the value of the vcardArray property.
+     *
+     * @param vCards
+     *     Objects of the following type(s) are allowed in the list
+     *     {@link Object}
+     */
+    public void setVcardArray(final VCard... vCards) {
+        final List<Object> vcardArray = getVcardArray();
+        vcardArray.clear();
+        vcardArray.add("vcard");
+        for (VCard next : vCards) {
+            vcardArray.add(next.getValues());
+        }
     }
 
     /**
