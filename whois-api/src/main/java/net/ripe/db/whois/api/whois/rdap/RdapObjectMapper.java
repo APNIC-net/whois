@@ -192,7 +192,7 @@ class RdapObjectMapper {
 
         /* todo: This shouldn't be null. The check should only be here temporarily. */
         if (noticeFactory != null) {
-            rdapResponse.getNotices().addAll(noticeFactory.generateResponseNotices(selfUrl));
+            rdapResponse.getNotices().addAll(noticeFactory.generateResponseNotices(rdapUrlFactory.getRequestUrl()));
         }
 
         final List<Remark> remarks = createRemarks(rpslObject);
