@@ -437,6 +437,7 @@ public class RdapObjectMapperTest {
     }
 
     private Object map(final RpslObject rpslObject) {
-        return RdapObjectMapper.map(REQUEST_URL,BASE_URL, rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP_LOCAL, Lists.<RpslObject>newArrayList(), null, null, null);
+        final RdapUrlFactory rdapUrlFactory = new RdapUrlFactory(REQUEST_URL, BASE_URL);
+        return RdapObjectMapper.map(rdapUrlFactory, rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP_LOCAL, Lists.<RpslObject>newArrayList(), null, null, null);
     }
 }

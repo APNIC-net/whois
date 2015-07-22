@@ -25,6 +25,7 @@ public class DelegatedStatsServiceTest {
 
     private static final String BANANA_GRS = "BANANA-GRS";
     private static final String DEFAULT_REQUEST_PATH = "/ip/2001:67c:2e8:22::c100:68b";
+    private static final String EXTENDED_REQUEST_PATH = "/rdap/ip/2001:67c:2e8:22::c100:68b";
     private static final Query DEFAULT_QUERY = Query.parse("--no-grouping --select-types inet6num --no-filtering 2001:67c:2e8:22::c100:68b");
     private static final String BANANA_GRS_BASEURL = "://banana.net/rdap";
 
@@ -60,8 +61,12 @@ public class DelegatedStatsServiceTest {
         final String[] schemes = new String[] {"http", "https"};
         setupSourcePaths(schemes[0] + BANANA_GRS_BASEURL, schemes[1] + BANANA_GRS_BASEURL);
         for (String scheme : schemes) {
-            final URI redirectUri = subject.getUriForRedirect(scheme, DEFAULT_REQUEST_PATH, DEFAULT_QUERY);
+            URI redirectUri = subject.getUriForRedirect(scheme, DEFAULT_REQUEST_PATH, DEFAULT_QUERY);
             assertThat("generated redirectUri is wrong when using scheme: " + scheme,
+                    redirectUri.toString(), is(scheme + BANANA_GRS_BASEURL + DEFAULT_REQUEST_PATH));
+            // Check that redirect generates the correct URL when "/rdap" prefixes the actual query path.
+            redirectUri = subject.getUriForRedirect(scheme, EXTENDED_REQUEST_PATH, DEFAULT_QUERY);
+            assertThat("[/rdap in request path] generated redirectUri is wrong when using scheme: " + scheme,
                     redirectUri.toString(), is(scheme + BANANA_GRS_BASEURL + DEFAULT_REQUEST_PATH));
         }
     }

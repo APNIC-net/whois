@@ -11,7 +11,6 @@ import net.ripe.db.whois.update.log.LoggerContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -46,12 +45,16 @@ public class WhoisRdapServiceTest {
         when(sourceContext.getAllSourceNames()).thenReturn(CIString.ciSet("TEST", "TEST-GRS"));
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
         when(request.getRequestURL()).thenReturn(new StringBuffer().append("http://localhost/"));
-
-        subject = new WhoisRdapService(queryHandler,rpslObjectDao,null,null,null,null,null,"port43","http://localhost/");
+        when(request.getScheme()).thenReturn("http");
+        when(request.getRequestURI()).thenReturn("/");
+        when(request.getServletPath()).thenReturn("");
+        when(request.getPathInfo()).thenReturn("/");
+        when(request.getQueryString()).thenReturn("");
+        subject = new WhoisRdapService(queryHandler, rpslObjectDao, null, null, null, null, null, "port43", "http://localhost");
     }
 
     @Test
     public void lookup_entity() {
-        Response response = subject.lookup(request, httpHeaders, "entity", "TP1-TEST");
+        final Response response = subject.lookup(request, httpHeaders, "entity", "TP1-TEST");
     }
 }

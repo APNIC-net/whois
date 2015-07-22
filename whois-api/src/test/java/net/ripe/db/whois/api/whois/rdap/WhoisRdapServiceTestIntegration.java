@@ -319,7 +319,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         final List<Link> links = ip.getLinks();
         assertThat(links, hasSize(1));
-        final String selfUrl = createResource(AUDIENCE, "ip/" + RdapObjectMapper.urlencode("192.0.0.0/8")).toString();
+        final String selfUrl = createResource(AUDIENCE, "ip/" + RdapUrlFactory.urlencode("192.0.0.0/8")).toString();
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getHref(), equalTo(selfUrl));
         assertThat(links.get(0).getValue(), equalTo(selfUrl));
@@ -366,7 +366,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
         final List<Link> links = response.getLinks();
         assertThat(links, hasSize(2));
         final Link upLink = links.get(0);
-        final String upUrl = createResource(AUDIENCE, "ip/" + RdapObjectMapper.urlencode("192.0.0.0/24")).toString();
+        final String upUrl = createResource(AUDIENCE, "ip/" + RdapUrlFactory.urlencode("192.0.0.0/24")).toString();
         assertThat(upLink.getRel(), equalTo("up"));
         assertThat(upLink.getHref(), equalTo(upUrl));
 
@@ -463,7 +463,7 @@ public class WhoisRdapServiceTestIntegration extends AbstractRestClientTest {
 
         final List<Link> links = ip.getLinks();
         assertThat(links, hasSize(1));
-        final String selfUrl = createResource(AUDIENCE, "ip/" + RdapObjectMapper.urlencode("2001:2002:2003::/48")).toString();
+        final String selfUrl = createResource(AUDIENCE, "ip/" + RdapUrlFactory.urlencode("2001:2002:2003::/48")).toString();
         assertThat(links.get(0).getRel(), equalTo("self"));
         assertThat(links.get(0).getHref(), equalTo(selfUrl));
         assertThat(links.get(0).getValue(), equalTo(selfUrl));

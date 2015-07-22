@@ -55,7 +55,8 @@ public class WhoisRdapServletDeployer implements ServletDeployer {
             public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
                 String selfUrl = "";
                 if (whoisRDAPService != null) {
-                    selfUrl = whoisRDAPService.getBaseUrl(request);
+                    final RdapUrlFactory rdapUrlFactory = whoisRDAPService.createRdapUrlFactory(request);
+                    selfUrl = rdapUrlFactory.getBaseUrl();
                 }
                 if (request.getPathInfo() != null) {
                     selfUrl += request.getPathInfo();
