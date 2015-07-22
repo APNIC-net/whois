@@ -56,7 +56,7 @@ public class RdapUrlFactoryTest {
 
     @Test
     public void identical_scheme() {
-        // Check a request with http scheme uses a baseUrl of http://localhost
+        // Check a request with http scheme uses a baseUrl of http://localhost/rdap
         // and a request with https scheme uses a baseUrl of https://localhost/rdap
         final String requestPath = "/ip/1.2.3.0/24";
         when(request.getHeader(X_FORWARDED_PROTO_HEADER)).thenReturn(null);
@@ -76,7 +76,7 @@ public class RdapUrlFactoryTest {
 
     @Test
     public void unsupported_scheme() {
-        // Check a request with http scheme uses a baseUrl of https://localhost/...
+        // Check a request with http scheme uses a baseUrl of https://localhost/rdap
         // if http is not a preferred/supported scheme
         final String requestPath = "/ip/1.2.3.4";
         when(request.getHeader(X_FORWARDED_PROTO_HEADER)).thenReturn(null);

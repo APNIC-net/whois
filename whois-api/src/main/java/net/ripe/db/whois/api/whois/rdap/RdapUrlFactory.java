@@ -27,6 +27,7 @@ class RdapUrlFactory {
 
 
     public RdapUrlFactory(final HttpServletRequest request) {
+        // This constructor used for testing only.
         this.baseUrl = generateBaseUrl(request, null);
         this.requestUrl = generateRequestUrl(request, this.baseUrl);
     }
