@@ -186,6 +186,20 @@ class RdapObjectMapper {
         return searchResult;
     }
 
+    private static String getCountry(RpslObject rpslObject) {
+        List<RpslAttribute> rpslAttributes =
+            rpslObject.findAttributes(COUNTRY);
+        if (!rpslAttributes.isEmpty()) {
+            return rpslAttributes.get(0)
+                                 .getCleanValues()
+                                 .iterator()
+                                 .next()
+                                 .toString();
+        } else {
+            return null;
+        }
+    }
+
     private static void addInformational(RdapUrlFactory rdapUrlFactory, RpslObject rpslObject, List<RpslObject> relatedObjects, LocalDateTime lastChangedTimestamp, List<RpslObject> abuseContacts, RpslObject parentRpslObject, String port43, RdapObject rdapResponse, NoticeFactory noticeFactory) {
         rdapResponse.getRdapConformance().addAll(RDAP_CONFORMANCE_LEVEL);
         final String selfUrl = rdapUrlFactory.generateSelfUrl(rdapResponse);
@@ -234,7 +248,7 @@ class RdapObjectMapper {
         ip.setEndAddress(endAddr.split("/")[0]);
 
         ip.setName(rpslObject.getValueForAttribute(NETNAME).toString());
-        ip.setCountry(rpslObject.getValueForAttribute(COUNTRY).toString());
+        ip.setCountry(getCountry(rpslObject));
         ip.setType(rpslObject.getValueForAttribute(STATUS).toString());
 
         if (parentRpslObject != null) {
@@ -358,9 +372,8 @@ class RdapObjectMapper {
         final Autnum autnum = new Autnum();
         final String keyValue = rpslObject.getKey().toString();
         autnum.setHandle(keyValue);
-        if (rpslObject.containsAttribute(COUNTRY)) {
-            autnum.setCountry(rpslObject.getValueForAttribute(COUNTRY).toString());
-        }
+
+        autnum.setCountry(getCountry(rpslObject));
 
         if (rpslObject.getType() == ObjectType.AS_BLOCK) {
             final AsBlockRange asBlockRange = AsBlockRange.parse(keyValue);
