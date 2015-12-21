@@ -436,6 +436,59 @@ public class RdapObjectMapperTest {
         assertThat(result.getRemarks().get(1).getDescription().get(3), is("remark1"));
     }
 
+    @Test
+    public void multiple_inet_countries() {
+        final Ip result = (Ip) map((RpslObject.parse("" +
+                "inetnum:        10.0.0.0 - 10.255.255.255\n" +
+                "netname:        RIPE-NCC\n" +
+                "descr:          some descr\n" +
+                "country:        NL\n" +
+                "admin-c:        TP1-TEST\n" +
+                "tech-c:         TP1-TEST\n" +
+                "status:         OTHER\n" +
+                "country:        NL\n" +
+                "country:        AU\n" +
+                "mnt-by:         TST-MNT\n" +
+                "mnt-lower:      TST-MNT\n" +
+                "mnt-domains:    TST-MNT\n" +
+                "mnt-routes:     TST-MNT\n" +
+                "mnt-irt:        IRT-IRT1\n" +
+                "notify:         notify@test.net\n" +
+                "org:            ORG-TOL1-TEST\n" +
+                "changed:        ripe@test.net 20120101\n" +
+                "source:         TEST")));
+        assertThat(result.getCountry(), is("NL"));
+    }
+
+    @Test
+    public void multiple_autnum_countries() {
+        final Autnum result = (Autnum) map((RpslObject.parse("" +
+                "aut-num:        AS102\n" +
+                "as-name:        End-User-2\n" +
+                "member-of:      AS-TESTSET\n" +
+                "descr:          description\n" +
+                "import:         from AS1 accept ANY\n" +
+                "export:         to AS1 announce AS2\n" +
+                "default:        to AS1\n" +
+                "country:        NL\n" +
+                "mp-import:      afi ipv6.unicast from AS1 accept ANY\n" +
+                "mp-export:      afi ipv6.unicast to AS1 announce AS2\n" +
+                "mp-default:     to AS1\n" +
+                "remarks:        remarkable\n" +
+                "country:        NL\n" +
+                "org:            ORG-NCC1-RIPE\n" +
+                "admin-c:        AP1-TEST\n" +
+                "tech-c:         AP1-TEST\n" +
+                "notify:         noreply@ripe.net\n" +
+                "mnt-lower:      UPD-MNT\n" +
+                "mnt-routes:     UPD-MNT\n" +
+                "mnt-by:         UPD-MNT\n" +
+                "changed:        noreply@ripe.net 20120101\n" +
+                "source:         TEST\n" +
+                "password:       update")));
+        assertThat(result.getCountry(), is("NL"));
+    }
+
     private Object map(final RpslObject rpslObject) {
         final RdapUrlFactory rdapUrlFactory = new RdapUrlFactory(REQUEST_URL, BASE_URL);
         return RdapObjectMapper.map(rdapUrlFactory, rpslObject, Lists.<RpslObject>newArrayList(), VERSION_TIMESTAMP_LOCAL, Lists.<RpslObject>newArrayList(), null, null, null);
