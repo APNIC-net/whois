@@ -113,7 +113,8 @@ public enum AttributeType implements AttributeTypeBuilder {
     UPD_TO(AttributeTypeBuilder.implementationMap.get(Enum.UPD_TO)),
     ZONE_C(AttributeTypeBuilder.implementationMap.get(Enum.ZONE_C)),
     // APNIC
-    APNIC_REFER(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_REFER)); // TODO
+    APNIC_REFER(AttributeTypeBuilder.implementationMap.get(Enum.APNIC_REFER)), // TODO
+    RPKI_SIGNATURE(AttributeTypeBuilder.implementationMap.get(Enum.RPKI_SIGNATURE));
 
 
     private static final Map<CIString, AttributeType> TYPE_NAMES = Maps.newHashMapWithExpectedSize(AttributeType.values().length);

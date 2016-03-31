@@ -360,7 +360,8 @@ public class ObjectTemplateMapConfig {
                         new AttributeTemplate(MNT_ROUTES, OPTIONAL, MULTIPLE, INVERSE_KEY),
                         new AttributeTemplate(MNT_BY, MANDATORY, MULTIPLE, INVERSE_KEY),
                         new AttributeTemplate(CHANGED, MANDATORY, MULTIPLE),
-                        new AttributeTemplate(SOURCE, MANDATORY, SINGLE)),
+                        new AttributeTemplate(SOURCE, MANDATORY, SINGLE),
+                        new AttributeTemplate(RPKI_SIGNATURE, OPTIONAL, MULTIPLE)),
 
                 new ObjectTemplate(ObjectType.ROUTE6, 11,
                         new AttributeTemplate(ROUTE6, MANDATORY, SINGLE, PRIMARY_KEY, LOOKUP_KEY),
@@ -381,7 +382,8 @@ public class ObjectTemplateMapConfig {
                         new AttributeTemplate(MNT_ROUTES, OPTIONAL, MULTIPLE, INVERSE_KEY),
                         new AttributeTemplate(MNT_BY, MANDATORY, MULTIPLE, INVERSE_KEY),
                         new AttributeTemplate(CHANGED, MANDATORY, MULTIPLE),
-                        new AttributeTemplate(SOURCE, MANDATORY, SINGLE)),
+                        new AttributeTemplate(SOURCE, MANDATORY, SINGLE),
+                        new AttributeTemplate(RPKI_SIGNATURE, OPTIONAL, MULTIPLE)),
 
                 new ObjectTemplate(ObjectType.RTR_SET, 23,
                         new AttributeTemplate(RTR_SET, MANDATORY, SINGLE, PRIMARY_KEY, LOOKUP_KEY),

@@ -588,6 +588,10 @@ public class  AttributeTypeBuilderImpl implements AttributeTypeBuilder {
                 .doc("The NIC-handle of a zone contact.")
                 .syntax(AttributeSyntax.NIC_HANDLE_SYNTAX)
                 .references(ObjectType.PERSON, ObjectType.ROLE));
+
+        put(new AttributeTypeBuilderImpl("rpki-signature", "rg", Enum.RPKI_SIGNATURE)
+                .doc("The RPKI object signature.")
+                .syntax(AttributeSyntax.RPKI_SIGNATURE_SYNTAX));
     }
 
     private static void put(AttributeTypeBuilderImpl entry) {

@@ -90,6 +90,7 @@ public interface AttributeSyntax extends Documented {
     // APNIC
     static AttributeSyntax APNIC_REFER_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_REFER_SYNTAX);
     static AttributeSyntax APNIC_REFERRAL_BY_SYNTAX = implementationMap.get(AttributeSyntaxType.APNIC_REFERRAL_BY_SYNTAX); // TODO
+    static AttributeSyntax RPKI_SIGNATURE_SYNTAX = implementationMap.get(AttributeSyntaxType.RPKI_SIGNATURE_SYNTAX);
 
 
     static class AttributeSyntaxRegexp implements AttributeSyntax {
@@ -698,5 +699,6 @@ public interface AttributeSyntax extends Documented {
         // APNIC
         APNIC_REFER_SYNTAX,
         APNIC_REFERRAL_BY_SYNTAX,
+        RPKI_SIGNATURE_SYNTAX,
     }
 }

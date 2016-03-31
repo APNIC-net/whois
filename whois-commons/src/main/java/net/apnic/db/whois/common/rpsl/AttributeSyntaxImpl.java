@@ -483,6 +483,10 @@ public abstract class AttributeSyntaxImpl implements AttributeSyntax {
                     "- ALLOCATED NON-PORTABLE\n" +
                     "- ASSIGNED PORTABLE\n" +
                     "- ASSIGNED NON-PORTABLE\n"));
+
+            put(attributeSyntaxTypeMap, AttributeSyntaxType.RPKI_SIGNATURE_SYNTAX, new AttributeSyntaxRegexp(
+                    Pattern.compile("(?s)^.*$"), "" +
+                    "An RPKI object signature, as per draft-ietf-sidr-rpsl-sig."));
     }
 
 

@@ -111,6 +111,7 @@ public interface AttributeTypeBuilder extends Documented {
 
         // APNIC
         APNIC_REFER,
+        RPKI_SIGNATURE,
     }
 
     abstract String getName();
